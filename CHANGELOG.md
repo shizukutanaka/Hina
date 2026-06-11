@@ -3,6 +3,12 @@
 形式: [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) / バージョニング: SemVer
 
 ## [Unreleased]
+### Added
+- enum パラメータ（目の形・眉・髪型・前髪・衣装・袖）の選択肢を日英ローカライズ表示（従来は内部ID `round`/`sailor` 等を直接表示していた）。`enum.<key>.<value>` キーで管理し、テストが全選択肢のja/enラベル網羅を担保。
+- 詳細モードのスライダー横に**数値直接入力欄**を追加（SPEC §2「全パラメータ＋数値入力」の充足）。範囲外入力はクランプ。
+- Performance Rank の**律速項目を明示**（SPEC F-010）。PC/Quest ランクのバッジに、ランクを律速しているカテゴリ名（日英）をツールチップ＋小テキストで表示。
+### Changed
+- 性能カテゴリ（tris/bones/pbComp 等）に日英ラベル `cat.*` を追加。
 
 ## [0.1.0] - 2026-06-11
 ### Added

@@ -71,6 +71,15 @@ ok(html.includes("'guide.s1'") && html.indexOf("guide.s1") !== html.lastIndexOf(
   const ja = Object.keys(H.I18N.ja).sort(), en = Object.keys(H.I18N.en).sort();
   ok(ja.length === en.length && ja.every((k, i) => k === en[i]), 'i18n ja/en key parity');
   ok(ja.every(k => H.I18N.ja[k] && H.I18N.en[k]), 'i18n no empty values');
+  // every enum option carries a localized label in both languages (UI never shows raw ids)
+  const enumOpts = [];
+  for (const k in H.PARAMS) if (H.PARAMS[k].k === 'enum')
+    for (const o of H.PARAMS[k].opts) enumOpts.push('enum.' + k + '.' + o);
+  ok(enumOpts.every(key => H.I18N.ja[key] && H.I18N.en[key]), 'every enum option has ja+en label');
+  // every performance-rank category has a localized name (for the 律速 / limiting-factor display)
+  const cats = Object.keys(H.RANKS.pc);
+  ok(cats.every(c => H.I18N.ja['cat.' + c] && H.I18N.en['cat.' + c]), 'every rank category has ja+en label');
+  ok(H.I18N.ja['rank.limit'] && H.I18N.en['rank.limit'], 'limiting-factor label present');
 }
 
 /* ---- defaults / sanitize ---- */

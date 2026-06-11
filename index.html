@@ -44,6 +44,9 @@ main{flex:1;display:flex;min-height:0}
 .row label{flex:0 0 108px;font-size:12px;color:var(--text-dim)}
 .row input[type=range]{flex:1;accent-color:var(--accent);height:22px}
 .row .num{flex:0 0 56px;font-size:11px;color:var(--text-faint);text-align:right;font-variant-numeric:tabular-nums}
+.row input.numIn{font-size:11px;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:3px 5px;height:24px;cursor:text}
+.row input.numIn:hover{border-color:var(--accent)}
+.limit{display:block;font-size:10px;color:var(--text-faint);margin-top:3px;line-height:1.4}
 .row select,.row input[type=text]{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font-size:12px}
 .row input[type=color]{flex:0 0 40px;height:28px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);padding:2px;cursor:pointer}
 .row .swatches{display:flex;gap:5px;flex-wrap:wrap;flex:1}
@@ -303,6 +306,14 @@ const I18N = {
     'usage.Disallow':'不可','usage.Allow':'可',
     'selftest.ok':'自己診断: 全て正常','selftest.ng':'自己診断: 異常あり',
     'guide.t':'VRChat導入手順','guide.s1':'1. Unity Hub + VCC でアバタープロジェクト作成','guide.s2':'2. UniVRM (v0.x) をインポート','guide.s3':'3. VRM Converter for VRChat をインポート','guide.s4':'4. .vrm をドラッグ →「VRChatアバターに変換」','guide.s5':'5. VRChat SDK でビルド & アップロード',
+    'rank.limit':'律速',
+    'enum.eyeShape.round':'丸','enum.eyeShape.tare':'たれ目','enum.eyeShape.tsuri':'つり目','enum.eyeShape.jito':'じと目',
+    'enum.browType.soft':'やわらか','enum.browType.straight':'まっすぐ','enum.browType.arch':'アーチ',
+    'enum.hairStyle.short':'ショート','enum.hairStyle.bob':'ボブ','enum.hairStyle.long':'ロング','enum.hairStyle.twin':'ツイン','enum.hairStyle.pony':'ポニー',
+    'enum.bangs.full':'フル','enum.bangs.see':'シースルー','enum.bangs.center':'センター分け',
+    'enum.outfit.onepiece':'ワンピース','enum.outfit.sailor':'セーラー','enum.outfit.shirts':'シャツ','enum.outfit.hoodie':'パーカー',
+    'enum.sleeves.long':'長袖','enum.sleeves.short':'半袖',
+    'cat.tris':'三角形','cat.bones':'ボーン','cat.skinned':'スキンメッシュ','cat.mesh':'メッシュ','cat.mat':'マテリアル','cat.pbComp':'揺れ物部品','cat.pbTrans':'揺れ物ボーン','cat.pbCol':'コライダ','cat.pbCheck':'衝突判定','cat.texMB':'テクスチャ',
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
@@ -319,6 +330,14 @@ const I18N = {
     'usage.Disallow':'Disallow','usage.Allow':'Allow',
     'selftest.ok':'Self-test: all OK','selftest.ng':'Self-test: FAILED',
     'guide.t':'VRChat upload steps','guide.s1':'1. Create an avatar project with Unity Hub + VCC','guide.s2':'2. Import UniVRM (v0.x)','guide.s3':'3. Import VRM Converter for VRChat','guide.s4':'4. Drag the .vrm in → "Convert to VRChat avatar"','guide.s5':'5. Build & upload with the VRChat SDK',
+    'rank.limit':'Limited by',
+    'enum.eyeShape.round':'Round','enum.eyeShape.tare':'Drooping','enum.eyeShape.tsuri':'Sharp','enum.eyeShape.jito':'Half-lidded',
+    'enum.browType.soft':'Soft','enum.browType.straight':'Straight','enum.browType.arch':'Arched',
+    'enum.hairStyle.short':'Short','enum.hairStyle.bob':'Bob','enum.hairStyle.long':'Long','enum.hairStyle.twin':'Twintails','enum.hairStyle.pony':'Ponytail',
+    'enum.bangs.full':'Full','enum.bangs.see':'See-through','enum.bangs.center':'Center part',
+    'enum.outfit.onepiece':'One-piece','enum.outfit.sailor':'Sailor','enum.outfit.shirts':'Shirt','enum.outfit.hoodie':'Hoodie',
+    'enum.sleeves.long':'Long','enum.sleeves.short':'Short',
+    'cat.tris':'Triangles','cat.bones':'Bones','cat.skinned':'Skinned meshes','cat.mesh':'Meshes','cat.mat':'Materials','cat.pbComp':'PhysBones','cat.pbTrans':'PB transforms','cat.pbCol':'Colliders','cat.pbCheck':'Collision checks','cat.texMB':'Texture memory',
   }
 };
 
@@ -1784,16 +1803,29 @@ function paramRow(k){
   const s=PARAMS[k];
   const label = lang==='ja'?s.ja:s.en;
   if (s.k==='num'){
-    const num=el('span',{class:'num'}, String(params[k]));
+    // detail mode exposes a direct numeric entry (SPEC §2); easy mode shows a read-only value
+    let valEl;
     const r=el('input',{type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
       'aria-label':label,
-      oninput:e=>{ params[k]=parseFloat(e.target.value); num.textContent=String(params[k]);
+      oninput:e=>{ params[k]=parseFloat(e.target.value);
+        if (valEl.tagName==='INPUT') valEl.value=String(params[k]); else valEl.textContent=String(params[k]);
         onParam(k); }});
-    return el('div',{class:'row'}, el('label',{},label), r, num);
+    if (mode==='detail'){
+      valEl=el('input',{type:'number',class:'num numIn',min:s.min,max:s.max,step:s.step,value:params[k],
+        'aria-label':label,
+        onchange:e=>{ let n=parseFloat(e.target.value);
+          if (!Number.isFinite(n)) n=params[k];
+          n=M.clamp(n,s.min,s.max);
+          params[k]=n; e.target.value=String(n); r.value=String(n); onParam(k); }});
+    } else {
+      valEl=el('span',{class:'num'}, String(params[k]));
+    }
+    return el('div',{class:'row'}, el('label',{},label), r, valEl);
   }
   if (s.k==='enum'){
+    const optLabel=o=>{ const key='enum.'+k+'.'+o; const lbl=t(key); return lbl===key?o:lbl; };
     const sel=el('select',{'aria-label':label, onchange:e=>{params[k]=e.target.value; onParam(k);}});
-    for(const o of s.opts) sel.append(el('option',{value:o, ...(params[k]===o?{selected:''}:{})}, o));
+    for(const o of s.opts) sel.append(el('option',{value:o, ...(params[k]===o?{selected:''}:{})}, optLabel(o)));
     return el('div',{class:'row'}, el('label',{},label), sel);
   }
   if (s.k==='bool'){
@@ -1901,11 +1933,18 @@ function renderOut(bd){
 }
 
 const RANKCOLOR=['var(--r-e)','var(--r-g)','var(--r-m)','var(--r-p)','var(--r-vp)'];
+// the bottleneck categories that hold a rank back (SPEC F-010: 律速項目を明示)
+function limitText(r){
+  if (r.idx===0 || !r.worst || !r.worst.length) return '';
+  return t('rank.limit')+': '+r.worst.map(c=>t('cat.'+c)).join(' / ');
+}
 function updateStats(){
   if (!build) return;
   const est=HINA.estimate(build, params);
   const pc=HINA.rank(est,'pc'), q=HINA.rank(est,'quest');
-  const set=(elm,r)=>{ elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx]; };
+  const set=(elm,r)=>{ const lim=limitText(r);
+    elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx];
+    elm.title=lim; elm.parentElement.title=lim; };
   set($('rankPC'),pc); set($('rankQ'),q);
   if (statEls.tris){
     statEls.tris.textContent=est.tris;
@@ -1915,8 +1954,13 @@ function updateStats(){
     statEls.pbTrans.textContent=params.springOff?0:est.pbTrans;
     statEls.texMB.textContent='~'+est.texMB+' MB';
     statEls.rkPC.innerHTML=''; statEls.rkQ.innerHTML='';
-    const badge=r=>{ const b=el('span',{class:'rk'}, t('rank.'+r.rank));
-      b.style.background=RANKCOLOR[r.idx]; b.style.color='#0c1014'; return b; };
+    const badge=r=>{ const lim=limitText(r);
+      const b=el('span',{class:'rk'}, t('rank.'+r.rank));
+      b.style.background=RANKCOLOR[r.idx]; b.style.color='#0c1014';
+      if (lim) b.title=lim;
+      const wrap=el('span',{}, b);
+      if (lim) wrap.append(el('span',{class:'limit'}, lim));
+      return wrap; };
     statEls.rkPC.append(badge(pc)); statEls.rkQ.append(badge(q));
   }
 }
