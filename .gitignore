@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.temp/
+build/
+*.vrm
+!samples/*.vrm

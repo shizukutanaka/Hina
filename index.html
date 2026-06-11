@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="雛 (Hina) — ブラウザで作るVRChat用アバター。VRM 0.x書き出し・完全ローカル・依存ゼロ">
+<title>雛 — VRM Avatar Maker</title>
+<style>
+:root{
+  --accent:#00C4CC; --accent-dim:#00939a;
+  --bg:#0F1216; --surface:#161B22; --surface2:#1d242e; --line:#2a323e;
+  --text:#E8ECEF; --text-dim:#9aa6b2; --text-faint:#5f6b78;
+  --ok:#4cc26b; --warn:#e0b34a; --err:#e05a5a;
+  --r-e:#4cc26b; --r-g:#9ac24c; --r-m:#e0b34a; --r-p:#e0824a; --r-vp:#e05a5a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:14px/1.6 "Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--surface);flex:none}
+.logo{font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;font-size:24px;letter-spacing:.05em;display:flex;align-items:baseline;gap:10px}
+.logo b{color:var(--accent);font-weight:600}
+.logo span{font-size:11px;color:var(--text-faint);letter-spacing:.25em;text-transform:uppercase}
+.hdr-actions{display:flex;gap:8px}
+.hbtn{padding:6px 12px;border:1px solid var(--line);border-radius:6px;color:var(--text-dim);font-size:12px;background:var(--surface2)}
+.hbtn:hover{border-color:var(--accent);color:var(--text)}
+main{flex:1;display:flex;min-height:0}
+#stage{flex:1;position:relative;min-width:0;background:radial-gradient(120% 90% at 50% 30%, #1a2027 0%, #0F1216 70%)}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#gl.drag{cursor:grabbing}
+#rankWrap{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.rankBadge{display:flex;align-items:center;gap:8px;background:rgba(15,18,22,.82);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;backdrop-filter:blur(4px)}
+.rankBadge .lbl{color:var(--text-faint);font-size:10px;letter-spacing:.1em;width:42px}
+.rankBadge .val{font-weight:700}
+#hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--text-faint);background:rgba(15,18,22,.7);padding:4px 12px;border-radius:99px;pointer-events:none;white-space:nowrap}
+#panel{width:380px;flex:none;display:flex;flex-direction:column;border-left:1px solid var(--line);background:var(--surface)}
+#tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--line);flex:none}
+.tab{flex:1 0 auto;padding:9px 4px;font-size:12px;color:var(--text-dim);border-bottom:2px solid transparent;min-width:44px}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--text)}
+#tabBody{flex:1;overflow-y:auto;padding:14px 16px 40px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.row label{flex:0 0 108px;font-size:12px;color:var(--text-dim)}
+.row input[type=range]{flex:1;accent-color:var(--accent);height:22px}
+.row .num{flex:0 0 56px;font-size:11px;color:var(--text-faint);text-align:right;font-variant-numeric:tabular-nums}
+.row select,.row input[type=text]{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font-size:12px}
+.row input[type=color]{flex:0 0 40px;height:28px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);padding:2px;cursor:pointer}
+.row .swatches{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+.sw{width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.18);cursor:pointer;padding:0}
+.sw:hover{transform:scale(1.15)}
+.row input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+.sect{font-size:11px;letter-spacing:.15em;color:var(--text-faint);margin:20px 0 10px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.sect:first-child{margin-top:0}
+.presetGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.preCard{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:left;transition:border-color .15s}
+.preCard:hover{border-color:var(--accent)}
+.preCard .nm{font-size:14px;margin-bottom:6px}
+.preCard .cols{display:flex;gap:4px}
+.preCard .c{width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,.15)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface2);font-size:13px;color:var(--text)}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#06282a;font-weight:700}
+.btn.primary:hover{background:#1ad3da}
+.btn.wide{width:100%;margin-bottom:10px}
+.statTable{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+.statTable td{padding:5px 6px;border-bottom:1px solid var(--line)}
+.statTable td:first-child{color:var(--text-dim)}
+.statTable td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.rk{font-weight:700;padding:1px 8px;border-radius:99px;font-size:11px}
+.note{font-size:11px;color:var(--text-faint);margin:8px 0 14px;line-height:1.7}
+.note a{color:var(--accent)}
+dialog{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:24px;max-width:420px;margin:auto}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog h2{font-size:16px;margin-bottom:12px}
+dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
+#selftestBox{position:absolute;top:12px;right:12px;background:rgba(15,18,22,.9);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:11px;max-width:280px;display:none}
+@media (max-width:760px){
+  main{flex-direction:column}
+  #stage{flex:0 0 44vh}
+  #panel{width:100%;flex:1;border-left:none;border-top:1px solid var(--line)}
+}
+@media (prefers-reduced-motion:reduce){.preCard,.sw{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><b>雛</b><span>Hina · VRM Avatar Maker</span></div>
+  <div class="hdr-actions">
+    <button class="hbtn" id="btnMode" aria-pressed="false"></button>
+    <button class="hbtn" id="btnLang">EN</button>
+    <button class="hbtn" id="btnAbout" aria-label="About">?</button>
+  </div>
+</header>
+<main>
+  <section id="stage">
+    <canvas id="gl"></canvas>
+    <div id="rankWrap">
+      <div class="rankBadge"><span class="lbl">PC</span><span class="val" id="rankPC">—</span></div>
+      <div class="rankBadge"><span class="lbl">QUEST</span><span class="val" id="rankQ">—</span></div>
+    </div>
+    <div id="hint"></div>
+    <div id="selftestBox"></div>
+  </section>
+  <aside id="panel">
+    <nav id="tabs" role="tablist"></nav>
+    <div id="tabBody"></div>
+  </aside>
+</main>
+<dialog id="aboutDlg">
+  <h2>雛 (Hina) v0.1.0</h2>
+  <p id="aboutTxt"></p>
+  <p style="font-size:11px;color:var(--text-faint)">MIT License · © 2026 shizukutanaka<br>VRM is a registered trademark of the VRM Consortium.</p>
+  <button class="btn" id="aboutClose">OK</button>
+</dialog>
+<script id="hina-core">
+/*HINA-CORE-START*/
+/* 雛 (Hina) core — pure logic. No DOM / WebGL / Canvas references (tested in Node). */
+'use strict';
+const HINA = (() => {
+
+const VERSION = '0.1.0';
+
+/* ---------- math (column-major mat4, [x,y,z] vec, [x,y,z,w] quat) ---------- */
+const M = {
+  v3: (x=0,y=0,z=0)=>[x,y,z],
+  add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
+  sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+  scale:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
+  dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  cross:(a,b)=>[a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]],
+  len:a=>Math.hypot(a[0],a[1],a[2]),
+  norm(a){ const l=M.len(a)||1; return [a[0]/l,a[1]/l,a[2]/l]; },
+  lerp:(a,b,t)=>[a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t],
+  qid:()=>[0,0,0,1],
+  qAxis(axis,ang){ const s=Math.sin(ang/2), n=M.norm(axis); return [n[0]*s,n[1]*s,n[2]*s,Math.cos(ang/2)]; },
+  qMul(a,b){
+    return [
+      a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],
+      a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],
+      a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],
+      a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];
+  },
+  qRot(q,v){ // rotate vec by quat
+    const qv=[q[0],q[1],q[2]], uv=M.cross(qv,v), uuv=M.cross(qv,uv);
+    return M.add(v, M.add(M.scale(uv,2*q[3]), M.scale(uuv,2)));
+  },
+  qFromTo(a,b){ // rotation taking unit a → unit b
+    const d=M.dot(a,b);
+    if (d>0.999999) return M.qid();
+    if (d<-0.999999){ // 180°: pick orthogonal axis
+      let ax=M.cross([1,0,0],a); if (M.len(ax)<1e-6) ax=M.cross([0,1,0],a);
+      return M.qAxis(ax,Math.PI);
+    }
+    const c=M.cross(a,b), w=Math.sqrt((1+d)*2), inv=1/w;
+    return [c[0]*inv,c[1]*inv,c[2]*inv,w/2];
+  },
+  mId:()=>[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1],
+  mT:(x,y,z)=>[1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1],
+  mMul(a,b){ // a*b column-major
+    const o=new Array(16);
+    for(let c=0;c<4;c++)for(let r=0;r<4;r++){
+      o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];
+    }
+    return o;
+  },
+  mCompose(q,t){ // rotation+translation
+    const x=q[0],y=q[1],z=q[2],w=q[3];
+    const x2=x+x,y2=y+y,z2=z+z, xx=x*x2,xy=x*y2,xz=x*z2, yy=y*y2,yz=y*z2,zz=z*z2, wx=w*x2,wy=w*y2,wz=w*z2;
+    return [1-(yy+zz),xy+wz,xz-wy,0, xy-wz,1-(xx+zz),yz+wx,0, xz+wy,yz-wx,1-(xx+yy),0, t[0],t[1],t[2],1];
+  },
+  mApply(m,v){ return [m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12], m[1]*v[0]+m[5]*v[1]+m[9]*v[2]+m[13], m[2]*v[0]+m[6]*v[1]+m[10]*v[2]+m[14]]; },
+  mApplyRot(m,v){ return [m[0]*v[0]+m[4]*v[1]+m[8]*v[2], m[1]*v[0]+m[5]*v[1]+m[9]*v[2], m[2]*v[0]+m[6]*v[1]+m[10]*v[2]]; },
+  clamp:(v,a,b)=>v<a?a:(v>b?b:v),
+  smooth(a,b,t){ const x=M.clamp((t-a)/(b-a),0,1); return x*x*(3-2*x); },
+};
+
+/* ---------- color helpers ---------- */
+function hex2rgb(h){ const n=parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function shade(h,f){ const c=hex2rgb(h).map(v=>M.clamp(Math.round(v*f),0,255)); return '#'+c.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+const HEXRE = /^#[0-9a-fA-F]{6}$/;
+
+/* ---------- palettes ---------- */
+const PAL = {
+  skin:  ['#ffe3d0','#ffd6bd','#f7c5a8','#eab28e','#d49a72','#b97f59','#96603e','#6f4528'],
+  hair:  ['#3a3a45','#5a4632','#8a5a2b','#b98a4a','#d9c08a','#e8e0d8','#7a3b3b','#a64d6d','#5d4a7a','#3d5a80','#3f6f5f','#c9577a'],
+  eye:   ['#5a3825','#7a4a2a','#3d5a80','#3f6f5f','#7a4a8a','#a64d4d','#caa84a','#4a4a55'],
+  cloth: ['#2f3a52','#5d4a7a','#3f6f5f','#8a3b4a','#27496d','#7a5230','#384048','#7d3c5e','#9a8c5a','#46627a'],
+  accent:['#f2f2f2','#e8c84a','#d9534f','#00c4cc','#f0a0b8','#ffffff'],
+};
+
+/* ---------- parameter schema (single source of truth) ----------
+   kinds: num {min,max,def,step}, enum {opts,def}, bool {def}, color {def,pal} */
+const PARAMS = {
+  // 体格
+  height:    {k:'num', min:0.8, max:2.0, def:1.45, step:0.01, tab:'body', ja:'身長 (m)', en:'Height (m)'},
+  headRatio: {k:'num', min:0.18, max:0.36, def:0.24, step:0.005, tab:'body', ja:'頭の比率', en:'Head ratio'},
+  shoulderW: {k:'num', min:0.14, max:0.34, def:0.21, step:0.005, tab:'body', ja:'肩幅', en:'Shoulders'},
+  hipW:      {k:'num', min:0.14, max:0.34, def:0.215, step:0.005, tab:'body', ja:'腰幅', en:'Hips'},
+  bust:      {k:'num', min:0, max:1, def:0.25, step:0.01, tab:'body', ja:'胸', en:'Bust'},
+  armLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'腕の長さ', en:'Arm length'},
+  legLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'脚の長さ', en:'Leg length'},
+  armTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'腕の太さ', en:'Arm width'},
+  legTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'脚の太さ', en:'Leg width'},
+  // 顔
+  eyeSize:   {k:'num', min:0.6, max:1.4, def:1.0, step:0.01, tab:'face', ja:'目の大きさ', en:'Eye size'},
+  eyeY:      {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'目の高さ', en:'Eye height'},
+  eyeGap:    {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'目の間隔', en:'Eye gap'},
+  eyeShape:  {k:'enum', opts:['round','tare','tsuri','jito'], def:'round', tab:'face', ja:'目の形', en:'Eye shape'},
+  irisSize:  {k:'num', min:0.6, max:1.2, def:0.92, step:0.01, tab:'face', adv:1, ja:'瞳の大きさ', en:'Iris size'},
+  browType:  {k:'enum', opts:['soft','straight','arch'], def:'soft', tab:'face', ja:'眉', en:'Brows'},
+  mouthW:    {k:'num', min:0.6, max:1.5, def:1.0, step:0.01, tab:'face', ja:'口の幅', en:'Mouth width'},
+  blush:     {k:'num', min:0, max:1, def:0.45, step:0.01, tab:'face', ja:'頬紅', en:'Blush'},
+  // 髪
+  hairStyle: {k:'enum', opts:['short','bob','long','twin','pony'], def:'twin', tab:'hair', ja:'髪型', en:'Hair style'},
+  bangs:     {k:'enum', opts:['full','see','center'], def:'full', tab:'hair', ja:'前髪', en:'Bangs'},
+  hairLen:   {k:'num', min:0.7, max:1.4, def:1.0, step:0.01, tab:'hair', ja:'髪の長さ', en:'Hair length'},
+  hairVol:   {k:'num', min:0.8, max:1.3, def:1.0, step:0.01, tab:'hair', ja:'ボリューム', en:'Volume'},
+  ahoge:     {k:'bool', def:true, tab:'hair', ja:'アホ毛', en:'Ahoge'},
+  // 服
+  outfit:    {k:'enum', opts:['onepiece','sailor','shirts','hoodie'], def:'sailor', tab:'outfit', ja:'衣装', en:'Outfit'},
+  skirtLen:  {k:'num', min:0.6, max:1.6, def:1.0, step:0.01, tab:'outfit', ja:'スカート丈', en:'Skirt length'},
+  sleeves:   {k:'enum', opts:['long','short'], def:'long', tab:'outfit', ja:'袖', en:'Sleeves'},
+  socks:     {k:'bool', def:true, tab:'outfit', adv:1, ja:'ソックス', en:'Socks'},
+  // 色
+  skinTone:  {k:'color', def:'#ffd6bd', pal:'skin',  tab:'color', ja:'肌', en:'Skin'},
+  hairColor: {k:'color', def:'#5d4a7a', pal:'hair',  tab:'color', ja:'髪', en:'Hair'},
+  eyeColor:  {k:'color', def:'#3d5a80', pal:'eye',   tab:'color', ja:'瞳', en:'Eyes'},
+  clothMain: {k:'color', def:'#2f3a52', pal:'cloth', tab:'color', ja:'服メイン', en:'Cloth main'},
+  clothSub:  {k:'color', def:'#f2f2f2', pal:'accent',tab:'color', ja:'服サブ', en:'Cloth sub'},
+  clothAccent:{k:'color',def:'#d9534f', pal:'accent',tab:'color', ja:'アクセント', en:'Accent'},
+  shoeColor: {k:'color', def:'#384048', pal:'cloth', tab:'color', ja:'靴', en:'Shoes'},
+  // 物理
+  springOff: {k:'bool', def:false, tab:'phys', ja:'揺れ物オフ (Quest Excellent)', en:'No springs (Quest Excellent)'},
+  hairStiff: {k:'num', min:0, max:1, def:0.65, step:0.01, tab:'phys', ja:'髪の硬さ', en:'Hair stiffness'},
+  hairGrav:  {k:'num', min:0, max:1, def:0.05, step:0.01, tab:'phys', ja:'重力', en:'Gravity'},
+  hairDrag:  {k:'num', min:0, max:1, def:0.4, step:0.01, tab:'phys', ja:'減衰', en:'Drag'},
+};
+
+function defaults(){ const p={}; for(const k in PARAMS) p[k]=PARAMS[k].def; return p; }
+
+function sanitize(p){
+  const o=defaults();
+  if (!p || typeof p!=='object') return o;
+  for(const k in PARAMS){
+    const s=PARAMS[k], v=p[k];
+    if (v===undefined) continue;
+    if (s.k==='num'){ const n=Number(v); if (Number.isFinite(n)) o[k]=M.clamp(n,s.min,s.max); }
+    else if (s.k==='enum'){ if (s.opts.includes(v)) o[k]=v; }
+    else if (s.k==='bool'){ o[k]=!!v; }
+    else if (s.k==='color'){ if (typeof v==='string' && HEXRE.test(v)) o[k]=v.toLowerCase(); }
+  }
+  return o;
+}
+
+/* ---------- presets ---------- */
+const PRESETS = [
+  {id:'suzume', ja:'すずめ', en:'Suzume', p:{}},
+  {id:'kohaku', ja:'こはく', en:'Kohaku', p:{hairStyle:'bob', outfit:'onepiece', hairColor:'#8a5a2b', eyeColor:'#caa84a', clothMain:'#8a3b4a', clothSub:'#f2f2f2', clothAccent:'#e8c84a', bangs:'see', blush:0.6}},
+  {id:'aoi', ja:'あおい', en:'Aoi', p:{hairStyle:'long', outfit:'shirts', hairColor:'#3a3a45', eyeColor:'#3d5a80', clothMain:'#27496d', clothSub:'#ffffff', clothAccent:'#00c4cc', bangs:'center', eyeShape:'tsuri', blush:0.2}},
+  {id:'tsumugi', ja:'つむぎ', en:'Tsumugi', p:{hairStyle:'pony', outfit:'hoodie', hairColor:'#c9577a', eyeColor:'#7a4a8a', clothMain:'#5d4a7a', clothSub:'#f0a0b8', clothAccent:'#f2f2f2', eyeShape:'tare', mouthW:1.1, blush:0.65}},
+  {id:'minato', ja:'みなと', en:'Minato', p:{hairStyle:'short', outfit:'shirts', bust:0, shoulderW:0.24, hipW:0.19, hairColor:'#3f6f5f', eyeColor:'#4a4a55', clothMain:'#384048', clothSub:'#f2f2f2', clothAccent:'#00c4cc', eyeShape:'jito', blush:0, ahoge:false, skirtLen:0.6}},
+  {id:'chibi', ja:'ちび', en:'Chibi', p:{height:1.0, headRatio:0.34, outfit:'onepiece', hairColor:'#d9c08a', eyeColor:'#3f6f5f', clothMain:'#3f6f5f', clothSub:'#f2f2f2', clothAccent:'#e8c84a', eyeSize:1.25, blush:0.7, legLen:0.85, armLen:0.9}},
+];
+function presetParams(pre){ return sanitize(Object.assign(defaults(), pre.p)); }
+
+/* ---------- random (mulberry32) ---------- */
+function rng(seed){ let a=seed>>>0; return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function randomParams(seed){
+  const r = rng(seed===undefined ? (Math.random()*1e9)|0 : seed);
+  const pick = arr=>arr[(r()*arr.length)|0];
+  const p = defaults();
+  for(const k in PARAMS){
+    const s=PARAMS[k];
+    if (s.k==='num'){
+      let lo=s.min, hi=s.max;
+      if (k==='height'){lo=1.15;hi=1.75;} if (k==='headRatio'){lo=0.21;hi=0.30;}
+      p[k]=Math.round((lo+(hi-lo)*r())/s.step)*s.step;
+      p[k]=M.clamp(Number(p[k].toFixed(4)),s.min,s.max);
+    }
+    else if (s.k==='enum') p[k]=pick(s.opts);
+    else if (s.k==='bool' && k!=='springOff') p[k]=r()<0.5;
+    else if (s.k==='color') p[k]=pick(PAL[s.pal]);
+  }
+  p.springOff=false;
+  return sanitize(p);
+}
+
+/* ---------- i18n ---------- */
+const I18N = {
+  ja: {
+    'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
+    'btn.gacha':'ガチャ（ランダム生成）','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化',
+    'mode.easy':'かんたん','mode.detail':'詳細',
+    'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
+    'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物チェーン','st.tex':'テクスチャ推定',
+    'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
+    'hint.drag':'ドラッグ: 回転 / ホイール: ズーム / ダブルクリック: リセット',
+    'note.upload':'VRChatへは Unity + VRM Converter for VRChat 経由でアップロード。手順は docs/UPLOAD_GUIDE.md 参照。',
+    'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。',
+    'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。',
+    'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
+    'usage.Disallow':'不可','usage.Allow':'可',
+    'selftest.ok':'自己診断: 全て正常','selftest.ng':'自己診断: 異常あり',
+    'guide.t':'VRChat導入手順','guide.s1':'1. Unity Hub + VCC でアバタープロジェクト作成','guide.s2':'2. UniVRM (v0.x) をインポート','guide.s3':'3. VRM Converter for VRChat をインポート','guide.s4':'4. .vrm をドラッグ →「VRChatアバターに変換」','guide.s5':'5. VRChat SDK でビルド & アップロード',
+  },
+  en: {
+    'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
+    'btn.gacha':'Gacha (randomize)','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset',
+    'mode.easy':'Easy','mode.detail':'Detail',
+    'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
+    'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring chains','st.tex':'Texture est.',
+    'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
+    'hint.drag':'Drag: rotate / Wheel: zoom / Double-click: reset',
+    'note.upload':'Upload to VRChat via Unity + VRM Converter for VRChat. See docs/UPLOAD_GUIDE.md.',
+    'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.',
+    'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.',
+    'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
+    'usage.Disallow':'Disallow','usage.Allow':'Allow',
+    'selftest.ok':'Self-test: all OK','selftest.ng':'Self-test: FAILED',
+    'guide.t':'VRChat upload steps','guide.s1':'1. Create an avatar project with Unity Hub + VCC','guide.s2':'2. Import UniVRM (v0.x)','guide.s3':'3. Import VRM Converter for VRChat','guide.s4':'4. Drag the .vrm in → "Convert to VRChat avatar"','guide.s5':'5. Build & upload with the VRChat SDK',
+  }
+};
+
+/* ---------- atlas layout (1024×1024, px). UVs derive from these rects. ---------- */
+const TEX = 1024;
+const ATLAS = {
+  eyeL:  [0,0,256,192], eyeR: [256,0,512,192],
+  browL: [512,0,640,64], browR:[640,0,768,64],
+  mouth: [768,0,1024,128],
+  blush: [768,128,832,192],
+  // solid 64px blocks (sampled at center)
+  skin:[0,768], hair:[64,768], clothMain:[128,768], clothSub:[192,768],
+  accent:[256,768], shoe:[320,768], white:[384,768], hairHi:[448,768],
+};
+const uvBlock = name => { const b=ATLAS[name]; const u=(b[0]+32)/TEX, v=(b[1]+32)/TEX; return [u,v,u,v]; };
+const uvRect  = name => { const r=ATLAS[name]; return [r[0]/TEX, r[1]/TEX, r[2]/TEX, r[3]/TEX]; };
+
+/* ---------- VRChat Performance Rank tables ----------
+   Source: creators.vrchat.com "Performance Ranks" (2026-04-21). [E,G,M,P]; above P = Very Poor. */
+const RANKS = {
+  pc: {
+    tris:[32000,70000,70000,70000], bones:[75,150,256,400], skinned:[1,2,8,16], mesh:[4,8,16,24],
+    mat:[4,8,16,32], pbComp:[4,8,16,32], pbTrans:[16,64,128,256], pbCol:[4,8,16,32], pbCheck:[32,128,256,512],
+    texMB:[40,75,110,150],
+  },
+  quest: {
+    tris:[7500,10000,15000,20000], bones:[75,90,150,150], skinned:[1,1,2,2], mesh:[1,1,2,2],
+    mat:[1,1,2,4], pbComp:[0,4,6,8], pbTrans:[0,16,32,64], pbCol:[0,4,8,16], pbCheck:[0,16,32,64],
+    texMB:[10,18,25,40],
+  }
+};
+const RANK_NAMES = ['Excellent','Good','Medium','Poor','VeryPoor'];
+
+function estimate(build, p){
+  const tris = build.geom.idx.length/3;
+  const bones = build.bones.length;
+  const chains = p.springOff ? 0 : build.springs.length;
+  const springBones = p.springOff ? 0 : build.springs.reduce((s,c)=>s+c.boneIdxs.length,0);
+  const colliders = chains ? 1 : 0;
+  return {
+    tris, bones, skinned:1, mesh:0, mat:1,
+    pbComp: chains, pbTrans: springBones, pbCol: colliders, pbCheck: springBones*colliders,
+    texMB: Math.round(TEX*TEX*4*1.33/1048576*10)/10,
+  };
+}
+function rank(stats, platform){
+  const T=RANKS[platform]; let worstIdx=0; const worst=[];
+  for(const cat in T){
+    const v=stats[cat], arr=T[cat];
+    let i=4; for(let j=0;j<4;j++){ if (v<=arr[j]){ i=j; break; } }
+    if (i>worstIdx){ worstIdx=i; worst.length=0; }
+    if (i===worstIdx) worst.push(cat);
+  }
+  return { rank: RANK_NAMES[worstIdx], idx: worstIdx, worst };
+}
+
+/* ---------- serialization ---------- */
+function serialize(p, meta){ return JSON.stringify({app:'hina', version:VERSION, params:p, meta:meta||{}}, null, 1); }
+function deserialize(text){
+  let j; try{ j=JSON.parse(text); }catch(e){ return null; }
+  if (!j || j.app!=='hina') return null;
+  return { params: sanitize(j.params), meta: (j.meta && typeof j.meta==='object') ? j.meta : {} };
+}
+
+/* 1x1 transparent PNG (fallback / Node tests) */
+const PNG1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+function b64ToBytes(b64){
+  const T='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const clean=b64.replace(/=+$/,''); const out=[];
+  let buf=0, bits=0;
+  for(const ch of clean){ buf=(buf<<6)|T.indexOf(ch); bits+=6; if(bits>=8){ bits-=8; out.push((buf>>bits)&255); } }
+  return new Uint8Array(out);
+}
+
+/* ---------- skeleton ----------
+   VRM 0.x: right-handed Y-up, model faces Z-minus, character right = +X (vrm.dev).
+   T-pose normalized: node rotations identity, translations only. */
+const HB = ['hips','spine','chest','neck','head',
+  'leftShoulder','leftUpperArm','leftLowerArm','leftHand',
+  'rightShoulder','rightUpperArm','rightLowerArm','rightHand',
+  'leftUpperLeg','leftLowerLeg','leftFoot',
+  'rightUpperLeg','rightLowerLeg','rightFoot',
+  'leftEye','rightEye'];
+
+function buildSkeleton(p){
+  const H = p.height;
+  const headR = p.headRatio*H*0.5;
+  const headCY = H - headR;
+  const neckTopY = headCY - headR*0.8;
+  const hipsY = M.clamp(H*0.5*p.legLen, 0.32*H, neckTopY - 0.16*H);
+  const neckY = neckTopY - 0.015*H;
+  const chestY = hipsY + (neckY-hipsY)*0.62;
+  const spineY = hipsY + (neckY-hipsY)*0.30;
+  const shoulderY = chestY + (neckY-chestY)*0.62;
+  const shX = p.shoulderW*H*0.5;
+  const armL = H*0.34*p.armLen;
+  const elbowX = shX + armL*0.47, wristX = shX + armL*0.92;
+  const legX = p.hipW*H*0.5*0.52;
+  const kneeY = hipsY*0.52;
+  const ankleY = Math.max(0.035*H, hipsY*0.085);
+  const eyeWY = headCY + headR*(-0.05 + (p.eyeY-0.5)*0.4);
+  const eyeX = headR*(0.30 + (p.eyeGap-0.5)*0.24);
+
+  const bones = [];
+  const B = (name, hb, parent, w) => { bones.push({name, hb, parent, w}); return bones.length-1; };
+  const hips  = B('Hips','hips',-1,[0,hipsY,0]);
+  const spine = B('Spine','spine',hips,[0,spineY,0]);
+  const chest = B('Chest','chest',spine,[0,chestY,0]);
+  const neck  = B('Neck','neck',chest,[0,neckY,0]);
+  const head  = B('Head','head',neck,[0,headCY-headR*0.55,0]);
+  const lSh = B('LeftShoulder','leftShoulder',chest,[-shX*0.42,shoulderY,0]);
+  const lUA = B('LeftUpperArm','leftUpperArm',lSh,[-shX,shoulderY,0]);
+  const lLA = B('LeftLowerArm','leftLowerArm',lUA,[-elbowX,shoulderY,0]);
+  const lH  = B('LeftHand','leftHand',lLA,[-wristX,shoulderY,0]);
+  const rSh = B('RightShoulder','rightShoulder',chest,[shX*0.42,shoulderY,0]);
+  const rUA = B('RightUpperArm','rightUpperArm',rSh,[shX,shoulderY,0]);
+  const rLA = B('RightLowerArm','rightLowerArm',rUA,[elbowX,shoulderY,0]);
+  const rH  = B('RightHand','rightHand',rLA,[wristX,shoulderY,0]);
+  const lUL = B('LeftUpperLeg','leftUpperLeg',hips,[-legX,hipsY*0.98,0]);
+  const lLL = B('LeftLowerLeg','leftLowerLeg',lUL,[-legX,kneeY,0]);
+  const lF  = B('LeftFoot','leftFoot',lLL,[-legX,ankleY,0]);
+  const rUL = B('RightUpperLeg','rightUpperLeg',hips,[legX,hipsY*0.98,0]);
+  const rLL = B('RightLowerLeg','rightLowerLeg',rUL,[legX,kneeY,0]);
+  const rF  = B('RightFoot','rightFoot',rLL,[legX,ankleY,0]);
+  const lE  = B('LeftEye','leftEye',head,[-eyeX,eyeWY,-headR*0.7]);
+  const rE  = B('RightEye','rightEye',head,[eyeX,eyeWY,-headR*0.7]);
+
+  // hair spring chains
+  const springs = [];
+  const chain = (label, root, step, n, segLen) => {
+    let prev = head, pos = root.slice();
+    const idxs = [];
+    for(let i=0;i<n;i++){
+      const idx = B(label+i, null, prev, pos.slice());
+      idxs.push(idx); prev = idx;
+      pos = M.add(pos, M.scale(M.norm(step), segLen));
+    }
+    springs.push({boneIdxs: idxs});
+  };
+  const HL = p.hairLen, HV = p.hairVol;
+  if (p.hairStyle==='twin'){
+    const len = H*0.30*HL, seg = len/3;
+    chain('TailL_', [-headR*0.9*HV, headCY+headR*0.35, headR*0.12], [-0.14,-1,0.10], 4, seg);
+    chain('TailR_', [ headR*0.9*HV, headCY+headR*0.35, headR*0.12], [ 0.14,-1,0.10], 4, seg);
+  } else if (p.hairStyle==='pony'){
+    const len = H*0.32*HL, seg = len/3;
+    chain('Pony_', [0, headCY+headR*0.55, headR*0.8], [0,-1,0.28], 4, seg);
+  } else if (p.hairStyle==='long'){
+    const len = H*0.30*HL, seg = len/2;
+    for(const a of [-0.6,0,0.6]){
+      chain('Long'+(a<0?'L':a>0?'R':'C')+'_',
+        [Math.sin(a)*headR*0.8, headCY+headR*0.05, Math.cos(a)*headR*0.8],
+        [Math.sin(a)*0.18,-1,0.10], 3, seg);
+    }
+  }
+
+  const humanoid = {};
+  bones.forEach((b,i)=>{ if(b.hb) humanoid[b.hb]=i; });
+  return { bones, springs, humanoid,
+    dims:{H, headR, headCY, neckY, chestY, spineY, shoulderY, hipsY, kneeY, ankleY,
+          shX, elbowX, wristX, legX, eyeWY, eyeX, armL},
+    idx:{hips,spine,chest,neck,head,lSh,lUA,lLA,lH,rSh,rUA,rLA,rH,lUL,lLL,lF,rUL,rLL,rF,lE,rE} };
+}
+
+/* ---------- geometry primitives ---------- */
+function geoNew(){ return {pos:[],nrm:[],uv:[],jnt:[],wgt:[],idx:[],tags:{}}; }
+function addV(g, p, n, uv, skin){
+  g.pos.push(p[0],p[1],p[2]);
+  const nn = M.norm(n); g.nrm.push(nn[0],nn[1],nn[2]);
+  g.uv.push(uv[0],uv[1]);
+  let s = skin.slice(0,4), tw=0;
+  for(const e of s) tw += e[1];
+  if (!(tw>0)){ s=[[0,1]]; tw=1; }
+  const j=[0,0,0,0], w=[0,0,0,0];
+  s.forEach((e,i)=>{ j[i]=e[0]; w[i]=e[1]/tw; });
+  g.jnt.push(j[0],j[1],j[2],j[3]); g.wgt.push(w[0],w[1],w[2],w[3]);
+  return g.pos.length/3 - 1;
+}
+function quad4(g,a,b,c,d){ g.idx.push(a,b,c, a,c,d); }
+function tagged(g, name, fn){ const s=g.pos.length/3; fn(); g.tags[name]=[s, g.pos.length/3]; }
+
+/* flat quad: center c, halfwidth wx along +X, halfheight hy along +Y, at fixed z plane facing -Z */
+function faceQuad(g, c, wx, hy, uvr, skin){
+  const n=[0,0,-1];
+  const a=addV(g,[c[0]-wx,c[1]+hy,c[2]],n,[uvr[0],uvr[1]],skin);
+  const b=addV(g,[c[0]+wx,c[1]+hy,c[2]],n,[uvr[2],uvr[1]],skin);
+  const cc=addV(g,[c[0]+wx,c[1]-hy,c[2]],n,[uvr[2],uvr[3]],skin);
+  const d=addV(g,[c[0]-wx,c[1]-hy,c[2]],n,[uvr[0],uvr[3]],skin);
+  quad4(g,a,b,cc,d);
+}
+
+/* sphere band. dir = [sinφ sinθ, cosφ, sinφ cosθ] → θ=0 faces +Z(back), θ=π faces -Z(front) */
+function sphereBand(g, c, r, phi0, phi1, rings, segs, uv, skinFn, deform){
+  const grid=[];
+  for(let i=0;i<=rings;i++){
+    const phi = phi0 + (phi1-phi0)*i/rings;
+    const row=[];
+    for(let j=0;j<=segs;j++){
+      const th = j/segs*Math.PI*2;
+      let d=[Math.sin(phi)*Math.sin(th), Math.cos(phi), Math.sin(phi)*Math.cos(th)];
+      let rr = r, pos=[c[0]+d[0]*rr, c[1]+d[1]*rr, c[2]+d[2]*rr];
+      if (deform){ const o=deform(pos,d,phi,th); pos=o.p; d=o.n||d; }
+      row.push(addV(g,pos,d,uv,skinFn(pos,phi,th)));
+    }
+    grid.push(row);
+  }
+  for(let i=0;i<rings;i++)for(let j=0;j<segs;j++)
+    quad4(g, grid[i][j],grid[i][j+1],grid[i+1][j+1],grid[i+1][j]);
+}
+
+/* elliptic lathe around Y. rings: [{y, rx, rz, skin}] */
+function latheY(g, rings, segs, uv, deform){
+  const grid=[];
+  for(let i=0;i<rings.length;i++){
+    const R=rings[i], row=[];
+    for(let j=0;j<=segs;j++){
+      const th=j/segs*Math.PI*2, cx=Math.cos(th), sz=Math.sin(th);
+      let pos=[cx*R.rx, R.y, sz*R.rz];
+      // slope normal from neighbours
+      const rp=rings[Math.max(0,i-1)], rn=rings[Math.min(rings.length-1,i+1)];
+      const dr=((rp.rx+rp.rz)-(rn.rx+rn.rz))/2, dy=(rn.y-rp.y)||1e-4;
+      let n=M.norm([cx, dr/dy*0.8, sz]);
+      if (deform){ const o=deform(pos,th,i); pos=o.p; if(o.n) n=o.n; }
+      row.push(addV(g,pos,n,uv,R.skin));
+    }
+    grid.push(row);
+  }
+  for(let i=0;i<rings.length-1;i++)for(let j=0;j<segs;j++)
+    quad4(g, grid[i][j],grid[i][j+1],grid[i+1][j+1],grid[i+1][j]);
+}
+
+/* tube: ringDefs [{pos, r, skin}] open at both ends */
+function tube(g, ringDefs, segs, uv){
+  const grid=[];
+  for(let i=0;i<ringDefs.length;i++){
+    const R=ringDefs[i];
+    const prev=ringDefs[Math.max(0,i-1)].pos, next=ringDefs[Math.min(ringDefs.length-1,i+1)].pos;
+    let t=M.norm(M.sub(next,prev));
+    if (M.len(M.sub(next,prev))<1e-6) t=[0,-1,0];
+    let up = Math.abs(t[1])>0.92 ? [0,0,1] : [0,1,0];
+    const side=M.norm(M.cross(up,t)), up2=M.cross(t,side);
+    const row=[];
+    for(let j=0;j<=segs;j++){
+      const th=j/segs*Math.PI*2, n=M.add(M.scale(side,Math.cos(th)), M.scale(up2,Math.sin(th)));
+      row.push(addV(g, M.add(R.pos, M.scale(n,R.r)), n, uv, R.skin));
+    }
+    grid.push(row);
+  }
+  for(let i=0;i<grid.length-1;i++)for(let j=0;j<segs;j++)
+    quad4(g, grid[i][j],grid[i][j+1],grid[i+1][j+1],grid[i+1][j]);
+}
+
+/* closing fan cap at a tube end */
+function cap(g, center, normal, ringStartIdx, segs){
+  const c=addV(g, center, normal, [g.uv[ringStartIdx*2],g.uv[ringStartIdx*2+1]],
+    [[g.jnt[ringStartIdx*4], 1]]);
+  for(let j=0;j<segs;j++){
+    const a=ringStartIdx+j, b=ringStartIdx+j+1;
+    if (normal[1]>0) g.idx.push(c,a,b); else g.idx.push(c,b,a);
+  }
+}
+
+/* ---------- avatar mesh ---------- */
+function buildAvatar(p){
+  p = sanitize(p);
+  const sk = buildSkeleton(p);
+  const {bones, springs, humanoid, dims, idx} = sk;
+  const {H, headR, headCY, neckY, chestY, spineY, shoulderY, hipsY, kneeY, ankleY,
+         shX, elbowX, wristX, legX, eyeWY, eyeX} = dims;
+  const g = geoNew();
+  const hipR = p.hipW*H*0.5*0.92;
+  const uS=uvBlock('skin'), uH=uvBlock('hair'), uC=uvBlock('clothMain'),
+        uC2=uvBlock('clothSub'), uA=uvBlock('accent'), uSh=uvBlock('shoe'), uW=uvBlock('white');
+
+  /* torso */
+  const tor = (w1,b1,w2,b2)=>[[w1,b1],[w2,b2]];
+  latheY(g, [
+    {y:hipsY-0.07*H, rx:hipR*0.55, rz:hipR*0.45, skin:[[idx.hips,1]]},
+    {y:hipsY-0.03*H, rx:hipR*0.96, rz:hipR*0.70, skin:[[idx.hips,1]]},
+    {y:hipsY+0.02*H, rx:hipR,      rz:hipR*0.72, skin:[[idx.hips,1]]},
+    {y:spineY, rx:hipR*0.78, rz:hipR*0.60, skin:tor(idx.hips,0.35,idx.spine,0.65)},
+    {y:chestY, rx:Math.max(hipR*0.84, shX*0.56), rz:hipR*0.66, skin:tor(idx.spine,0.3,idx.chest,0.7)},
+    {y:shoulderY, rx:shX*0.66, rz:hipR*0.58, skin:[[idx.chest,1]]},
+    {y:neckY+0.01*H, rx:headR*0.34, rz:headR*0.30, skin:tor(idx.chest,0.55,idx.neck,0.45)},
+  ], 12, uS, (pos,th,i)=>{
+    if (i===4 && Math.sin(th)<-0.25) pos[2] -= p.bust*0.045*H*(-Math.sin(th)-0.25);
+    return {p:pos};
+  });
+
+  /* neck */
+  tube(g, [
+    {pos:[0,neckY,0], r:headR*0.30, skin:tor(idx.chest,0.3,idx.neck,0.7)},
+    {pos:[0,headCY-headR*0.55,0], r:headR*0.285, skin:tor(idx.neck,0.4,idx.head,0.6)},
+  ], 10, uS);
+
+  /* head */
+  sphereBand(g, [0,headCY,0.005*H], headR, 0, Math.PI, 12, 16, uS,
+    ()=>[[idx.head,1]],
+    (pos,d)=>{
+      const jaw = M.smooth(0.18, 0.95, -d[1]);
+      const s = 1 - 0.26*jaw;
+      return {p:[pos[0]*s + 0*0, pos[1], (pos[2]-0.005*H)*0.96*s + 0.005*H]};
+    });
+
+  /* arms (single tube each), hands */
+  const armR = 0.026*H*p.armTh;
+  for(const s of [-1,1]){
+    const ua=s<0?idx.lUA:idx.rUA, la=s<0?idx.lLA:idx.rLA, ha=s<0?idx.lH:idx.rH;
+    const xs=v=>s*v;
+    tube(g, [
+      {pos:[xs(shX*0.92),shoulderY,0], r:armR*1.25, skin:[[idx.chest,0.45],[ua,0.55]]},
+      {pos:[xs(shX+ (elbowX-shX)*0.45),shoulderY,0], r:armR*1.05, skin:[[ua,1]]},
+      {pos:[xs(elbowX),shoulderY,0], r:armR*0.92, skin:[[ua,0.5],[la,0.5]]},
+      {pos:[xs(elbowX+(wristX-elbowX)*0.55),shoulderY,0], r:armR*0.82, skin:[[la,1]]},
+      {pos:[xs(wristX),shoulderY,0], r:armR*0.68, skin:[[la,0.65],[ha,0.35]]},
+    ], 8, uS);
+    // mitten hand
+    const hcx = xs(wristX+0.030*H*p.armLen);
+    sphereBand(g,[hcx,shoulderY,0], 0.030*H*p.armTh, 0, Math.PI, 6, 8, uS,
+      ()=>[[ha,1]], (pos,d)=>({p:[hcx+(pos[0]-hcx)*1.35, shoulderY+(pos[1]-shoulderY)*0.82, pos[2]]}));
+  }
+
+  /* legs + shoes */
+  const legR = 0.040*H*p.legTh;
+  for(const s of [-1,1]){
+    const ul=s<0?idx.lUL:idx.rUL, ll=s<0?idx.lLL:idx.rLL, ft=s<0?idx.lF:idx.rF;
+    const x=s*legX;
+    tube(g, [
+      {pos:[x,hipsY*0.99,0], r:legR*1.35, skin:[[idx.hips,0.4],[ul,0.6]]},
+      {pos:[x,hipsY*0.78,0], r:legR*1.18, skin:[[ul,1]]},
+      {pos:[x,kneeY,0], r:legR*0.92, skin:[[ul,0.5],[ll,0.5]]},
+      {pos:[x,kneeY*0.55+ankleY*0.45,0], r:legR*0.8, skin:[[ll,1]]},
+      {pos:[x,ankleY,0], r:legR*0.62, skin:[[ll,0.6],[ft,0.4]]},
+    ], 8, uS);
+    sphereBand(g,[x,ankleY*0.72,-0.030*H], legR*1.1, 0, Math.PI, 6, 8, uSh,
+      ()=>[[ft,1]], (pos,d)=>({p:[x+(pos[0]-x)*0.8, ankleY*0.72+(pos[1]-ankleY*0.72)*0.62, -0.030*H+(pos[2]+0.030*H)*1.9]}));
+    if (p.socks){
+      tube(g, [
+        {pos:[x,kneeY*0.72+ankleY*0.28,0], r:legR*0.86, skin:[[ll,1]]},
+        {pos:[x,ankleY*1.1,0], r:legR*0.70, skin:[[ll,0.6],[ft,0.4]]},
+      ], 8, uW);
+    }
+  }
+
+  /* outfit */
+  const skirtTop=hipsY+0.035*H, skirtLenW = (0.10+0.10*p.skirtLen)*H;
+  const hasSkirt = p.outfit==='onepiece' || p.outfit==='sailor';
+  const topUv = p.outfit==='shirts' ? uC2 : uC;
+  // top shell
+  latheY(g, [
+    {y:spineY-0.03*H, rx:hipR*0.84, rz:hipR*0.66, skin:tor(idx.hips,0.35,idx.spine,0.65)},
+    {y:chestY, rx:Math.max(hipR*0.90, shX*0.60), rz:hipR*0.72, skin:tor(idx.spine,0.3,idx.chest,0.7)},
+    {y:shoulderY+0.012*H, rx:shX*0.74, rz:hipR*0.64, skin:[[idx.chest,1]]},
+    {y:neckY+0.012*H, rx:headR*0.40, rz:headR*0.36, skin:tor(idx.chest,0.6,idx.neck,0.4)},
+  ], 12, topUv, (pos,th,i)=>{
+    if (i===1 && Math.sin(th)<-0.25) pos[2] -= p.bust*0.05*H*(-Math.sin(th)-0.25);
+    return {p:pos};
+  });
+  if (hasSkirt){
+    const sw = (t)=>{ /* angular leg-follow weights */ return null; };
+    latheY(g, [
+      {y:skirtTop, rx:hipR*1.10, rz:hipR*0.92, skin:[[idx.hips,1]]},
+      {y:skirtTop-skirtLenW*0.5, rx:hipR*1.35, rz:hipR*1.15, skin:[[idx.hips,1]]},
+      {y:skirtTop-skirtLenW, rx:hipR*1.62, rz:hipR*1.40, skin:[[idx.hips,1]]},
+    ], 14, p.outfit==='onepiece'?uC:uC, (pos,th,i)=>{
+      return {p:pos};
+    });
+    // re-skin skirt lower rings toward legs (angular): patch last latheY verts
+    const n=(14+1)*3, start=g.pos.length/3-n;
+    for(let k=0;k<n;k++){
+      const vi=start+k, ring=(k/(15))|0, t=ring/2;
+      const x=g.pos[vi*3], cx=x/(hipR*1.6);
+      const wl=Math.max(0,-cx)*0.5*t, wr=Math.max(0,cx)*0.5*t, wh=1-wl-wr;
+      g.jnt[vi*4]=idx.hips; g.wgt[vi*4]=wh;
+      g.jnt[vi*4+1]=idx.lUL; g.wgt[vi*4+1]=wl;
+      g.jnt[vi*4+2]=idx.rUL; g.wgt[vi*4+2]=wr;
+      g.jnt[vi*4+3]=0; g.wgt[vi*4+3]=0;
+    }
+  } else {
+    // shorts / pants
+    for(const s of [-1,1]){
+      const ul=s<0?idx.lUL:idx.rUL, ll=s<0?idx.lLL:idx.rLL, x=s*legX;
+      const bot = p.outfit==='shirts'? hipsY*0.62 : hipsY*0.74;
+      tube(g, [
+        {pos:[x,hipsY*1.0,0], r:legR*1.5, skin:[[idx.hips,0.4],[ul,0.6]]},
+        {pos:[x,bot,0], r:legR*1.3, skin:[[ul,0.85],[ll,0.15]]},
+      ], 8, uC);
+    }
+  }
+  // sleeves
+  {
+    const tEnd = p.sleeves==='long'?0.94:0.40;
+    const sUv = p.outfit==='shirts'?uC2:uC;
+    for(const s of [-1,1]){
+      const ua=s<0?idx.lUA:idx.rUA, la=s<0?idx.lLA:idx.rLA;
+      const x0=s*shX*0.9, x1=s*(shX+(wristX-shX)*tEnd);
+      tube(g, [
+        {pos:[x0,shoulderY,0], r:armR*1.55, skin:[[idx.chest,0.4],[ua,0.6]]},
+        {pos:[s*(shX+(wristX-shX)*tEnd*0.5),shoulderY,0], r:armR*1.30, skin:[[ua,tEnd>0.5?0.6:1],[la,tEnd>0.5?0.4:0]]},
+        {pos:[x1,shoulderY,0], r:armR*1.12, skin: tEnd>0.5?[[la,1]]:[[ua,1]]},
+      ], 8, sUv);
+    }
+  }
+  // sailor collar / accent
+  if (p.outfit==='sailor'){
+    const cy=neckY+0.005*H, cw=shX*0.62, n=[0,0.3,-1];
+    const a=addV(g,[-cw,cy,-hipR*0.55],n,uA,[[idx.chest,1]]);
+    const b=addV(g,[ cw,cy,-hipR*0.55],n,uA,[[idx.chest,1]]);
+    const c=addV(g,[0,cy-0.085*H,-hipR*0.78],n,uA,[[idx.chest,1]]);
+    g.idx.push(a,b,c);
+    const a2=addV(g,[-cw*1.05,cy,hipR*0.5],[0,0.3,1],uA,[[idx.chest,1]]);
+    const b2=addV(g,[ cw*1.05,cy,hipR*0.5],[0,0.3,1],uA,[[idx.chest,1]]);
+    const c2=addV(g,[ cw*1.05,cy-0.10*H,hipR*0.62],[0,0,1],uA,[[idx.chest,1]]);
+    const d2=addV(g,[-cw*1.05,cy-0.10*H,hipR*0.62],[0,0,1],uA,[[idx.chest,1]]);
+    quad4(g,a2,b2,c2,d2);
+  }
+  if (p.outfit==='hoodie'){
+    sphereBand(g,[0,neckY+0.01*H, headR*0.35], headR*0.95, 0.25*Math.PI, 0.6*Math.PI, 4, 8, uC,
+      ()=>[[idx.chest,0.6],[idx.neck,0.4]], null);
+  }
+
+  /* hair: scalp + style */
+  const hr = headR*1.085*p.hairVol, hc=[0,headCY+headR*0.02, headR*0.02];
+  sphereBand(g, hc, hr, 0, 0.56*Math.PI, 7, 16, uH, ()=>[[idx.head,1]], null);
+  if (p.hairStyle==='bob'){
+    sphereBand(g, hc, hr, 0.5*Math.PI, 0.92*Math.PI, 5, 12, uH, ()=>[[idx.head,1]],
+      (pos,d,phi,th)=>{ const f=1+0.14*M.smooth(0.5*Math.PI,0.92*Math.PI,phi);
+        return {p:[hc[0]+d[0]*hr*f, pos[1]-0.02*H*M.smooth(0.6*Math.PI,0.92*Math.PI,phi), hc[2]+d[2]*hr*f]}; });
+  } else if (p.hairStyle==='short'){
+    sphereBand(g, hc, hr, 0.5*Math.PI, 0.74*Math.PI, 3, 12, uH, ()=>[[idx.head,1]], null);
+  } else {
+    sphereBand(g, hc, hr, 0.5*Math.PI, 0.78*Math.PI, 3, 12, uH, ()=>[[idx.head,1]],
+      (pos,d,phi,th)=>{
+        // nape coverage mostly at back: pull front-side verts back to scalp radius
+        if (d[2]<0.1) return {p:M.add(hc, M.scale(d, hr*0.995))};
+        return {p:pos};
+      });
+  }
+
+  /* bangs */
+  const bangStrip=(thC, halfW, tipDrop, tipShift)=>{
+    const phiTop=0.34*Math.PI;
+    const pOn=(th,phi)=>[hc[0]+Math.sin(phi)*Math.sin(th)*hr*1.01, hc[1]+Math.cos(phi)*hr*1.01, hc[2]+Math.sin(phi)*Math.cos(th)*hr*1.01];
+    const t0=pOn(thC-halfW, phiTop), t1=pOn(thC+halfW, phiTop);
+    const midPhi=0.5*Math.PI;
+    const m0=pOn(thC-halfW*0.9, midPhi), m1=pOn(thC+halfW*0.9, midPhi);
+    m0[2]-=headR*0.04; m1[2]-=headR*0.04;
+    const tipBase=pOn(thC+tipShift, midPhi);
+    const tip=[tipBase[0], eyeWY - headR*tipDrop, tipBase[2]-headR*0.05];
+    const n=[Math.sin(thC)*0.4,0.15,Math.cos(thC)<0?-1:1];
+    const sk=[[idx.head,1]];
+    const A=addV(g,t0,n,uH,sk),B2=addV(g,t1,n,uH,sk),C=addV(g,m0,n,uH,sk),D=addV(g,m1,n,uH,sk),T=addV(g,tip,n,uH,sk);
+    g.idx.push(A,B2,D, A,D,C, C,D,T);
+  };
+  const F=Math.PI; // front center θ
+  if (p.bangs==='full'){
+    for(let i=0;i<7;i++){
+      const off=(i-3)*0.13*Math.PI;
+      bangStrip(F+off, 0.075*Math.PI, i%2?0.05:0.30, 0);
+    }
+  } else if (p.bangs==='see'){
+    for(let i=0;i<5;i++){
+      const off=(i-2)*0.17*Math.PI;
+      bangStrip(F+off, 0.05*Math.PI, i%2?0.1:0.35, 0);
+    }
+  } else { // center part
+    bangStrip(F-0.16*Math.PI, 0.10*Math.PI, 0.45, -0.12*Math.PI);
+    bangStrip(F+0.16*Math.PI, 0.10*Math.PI, 0.45,  0.12*Math.PI);
+    bangStrip(F-0.34*Math.PI, 0.07*Math.PI, 0.2, -0.06*Math.PI);
+    bangStrip(F+0.34*Math.PI, 0.07*Math.PI, 0.2,  0.06*Math.PI);
+  }
+  if (p.ahoge){
+    const top=[0,hc[1]+hr*0.99,hc[2]];
+    const sk=[[idx.head,1]], n=[0,0,-1];
+    const A=addV(g,[top[0]-headR*0.03,top[1],top[2]],n,uH,sk);
+    const B2=addV(g,[top[0]+headR*0.03,top[1],top[2]],n,uH,sk);
+    const T=addV(g,[top[0]+headR*0.10,top[1]+headR*0.26,top[2]-headR*0.10],n,uH,sk);
+    g.idx.push(A,B2,T);
+  }
+
+  /* hair tails along spring chains */
+  const tailUv=uH;
+  const chainPath=(sp)=>sp.boneIdxs.map(bi=>bones[bi].w);
+  if (p.hairStyle==='twin' || p.hairStyle==='pony'){
+    for(const sp of springs){
+      const pts=chainPath(sp);
+      const last=pts[pts.length-1], prev=pts[pts.length-2];
+      const ext=M.add(last, M.scale(M.norm(M.sub(last,prev)), H*0.05*p.hairLen));
+      const path=[...pts, ext];
+      const r0=headR*0.34*p.hairVol;
+      const rings=path.map((pos,i)=>{
+        const t=i/(path.length-1);
+        const bi=sp.boneIdxs[Math.min(i, sp.boneIdxs.length-1)];
+        const bp=sp.boneIdxs[Math.max(0,Math.min(i, sp.boneIdxs.length-1)-1)];
+        return {pos, r:r0*(1-t*0.92)+0.004, skin:[[bi,0.75],[bp,0.25]]};
+      });
+      tube(g, rings, 8, tailUv);
+      cap(g, M.add(path[path.length-1],[0,-0.005,0]), [0,-1,0], g.pos.length/3-9, 8);
+      // scrunchie
+      tube(g, [
+        {pos:M.add(pts[0],[0,0.012*H,0]), r:r0*1.12, skin:[[sp.boneIdxs[0],1]]},
+        {pos:M.add(pts[0],[0,-0.012*H,0]), r:r0*1.12, skin:[[sp.boneIdxs[0],1]]},
+      ], 8, uA);
+    }
+  } else if (p.hairStyle==='long'){
+    for(const sp of springs){
+      const pts=chainPath(sp);
+      const last=pts[pts.length-1], prev=pts[pts.length-2];
+      const ext=M.add(last, M.scale(M.norm(M.sub(last,prev)), H*0.06*p.hairLen));
+      const path=[...pts, ext];
+      // ribbon
+      const w0=headR*0.40*p.hairVol;
+      let pv=[];
+      for(let i=0;i<path.length;i++){
+        const t=i/(path.length-1);
+        const dir=M.norm(M.sub(path[Math.min(i+1,path.length-1)], path[Math.max(0,i-1)]));
+        let side=M.norm(M.cross([0,0,1],dir)); if(!M.len(side)) side=[1,0,0];
+        const w=w0*(1-t*0.85);
+        const bi=sp.boneIdxs[Math.min(i,sp.boneIdxs.length-1)];
+        const n=M.norm([path[i][0]*0.3,0.1,1]);
+        const sk=[[bi,1]];
+        const a=addV(g,M.add(path[i],M.scale(side,w)),n,uH,sk);
+        const b=addV(g,M.sub(path[i],M.scale(side,w)),n,uH,sk);
+        if (pv.length) quad4(g, pv[0],pv[1],b,a);
+        pv=[a,b];
+      }
+    }
+  }
+
+  /* ---- face parts (kept LAST → outline pass excludes from here) ---- */
+  const faceStart = g.pos.length/3;
+  const faceZ=-headR*0.97 + 0.005*H*0;
+  const ew=headR*0.21*p.eyeSize, eh=headR*0.17*p.eyeSize;
+  tagged(g,'eyeL', ()=>faceQuad(g,[-eyeX,eyeWY,faceZ],ew,eh,uvRect('eyeL'),[[idx.lE,1]]));
+  tagged(g,'eyeR', ()=>faceQuad(g,[ eyeX,eyeWY,faceZ],ew,eh,uvRect('eyeR'),[[idx.rE,1]]));
+  const bw=ew*1.12, bh=headR*0.052, by=eyeWY+eh*1.55;
+  tagged(g,'browL',()=>faceQuad(g,[-eyeX,by,faceZ],bw,bh,uvRect('browL'),[[idx.head,1]]));
+  tagged(g,'browR',()=>faceQuad(g,[ eyeX,by,faceZ],bw,bh,uvRect('browR'),[[idx.head,1]]));
+  // mouth fan
+  const mc=[0, headCY-headR*0.42, faceZ];
+  const mrx=headR*0.14*p.mouthW, mry=headR*0.045;
+  const mrect=ATLAS.mouth, mcu=(mrect[0]+mrect[2])/2/TEX, mcv=(mrect[1]+mrect[3])/2/TEX;
+  const mru=(mrect[2]-mrect[0])/2/TEX*0.85, mrv=(mrect[3]-mrect[1])/2/TEX*0.85;
+  tagged(g,'mouth',()=>{
+    const cIdx=addV(g,mc,[0,0,-1],[mcu,mcv],[[idx.head,1]]);
+    const ring=[];
+    for(let i2=0;i2<8;i2++){
+      const a=i2/8*Math.PI*2;
+      ring.push(addV(g,[mc[0]+Math.cos(a)*mrx, mc[1]+Math.sin(a)*mry, mc[2]],[0,0,-1],
+        [mcu+Math.cos(a)*mru, mcv-Math.sin(a)*mrv],[[idx.head,1]]));
+    }
+    for(let i2=0;i2<8;i2++) g.idx.push(cIdx, ring[i2], ring[(i2+1)%8]);
+  });
+  // cheeks
+  for(const s of [-1,1])
+    faceQuad(g,[s*headR*0.52, headCY-headR*0.26, -headR*0.86], headR*0.14, headR*0.10, uvRect('blush'), [[idx.head,1]]);
+
+  /* ---------- morph targets ---------- */
+  const morphNames=['a','i','u','e','o','blink','blink_l','blink_r','joy','angry','sorrow','fun'];
+  const sparse={}; morphNames.forEach(n=>sparse[n]=[]);
+  const range=n=>g.tags[n];
+  const scaleTag=(t,tag,c,sx,sy,dz=0,dy=0)=>{
+    const [s,e]=range(tag);
+    for(let i=s;i<e;i++){
+      const px=g.pos[i*3]-c[0], py=g.pos[i*3+1]-c[1];
+      const d=[px*(sx-1), py*(sy-1)+dy, dz];
+      if (d[0]||d[1]||d[2]) sparse[t].push([i,d[0],d[1],d[2]]);
+    }
+  };
+  const browTilt=(t,tag,innerDy,outerDy)=>{
+    const [s,e]=range(tag);
+    const sign = tag==='browL' ? 1 : -1; // inner = toward x=0
+    for(let i=s;i<e;i++){
+      const px=g.pos[i*3];
+      const inner = sign>0 ? (px > -eyeX) : (px < eyeX);
+      const dy=inner?innerDy:outerDy;
+      sparse[t].push([i,0,dy,0]);
+    }
+  };
+  const eC_L=[-eyeX,eyeWY,faceZ], eC_R=[eyeX,eyeWY,faceZ];
+  // vowels
+  scaleTag('a','mouth',mc,1.15,3.4);
+  scaleTag('i','mouth',mc,1.55,0.45);
+  scaleTag('u','mouth',mc,0.55,1.7,-headR*0.05);
+  scaleTag('e','mouth',mc,1.30,2.0);
+  scaleTag('o','mouth',mc,0.75,2.7,-headR*0.035);
+  // blinks
+  scaleTag('blink','eyeL',eC_L,1,0.06); scaleTag('blink','eyeR',eC_R,1,0.06);
+  browTilt('blink','browL',-headR*0.035,-headR*0.035); browTilt('blink','browR',-headR*0.035,-headR*0.035);
+  scaleTag('blink_l','eyeL',eC_L,1,0.06); browTilt('blink_l','browL',-headR*0.035,-headR*0.035);
+  scaleTag('blink_r','eyeR',eC_R,1,0.06); browTilt('blink_r','browR',-headR*0.035,-headR*0.035);
+  // emotions
+  scaleTag('joy','eyeL',eC_L,1,0.12,0,headR*0.02); scaleTag('joy','eyeR',eC_R,1,0.12,0,headR*0.02);
+  scaleTag('joy','mouth',mc,1.25,1.9);
+  browTilt('angry','browL',-headR*0.085, headR*0.025); browTilt('angry','browR',-headR*0.085, headR*0.025);
+  scaleTag('angry','mouth',mc,0.7,0.85);
+  browTilt('sorrow','browL', headR*0.07,-headR*0.02); browTilt('sorrow','browR', headR*0.07,-headR*0.02);
+  scaleTag('sorrow','mouth',mc,0.9,0.5,0,-headR*0.015);
+  scaleTag('sorrow','eyeL',eC_L,1,0.62); scaleTag('sorrow','eyeR',eC_R,1,0.62);
+  scaleTag('fun','mouth',mc,1.45,1.35);
+  scaleTag('fun','eyeL',eC_L,1,0.55); scaleTag('fun','eyeR',eC_R,1,0.55);
+
+  return { geom:g, bones, springs, humanoid, dims, idx, faceStart,
+    morphs:{names:morphNames, sparse},
+    collider:{ bone: idx.head, offset:[0, 0.0, 0.01*H], radius: headR*0.88 } };
+}
+
+/* ---------- binary writer (little-endian; glTF requires LE) ---------- */
+function BinWriter(){ this.parts=[]; this.len=0; }
+BinWriter.prototype.align = function(n){
+  const pad=(n-(this.len%n))%n;
+  if (pad){ this.parts.push(new Uint8Array(pad)); this.len+=pad; }
+};
+BinWriter.prototype.push = function(ta){
+  this.align(4);
+  const off=this.len;
+  const u8 = ta instanceof Uint8Array ? ta : new Uint8Array(ta.buffer, ta.byteOffset, ta.byteLength);
+  this.parts.push(u8); this.len+=u8.length;
+  return off;
+};
+BinWriter.prototype.bytes = function(){
+  const out=new Uint8Array(this.len); let o=0;
+  for(const p of this.parts){ out.set(p,o); o+=p.length; }
+  return out;
+};
+
+function utf8(str){
+  if (typeof TextEncoder!=='undefined') return new TextEncoder().encode(str);
+  const out=[];
+  for(let i=0;i<str.length;i++){
+    let c=str.codePointAt(i); if (c>0xFFFF) i++;
+    if (c<0x80) out.push(c);
+    else if (c<0x800) out.push(0xC0|c>>6, 0x80|c&63);
+    else if (c<0x10000) out.push(0xE0|c>>12, 0x80|c>>6&63, 0x80|c&63);
+    else out.push(0xF0|c>>18, 0x80|c>>12&63, 0x80|c>>6&63, 0x80|c&63);
+  }
+  return new Uint8Array(out);
+}
+
+/* ---------- VRM 0.x export ----------
+   GLB container (glTF 2.0) + extensions.VRM (specVersion "0.0").
+   Spec notes (vrm.dev): Y-up right-handed, model faces Z-, T-pose with identity
+   rotations (translations only) → IBM = translate(-worldPos).
+   Field names keep official VRM0 typos: "stiffiness", "*UssageName". */
+function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
+  p = sanitize(p);
+  meta = (meta && typeof meta==='object') ? meta : {};
+  const g = build.geom, bones = build.bones;
+  const nV = g.pos.length/3;
+  if (nV>=65536) throw new Error('vertex count exceeds uint16 index range');
+  if (bones.length>=256) throw new Error('bone count exceeds uint8 joint range');
+  const png = pngBytes instanceof Uint8Array ? pngBytes : new Uint8Array(pngBytes||[]);
+
+  const bw = new BinWriter();
+  const views=[], accessors=[];
+  const addView=(byteOffset,byteLength,target)=>{
+    const v={buffer:0, byteOffset, byteLength};
+    if (target) v.target=target;
+    views.push(v); return views.length-1;
+  };
+  const addAcc=(bufferView,componentType,count,type,extra)=>{
+    accessors.push(Object.assign({bufferView,componentType,count,type},extra||{}));
+    return accessors.length-1;
+  };
+  const minMax3=arr=>{
+    const mn=[Infinity,Infinity,Infinity], mx=[-Infinity,-Infinity,-Infinity];
+    for(let i=0;i<arr.length;i+=3)for(let k=0;k<3;k++){
+      const v=arr[i+k]; if(v<mn[k])mn[k]=v; if(v>mx[k])mx[k]=v;
+    }
+    return {min:mn, max:mx};
+  };
+
+  /* vertex attributes */
+  const fPos=new Float32Array(g.pos), fNrm=new Float32Array(g.nrm), fUv=new Float32Array(g.uv);
+  const uJnt=new Uint8Array(g.jnt), fWgt=new Float32Array(g.wgt), uIdx=new Uint16Array(g.idx);
+  const mmP=minMax3(fPos);
+  const aPos=addAcc(addView(bw.push(fPos),fPos.byteLength,34962),5126,nV,'VEC3',{min:mmP.min,max:mmP.max});
+  const aNrm=addAcc(addView(bw.push(fNrm),fNrm.byteLength,34962),5126,nV,'VEC3');
+  const aUv =addAcc(addView(bw.push(fUv ),fUv.byteLength ,34962),5126,nV,'VEC2');
+  const aJnt=addAcc(addView(bw.push(uJnt),uJnt.byteLength,34962),5121,nV,'VEC4');
+  const aWgt=addAcc(addView(bw.push(fWgt),fWgt.byteLength,34962),5126,nV,'VEC4');
+  const aIdx=addAcc(addView(bw.push(uIdx),uIdx.byteLength,34963),5123,uIdx.length,'SCALAR');
+
+  /* morph targets (full delta arrays; min/max mandatory for POSITION) */
+  const targetNames = build.morphs.names.slice();
+  const targets = targetNames.map(name=>{
+    const full=new Float32Array(nV*3);
+    for(const e of build.morphs.sparse[name]){ full[e[0]*3]=e[1]; full[e[0]*3+1]=e[2]; full[e[0]*3+2]=e[3]; }
+    const mm=minMax3(full);
+    return {POSITION: addAcc(addView(bw.push(full),full.byteLength,34962),5126,nV,'VEC3',{min:mm.min,max:mm.max})};
+  });
+
+  /* inverse bind matrices: translate(-world), column-major */
+  const ibm=new Float32Array(bones.length*16);
+  bones.forEach((b,i)=>{
+    const m=M.mId(); m[12]=-b.w[0]; m[13]=-b.w[1]; m[14]=-b.w[2];
+    ibm.set(m,i*16);
+  });
+  const aIBM=addAcc(addView(bw.push(ibm),ibm.byteLength),5126,bones.length,'MAT4');
+
+  /* texture images (0 = atlas; 1 = optional portrait thumbnail) */
+  const vImg=addView(bw.push(png),png.length);
+  const images=[{bufferView:vImg, mimeType:'image/png'}];
+  const textures=[{sampler:0, source:0}];
+  let metaTexture=-1;
+  const thumb = thumbPngBytes instanceof Uint8Array ? thumbPngBytes : null;
+  if (thumb && thumb.length){
+    const vTh=addView(bw.push(thumb),thumb.length);
+    images.push({bufferView:vTh, mimeType:'image/png'});
+    textures.push({sampler:0, source:1});
+    metaTexture=1;
+  }
+
+  /* nodes: 0=Root, bones → i+1, mesh node last */
+  const nodeOf=i=>i+1;
+  const meshNode=bones.length+1;
+  const childMap={};
+  bones.forEach((b,i)=>{ if(b.parent>=0)(childMap[b.parent]=childMap[b.parent]||[]).push(nodeOf(i)); });
+  const nodes=[{name:'Root', children:[nodeOf(0), meshNode]}];
+  bones.forEach((b,i)=>{
+    const pw = b.parent>=0 ? bones[b.parent].w : [0,0,0];
+    const n={name:b.name, translation:[b.w[0]-pw[0], b.w[1]-pw[1], b.w[2]-pw[2]]};
+    if (childMap[i]) n.children=childMap[i];
+    nodes.push(n);
+  });
+  nodes.push({name:'Body', mesh:0, skin:0});
+
+  /* VRM meta (sanitized) */
+  const str=(v,d)=>(typeof v==='string' && v.trim()) ? v.replace(/[\u0000-\u001f]/g,'').slice(0,256) : d;
+  const pick=(v,arr,d)=>arr.includes(v)?v:d;
+  const vrmMeta={
+    title: str(meta.title,'Hina Avatar'),
+    version: str(meta.version,'1.0'),
+    author: str(meta.author,'unknown'),
+    contactInformation: str(meta.contact,''),
+    reference: str(meta.reference,''),
+    texture: metaTexture,
+    allowedUserName: pick(meta.allowed,['OnlyAuthor','ExplicitlyLicensedPerson','Everyone'],'OnlyAuthor'),
+    violentUssageName: pick(meta.violent,['Disallow','Allow'],'Disallow'),
+    sexualUssageName: pick(meta.sexual,['Disallow','Allow'],'Disallow'),
+    commercialUssageName: pick(meta.commercial,['Disallow','Allow'],'Disallow'),
+    otherPermissionUrl: '',
+    licenseName: pick(meta.license,
+      ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
+      'Redistribution_Prohibited'),
+    otherLicenseUrl: '',
+  };
+
+  const humanBones = HB.map(hb=>({bone:hb, node:nodeOf(build.humanoid[hb]), useDefaultValues:true}));
+
+  const curve={curve:[0,0,0,1,1,1,1,0], xRange:90, yRange:10};
+  const r3=v=>Math.round(v*1000)/1000;
+  const fpY=r3(build.dims.eyeWY - bones[build.idx.head].w[1]);
+  const fpZ=r3(-build.dims.headR*0.7);
+  const firstPerson={
+    firstPersonBone: nodeOf(build.idx.head),
+    firstPersonBoneOffset:{x:0,y:fpY,z:fpZ},
+    meshAnnotations:[{mesh:0, firstPersonFlag:'Auto'}],
+    lookAtTypeName:'Bone',
+    lookAtHorizontalInner: curve,
+    lookAtHorizontalOuter: curve,
+    lookAtVerticalDown: curve,
+    lookAtVerticalUp: curve,
+  };
+
+  const grp=(name,preset,binds)=>({name, presetName:preset, binds:binds||[], materialValues:[], isBinary:false});
+  const bind1=n=>[{mesh:0, index:targetNames.indexOf(n), weight:100}];
+  const blendShapeGroups=[
+    grp('Neutral','neutral'),
+    grp('A','a',bind1('a')), grp('I','i',bind1('i')), grp('U','u',bind1('u')),
+    grp('E','e',bind1('e')), grp('O','o',bind1('o')),
+    grp('Blink','blink',bind1('blink')),
+    grp('Blink_L','blink_l',bind1('blink_l')),
+    grp('Blink_R','blink_r',bind1('blink_r')),
+    grp('Joy','joy',bind1('joy')), grp('Angry','angry',bind1('angry')),
+    grp('Sorrow','sorrow',bind1('sorrow')), grp('Fun','fun',bind1('fun')),
+    grp('LookUp','lookup'), grp('LookDown','lookdown'),
+    grp('LookLeft','lookleft'), grp('LookRight','lookright'),
+  ];
+
+  const hasSprings = !p.springOff && build.springs.length>0;
+  const secondaryAnimation = hasSprings ? {
+    boneGroups:[{
+      comment:'hair',
+      stiffiness: Math.round(p.hairStiff*4*100)/100,   // VRM0 official typo
+      gravityPower: p.hairGrav,
+      gravityDir:{x:0,y:-1,z:0},
+      dragForce: p.hairDrag,
+      center:-1,
+      hitRadius:0.02,
+      bones: build.springs.map(s=>nodeOf(s.boneIdxs[0])),
+      colliderGroups:[0],
+    }],
+    colliderGroups:[{
+      node: nodeOf(build.collider.bone),
+      colliders:[{offset:{x:build.collider.offset[0], y:build.collider.offset[1], z:build.collider.offset[2]},
+                  radius: Math.round(build.collider.radius*1000)/1000}],
+    }],
+  } : {boneGroups:[], colliderGroups:[]};
+
+  const materialProperties=[{
+    name:'HinaMain',
+    shader:'VRM/MToon',
+    renderQueue:2450,
+    floatProperties:{
+      _Cutoff:0.5, _BumpScale:1, _ReceiveShadowRate:1, _ShadingGradeRate:1,
+      _ShadeShift:0, _ShadeToony:0.9, _LightColorAttenuation:0, _IndirectLightIntensity:0.1,
+      _RimLightingMix:0, _RimFresnelPower:1, _RimLift:0,
+      _OutlineWidth:0.07, _OutlineScaledMaxDistance:1, _OutlineLightingMix:1,
+      _OutlineColorMode:0, _OutlineWidthMode:1, _OutlineCullMode:1,
+      _UvAnimScrollX:0, _UvAnimScrollY:0, _UvAnimRotation:0,
+      _MToonVersion:38, _DebugMode:0, _BlendMode:1, _CullMode:0,
+      _SrcBlend:1, _DstBlend:0, _ZWrite:1,
+    },
+    vectorProperties:{
+      _Color:[1,1,1,1], _ShadeColor:[0.9,0.85,0.95,1], _EmissionColor:[0,0,0,1],
+      _OutlineColor:[0.12,0.10,0.14,1], _RimColor:[0,0,0,1],
+      _MainTex:[0,0,1,1], _ShadeTexture:[0,0,1,1],
+    },
+    textureProperties:{_MainTex:0, _ShadeTexture:0},
+    keywordMap:{_ALPHATEST_ON:true},
+    tagMap:{RenderType:'TransparentCutout'},
+  }];
+
+  const gltf={
+    asset:{version:'2.0', generator:'Hina '+VERSION},
+    scene:0,
+    scenes:[{nodes:[0]}],
+    nodes,
+    meshes:[{
+      name:'Body',
+      primitives:[{
+        attributes:{POSITION:aPos, NORMAL:aNrm, TEXCOORD_0:aUv, JOINTS_0:aJnt, WEIGHTS_0:aWgt},
+        indices:aIdx, material:0, mode:4, targets,
+        extras:{targetNames},
+      }],
+      extras:{targetNames},
+    }],
+    skins:[{name:'Skin', joints:bones.map((b,i)=>nodeOf(i)), skeleton:nodeOf(0), inverseBindMatrices:aIBM}],
+    materials:[{
+      name:'HinaMain',
+      pbrMetallicRoughness:{baseColorTexture:{index:0}, metallicFactor:0, roughnessFactor:0.9},
+      alphaMode:'MASK', alphaCutoff:0.5, doubleSided:true,
+    }],
+    textures,
+    samplers:[{magFilter:9729, minFilter:9987, wrapS:10497, wrapT:10497}],
+    images,
+    buffers:[{byteLength: bw.len}],
+    bufferViews:views,
+    accessors,
+    extensionsUsed:['VRM'],
+    extensions:{VRM:{
+      exporterVersion:'Hina-'+VERSION,
+      specVersion:'0.0',
+      meta:vrmMeta,
+      humanoid:{
+        humanBones,
+        armStretch:0.05, legStretch:0.05,
+        upperArmTwist:0.5, lowerArmTwist:0.5, upperLegTwist:0.5, lowerLegTwist:0.5,
+        feetSpacing:0, hasTranslationDoF:false,
+      },
+      firstPerson,
+      blendShapeMaster:{blendShapeGroups},
+      secondaryAnimation,
+      materialProperties,
+    }},
+  };
+
+  /* GLB assembly */
+  const jsonBytes=utf8(JSON.stringify(gltf));
+  const jPad=(4-(jsonBytes.length%4))%4;
+  const binBytes=bw.bytes();
+  const bPad=(4-(binBytes.length%4))%4;
+  const total=12 + 8+jsonBytes.length+jPad + 8+binBytes.length+bPad;
+  const out=new Uint8Array(total);
+  const dv=new DataView(out.buffer);
+  dv.setUint32(0,0x46546C67,true);            // 'glTF'
+  dv.setUint32(4,2,true);
+  dv.setUint32(8,total,true);
+  dv.setUint32(12,jsonBytes.length+jPad,true);
+  dv.setUint32(16,0x4E4F534A,true);           // 'JSON'
+  out.set(jsonBytes,20);
+  for(let i=0;i<jPad;i++) out[20+jsonBytes.length+i]=0x20;
+  const bo=20+jsonBytes.length+jPad;
+  dv.setUint32(bo,binBytes.length+bPad,true);
+  dv.setUint32(bo+4,0x004E4942,true);         // 'BIN\0'
+  out.set(binBytes,bo+8);
+  return {bytes:out, json:gltf};
+}
+
+/* ---------- self test (runs in browser ?selftest and Node) ---------- */
+function selfTest(){
+  const R=[];
+  const T=(name,fn)=>{
+    try{ R.push({name, ok: fn()===true}); }
+    catch(e){ R.push({name, ok:false, msg:String(e && e.message || e)}); }
+  };
+  const p=defaults();
+  let build=null, ex=null;
+  T('build default', ()=>{ build=buildAvatar(p); return !!build && build.geom.idx.length>0; });
+  T('humanoid 21 bones mapped', ()=>HB.every(hb=>Number.isInteger(build.humanoid[hb])));
+  T('VRM0 orientation: leftUpperArm x<0, rightUpperArm x>0', ()=>{
+    return build.bones[build.idx.lUA].w[0]<0 && build.bones[build.idx.rUA].w[0]>0;
+  });
+  T('weights normalized', ()=>{
+    const w=build.geom.wgt;
+    for(let i=0;i<w.length;i+=4){ const s=w[i]+w[i+1]+w[i+2]+w[i+3]; if (Math.abs(s-1)>1e-4) return false; }
+    return true;
+  });
+  T('joint indices in range', ()=>{
+    const j=build.geom.jnt, n=build.bones.length;
+    for(let i=0;i<j.length;i++) if (j[i]<0||j[i]>=n) return false;
+    return true;
+  });
+  T('positions finite', ()=>build.geom.pos.every(Number.isFinite));
+  T('tris < Quest Excellent 7500', ()=>build.geom.idx.length/3 < 7500);
+  T('bones < Quest Excellent 75', ()=>build.bones.length < 75);
+  T('morph "a" non-empty', ()=>build.morphs.sparse.a.length>0);
+  T('export GLB', ()=>{ ex=exportVRM(build,p,{},b64ToBytes(PNG1)); return ex.bytes.length>100; });
+  T('GLB magic+version', ()=>{
+    const dv=new DataView(ex.bytes.buffer,ex.bytes.byteOffset,ex.bytes.byteLength);
+    return dv.getUint32(0,true)===0x46546C67 && dv.getUint32(4,true)===2 && dv.getUint32(8,true)===ex.bytes.length;
+  });
+  T('VRM ext present', ()=>ex.json.extensionsUsed.includes('VRM') && ex.json.extensions.VRM.specVersion==='0.0');
+  T('blendShapeGroups = 17', ()=>ex.json.extensions.VRM.blendShapeMaster.blendShapeGroups.length===17);
+  T('accessors within buffer', ()=>{
+    const SZ={5126:4,5123:2,5121:1}, N={SCALAR:1,VEC2:2,VEC3:3,VEC4:4,MAT4:16};
+    return ex.json.accessors.every(a=>{
+      const v=ex.json.bufferViews[a.bufferView];
+      return a.count*SZ[a.componentType]*N[a.type] <= v.byteLength &&
+             v.byteOffset+v.byteLength <= ex.json.buffers[0].byteLength;
+    });
+  });
+  T('rank: PC Excellent', ()=>rank(estimate(build,p),'pc').rank==='Excellent');
+  T('rank: Quest Good with springs', ()=>rank(estimate(build,p),'quest').rank==='Good');
+  T('rank: Quest Excellent with springOff', ()=>{
+    const p2=Object.assign({},p,{springOff:true});
+    return rank(estimate(build,p2),'quest').rank==='Excellent';
+  });
+  T('serialize roundtrip', ()=>{
+    const d=deserialize(serialize(p,{title:'t'}));
+    return !!d && d.params.height===p.height && d.params.hairStyle===p.hairStyle;
+  });
+  return {ok:R.every(r=>r.ok), results:R};
+}
+
+return {
+  VERSION, M, hex2rgb, shade, HEXRE, PAL,
+  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams,
+  I18N, TEX, ATLAS, uvBlock, uvRect,
+  RANKS, RANK_NAMES, estimate, rank,
+  serialize, deserialize, PNG1, b64ToBytes,
+  HB, buildSkeleton, buildAvatar, BinWriter, exportVRM, selfTest,
+};
+})();
+if (typeof module!=='undefined' && module.exports) module.exports = HINA;
+/*HINA-CORE-END*/
+</script>
+<script>
+'use strict';
+(() => {
+const $ = id => document.getElementById(id);
+const M = HINA.M, PARAMS = HINA.PARAMS, TEXSZ = HINA.TEX, ATLAS = HINA.ATLAS;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- state ---------- */
+let lang = 'ja', mode = 'easy', activeTab = 'preset';
+let params = HINA.defaults();
+let meta = {title:'', author:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow',
+            commercial:'Disallow', license:'Redistribution_Prohibited'};
+let build = null;
+const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
+
+const LS = 'hina.v1';
+function loadState(){
+  try{
+    const j = JSON.parse(localStorage.getItem(LS));
+    if (!j) return;
+    params = HINA.sanitize(j.params);
+    if (j.meta && typeof j.meta==='object') Object.assign(meta, j.meta);
+    if (j.lang==='en' || j.lang==='ja') lang = j.lang;
+    if (j.mode==='detail') mode = 'detail';
+  }catch(e){}
+}
+function saveState(){
+  try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode})); }catch(e){}
+}
+
+/* ---------- texture atlas (2D canvas → WebGL + PNG export) ---------- */
+const atlas = document.createElement('canvas');
+atlas.width = atlas.height = TEXSZ;
+const ax = atlas.getContext('2d');
+
+function drawEye(r, p){
+  const [x0,y0,x1,y1] = r, w = x1-x0, h = y1-y0;
+  ax.save(); ax.translate(x0,y0);
+  const cx=w/2, cy=h*0.54, rx=w*0.40, ry=h*0.40;
+  const shape = p.eyeShape;
+  // sclera
+  ax.save(); ax.translate(cx,cy);
+  if (shape==='tare') ax.rotate(0.16);
+  else if (shape==='tsuri') ax.rotate(-0.16);
+  const ryS = shape==='jito' ? ry*0.62 : ry;
+  ax.beginPath(); ax.ellipse(0, shape==='jito'? h*0.06:0, rx, ryS, 0, 0, Math.PI*2);
+  ax.fillStyle = '#ffffff'; ax.fill();
+  ax.clip();
+  // iris
+  const ir = Math.min(rx,ryS)*1.18*p.irisSize;
+  const g1 = ax.createLinearGradient(0,-ir,0,ir);
+  g1.addColorStop(0, HINA.shade(p.eyeColor,0.55));
+  g1.addColorStop(0.55, p.eyeColor);
+  g1.addColorStop(1, HINA.shade(p.eyeColor,1.55));
+  ax.beginPath(); ax.ellipse(0, h*0.02, ir*0.78, ir, 0, 0, Math.PI*2);
+  ax.fillStyle = g1; ax.fill();
+  // pupil
+  ax.beginPath(); ax.ellipse(0, h*0.03, ir*0.30, ir*0.42, 0, 0, Math.PI*2);
+  ax.fillStyle = HINA.shade(p.eyeColor,0.32); ax.fill();
+  // highlights
+  ax.fillStyle = 'rgba(255,255,255,0.95)';
+  ax.beginPath(); ax.ellipse(-ir*0.30, -ir*0.34, ir*0.22, ir*0.26, 0, 0, Math.PI*2); ax.fill();
+  ax.fillStyle = 'rgba(255,255,255,0.55)';
+  ax.beginPath(); ax.ellipse(ir*0.30, ir*0.40, ir*0.11, ir*0.13, 0, 0, Math.PI*2); ax.fill();
+  ax.restore();
+  // top lash
+  ax.save(); ax.translate(cx,cy);
+  if (shape==='tare') ax.rotate(0.16); else if (shape==='tsuri') ax.rotate(-0.16);
+  ax.beginPath();
+  ax.ellipse(0, shape==='jito'? h*0.06:0, rx*1.06, ryS*1.06, 0, Math.PI*1.06, Math.PI*1.94);
+  ax.lineWidth = h*0.13; ax.strokeStyle = HINA.shade(p.hairColor,0.30);
+  ax.lineCap = 'round'; ax.stroke();
+  ax.restore();
+  ax.restore();
+}
+
+function drawBrow(r, p, mirror){
+  const [x0,y0,x1,y1]=r, w=x1-x0, h=y1-y0;
+  ax.save(); ax.translate(x0+w/2, y0+h/2);
+  if (mirror) ax.scale(-1,1);
+  ax.strokeStyle = HINA.shade(p.hairColor,0.62);
+  ax.lineWidth = h*0.30; ax.lineCap='round';
+  ax.beginPath();
+  if (p.browType==='straight'){ ax.moveTo(-w*0.34, 0); ax.lineTo(w*0.34, -h*0.04); }
+  else if (p.browType==='arch'){ ax.moveTo(-w*0.34, h*0.10); ax.quadraticCurveTo(0,-h*0.30, w*0.34, h*0.06); }
+  else { ax.moveTo(-w*0.34, h*0.08); ax.quadraticCurveTo(0,-h*0.14, w*0.34, -h*0.02); }
+  ax.stroke();
+  ax.restore();
+}
+
+function drawAtlas(p){
+  ax.clearRect(0,0,TEXSZ,TEXSZ);
+  // solid blocks
+  const block = (name, color) => { const b=ATLAS[name]; ax.fillStyle=color; ax.fillRect(b[0],b[1],64,64); };
+  block('skin', p.skinTone);
+  block('hair', p.hairColor);
+  block('clothMain', p.clothMain);
+  block('clothSub', p.clothSub);
+  block('accent', p.clothAccent);
+  block('shoe', p.shoeColor);
+  block('white', '#f6f6f8');
+  block('hairHi', HINA.shade(p.hairColor,1.4));
+  // face parts
+  drawEye(ATLAS.eyeL, p);
+  // mirror eyeL → eyeR
+  const eL=ATLAS.eyeL, eR=ATLAS.eyeR;
+  ax.save(); ax.translate(eR[0]+(eR[2]-eR[0]), eR[1]); ax.scale(-1,1);
+  ax.drawImage(atlas, eL[0],eL[1],eL[2]-eL[0],eL[3]-eL[1], 0,0,eR[2]-eR[0],eR[3]-eR[1]);
+  ax.restore();
+  drawBrow(ATLAS.browL, p, false);
+  drawBrow(ATLAS.browR, p, true);
+  // mouth
+  { const r=ATLAS.mouth, w=r[2]-r[0], h=r[3]-r[1];
+    ax.save(); ax.translate(r[0]+w/2, r[1]+h/2);
+    const g = ax.createLinearGradient(0,-h*0.3,0,h*0.36);
+    g.addColorStop(0,'#8a3c46'); g.addColorStop(1,'#c96a72');
+    ax.fillStyle=g;
+    ax.beginPath(); ax.ellipse(0,0,w*0.32,h*0.34,0,0,Math.PI*2); ax.fill();
+    ax.fillStyle='rgba(60,20,28,0.85)';
+    ax.beginPath(); ax.ellipse(0,-h*0.06,w*0.20,h*0.16,0,0,Math.PI*2); ax.fill();
+    ax.restore(); }
+  // blush (alpha < 0.5 discarded by MASK → radius scales with intensity)
+  { const r=ATLAS.blush, w=r[2]-r[0];
+    if (p.blush>0.02){
+      const cx=r[0]+w/2, cy=r[1]+w/2;
+      const g=ax.createRadialGradient(cx,cy,0,cx,cy,w*0.48);
+      const a=Math.min(1, 0.45+p.blush*0.55);
+      g.addColorStop(0,'rgba(244,138,150,'+a+')');
+      g.addColorStop(1,'rgba(244,138,150,0)');
+      ax.fillStyle=g; ax.beginPath(); ax.arc(cx,cy,w*0.48,0,Math.PI*2); ax.fill();
+    } }
+}
+
+/* ---------- WebGL renderer ---------- */
+const cv = $('gl');
+let gl = null;
+try{ gl = cv.getContext('webgl', {antialias:true, alpha:false}); }catch(e){}
+const GLOK = !!gl;
+
+function compile(vs, fs){
+  const mk=(ty,src)=>{ const s=gl.createShader(ty); gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const pr=gl.createProgram();
+  gl.attachShader(pr,mk(gl.VERTEX_SHADER,vs)); gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+  return pr;
+}
+
+let progMain, progFlat, bufPos, bufNrm, bufUv, bufIdx, bufShadow, tex;
+let locM = {}, locF = {};
+if (GLOK){
+  progMain = compile(
+    'attribute vec3 aPos;attribute vec3 aNrm;attribute vec2 aUv;'+
+    'uniform mat4 uVP;varying vec3 vN;varying vec2 vUv;varying vec3 vW;'+
+    'void main(){vN=aNrm;vUv=aUv;vW=aPos;gl_Position=uVP*vec4(aPos,1.0);}',
+    'precision mediump float;varying vec3 vN;varying vec2 vUv;varying vec3 vW;'+
+    'uniform sampler2D uTex;uniform vec3 uLight;uniform vec3 uEye;'+
+    'void main(){vec4 c=texture2D(uTex,vUv);if(c.a<0.5)discard;'+
+    'vec3 N=normalize(vN);float nl=dot(N,uLight)*0.5+0.5;'+
+    'float s=mix(0.62,1.0,step(0.42,nl));'+
+    'vec3 V=normalize(uEye-vW);float rim=pow(1.0-max(dot(N,V),0.0),3.0)*0.16;'+
+    'vec3 col=c.rgb*s+rim*vec3(0.55,0.75,0.80);'+
+    'gl_FragColor=vec4(col,1.0);}');
+  progFlat = compile(
+    'attribute vec3 aPos;attribute vec3 aNrm;uniform mat4 uVP;uniform float uW;'+
+    'void main(){gl_Position=uVP*vec4(aPos+aNrm*uW,1.0);}',
+    'precision mediump float;uniform vec4 uColor;void main(){gl_FragColor=uColor;}');
+  locM = {aPos:gl.getAttribLocation(progMain,'aPos'), aNrm:gl.getAttribLocation(progMain,'aNrm'),
+          aUv:gl.getAttribLocation(progMain,'aUv'), uVP:gl.getUniformLocation(progMain,'uVP'),
+          uTex:gl.getUniformLocation(progMain,'uTex'), uLight:gl.getUniformLocation(progMain,'uLight'),
+          uEye:gl.getUniformLocation(progMain,'uEye')};
+  locF = {aPos:gl.getAttribLocation(progFlat,'aPos'), aNrm:gl.getAttribLocation(progFlat,'aNrm'),
+          uVP:gl.getUniformLocation(progFlat,'uVP'), uW:gl.getUniformLocation(progFlat,'uW'),
+          uColor:gl.getUniformLocation(progFlat,'uColor')};
+  bufPos=gl.createBuffer(); bufNrm=gl.createBuffer(); bufUv=gl.createBuffer();
+  bufIdx=gl.createBuffer(); bufShadow=gl.createBuffer();
+  tex=gl.createTexture();
+  gl.enable(gl.DEPTH_TEST);
+  gl.clearColor(0.066,0.075,0.090,1);
+}
+
+function uploadTexture(){
+  if (!GLOK) return;
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE, atlas);
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);
+}
+
+/* skinning + animation state */
+let basePos, baseNrm, morphPos, skPos, skNrm, nVerts=0, outlineCount=0;
+let localQ=[], worldMats=[], skinMats=[];
+let chains=[];           // [{boneIdxs, pts, prev, segs, bindDirs}]
+let morphW={}, morphDirty=true;
+let camYaw=Math.PI, camPitch=0.10, camDist=2.6, camTarget=[0,0.8,0];
+let gazeX=0, gazeY=0;
+let blinkT=1.8, blinkPhase=-1;
+
+function uploadGeometry(){
+  const g = build.geom;
+  nVerts = g.pos.length/3;
+  basePos = new Float32Array(g.pos);
+  baseNrm = new Float32Array(g.nrm);
+  morphPos = new Float32Array(basePos);
+  skPos = new Float32Array(basePos.length);
+  skNrm = new Float32Array(baseNrm.length);
+  morphDirty = true;
+  // outline excludes face parts (face verts/indices appended last)
+  const fs = build.faceStart, idx = g.idx;
+  outlineCount = idx.length;
+  for(let i=0;i<idx.length;i+=3){
+    if (idx[i]>=fs || idx[i+1]>=fs || idx[i+2]>=fs){ outlineCount=i; break; }
+  }
+  if (!GLOK) return;
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufUv);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(g.uv), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufIdx);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(g.idx), gl.STATIC_DRAW);
+  // floor shadow ellipse fan
+  const H = build.dims.H, sh=[0,0.0015,0];
+  for(let i=0;i<=24;i++){ const a=i/24*Math.PI*2;
+    sh.push(Math.cos(a)*H*0.14, 0.0015, Math.sin(a)*H*0.11); }
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufShadow);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sh), gl.STATIC_DRAW);
+  camTarget=[0, H*0.55, 0];
+}
+
+function initSprings(){
+  chains = build.springs.map(sp=>{
+    const pts = sp.boneIdxs.map(bi=>build.bones[bi].w.slice());
+    const segs=[], bindOff=[];
+    for(let i=1;i<pts.length;i++){
+      segs.push(M.len(M.sub(pts[i],pts[i-1])));
+      bindOff.push(M.sub(pts[i],pts[i-1]));
+    }
+    return {boneIdxs:sp.boneIdxs, pts, prev:pts.map(p=>p.slice()), segs, bindOff,
+            bind:pts.map(p=>p.slice())};
+  });
+}
+
+function applyMorphs(){
+  morphPos.set(basePos);
+  const sp = build.morphs.sparse;
+  for(const name in morphW){
+    const w = morphW[name];
+    if (!w) continue;
+    for(const e of sp[name]){
+      morphPos[e[0]*3]   += e[1]*w;
+      morphPos[e[0]*3+1] += e[2]*w;
+      morphPos[e[0]*3+2] += e[3]*w;
+    }
+  }
+  morphDirty = false;
+}
+
+function poseAndSkin(time){
+  const bones = build.bones, idx = build.idx;
+  const n = bones.length;
+  if (localQ.length!==n){ localQ=[]; worldMats=[]; skinMats=[];
+    for(let i=0;i<n;i++){ localQ.push(M.qid()); worldMats.push(M.mId()); skinMats.push(M.mId()); } }
+  for(let i=0;i<n;i++) localQ[i]=M.qid();
+  const breath = reduceMotion ? 0 : Math.sin(time*0.0014);
+  // relaxed A-pose (preview only — export stays T-pose)
+  localQ[idx.lUA] = M.qAxis([0,0,1],  0.96 + breath*0.015);
+  localQ[idx.rUA] = M.qAxis([0,0,1], -0.96 - breath*0.015);
+  localQ[idx.lLA] = M.qAxis([0,0,1],  0.10);
+  localQ[idx.rLA] = M.qAxis([0,0,1], -0.10);
+  localQ[idx.chest] = M.qAxis([1,0,0], breath*0.022);
+  localQ[idx.head]  = M.qAxis([0,1,0], (reduceMotion?0:Math.sin(time*0.0006))*0.05);
+  const gq = M.qMul(M.qAxis([0,1,0], gazeX*0.22), M.qAxis([1,0,0], -gazeY*0.14));
+  localQ[idx.lE]=gq; localQ[idx.rE]=gq;
+  const bob = reduceMotion ? 0 : Math.sin(time*0.0014)*0.004*build.dims.H;
+  for(let i=0;i<n;i++){
+    const b=bones[i];
+    const pw = b.parent>=0 ? bones[b.parent].w : [0,0,0];
+    const lt = [b.w[0]-pw[0], b.w[1]-pw[1] + (b.parent<0?bob:0), b.w[2]-pw[2]];
+    const lm = M.mCompose(localQ[i], lt);
+    worldMats[i] = b.parent>=0 ? M.mMul(worldMats[b.parent], lm) : lm;
+  }
+  // spring chains
+  if (!params.springOff && chains.length && !reduceMotion){
+    const col = build.collider;
+    const cc = M.mApply(worldMats[col.bone], col.offset);
+    const headW = worldMats[build.idx.head];
+    for(const ch of chains){
+      const root = build.bones[ch.boneIdxs[0]];
+      const anchor = M.mApply(worldMats[root.parent],
+        M.sub(ch.bind[0], build.bones[root.parent].w));
+      ch.pts[0] = anchor;
+      const drag = HINA.M.clamp(params.hairDrag,0,1)*0.10;
+      const stiff = params.hairStiff*0.16;
+      for(let i=1;i<ch.pts.length;i++){
+        const cur=ch.pts[i], prev=ch.prev[i];
+        const vel=M.scale(M.sub(cur,prev), 1-drag);
+        let nx=M.add(cur, vel);
+        nx[1]-= params.hairGrav*0.0016;
+        // stiffness: pull toward bind offset (rotated by head)
+        const rest=M.add(ch.pts[i-1], M.mApplyRot(headW, ch.bindOff[i-1]));
+        nx=M.add(nx, M.scale(M.sub(rest,nx), stiff));
+        ch.prev[i]=cur;
+        // distance constraint
+        const d=M.sub(nx, ch.pts[i-1]), L=M.len(d)||1e-6;
+        nx=M.add(ch.pts[i-1], M.scale(d, ch.segs[i-1]/L));
+        // head collider
+        const dc=M.sub(nx, cc), Lc=M.len(dc);
+        if (Lc < col.radius) nx=M.add(cc, M.scale(dc, col.radius/(Lc||1e-6)));
+        ch.pts[i]=nx;
+      }
+      // bone transforms from particles
+      for(let k=0;k<ch.boneIdxs.length;k++){
+        const bi=ch.boneIdxs[k];
+        const a = k<ch.pts.length-1 ? k : k-1;
+        const bd=M.norm(M.sub(ch.bind[a+1], ch.bind[a]));
+        const cd=M.norm(M.sub(ch.pts[a+1], ch.pts[a]));
+        const R=M.qFromTo(bd,cd);
+        skinMats[bi]=M.mMul(M.mCompose(R, ch.pts[k]), M.mT(-ch.bind[k][0],-ch.bind[k][1],-ch.bind[k][2]));
+      }
+    }
+  }
+  for(let i=0;i<n;i++){
+    const isChain = !bones[i].hb && !params.springOff && chains.length && !reduceMotion;
+    if (isChain) continue; // already set
+    skinMats[i]=M.mMul(worldMats[i], M.mT(-bones[i].w[0],-bones[i].w[1],-bones[i].w[2]));
+  }
+  // CPU skin
+  const g=build.geom, J=g.jnt, W=g.wgt;
+  for(let v=0;v<nVerts;v++){
+    const px=morphPos[v*3], py=morphPos[v*3+1], pz=morphPos[v*3+2];
+    let x=0,y=0,z=0, dom=0, domW=-1;
+    for(let k=0;k<4;k++){
+      const w=W[v*4+k]; if(!w) continue;
+      const m=skinMats[J[v*4+k]];
+      x+=w*(m[0]*px+m[4]*py+m[8]*pz+m[12]);
+      y+=w*(m[1]*px+m[5]*py+m[9]*pz+m[13]);
+      z+=w*(m[2]*px+m[6]*py+m[10]*pz+m[14]);
+      if (w>domW){domW=w;dom=J[v*4+k];}
+    }
+    skPos[v*3]=x; skPos[v*3+1]=y; skPos[v*3+2]=z;
+    const m=skinMats[dom], nx0=baseNrm[v*3], ny0=baseNrm[v*3+1], nz0=baseNrm[v*3+2];
+    skNrm[v*3]  =m[0]*nx0+m[4]*ny0+m[8]*nz0;
+    skNrm[v*3+1]=m[1]*nx0+m[5]*ny0+m[9]*nz0;
+    skNrm[v*3+2]=m[2]*nx0+m[6]*ny0+m[10]*nz0;
+  }
+}
+
+/* camera matrices */
+function perspective(fovy,aspect,near,far){
+  const f=1/Math.tan(fovy/2), nf=1/(near-far);
+  return [f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,2*far*near*nf,0];
+}
+function lookAt(eye,ct,up){
+  const z=M.norm(M.sub(eye,ct)), x=M.norm(M.cross(up,z)), y=M.cross(z,x);
+  return [x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0,
+          -M.dot(x,eye),-M.dot(y,eye),-M.dot(z,eye),1];
+}
+
+function resize(){
+  const dpr=Math.min(devicePixelRatio||1,2);
+  const w=cv.clientWidth, h=cv.clientHeight;
+  if (cv.width!==w*dpr||cv.height!==h*dpr){ cv.width=w*dpr; cv.height=h*dpr; if(GLOK) gl.viewport(0,0,cv.width,cv.height); }
+}
+
+function renderFrame(time){
+  if (!build || !GLOK) return;
+  resize();
+  // blink
+  if (!reduceMotion){
+    blinkT -= 1/60;
+    if (blinkT<=0 && blinkPhase<0){ blinkPhase=0; }
+    if (blinkPhase>=0){
+      blinkPhase += 1/9;
+      const w = blinkPhase<0.5 ? blinkPhase*2 : Math.max(0,2-blinkPhase*2);
+      if (morphW.blink!==w){ morphW.blink=w; morphDirty=true; }
+      if (blinkPhase>=1){ blinkPhase=-1; blinkT=1.8+Math.random()*2.6; morphW.blink=0; morphDirty=true; }
+    }
+  }
+  if (morphDirty) applyMorphs();
+  poseAndSkin(time);
+  const eye=[camTarget[0]+Math.sin(camYaw)*Math.cos(camPitch)*camDist,
+             camTarget[1]+Math.sin(camPitch)*camDist,
+             camTarget[2]+Math.cos(camYaw)*Math.cos(camPitch)*camDist];
+  const vp=M.mMul(perspective(0.62, cv.width/cv.height, 0.05, 60), lookAt(eye,camTarget,[0,1,0]));
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+
+  // shadow
+  gl.useProgram(progFlat);
+  gl.uniformMatrix4fv(locF.uVP,false,vp);
+  gl.uniform1f(locF.uW,0);
+  gl.uniform4f(locF.uColor,0,0,0,0.30);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  gl.depthMask(false);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufShadow);
+  gl.enableVertexAttribArray(locF.aPos);
+  gl.vertexAttribPointer(locF.aPos,3,gl.FLOAT,false,0,0);
+  gl.disableVertexAttribArray(locF.aNrm);
+  gl.vertexAttrib3f(locF.aNrm,0,0,0);
+  gl.drawArrays(gl.TRIANGLE_FAN,0,26);
+  gl.depthMask(true); gl.disable(gl.BLEND);
+
+  // upload skinned attribs
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
+  gl.bufferData(gl.ARRAY_BUFFER, skPos, gl.DYNAMIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufNrm);
+  gl.bufferData(gl.ARRAY_BUFFER, skNrm, gl.DYNAMIC_DRAW);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufIdx);
+
+  // outline (front-cull, body only)
+  gl.useProgram(progFlat);
+  gl.uniformMatrix4fv(locF.uVP,false,vp);
+  gl.uniform1f(locF.uW, build.dims.H*0.0035);
+  gl.uniform4f(locF.uColor, 0.07,0.06,0.09,1);
+  gl.enable(gl.CULL_FACE); gl.cullFace(gl.FRONT);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
+  gl.enableVertexAttribArray(locF.aPos);
+  gl.vertexAttribPointer(locF.aPos,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufNrm);
+  gl.enableVertexAttribArray(locF.aNrm);
+  gl.vertexAttribPointer(locF.aNrm,3,gl.FLOAT,false,0,0);
+  gl.drawElements(gl.TRIANGLES, outlineCount, gl.UNSIGNED_SHORT, 0);
+  gl.disable(gl.CULL_FACE);
+
+  // main toon
+  gl.useProgram(progMain);
+  gl.uniformMatrix4fv(locM.uVP,false,vp);
+  gl.uniform3f(locM.uLight, 0.42,0.76,-0.50);
+  gl.uniform3fv(locM.uEye, eye);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.uniform1i(locM.uTex,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
+  gl.enableVertexAttribArray(locM.aPos);
+  gl.vertexAttribPointer(locM.aPos,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufNrm);
+  gl.enableVertexAttribArray(locM.aNrm);
+  gl.vertexAttribPointer(locM.aNrm,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufUv);
+  gl.enableVertexAttribArray(locM.aUv);
+  gl.vertexAttribPointer(locM.aUv,2,gl.FLOAT,false,0,0);
+  gl.drawElements(gl.TRIANGLES, build.geom.idx.length, gl.UNSIGNED_SHORT, 0);
+}
+
+/* ---------- camera input ---------- */
+(()=>{
+  let drag=false, px=0, py=0;
+  const ptrs=new Map();
+  cv.addEventListener('pointerdown',e=>{
+    cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+    drag=true; px=e.clientX; py=e.clientY; cv.classList.add('drag');
+  });
+  cv.addEventListener('pointermove',e=>{
+    const r=cv.getBoundingClientRect();
+    gazeX=((e.clientX-r.left)/r.width-0.5)*2;
+    gazeY=((e.clientY-r.top)/r.height-0.5)*2;
+    if (!drag) return;
+    if (ptrs.size===2){
+      const old=[...ptrs.values()];
+      const d0=Math.hypot(old[0][0]-old[1][0], old[0][1]-old[1][1]);
+      ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+      const cur=[...ptrs.values()];
+      const d1=Math.hypot(cur[0][0]-cur[1][0], cur[0][1]-cur[1][1]);
+      if (d0>0) camDist=M.clamp(camDist*d0/d1, 0.6, 8);
+      return;
+    }
+    ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+    camYaw -= (e.clientX-px)*0.008;
+    camPitch = M.clamp(camPitch+(e.clientY-py)*0.006, -0.5, 1.25);
+    px=e.clientX; py=e.clientY;
+  });
+  const up=e=>{ ptrs.delete(e.pointerId); if(!ptrs.size){drag=false; cv.classList.remove('drag');} };
+  cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+  cv.addEventListener('wheel',e=>{ e.preventDefault();
+    camDist=M.clamp(camDist*(1+e.deltaY*0.0012), 0.6, 8); },{passive:false});
+  cv.addEventListener('dblclick',()=>{ camYaw=Math.PI; camPitch=0.10;
+    camDist=(build?build.dims.H:1.45)*1.85; });
+})();
+
+/* ---------- UI ---------- */
+const TABS=['preset','body','face','hair','outfit','color','phys','out'];
+
+function el(tag, attrs, ...kids){
+  const e=document.createElement(tag);
+  for(const k in attrs||{}){
+    if (k==='class') e.className=attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  }
+  for(const c of kids) e.append(c);
+  return e;
+}
+
+function renderTabs(){
+  const nav=$('tabs'); nav.textContent='';
+  for(const tb of TABS){
+    nav.append(el('button',{class:'tab', role:'tab', 'aria-selected':String(tb===activeTab),
+      onclick:()=>{activeTab=tb; renderTabs(); renderBody();}}, t('tab.'+tb)));
+  }
+}
+
+function paramRow(k){
+  const s=PARAMS[k];
+  const label = lang==='ja'?s.ja:s.en;
+  if (s.k==='num'){
+    const num=el('span',{class:'num'}, String(params[k]));
+    const r=el('input',{type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
+      'aria-label':label,
+      oninput:e=>{ params[k]=parseFloat(e.target.value); num.textContent=String(params[k]);
+        onParam(k); }});
+    return el('div',{class:'row'}, el('label',{},label), r, num);
+  }
+  if (s.k==='enum'){
+    const sel=el('select',{'aria-label':label, onchange:e=>{params[k]=e.target.value; onParam(k);}});
+    for(const o of s.opts) sel.append(el('option',{value:o, ...(params[k]===o?{selected:''}:{})}, o));
+    return el('div',{class:'row'}, el('label',{},label), sel);
+  }
+  if (s.k==='bool'){
+    const cb=el('input',{type:'checkbox','aria-label':label,
+      onchange:e=>{params[k]=e.target.checked; onParam(k);}});
+    cb.checked=params[k];
+    return el('div',{class:'row'}, el('label',{},label), cb);
+  }
+  // color
+  const inp=el('input',{type:'color', value:params[k], 'aria-label':label,
+    oninput:e=>{params[k]=e.target.value; onParam(k);}});
+  const sw=el('div',{class:'swatches'});
+  for(const c of HINA.PAL[s.pal])
+    sw.append(el('button',{class:'sw', style:'background:'+c, 'aria-label':label+' '+c,
+      onclick:()=>{params[k]=c; inp.value=c; onParam(k);}}));
+  return el('div',{class:'row'}, el('label',{},label), inp, sw);
+}
+
+function onParam(k){
+  const s=PARAMS[k];
+  if (s.k==='color'){ drawAtlas(params); uploadTexture(); saveState(); return; }
+  if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
+  rebuild();
+}
+
+function renderBody(){
+  const bd=$('tabBody'); bd.textContent='';
+  if (activeTab==='preset'){
+    const grid=el('div',{class:'presetGrid'});
+    for(const pre of HINA.PRESETS){
+      const pp=HINA.presetParams(pre);
+      const cols=el('div',{class:'cols'},
+        el('span',{class:'c',style:'background:'+pp.hairColor}),
+        el('span',{class:'c',style:'background:'+pp.eyeColor}),
+        el('span',{class:'c',style:'background:'+pp.clothMain}));
+      grid.append(el('button',{class:'preCard', onclick:()=>{
+        params=pp; rebuild(); renderBody(); }},
+        el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en), cols));
+    }
+    bd.append(grid,
+      el('div',{style:'margin-top:14px'},
+        el('button',{class:'btn wide', onclick:()=>{ params=HINA.randomParams(); rebuild(); }}, t('btn.gacha'))));
+    return;
+  }
+  if (activeTab==='out'){ renderOut(bd); return; }
+  for(const k in PARAMS){
+    const s=PARAMS[k];
+    if (s.tab!==activeTab) continue;
+    if (mode==='easy' && s.adv) continue;
+    bd.append(paramRow(k));
+  }
+  if (activeTab==='phys') bd.append(el('div',{class:'note'}, t('note.quest')));
+}
+
+let statEls={};
+function renderOut(bd){
+  bd.append(el('div',{class:'sect'}, t('out.meta')));
+  const txt=(key,mk)=>{ bd.append(el('div',{class:'row'},
+    el('label',{},t(key)),
+    el('input',{type:'text', value:meta[mk]||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
+  txt('out.title','title'); txt('out.author','author');
+  const selRow=(key,mk,opts,tp)=>{
+    const sel=el('select',{onchange:e=>{meta[mk]=e.target.value; saveState();}});
+    for(const o of opts) sel.append(el('option',{value:o, ...(meta[mk]===o?{selected:''}:{})},
+      tp?t(tp+'.'+o):o));
+    bd.append(el('div',{class:'row'}, el('label',{},t(key)), sel));
+  };
+  selRow('out.allowed','allowed',['OnlyAuthor','ExplicitlyLicensedPerson','Everyone'],'allowed');
+  selRow('out.violent','violent',['Disallow','Allow'],'usage');
+  selRow('out.sexual','sexual',['Disallow','Allow'],'usage');
+  selRow('out.commercial','commercial',['Disallow','Allow'],'usage');
+  selRow('out.license','license',
+    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND'],null);
+
+  bd.append(el('div',{class:'sect'}, t('out.stats')));
+  const tbl=el('table',{class:'statTable'}); statEls={};
+  const row=(key,id)=>{ const td=el('td',{}); statEls[id]=td;
+    tbl.append(el('tr',{}, el('td',{},t(key)), td)); };
+  row('st.tris','tris'); row('st.bones','bones'); row('st.mat','mat');
+  row('st.mesh','skinned'); row('st.spring','pbTrans'); row('st.tex','texMB');
+  const rkPC=el('td',{}); statEls.rkPC=rkPC;
+  const rkQ=el('td',{}); statEls.rkQ=rkQ;
+  tbl.append(el('tr',{}, el('td',{},'PC'), rkPC));
+  tbl.append(el('tr',{}, el('td',{},'Quest'), rkQ));
+  bd.append(tbl);
+
+  bd.append(el('button',{class:'btn primary wide', onclick:doExport}, t('btn.export')));
+  bd.append(el('button',{class:'btn wide', onclick:saveJson}, t('btn.saveJson')));
+  const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
+    onchange:e=>{ const f=e.target.files[0]; if(!f) return;
+      const rd=new FileReader();
+      rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
+        if (d){ params=d.params; Object.assign(meta,d.meta); rebuild(); renderBody(); } };
+      rd.readAsText(f); e.target.value=''; }});
+  bd.append(file);
+  bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
+  bd.append(el('button',{class:'btn wide', onclick:()=>{
+    params=HINA.defaults(); rebuild(); renderBody(); }}, t('btn.reset')));
+  bd.append(el('div',{class:'note'}, t('note.upload')));
+  const gd=el('div',{class:'note'}, el('b',{}, t('guide.t')));
+  for(const k of ['guide.s1','guide.s2','guide.s3','guide.s4','guide.s5'])
+    gd.append(el('div',{}, t(k)));
+  bd.append(gd);
+  updateStats();
+}
+
+const RANKCOLOR=['var(--r-e)','var(--r-g)','var(--r-m)','var(--r-p)','var(--r-vp)'];
+function updateStats(){
+  if (!build) return;
+  const est=HINA.estimate(build, params);
+  const pc=HINA.rank(est,'pc'), q=HINA.rank(est,'quest');
+  const set=(elm,r)=>{ elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx]; };
+  set($('rankPC'),pc); set($('rankQ'),q);
+  if (statEls.tris){
+    statEls.tris.textContent=est.tris;
+    statEls.bones.textContent=est.bones;
+    statEls.mat.textContent=est.mat;
+    statEls.skinned.textContent=est.skinned;
+    statEls.pbTrans.textContent=params.springOff?0:est.pbTrans;
+    statEls.texMB.textContent='~'+est.texMB+' MB';
+    statEls.rkPC.innerHTML=''; statEls.rkQ.innerHTML='';
+    const badge=r=>{ const b=el('span',{class:'rk'}, t('rank.'+r.rank));
+      b.style.background=RANKCOLOR[r.idx]; b.style.color='#0c1014'; return b; };
+    statEls.rkPC.append(badge(pc)); statEls.rkQ.append(badge(q));
+  }
+}
+
+/* ---------- export / save / load ---------- */
+function download(bytes, name, type){
+  const b=new Blob([bytes],{type});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u; a.download=name; document.body.append(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u), 8000);
+}
+function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_'); return v||fb; }
+const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
+async function doExport(){
+  if (!build) return;
+  try{
+    let thumbBytes = null;
+    if (GLOK){
+      renderFrame(performance.now());            // same task → buffer readable
+      const sq = Math.min(cv.width, cv.height);
+      const tc = document.createElement('canvas');
+      tc.width = tc.height = 256;
+      tc.getContext('2d').drawImage(cv, (cv.width-sq)/2, (cv.height-sq)/2, sq, sq, 0, 0, 256, 256);
+      const tb = await canvasBlob(tc);
+      if (tb) thumbBytes = new Uint8Array(await tb.arrayBuffer());
+    }
+    const ab = await (await canvasBlob(atlas)).arrayBuffer();
+    const {bytes} = HINA.exportVRM(build, params, meta, new Uint8Array(ab), thumbBytes);
+    download(bytes, safeName(meta.title,'hina')+'.vrm', 'application/octet-stream');
+  }catch(e){ alert('Export failed: '+e.message); }
+}
+function saveJson(){
+  download(new TextEncoder().encode(HINA.serialize(params, meta)),
+    safeName(meta.title,'hina')+'.hina.json', 'application/json');
+}
+
+/* ---------- rebuild ---------- */
+function rebuild(){
+  params=HINA.sanitize(params);
+  build=HINA.buildAvatar(params);
+  drawAtlas(params);
+  uploadTexture();
+  uploadGeometry();
+  initSprings();
+  morphW={}; morphDirty=true;
+  updateStats();
+  saveState();
+}
+
+/* ---------- header / dialogs / boot ---------- */
+function applyLang(){
+  $('btnLang').textContent = lang==='ja'?'EN':'JA';
+  $('btnMode').textContent = mode==='easy'?t('mode.easy'):t('mode.detail');
+  $('btnMode').setAttribute('aria-pressed', String(mode==='detail'));
+  $('hint').textContent = t('hint.drag');
+  $('aboutTxt').textContent = t('about');
+  document.documentElement.lang = lang;
+  renderTabs(); renderBody(); updateStats();
+}
+$('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); });
+$('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); });
+$('btnAbout').addEventListener('click',()=>$('aboutDlg').showModal());
+$('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
+
+loadState();
+rebuild();
+applyLang();
+camDist=build.dims.H*1.85; camTarget=[0,build.dims.H*0.55,0];
+if (!GLOK) $('hint').textContent='WebGL unavailable — preview disabled (export still works)';
+cv.addEventListener('webglcontextlost', e=>{ e.preventDefault();
+  $('hint').textContent='WebGL context lost — reload to restore preview'; });
+if (location.search.indexOf('selftest')>=0){
+  const st=HINA.selfTest();
+  const box=$('selftestBox'); box.style.display='block';
+  box.append(el('div',{style:'font-weight:700;margin-bottom:6px;color:'+(st.ok?'var(--ok)':'var(--err)')},
+    st.ok?t('selftest.ok'):t('selftest.ng')));
+  for(const r of st.results)
+    box.append(el('div',{style:'color:'+(r.ok?'var(--text-dim)':'var(--err)')},
+      (r.ok?'✓ ':'✗ ')+r.name+(r.msg?' — '+r.msg:'')));
+}
+(function loop(t){ requestAnimationFrame(loop); renderFrame(t||0); })(0);
+})();
+</script>
+</body>
+</html>
