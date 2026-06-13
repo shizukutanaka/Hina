@@ -45,6 +45,7 @@
 - **`beforeunload` で saveState をフラッシュ**: 500ms デバウンス中にタブを閉じると最後の編集が保存されない問題を修正。`beforeunload` ハンドラで保留タイマーをキャンセルし即時 `localStorage.setItem` を実行。テスト232→233で担保。
 - **JSON 読込後の残留プリセットハイライト修正**: JSON ファイルを読み込んだ後も前に選択していたプリセットカードのハイライトが残り、ファイル名も旧プリセット ID（例: `hina_kotone.vrm`）のまま書き出される問題を修正。JSON 読込成功時に `activePresetId=null` / `lastGachaSeed=null` をリセットし `saveState()` を呼出。テスト233→234で担保。
 - **リセットボタンの完全リセット**: リセットボタンがパラメータのみリセットし、meta（タイトル・作者等）・プリセット選択状態・ガチャシードが残留する問題を修正。`META_DEFAULTS` 定数を導入しリセット時に `meta=Object.assign({},META_DEFAULTS)` / `activePresetId=null` / `lastGachaSeed=null` / `saveState()` を実行。テスト234→235で担保。
+- **VRM書き出しエラーメッセージの i18n 対応 + 二重書き出し防止**: `doExport()` のエラー時アラートがハードコード英語（`'Export failed: '`）だった問題を修正。`err.exportFailed` i18n キー（ja/en）を追加し言語連動。また Ctrl+S の高速連打で非同期書き出しが重複起動する問題を `_exporting` フラグで防止。テスト235→237で担保。
 
 ## [0.1.0] - 2026-06-11
 ### Added

@@ -750,8 +750,10 @@ function download(bytes, name, type){
 function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_'); return v||fb; }
 function fnameStem(){ return safeName(meta.title, 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
+let _exporting = false;
 async function doExport(){
-  if (!build) return;
+  if (!build || _exporting) return;
+  _exporting = true;
   try{
     let thumbBytes = null;
     if (GLOK){
@@ -769,7 +771,8 @@ async function doExport(){
     download(bytes, fname, 'application/octet-stream');
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
-  }catch(e){ alert('Export failed: '+e.message); }
+  }catch(e){ alert(t('err.exportFailed')+': '+e.message); }
+  finally{ _exporting = false; }
 }
 function saveJson(){
   download(new TextEncoder().encode(HINA.serialize(params, meta)),

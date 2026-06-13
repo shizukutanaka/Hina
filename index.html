@@ -325,6 +325,7 @@ const I18N = {
     'selftest.ok':'自己診断: 全て正常','selftest.ng':'自己診断: 異常あり',
     'err.loadFailed':'JSONファイルを読み込めませんでした（形式が不正か、雛のJSONではありません）',
     'err.buildFailed':'アバター生成に失敗しました',
+    'err.exportFailed':'VRM書き出しに失敗しました',
     'guide.t':'VRChat導入手順','guide.s1':'1. Unity Hub + VCC でアバタープロジェクト作成','guide.s2':'2. UniVRM (v0.x) をインポート','guide.s3':'3. VRM Converter for VRChat をインポート','guide.s4':'4. .vrm をドラッグ →「VRChatアバターに変換」','guide.s5':'5. VRChat SDK でビルド & アップロード',
     'rank.limit':'律速',
     'enum.eyeShape.round':'丸','enum.eyeShape.tare':'たれ目','enum.eyeShape.tsuri':'つり目','enum.eyeShape.jito':'じと目',
@@ -363,6 +364,7 @@ const I18N = {
     'selftest.ok':'Self-test: all OK','selftest.ng':'Self-test: FAILED',
     'err.loadFailed':'Could not load JSON (invalid format or not a Hina file)',
     'err.buildFailed':'Avatar build failed',
+    'err.exportFailed':'VRM export failed',
     'guide.t':'VRChat upload steps','guide.s1':'1. Create an avatar project with Unity Hub + VCC','guide.s2':'2. Import UniVRM (v0.x)','guide.s3':'3. Import VRM Converter for VRChat','guide.s4':'4. Drag the .vrm in → "Convert to VRChat avatar"','guide.s5':'5. Build & upload with the VRChat SDK',
     'rank.limit':'Limited by',
     'enum.eyeShape.round':'Round','enum.eyeShape.tare':'Drooping','enum.eyeShape.tsuri':'Sharp','enum.eyeShape.jito':'Half-lidded',
@@ -2126,8 +2128,10 @@ function download(bytes, name, type){
 function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_'); return v||fb; }
 function fnameStem(){ return safeName(meta.title, 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
+let _exporting = false;
 async function doExport(){
-  if (!build) return;
+  if (!build || _exporting) return;
+  _exporting = true;
   try{
     let thumbBytes = null;
     if (GLOK){
@@ -2145,7 +2149,8 @@ async function doExport(){
     download(bytes, fname, 'application/octet-stream');
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
-  }catch(e){ alert('Export failed: '+e.message); }
+  }catch(e){ alert(t('err.exportFailed')+': '+e.message); }
+  finally{ _exporting = false; }
 }
 function saveJson(){
   download(new TextEncoder().encode(HINA.serialize(params, meta)),
