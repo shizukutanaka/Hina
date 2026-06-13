@@ -34,6 +34,8 @@ ok(/addEventListener\(['"]keydown['"]/.test(html), 'keyboard camera handler wire
 ok(html.includes("'a11y.canvas'"), 'canvas aria-label i18n key present');
 // WCAG 3.1.1 — page language updated on language switch
 ok(html.includes('documentElement.lang'), 'applyLang() updates <html lang> attribute (WCAG 3.1.1)');
+// WCAG 1.3.1 — stat table row headers
+ok(html.includes("el('th',{scope:'row'}"), 'stat table uses th[scope=row] for label cells (WCAG 1.3.1)');
 // Preset cards expose active state to assistive tech
 ok(html.includes("'aria-pressed':String(activePresetId===pre.id)"), 'preset cards have aria-pressed for screen reader active-state');
 // WCAG 4.1.3 — status messages: a polite live region announces rank/export changes

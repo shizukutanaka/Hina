@@ -660,14 +660,14 @@ function renderOut(bd){
   bd.append(el('div',{class:'sect'}, t('out.stats')));
   const tbl=el('table',{class:'statTable'}); statEls={};
   const row=(key,id)=>{ const td=el('td',{}); statEls[id]=td;
-    tbl.append(el('tr',{}, el('td',{},t(key)), td)); };
+    tbl.append(el('tr',{}, el('th',{scope:'row'},t(key)), td)); };
   row('st.tris','tris'); row('st.bones','bones'); row('st.mat','mat');
   row('st.mesh','skinned'); row('st.spring','pbTrans'); row('st.tex','texMB');
   row('st.vrm','approxBytes');
   const rkPC=el('td',{}); statEls.rkPC=rkPC;
   const rkQ=el('td',{}); statEls.rkQ=rkQ;
-  tbl.append(el('tr',{}, el('td',{},'PC'), rkPC));
-  tbl.append(el('tr',{}, el('td',{},'Quest'), rkQ));
+  tbl.append(el('tr',{}, el('th',{scope:'row'},'PC'), rkPC));
+  tbl.append(el('tr',{}, el('th',{scope:'row'},'Quest'), rkQ));
   bd.append(tbl);
 
   bd.append(el('button',{class:'btn primary wide', onclick:doExport}, t('btn.export')));

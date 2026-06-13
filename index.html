@@ -72,9 +72,9 @@ main{flex:1;display:flex;min-height:0}
 .btn.primary:hover{background:#1ad3da}
 .btn.wide{width:100%;margin-bottom:10px}
 .statTable{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
-.statTable td{padding:5px 6px;border-bottom:1px solid var(--line)}
-.statTable td:first-child{color:var(--text-dim)}
-.statTable td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.statTable td,.statTable th{padding:5px 6px;border-bottom:1px solid var(--line);font-weight:normal;text-align:left}
+.statTable th{color:var(--text-dim)}
+.statTable td{text-align:right;font-variant-numeric:tabular-nums}
 .rk{font-weight:700;padding:1px 8px;border-radius:99px;font-size:11px}
 .note{font-size:11px;color:var(--text-faint);margin:8px 0 14px;line-height:1.7}
 .note a{color:var(--accent)}
@@ -2038,14 +2038,14 @@ function renderOut(bd){
   bd.append(el('div',{class:'sect'}, t('out.stats')));
   const tbl=el('table',{class:'statTable'}); statEls={};
   const row=(key,id)=>{ const td=el('td',{}); statEls[id]=td;
-    tbl.append(el('tr',{}, el('td',{},t(key)), td)); };
+    tbl.append(el('tr',{}, el('th',{scope:'row'},t(key)), td)); };
   row('st.tris','tris'); row('st.bones','bones'); row('st.mat','mat');
   row('st.mesh','skinned'); row('st.spring','pbTrans'); row('st.tex','texMB');
   row('st.vrm','approxBytes');
   const rkPC=el('td',{}); statEls.rkPC=rkPC;
   const rkQ=el('td',{}); statEls.rkQ=rkQ;
-  tbl.append(el('tr',{}, el('td',{},'PC'), rkPC));
-  tbl.append(el('tr',{}, el('td',{},'Quest'), rkQ));
+  tbl.append(el('tr',{}, el('th',{scope:'row'},'PC'), rkPC));
+  tbl.append(el('tr',{}, el('th',{scope:'row'},'Quest'), rkQ));
   bd.append(tbl);
 
   bd.append(el('button',{class:'btn primary wide', onclick:doExport}, t('btn.export')));

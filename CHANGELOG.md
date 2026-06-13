@@ -47,6 +47,7 @@
 - **リセットボタンの完全リセット**: リセットボタンがパラメータのみリセットし、meta（タイトル・作者等）・プリセット選択状態・ガチャシードが残留する問題を修正。`META_DEFAULTS` 定数を導入しリセット時に `meta=Object.assign({},META_DEFAULTS)` / `activePresetId=null` / `lastGachaSeed=null` / `saveState()` を実行。テスト234→235で担保。
 - **VRM書き出しエラーメッセージの i18n 対応 + 二重書き出し防止**: `doExport()` のエラー時アラートがハードコード英語（`'Export failed: '`）だった問題を修正。`err.exportFailed` i18n キー（ja/en）を追加し言語連動。また Ctrl+S の高速連打で非同期書き出しが重複起動する問題を `_exporting` フラグで防止。テスト235→237で担保。
 - **プリセットカードに `aria-pressed` 追加（WCAG 4.1.2）**: 選択中のプリセットが視覚的（`.selected` CSS クラス）のみで表現され、スクリーンリーダーに伝わらなかった問題を修正。`aria-pressed="true/false"` を各プリセットカードボタンに追加。テスト237→239で担保。WCAG 3.1.1 の `<html lang>` 動的更新（`applyLang()` 内 `document.documentElement.lang = lang`）もテスト追加で担保。
+- **統計テーブルのセマンティクス修正（WCAG 1.3.1）**: 統計テーブルのラベル列（三角形数・ボーン数・PC/Questランク等）が全て `<td>` だった問題を修正。`<th scope="row">` に変更し、スクリーンリーダーが行ヘッダーと値の関係を正しく解釈できるように。CSS も `th` を対象に更新。テスト239→240で担保。
 
 ## [0.1.0] - 2026-06-11
 ### Added
