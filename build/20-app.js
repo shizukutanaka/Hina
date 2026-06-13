@@ -822,6 +822,10 @@ document.addEventListener('keydown',e=>{
     e.preventDefault(); doExport();
   }
 });
+window.addEventListener('beforeunload',()=>{
+  clearTimeout(_saveTimer);
+  try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activePresetId, lastGachaSeed})); }catch(e){}
+});
 // Roving tabindex: arrow keys navigate between tabs (ARIA tablist pattern)
 $('tabs').addEventListener('keydown',e=>{
   const idx=TABS.indexOf(activeTab), n=TABS.length; let ni=-1;
