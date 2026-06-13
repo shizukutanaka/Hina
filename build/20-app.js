@@ -24,8 +24,12 @@ function loadState(){
     if (j.mode==='detail') mode = 'detail';
   }catch(e){}
 }
+let _saveTimer = null;
 function saveState(){
-  try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode})); }catch(e){}
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(()=>{
+    try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode})); }catch(e){}
+  }, 500);
 }
 
 /* ---------- texture atlas (2D canvas → WebGL + PNG export) ---------- */
@@ -636,7 +640,8 @@ function renderOut(bd){
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
-        if (d){ params=d.params; Object.assign(meta,d.meta); rebuild(); renderBody(); } };
+        if (d){ params=d.params; Object.assign(meta,d.meta); rebuild(); renderBody(); }
+        else { alert(t('err.loadFailed')); } };
       rd.readAsText(f); e.target.value=''; }});
   bd.append(file);
   bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));

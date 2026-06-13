@@ -35,6 +35,8 @@ ok(html.includes("'a11y.canvas'"), 'canvas aria-label i18n key present');
 // WCAG 4.1.3 — status messages: a polite live region announces rank/export changes
 ok(/id="srStatus"[^>]*aria-live=/.test(html), 'live status region present with aria-live');
 ok(/announceRank\s*\(/.test(html), 'rank-change announcer wired');
+ok(/err\.loadFailed/.test(html), 'JSON load-failure uses err.loadFailed i18n key');
+ok(/saveState/.test(html) && /clearTimeout/.test(html), 'saveState is debounced (clearTimeout present)');
 
 /* ---- math sanity ---- */
 {
@@ -87,6 +89,10 @@ ok(/announceRank\s*\(/.test(html), 'rank-change announcer wired');
   const cats = Object.keys(H.RANKS.pc);
   ok(cats.every(c => H.I18N.ja['cat.' + c] && H.I18N.en['cat.' + c]), 'every rank category has ja+en label');
   ok(H.I18N.ja['rank.limit'] && H.I18N.en['rank.limit'], 'limiting-factor label present');
+  ok(H.I18N.ja['err.loadFailed'] && H.I18N.en['err.loadFailed'], 'err.loadFailed key in both languages');
+  // note.upload must not reference a file that doesn't exist in single-file distribution
+  ok(!H.I18N.ja['note.upload'].includes('UPLOAD_GUIDE'), 'ja note.upload no stale file reference');
+  ok(!H.I18N.en['note.upload'].includes('UPLOAD_GUIDE'), 'en note.upload no stale file reference');
 }
 
 /* ---- defaults / sanitize ---- */
