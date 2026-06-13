@@ -45,7 +45,7 @@ ok(/err\.loadFailed/.test(html), 'JSON load-failure uses err.loadFailed i18n key
 ok(/err\.buildFailed/.test(html), 'buildAvatar failure uses err.buildFailed i18n key');
 ok(/saveState/.test(html) && /clearTimeout/.test(html), 'saveState is debounced (clearTimeout present)');
 ok(/buildAvatar[\s\S]{0,60}catch/.test(html), 'rebuild() catches buildAvatar errors');
-ok(/'license'\)/.test(html) || /"license"\)/.test(html), 'license selRow uses translation prefix');
+ok(/'license',\s*v=>/.test(html) || /"license",\s*v=>/.test(html) || /'license'\)/.test(html), 'license selRow uses translation prefix with dynamic callback');
 // ARIA tablist pattern (WCAG 2.1.1 for tab navigation)
 ok(html.includes('role="tabpanel"'), 'tabBody has role=tabpanel');
 ok(html.includes('aria-controls'), 'tab buttons have aria-controls');
@@ -107,7 +107,7 @@ ok(H.I18N.ja['out.version'] && H.I18N.en['out.version'], 'out.version label i18n
 ok(html.includes("e.key==='?'") && html.includes('aboutDlg'), '? key opens About dialog (keyboard discoverability)');
 ok(html.includes("type:'button'") && /type:'button'[\s\S]{0,80}class:'sw'/.test(html), 'color swatch buttons have type=button (form-safe)');
 ok(html.includes("'out.version','version'") && html.includes("version:''"), 'version field in UI and META_DEFAULTS');
-ok(html.includes("'licenseUrl'") && html.includes("META_DEFAULTS") && html.includes("licenseUrl:''"), 'licenseUrl in META_DEFAULTS and wired to UI');
+ok(html.includes("meta.licenseUrl") && html.includes("META_DEFAULTS") && html.includes("licenseUrl:''"), 'licenseUrl in META_DEFAULTS and wired to UI');
 ok(/bd\.scrollTop\s*=\s*0/.test(html), 'renderBody() resets scrollTop to 0 so tab switches start at top');
 {
   const png = H.b64ToBytes(H.PNG1);
@@ -122,7 +122,9 @@ ok(/bd\.scrollTop\s*=\s*0/.test(html), 'renderBody() resets scrollTop to 0 so ta
 }
 ok(html.includes('CLAMP_TO_EDGE') && !html.includes('TEXTURE_WRAP_S,gl.REPEAT'), 'texture atlas uses CLAMP_TO_EDGE to prevent edge bleed (not REPEAT)');
 ok(!html.includes('HINA.M.clamp'), 'no HINA.M.clamp calls — use local M alias consistently');
-ok(html.includes("'Other'],'license'"), 'Other license option added to UI selector (matches VRM writer accepted values)');
+ok(html.includes("'Other']") && (html.includes("'Other'],'license'") || html.includes("'license',")), 'Other license option in UI selector with license translation prefix');
+ok(html.includes('wrapS:33071') && html.includes('wrapT:33071'), 'glTF sampler uses CLAMP_TO_EDGE (33071) consistent with WebGL preview');
+ok(/licUrlRow\.style\.display/.test(html) && /meta\.license\s*===\s*['"]Other['"]/.test(html), 'licenseUrl row shown only when license=Other (conditional visibility)');
 {
   const r0 = H.randomParams(0);
   ok(r0 && typeof r0.height === 'number', 'randomParams(0) — seed 0 produces valid params');

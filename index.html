@@ -1245,7 +1245,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
       alphaMode:'MASK', alphaCutoff:0.5, doubleSided:true,
     }],
     textures,
-    samplers:[{magFilter:9729, minFilter:9987, wrapS:10497, wrapT:10497}],
+    samplers:[{magFilter:9729, minFilter:9987, wrapS:33071, wrapT:33071}],
     images,
     buffers:[{byteLength: bw.len}],
     bufferViews:views,
@@ -2043,9 +2043,9 @@ function renderOut(bd){
   txt('out.author','author', t('out.author.ph'));
   txt('out.contact','contact', t('out.contact.ph'));
   txt('out.reference','reference', t('out.reference.ph'));
-  const selRow=(key,mk,opts,tp)=>{
+  const selRow=(key,mk,opts,tp,onChange)=>{
     const id='sel-'+mk;
-    const sel=el('select',{id, onchange:e=>{meta[mk]=e.target.value; saveState();}});
+    const sel=el('select',{id, onchange:e=>{meta[mk]=e.target.value; saveState(); if(onChange) onChange(e.target.value);}});
     for(const o of opts) sel.append(el('option',{value:o, ...(meta[mk]===o?{selected:''}:{})},
       tp?t(tp+'.'+o):o));
     bd.append(el('div',{class:'row'}, el('label',{'for':id},t(key)), sel));
@@ -2054,9 +2054,16 @@ function renderOut(bd){
   selRow('out.violent','violent',['Disallow','Allow'],'usage');
   selRow('out.sexual','sexual',['Disallow','Allow'],'usage');
   selRow('out.commercial','commercial',['Disallow','Allow'],'usage');
+  const licUrlId='meta-licenseUrl';
+  const licUrlRow=el('div',{class:'row', style: meta.license==='Other' ? '' : 'display:none'});
+  licUrlRow.append(
+    el('label',{'for':licUrlId}, t('out.license.url')),
+    el('input',{id:licUrlId, type:'text', maxlength:'256', value:meta.licenseUrl||'',
+      placeholder:t('out.license.url.ph'), oninput:e=>{meta.licenseUrl=e.target.value; saveState();}}));
   selRow('out.license','license',
-    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],'license');
-  txt('out.license.url','licenseUrl', t('out.license.url.ph'));
+    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
+    'license', v=>{licUrlRow.style.display=v==='Other'?'':'none';});
+  bd.append(licUrlRow);
 
   bd.append(el('div',{class:'sect'}, t('out.stats')));
   const tbl=el('table',{class:'statTable'}); statEls={};

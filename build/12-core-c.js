@@ -254,7 +254,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
       alphaMode:'MASK', alphaCutoff:0.5, doubleSided:true,
     }],
     textures,
-    samplers:[{magFilter:9729, minFilter:9987, wrapS:10497, wrapT:10497}],
+    samplers:[{magFilter:9729, minFilter:9987, wrapS:33071, wrapT:33071}],
     images,
     buffers:[{byteLength: bw.len}],
     bufferViews:views,
