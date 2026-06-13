@@ -70,6 +70,9 @@ ok(html.includes('lastGachaSeed'), 'gacha seed tracked for reproducibility');
 ok(H.I18N.ja['gacha.seed.ph'] && H.I18N.en['gacha.seed.ph'], 'gacha seed placeholder i18n in both languages');
 ok(html.includes('runGacha'), 'gacha runs through shared runGacha() for seed reuse');
 ok(html.includes("maxlength:'256'"), 'VRM meta text inputs have maxlength=256 matching writer truncation');
+ok(H.I18N.ja['hint.noGL'] && H.I18N.en['hint.noGL'], 'WebGL unavailable hint i18n in both languages');
+ok(H.I18N.ja['hint.glLost'] && H.I18N.en['hint.glLost'], 'WebGL context-lost hint i18n in both languages');
+ok(html.includes("GLOK ? t('hint.drag') : t('hint.noGL')"), 'applyLang() uses localized hint conditionally');
 
 /* ---- math sanity ---- */
 {

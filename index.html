@@ -305,6 +305,8 @@ const I18N = {
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物チェーン','st.tex':'テクスチャ推定',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'ドラッグ/矢印キー: 回転 / ホイール・+−: ズーム / ダブルクリック・Home: リセット',
+    'hint.noGL':'WebGL が使えません — プレビュー無効（書き出しは動作します）',
+    'hint.glLost':'WebGL コンテキストが失われました — ページを再読み込みしてください',
     'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、＋／−でズーム、Homeで初期位置に戻ります。',
     'a11y.stage':'3Dプレビューエリア','a11y.panel':'アバター設定パネル',
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
@@ -341,6 +343,8 @@ const I18N = {
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring chains','st.tex':'Texture est.',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'Drag/Arrows: rotate / Wheel · +−: zoom / Double-click · Home: reset',
+    'hint.noGL':'WebGL unavailable — preview disabled (export still works)',
+    'hint.glLost':'WebGL context lost — reload to restore preview',
     'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, +/− zoom, Home resets the view.',
     'a11y.stage':'3D preview area','a11y.panel':'Avatar settings panel',
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
@@ -2152,7 +2156,7 @@ function applyLang(){
   $('btnLang').textContent = lang==='ja'?'EN':'JA';
   $('btnMode').textContent = mode==='easy'?t('mode.easy'):t('mode.detail');
   $('btnMode').setAttribute('aria-pressed', String(mode==='detail'));
-  $('hint').textContent = t('hint.drag');
+  $('hint').textContent = GLOK ? t('hint.drag') : t('hint.noGL');
   cv.setAttribute('aria-label', t('a11y.canvas'));
   $('stage').setAttribute('aria-label', t('a11y.stage'));
   $('panel').setAttribute('aria-label', t('a11y.panel'));
@@ -2187,9 +2191,8 @@ $('tabs').addEventListener('keydown',e=>{
   activeTab=TABS[ni]; renderTabs(); renderBody(); $('tab-'+TABS[ni]).focus();
 });
 camDist=build.dims.H*1.85; camTarget=[0,build.dims.H*0.55,0];
-if (!GLOK) $('hint').textContent='WebGL unavailable — preview disabled (export still works)';
 cv.addEventListener('webglcontextlost', e=>{ e.preventDefault();
-  $('hint').textContent='WebGL context lost — reload to restore preview'; });
+  $('hint').textContent=t('hint.glLost'); });
 if (location.search.indexOf('selftest')>=0){
   const st=HINA.selfTest();
   const box=$('selftestBox'); box.style.display='block';

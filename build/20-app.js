@@ -793,7 +793,7 @@ function applyLang(){
   $('btnLang').textContent = lang==='ja'?'EN':'JA';
   $('btnMode').textContent = mode==='easy'?t('mode.easy'):t('mode.detail');
   $('btnMode').setAttribute('aria-pressed', String(mode==='detail'));
-  $('hint').textContent = t('hint.drag');
+  $('hint').textContent = GLOK ? t('hint.drag') : t('hint.noGL');
   cv.setAttribute('aria-label', t('a11y.canvas'));
   $('stage').setAttribute('aria-label', t('a11y.stage'));
   $('panel').setAttribute('aria-label', t('a11y.panel'));
@@ -828,9 +828,8 @@ $('tabs').addEventListener('keydown',e=>{
   activeTab=TABS[ni]; renderTabs(); renderBody(); $('tab-'+TABS[ni]).focus();
 });
 camDist=build.dims.H*1.85; camTarget=[0,build.dims.H*0.55,0];
-if (!GLOK) $('hint').textContent='WebGL unavailable — preview disabled (export still works)';
 cv.addEventListener('webglcontextlost', e=>{ e.preventDefault();
-  $('hint').textContent='WebGL context lost — reload to restore preview'; });
+  $('hint').textContent=t('hint.glLost'); });
 if (location.search.indexOf('selftest')>=0){
   const st=HINA.selfTest();
   const box=$('selftestBox'); box.style.display='block';
