@@ -628,7 +628,10 @@ function renderBody(){
     if (mode==='easy' && s.adv) continue;
     bd.append(paramRow(k));
   }
-  if (activeTab==='phys') bd.append(el('div',{class:'note'}, t('note.quest')));
+  if (activeTab==='phys'){
+    const hasS = build && build.springs && build.springs.length > 0;
+    bd.append(el('div',{class:'note'}, t(hasS ? 'note.quest' : 'note.quest.nospring')));
+  }
 }
 
 let statEls={};

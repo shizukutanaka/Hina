@@ -185,6 +185,8 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   ok(H.I18N.ja['rank.limit'] && H.I18N.en['rank.limit'], 'limiting-factor label present');
   ok(H.I18N.ja['err.loadFailed'] && H.I18N.en['err.loadFailed'], 'err.loadFailed key in both languages');
   ok(H.I18N.ja['err.buildFailed'] && H.I18N.en['err.buildFailed'], 'err.buildFailed key in both languages');
+  ok(H.I18N.ja['note.quest.nospring'] && H.I18N.en['note.quest.nospring'], 'note.quest.nospring key in both languages (for hairstyles without spring bones)');
+  ok(html.includes("'note.quest.nospring'") && html.includes("'note.quest'") && /hasS.*note\.quest/.test(html), 'phys tab shows dynamic spring note based on actual spring count');
   // every license option has a user-readable localized label (not raw technical id)
   const licenseOpts = ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'];
   ok(licenseOpts.every(l => H.I18N.ja['license.'+l] && H.I18N.en['license.'+l]), 'all license options have ja+en labels');
