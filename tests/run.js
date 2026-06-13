@@ -78,6 +78,8 @@ ok(html.includes('<noscript>'), 'noscript fallback message present for JS-disabl
 ok(H.I18N.ja['a11y.about.btn'] && H.I18N.en['a11y.about.btn'], 'About button aria-label i18n in both languages');
 ok(html.includes("$('btnAbout').setAttribute('aria-label'"), 'About button aria-label set dynamically in applyLang()');
 ok(html.includes("_rmMQ.addEventListener('change'"), 'prefers-reduced-motion MediaQuery change event wired for live updates');
+ok(html.includes('name="theme-color"') && html.includes('#0F1216'), 'theme-color meta present for mobile browser theming');
+ok(html.includes('apple-mobile-web-app-capable'), 'apple-mobile-web-app-capable meta for iOS home screen');
 ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button label i18n in both languages');
 
 /* ---- math sanity ---- */
