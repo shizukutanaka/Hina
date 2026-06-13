@@ -18,6 +18,7 @@
 - **`rebuild()` エラーバウンダリ追加**: `buildAvatar()` が例外を投げた場合 `build` が null のまま機能停止していた。try/catch を追加し `err.buildFailed` i18n キーで alert 通知。テスト担保。
 - **メタ入力欄に placeholder ヒント追加**: タイトル・作者フィールドに placeholder（`out.title.ph`・`out.author.ph`、ja/en）を追加。タイトル未入力のままエクスポートすると全ファイルが `hina.vrm` になる問題への入力促進。
 - **i18n `note.upload` 死エントリ除去**: 両言語（ja/en）の i18n オブジェクトに、修正済みの正エントリとは別に旧エントリ（`docs/UPLOAD_GUIDE.md` を参照するテキスト）が重複キーとして残存していた。JavaScript はオブジェクトリテラルの重複キーで後勝ちのため動作上の影響はなかったが、混乱を招くコードスメルだったため削除。
+- **VRM meta 入力欄に maxlength="256" 追加**: VRM ライターの `str()` が `.slice(0,256)` でサニタイズするため、ブラウザ側でも256文字上限を `maxlength` で明示。無音切り詰めを防ぎ、ユーザーが意図せず長い文字列を送信することを防止。title・author・contact・reference の全フィールドに適用。
 - **ガチャシード再入力フォーム**: プリセットタブのガチャセクションにシード番号入力欄を追加。数値を入力してEnterキーを押すと同じシードでアバターを再生成でき、友人とシード番号を共有することで同一アバターを再現できる。gacha.seed.ph プレースホルダーi18nキー（ja/en）追加。ガチャボタンと再入力を `runGacha(seed)` に統一。
 - **WCAG ランドマーク構造強化**: `<section id="stage">` と `<aside id="panel">` に `aria-label`（`a11y.stage`・`a11y.panel` i18n、ja/en）を追加。名前なし `<section>` はARIA ランドマークにならないため、スクリーンリーダーのランドマーク移動（NVDA: R / VoiceOver: VO+Cmd+L）で「3Dプレビューエリア」「アバター設定パネル」として到達可能になった。言語切替時は `applyLang()` で動的更新。
 - **WCAG 1.3.1 完全対応 — `paramRow` の全入力にラベル関連付け追加**: `paramRow()` が生成するすべての入力要素（range・enum select・checkbox・color picker）に `id='pr-{param}'` を付与し、対応する `<label>` の `for` 属性を設定。ラベルをクリックするとフォーカスが対応するスライダー/セレクト/チェックボックス/カラーピッカーに移動するようになった（Round 11 の Exportタブ対応と合わせて全タブで充足）。

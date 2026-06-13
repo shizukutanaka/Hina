@@ -69,6 +69,7 @@ ok(html.includes('activePresetId'), 'active preset selection state tracked');
 ok(html.includes('lastGachaSeed'), 'gacha seed tracked for reproducibility');
 ok(H.I18N.ja['gacha.seed.ph'] && H.I18N.en['gacha.seed.ph'], 'gacha seed placeholder i18n in both languages');
 ok(html.includes('runGacha'), 'gacha runs through shared runGacha() for seed reuse');
+ok(html.includes("maxlength:'256'"), 'VRM meta text inputs have maxlength=256 matching writer truncation');
 
 /* ---- math sanity ---- */
 {
