@@ -25,7 +25,7 @@ function loadState(){
     if (j.meta && typeof j.meta==='object') Object.assign(meta, j.meta);
     if (j.lang==='en' || j.lang==='ja') lang = j.lang;
     if (j.mode==='detail') mode = 'detail';
-    if (j.activePresetId) activePresetId = j.activePresetId;
+    if (j.activePresetId && HINA.PRESETS.some(p=>p.id===j.activePresetId)) activePresetId = j.activePresetId;
     if (Number.isFinite(j.lastGachaSeed)) lastGachaSeed = j.lastGachaSeed;
   }catch(e){}
 }

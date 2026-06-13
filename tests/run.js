@@ -98,6 +98,7 @@ ok(/document\.title\s*=.*fnameStem/.test(html), 'document.title updated in rebui
 ok(html.includes('visibilitychange') && html.includes('_rafPaused'), 'rAF loop pauses on page visibility hidden (saves CPU/battery on mobile)');
 ok(/n>=0\)\s*runGacha/.test(html), 'gacha seed input accepts seed 0 (n>=0 guard in seed handler)');
 ok(html.includes('webglcontextrestored') && html.includes('location.reload'), 'webglcontextrestored triggers reload to re-init GL resources');
+ok(html.includes('HINA.PRESETS.some') && html.includes("j.activePresetId"), 'activePresetId validated against PRESETS list on load to guard against stale IDs');
 {
   const r0 = H.randomParams(0);
   ok(r0 && typeof r0.height === 'number', 'randomParams(0) — seed 0 produces valid params');
