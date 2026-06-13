@@ -100,6 +100,7 @@ ok(/n>=0\)\s*runGacha/.test(html), 'gacha seed input accepts seed 0 (n>=0 guard 
 ok(html.includes('webglcontextrestored') && html.includes('location.reload'), 'webglcontextrestored triggers reload to re-init GL resources');
 ok(html.includes('HINA.PRESETS.some') && html.includes("j.activePresetId"), 'activePresetId validated against PRESETS list on load to guard against stale IDs');
 ok(/camDist.*camDist.*H.*prevH/.test(html), 'camDist scales proportionally with avatar height in uploadGeometry()');
+ok(/if \(!drag\)\{\s*gazeX=M\.clamp/.test(html), 'gaze update skipped during drag and M.clamp prevents eye over-rotation outside canvas');
 {
   const r0 = H.randomParams(0);
   ok(r0 && typeof r0.height === 'number', 'randomParams(0) — seed 0 produces valid params');

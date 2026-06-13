@@ -466,9 +466,11 @@ function renderFrame(time){
   });
   cv.addEventListener('pointermove',e=>{
     const r=cv.getBoundingClientRect();
-    gazeX=((e.clientX-r.left)/r.width-0.5)*2;
-    gazeY=((e.clientY-r.top)/r.height-0.5)*2;
-    if (!drag) return;
+    if (!drag){
+      gazeX=M.clamp(((e.clientX-r.left)/r.width-0.5)*2, -1, 1);
+      gazeY=M.clamp(((e.clientY-r.top)/r.height-0.5)*2, -1, 1);
+      return;
+    }
     if (ptrs.size===2){
       const old=[...ptrs.values()];
       const d0=Math.hypot(old[0][0]-old[1][0], old[0][1]-old[1][1]);
