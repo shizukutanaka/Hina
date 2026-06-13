@@ -477,6 +477,21 @@ function renderFrame(time){
     camDist=M.clamp(camDist*(1+e.deltaY*0.0012), 0.6, 8); },{passive:false});
   cv.addEventListener('dblclick',()=>{ camYaw=Math.PI; camPitch=0.10;
     camDist=(build?build.dims.H:1.45)*1.85; });
+  // keyboard camera control (WCAG 2.1.1 — preview must be operable without a pointer)
+  cv.addEventListener('keydown',e=>{
+    const rot=0.18, zoom=0.12; let used=true;
+    switch(e.key){
+      case 'ArrowLeft':  camYaw += rot; break;
+      case 'ArrowRight': camYaw -= rot; break;
+      case 'ArrowUp':    camPitch=M.clamp(camPitch+rot, -0.5, 1.25); break;
+      case 'ArrowDown':  camPitch=M.clamp(camPitch-rot, -0.5, 1.25); break;
+      case '+': case '=': camDist=M.clamp(camDist*(1-zoom), 0.6, 8); break;
+      case '-': case '_': camDist=M.clamp(camDist*(1+zoom), 0.6, 8); break;
+      case 'Home': case '0': camYaw=Math.PI; camPitch=0.10; camDist=(build?build.dims.H:1.45)*1.85; break;
+      default: used=false;
+    }
+    if (used) e.preventDefault();
+  });
 })();
 
 /* ---------- UI ---------- */
@@ -723,6 +738,7 @@ function applyLang(){
   $('btnMode').textContent = mode==='easy'?t('mode.easy'):t('mode.detail');
   $('btnMode').setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = t('hint.drag');
+  cv.setAttribute('aria-label', t('a11y.canvas'));
   $('aboutTxt').textContent = t('about');
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); updateStats();

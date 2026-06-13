@@ -28,6 +28,10 @@ ok(!/<link[^>]*\shref=/.test(html), 'no external <link href>');
 ok(!/\bfetch\s*\(\s*['"]http/.test(html), 'no external fetch');
 ok((html.match(/<canvas/g) || []).length === 1, 'single canvas');
 ok(html.includes("'guide.s1'") && html.indexOf("guide.s1") !== html.lastIndexOf("guide.s1"), 'in-app upload guide wired (i18n + UI)');
+// WCAG 2.1.1: the 3D preview must be keyboard-operable (focusable + key handler + aria-label)
+ok(/<canvas[^>]*\btabindex=/.test(html), 'canvas is keyboard-focusable (tabindex)');
+ok(/addEventListener\(['"]keydown['"]/.test(html), 'keyboard camera handler wired');
+ok(html.includes("'a11y.canvas'"), 'canvas aria-label i18n key present');
 
 /* ---- math sanity ---- */
 {

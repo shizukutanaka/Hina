@@ -97,7 +97,7 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
 </header>
 <main>
   <section id="stage">
-    <canvas id="gl"></canvas>
+    <canvas id="gl" tabindex="0" role="img"></canvas>
     <div id="rankWrap">
       <div class="rankBadge"><span class="lbl">PC</span><span class="val" id="rankPC">—</span></div>
       <div class="rankBadge"><span class="lbl">QUEST</span><span class="val" id="rankQ">—</span></div>
@@ -298,7 +298,8 @@ const I18N = {
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物チェーン','st.tex':'テクスチャ推定',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
-    'hint.drag':'ドラッグ: 回転 / ホイール: ズーム / ダブルクリック: リセット',
+    'hint.drag':'ドラッグ/矢印キー: 回転 / ホイール・+−: ズーム / ダブルクリック・Home: リセット',
+    'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、＋／−でズーム、Homeで初期位置に戻ります。',
     'note.upload':'VRChatへは Unity + VRM Converter for VRChat 経由でアップロード。手順は docs/UPLOAD_GUIDE.md 参照。',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。',
@@ -324,7 +325,8 @@ const I18N = {
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring chains','st.tex':'Texture est.',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
-    'hint.drag':'Drag: rotate / Wheel: zoom / Double-click: reset',
+    'hint.drag':'Drag/Arrows: rotate / Wheel · +−: zoom / Double-click · Home: reset',
+    'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, +/− zoom, Home resets the view.',
     'note.upload':'Upload to VRChat via Unity + VRM Converter for VRChat. See docs/UPLOAD_GUIDE.md.',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.',
@@ -1811,6 +1813,21 @@ function renderFrame(time){
     camDist=M.clamp(camDist*(1+e.deltaY*0.0012), 0.6, 8); },{passive:false});
   cv.addEventListener('dblclick',()=>{ camYaw=Math.PI; camPitch=0.10;
     camDist=(build?build.dims.H:1.45)*1.85; });
+  // keyboard camera control (WCAG 2.1.1 — preview must be operable without a pointer)
+  cv.addEventListener('keydown',e=>{
+    const rot=0.18, zoom=0.12; let used=true;
+    switch(e.key){
+      case 'ArrowLeft':  camYaw += rot; break;
+      case 'ArrowRight': camYaw -= rot; break;
+      case 'ArrowUp':    camPitch=M.clamp(camPitch+rot, -0.5, 1.25); break;
+      case 'ArrowDown':  camPitch=M.clamp(camPitch-rot, -0.5, 1.25); break;
+      case '+': case '=': camDist=M.clamp(camDist*(1-zoom), 0.6, 8); break;
+      case '-': case '_': camDist=M.clamp(camDist*(1+zoom), 0.6, 8); break;
+      case 'Home': case '0': camYaw=Math.PI; camPitch=0.10; camDist=(build?build.dims.H:1.45)*1.85; break;
+      default: used=false;
+    }
+    if (used) e.preventDefault();
+  });
 })();
 
 /* ---------- UI ---------- */
@@ -2057,6 +2074,7 @@ function applyLang(){
   $('btnMode').textContent = mode==='easy'?t('mode.easy'):t('mode.detail');
   $('btnMode').setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = t('hint.drag');
+  cv.setAttribute('aria-label', t('a11y.canvas'));
   $('aboutTxt').textContent = t('about');
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); updateStats();
