@@ -858,6 +858,7 @@ $('tabs').addEventListener('keydown',e=>{
 camDist=build.dims.H*1.85; camTarget=[0,build.dims.H*0.55,0];
 cv.addEventListener('webglcontextlost', e=>{ e.preventDefault();
   $('hint').textContent=t('hint.glLost'); });
+cv.addEventListener('webglcontextrestored', ()=>{ location.reload(); });
 if (location.search.indexOf('selftest')>=0){
   const st=HINA.selfTest();
   const box=$('selftestBox'); box.style.display='block';

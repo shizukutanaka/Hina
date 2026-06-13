@@ -97,6 +97,7 @@ ok(html.includes("dataTransfer.types.includes('Files')") && html.includes("dataT
 ok(/document\.title\s*=.*fnameStem/.test(html), 'document.title updated in rebuild() so browser tab reflects loaded title immediately');
 ok(html.includes('visibilitychange') && html.includes('_rafPaused'), 'rAF loop pauses on page visibility hidden (saves CPU/battery on mobile)');
 ok(/n>=0\)\s*runGacha/.test(html), 'gacha seed input accepts seed 0 (n>=0 guard in seed handler)');
+ok(html.includes('webglcontextrestored') && html.includes('location.reload'), 'webglcontextrestored triggers reload to re-init GL resources');
 {
   const r0 = H.randomParams(0);
   ok(r0 && typeof r0.height === 'number', 'randomParams(0) — seed 0 produces valid params');
