@@ -1626,6 +1626,9 @@ function uploadGeometry(){
     sh.push(Math.cos(a)*H*0.14, 0.0015, Math.sin(a)*H*0.11); }
   gl.bindBuffer(gl.ARRAY_BUFFER, bufShadow);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sh), gl.STATIC_DRAW);
+  // scale camDist proportionally so framing is consistent across avatar heights
+  const prevH = camTarget[1] / 0.55;
+  if (prevH > 0 && Math.abs(prevH - H) > 0.001) camDist = M.clamp(camDist * H / prevH, 0.6, 8);
   camTarget=[0, H*0.55, 0];
 }
 
