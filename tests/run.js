@@ -58,6 +58,7 @@ ok(html.includes("'for':id") || html.includes('"for":id'), 'Export tab labels ha
 ok(html.includes("'meta-title'") || html.includes('"meta-title"'), 'title input has id for label association');
 ok(H.I18N.ja['hint.ctrlS'] && H.I18N.en['hint.ctrlS'], 'Ctrl+S hint label in both languages');
 ok(html.includes('document.title'), 'document.title updated dynamically with avatar name');
+ok(html.includes("object-src 'none'") && html.includes("base-uri 'none'"), 'CSP meta blocks object/base injection');
 ok(html.includes('fnameStem'), 'fnameStem() used for export filename');
 ok(html.includes("activePresetId||'custom'"), 'filename fallback uses preset ID');
 ok(html.includes('activePresetId'), 'active preset selection state tracked');
