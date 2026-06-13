@@ -191,3 +191,16 @@ hina/
 | メタ | 最小コスト最大是正は？ | boot 部に7行追加。テスト206→207 |
 
 結論2往復で収束。Ctrl/Cmd+S で即時VRM書き出し。パワーユーザーのワークフローが大幅に改善。
+
+## ソクラテス問答記録（2026-06-13・WCAG 1.3.1 form 要素ラベル関連付け）
+
+| 種別 | 問い | 結論 → 対応 |
+|------|------|------------|
+| 明確化 | WCAG 1.3.1「情報と関係性」における form 要素の要件は？ | `<input>`/`<select>` は対応する `<label>` に `for` 属性でプログラム的に関連付けるか、`aria-label`/`aria-labelledby` が必要 |
+| 前提検証 | Exportタブの `<label>` 要素は入力欄と関連付けられているか？ | 否。`txt()` / `selRow()` 両ヘルパーで label は `for` なし、input/select は `id` なし。ラベルクリックでフォーカス遷移しない |
+| 根拠 | `paramRow()` の label はどうか？ | 全入力に `aria-label` が付与されているため SR は読める。ただしラベルクリックでフォーカスは移らない |
+| 視点転換 | Exportタブのみ優先的に修正する理由は？ | `paramRow` は `aria-label` で SR 対応済み。Export の `txt()` / `selRow()` は `aria-label` も `for` もない → 即時修正が必要 |
+| 帰結 | 最小の修正は？ | `txt()`: input に `id='meta-'+mk`、label に `for=id`。`selRow()`: select に `id='sel-'+mk`、label に `for=id`。title 行にも `id='meta-title'` を追加 |
+| メタ | コスト/効果 | 5行変更・ゼロリスク・WCAG 1.3.1 達成・テスト207→209 |
+
+結論2往復で収束。Exportタブの全 form 要素でラベルのプログラム的関連付けを確立した。

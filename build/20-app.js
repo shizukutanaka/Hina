@@ -616,14 +616,14 @@ function renderBody(){
 let statEls={};
 function renderOut(bd){
   bd.append(el('div',{class:'sect'}, t('out.meta')));
-  const txt=(key,mk,ph)=>{ bd.append(el('div',{class:'row'},
-    el('label',{},t(key)),
-    el('input',{type:'text', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
+  const txt=(key,mk,ph)=>{ const id='meta-'+mk; bd.append(el('div',{class:'row'},
+    el('label',{'for':id},t(key)),
+    el('input',{id, type:'text', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
   const fnPrev=el('div',{class:'limit', id:'fnPreview'});
   const updateFnPrev=()=>{ fnPrev.textContent=t('out.filename')+': '+fnameStem()+'.vrm'; };
   bd.append(el('div',{class:'row'},
-    el('label',{},t('out.title')),
-    el('input',{type:'text', value:meta.title||'', placeholder:t('out.title.ph'),
+    el('label',{'for':'meta-title'},t('out.title')),
+    el('input',{id:'meta-title', type:'text', value:meta.title||'', placeholder:t('out.title.ph'),
       oninput:e=>{ meta.title=e.target.value; saveState(); updateFnPrev(); }})));
   updateFnPrev();
   bd.append(fnPrev);
@@ -631,10 +631,11 @@ function renderOut(bd){
   txt('out.contact','contact', t('out.contact.ph'));
   txt('out.reference','reference', t('out.reference.ph'));
   const selRow=(key,mk,opts,tp)=>{
-    const sel=el('select',{onchange:e=>{meta[mk]=e.target.value; saveState();}});
+    const id='sel-'+mk;
+    const sel=el('select',{id, onchange:e=>{meta[mk]=e.target.value; saveState();}});
     for(const o of opts) sel.append(el('option',{value:o, ...(meta[mk]===o?{selected:''}:{})},
       tp?t(tp+'.'+o):o));
-    bd.append(el('div',{class:'row'}, el('label',{},t(key)), sel));
+    bd.append(el('div',{class:'row'}, el('label',{'for':id},t(key)), sel));
   };
   selRow('out.allowed','allowed',['OnlyAuthor','ExplicitlyLicensedPerson','Everyone'],'allowed');
   selRow('out.violent','violent',['Disallow','Allow'],'usage');
