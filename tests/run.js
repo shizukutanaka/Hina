@@ -32,6 +32,9 @@ ok(html.includes("'guide.s1'") && html.indexOf("guide.s1") !== html.lastIndexOf(
 ok(/<canvas[^>]*\btabindex=/.test(html), 'canvas is keyboard-focusable (tabindex)');
 ok(/addEventListener\(['"]keydown['"]/.test(html), 'keyboard camera handler wired');
 ok(html.includes("'a11y.canvas'"), 'canvas aria-label i18n key present');
+// WCAG 4.1.3 — status messages: a polite live region announces rank/export changes
+ok(/id="srStatus"[^>]*aria-live=/.test(html), 'live status region present with aria-live');
+ok(/announceRank\s*\(/.test(html), 'rank-change announcer wired');
 
 /* ---- math sanity ---- */
 {

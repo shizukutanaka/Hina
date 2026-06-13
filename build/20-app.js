@@ -656,6 +656,18 @@ function limitText(r){
   if (r.idx===0 || !r.worst || !r.worst.length) return '';
   return t('rank.limit')+': '+r.worst.map(c=>t('cat.'+c)).join(' / ');
 }
+// WCAG 4.1.3 — announce rank changes to assistive tech, but only when the
+// label actually changes (slider ticks must not spam the live region).
+let lastRankKey='';
+function announceRank(pc, q){
+  const sr=$('srStatus'); if (!sr) return;
+  const key=pc.rank+'|'+q.rank+'|'+lang;
+  if (key===lastRankKey) return;
+  lastRankKey=key;
+  let msg=t('a11y.rankStatus').replace('{pc}',t('rank.'+pc.rank)).replace('{q}',t('rank.'+q.rank));
+  const lim=limitText(q); if (lim) msg+=' ('+lim+')';
+  sr.textContent=msg;
+}
 function updateStats(){
   if (!build) return;
   const est=HINA.estimate(build, params);
@@ -664,6 +676,7 @@ function updateStats(){
     elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx];
     elm.title=lim; elm.parentElement.title=lim; };
   set($('rankPC'),pc); set($('rankQ'),q);
+  announceRank(pc, q);
   if (statEls.tris){
     statEls.tris.textContent=est.tris;
     statEls.bones.textContent=est.bones;
@@ -709,7 +722,10 @@ async function doExport(){
     }
     const ab = await (await canvasBlob(atlas)).arrayBuffer();
     const {bytes} = HINA.exportVRM(build, params, meta, new Uint8Array(ab), thumbBytes);
-    download(bytes, safeName(meta.title,'hina')+'.vrm', 'application/octet-stream');
+    const fname = safeName(meta.title,'hina')+'.vrm';
+    download(bytes, fname, 'application/octet-stream');
+    const sr=$('srStatus');
+    if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
   }catch(e){ alert('Export failed: '+e.message); }
 }
 function saveJson(){

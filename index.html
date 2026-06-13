@@ -78,6 +78,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog h2{font-size:16px;margin-bottom:12px}
 dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
 #selftestBox{position:absolute;top:12px;right:12px;background:rgba(15,18,22,.9);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:11px;max-width:280px;display:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media (max-width:760px){
   main{flex-direction:column}
   #stage{flex:0 0 44vh}
@@ -104,6 +105,7 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
     </div>
     <div id="hint"></div>
     <div id="selftestBox"></div>
+    <div id="srStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
   </section>
   <aside id="panel">
     <nav id="tabs" role="tablist"></nav>
@@ -300,6 +302,8 @@ const I18N = {
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'ドラッグ/矢印キー: 回転 / ホイール・+−: ズーム / ダブルクリック・Home: リセット',
     'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、＋／−でズーム、Homeで初期位置に戻ります。',
+    'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
+    'a11y.exported':'{name} を書き出しました（約{size}）',
     'note.upload':'VRChatへは Unity + VRM Converter for VRChat 経由でアップロード。手順は docs/UPLOAD_GUIDE.md 参照。',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。',
@@ -327,6 +331,8 @@ const I18N = {
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'Drag/Arrows: rotate / Wheel · +−: zoom / Double-click · Home: reset',
     'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, +/− zoom, Home resets the view.',
+    'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
+    'a11y.exported':'Exported {name} (~{size})',
     'note.upload':'Upload to VRChat via Unity + VRM Converter for VRChat. See docs/UPLOAD_GUIDE.md.',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.',
@@ -1992,6 +1998,18 @@ function limitText(r){
   if (r.idx===0 || !r.worst || !r.worst.length) return '';
   return t('rank.limit')+': '+r.worst.map(c=>t('cat.'+c)).join(' / ');
 }
+// WCAG 4.1.3 — announce rank changes to assistive tech, but only when the
+// label actually changes (slider ticks must not spam the live region).
+let lastRankKey='';
+function announceRank(pc, q){
+  const sr=$('srStatus'); if (!sr) return;
+  const key=pc.rank+'|'+q.rank+'|'+lang;
+  if (key===lastRankKey) return;
+  lastRankKey=key;
+  let msg=t('a11y.rankStatus').replace('{pc}',t('rank.'+pc.rank)).replace('{q}',t('rank.'+q.rank));
+  const lim=limitText(q); if (lim) msg+=' ('+lim+')';
+  sr.textContent=msg;
+}
 function updateStats(){
   if (!build) return;
   const est=HINA.estimate(build, params);
@@ -2000,6 +2018,7 @@ function updateStats(){
     elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx];
     elm.title=lim; elm.parentElement.title=lim; };
   set($('rankPC'),pc); set($('rankQ'),q);
+  announceRank(pc, q);
   if (statEls.tris){
     statEls.tris.textContent=est.tris;
     statEls.bones.textContent=est.bones;
@@ -2045,7 +2064,10 @@ async function doExport(){
     }
     const ab = await (await canvasBlob(atlas)).arrayBuffer();
     const {bytes} = HINA.exportVRM(build, params, meta, new Uint8Array(ab), thumbBytes);
-    download(bytes, safeName(meta.title,'hina')+'.vrm', 'application/octet-stream');
+    const fname = safeName(meta.title,'hina')+'.vrm';
+    download(bytes, fname, 'application/octet-stream');
+    const sr=$('srStatus');
+    if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
   }catch(e){ alert('Export failed: '+e.message); }
 }
 function saveJson(){
