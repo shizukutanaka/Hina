@@ -115,11 +115,11 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
     <div id="tabBody" role="tabpanel" tabindex="0"></div>
   </aside>
 </main>
-<dialog id="aboutDlg">
-  <h2>雛 (Hina) <span id="aboutVer"></span></h2>
+<dialog id="aboutDlg" aria-labelledby="aboutH2">
+  <h2 id="aboutH2">雛 (Hina) <span id="aboutVer"></span></h2>
   <p id="aboutTxt"></p>
   <p style="font-size:11px;color:var(--text-faint)">MIT License · © 2026 shizukutanaka<br>VRM is a registered trademark of the VRM Consortium.</p>
-  <button class="btn" id="aboutClose">OK</button>
+  <button class="btn" id="aboutClose"></button>
 </dialog>
 <script id="hina-core">
 /*HINA-CORE-START*/
@@ -312,7 +312,7 @@ const I18N = {
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
     'a11y.exported':'{name} を書き出しました（約{size}）',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。',
-    'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。',
+    'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
     'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
     'usage.Disallow':'不可','usage.Allow':'可',
     'license.Redistribution_Prohibited':'再配布禁止','license.CC0':'CC0（パブリックドメイン）',
@@ -350,7 +350,7 @@ const I18N = {
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
     'a11y.exported':'Exported {name} (~{size})',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.',
-    'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.',
+    'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
     'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
     'usage.Disallow':'Disallow','usage.Allow':'Allow',
     'license.Redistribution_Prohibited':'No redistribution','license.CC0':'CC0 (Public domain)',
@@ -2161,6 +2161,7 @@ function applyLang(){
   $('stage').setAttribute('aria-label', t('a11y.stage'));
   $('panel').setAttribute('aria-label', t('a11y.panel'));
   $('aboutTxt').textContent = t('about');
+  $('aboutClose').textContent = t('about.close');
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); updateStats();
 }

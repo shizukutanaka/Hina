@@ -115,10 +115,10 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
     <div id="tabBody" role="tabpanel" tabindex="0"></div>
   </aside>
 </main>
-<dialog id="aboutDlg">
-  <h2>雛 (Hina) <span id="aboutVer"></span></h2>
+<dialog id="aboutDlg" aria-labelledby="aboutH2">
+  <h2 id="aboutH2">雛 (Hina) <span id="aboutVer"></span></h2>
   <p id="aboutTxt"></p>
   <p style="font-size:11px;color:var(--text-faint)">MIT License · © 2026 shizukutanaka<br>VRM is a registered trademark of the VRM Consortium.</p>
-  <button class="btn" id="aboutClose">OK</button>
+  <button class="btn" id="aboutClose"></button>
 </dialog>
 <script id="hina-core">

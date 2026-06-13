@@ -798,6 +798,7 @@ function applyLang(){
   $('stage').setAttribute('aria-label', t('a11y.stage'));
   $('panel').setAttribute('aria-label', t('a11y.panel'));
   $('aboutTxt').textContent = t('about');
+  $('aboutClose').textContent = t('about.close');
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); updateStats();
 }
