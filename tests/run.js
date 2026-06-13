@@ -527,7 +527,7 @@ function accData(j, bin, ai){
 {
   const st = H.selfTest();
   ok(st.ok === true, 'selfTest ok');
-  ok(st.results.length >= 20 && st.results.every(r => r.ok), 'selfTest all 20+ checks pass (incl. node index validation)');
+  ok(st.results.length >= 22 && st.results.every(r => r.ok), 'selfTest all 22+ checks pass (incl. UV range and normal length validation)');
 }
 
 /* ---- summary ---- */

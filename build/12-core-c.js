@@ -367,6 +367,19 @@ function selfTest(){
     const cg=ex.json.extensions.VRM.secondaryAnimation.colliderGroups;
     return cg.every(g=>g.node>=0 && g.node<nLen);
   });
+  T('UV coordinates in [0,1]', ()=>{
+    const uv=build.geom.uv;
+    for(let i=0;i<uv.length;i++) if (uv[i]<0||uv[i]>1) return false;
+    return true;
+  });
+  T('normals are unit length', ()=>{
+    const n=build.geom.nrm;
+    for(let i=0;i<n.length;i+=3){
+      const len=Math.sqrt(n[i]*n[i]+n[i+1]*n[i+1]+n[i+2]*n[i+2]);
+      if (Math.abs(len-1)>0.01) return false;
+    }
+    return true;
+  });
   T('serialize roundtrip', ()=>{
     const d=deserialize(serialize(p,{title:'t'}));
     return !!d && d.params.height===p.height && d.params.hairStyle===p.hairStyle;
