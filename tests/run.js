@@ -60,6 +60,9 @@ ok(H.I18N.ja['hint.ctrlS'] && H.I18N.en['hint.ctrlS'], 'Ctrl+S hint label in bot
 ok(html.includes('document.title'), 'document.title updated dynamically with avatar name');
 ok(html.includes("object-src 'none'") && html.includes("base-uri 'none'"), 'CSP meta blocks object/base injection');
 ok(html.includes("const pid='pr-'+k") && html.includes("'for':pid"), 'paramRow inputs have for/id label association (WCAG 1.3.1)');
+ok(H.I18N.ja['a11y.stage'] && H.I18N.en['a11y.stage'], 'stage landmark label i18n');
+ok(H.I18N.ja['a11y.panel'] && H.I18N.en['a11y.panel'], 'panel landmark label i18n');
+ok(html.includes("$('stage').setAttribute('aria-label'"), 'section#stage has aria-label landmark');
 ok(html.includes('fnameStem'), 'fnameStem() used for export filename');
 ok(html.includes("activePresetId||'custom'"), 'filename fallback uses preset ID');
 ok(html.includes('activePresetId'), 'active preset selection state tracked');

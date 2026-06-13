@@ -306,6 +306,7 @@ const I18N = {
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'ドラッグ/矢印キー: 回転 / ホイール・+−: ズーム / ダブルクリック・Home: リセット',
     'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、＋／−でズーム、Homeで初期位置に戻ります。',
+    'a11y.stage':'3Dプレビューエリア','a11y.panel':'アバター設定パネル',
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
     'a11y.exported':'{name} を書き出しました（約{size}）',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。',
@@ -341,6 +342,7 @@ const I18N = {
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'Drag/Arrows: rotate / Wheel · +−: zoom / Double-click · Home: reset',
     'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, +/− zoom, Home resets the view.',
+    'a11y.stage':'3D preview area','a11y.panel':'Avatar settings panel',
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
     'a11y.exported':'Exported {name} (~{size})',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.',
@@ -2145,6 +2147,8 @@ function applyLang(){
   $('btnMode').setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = t('hint.drag');
   cv.setAttribute('aria-label', t('a11y.canvas'));
+  $('stage').setAttribute('aria-label', t('a11y.stage'));
+  $('panel').setAttribute('aria-label', t('a11y.panel'));
   $('aboutTxt').textContent = t('about');
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); updateStats();
