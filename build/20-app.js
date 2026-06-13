@@ -790,6 +790,7 @@ function rebuild(){
   uploadGeometry();
   initSprings();
   morphW={}; morphDirty=true;
+  document.title='雛 — '+fnameStem();
   updateStats();
   saveState();
 }
