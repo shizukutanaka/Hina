@@ -304,6 +304,7 @@ const I18N = {
     'mode.easy':'かんたん','mode.detail':'詳細',
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.filename':'ファイル名','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
+    'out.license.url':'ライセンス URL（Other 選択時）','out.license.url.ph':'例: https://example.com/license',
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物チェーン','st.tex':'テクスチャ推定',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'ドラッグ/矢印キー: 回転 / ホイール・+−: ズーム / ダブルクリック・Home: リセット',
@@ -343,6 +344,7 @@ const I18N = {
     'mode.easy':'Easy','mode.detail':'Detail',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.filename':'File name','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
+    'out.license.url':'License URL (when Other)','out.license.url.ph':'e.g. https://example.com/license',
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring chains','st.tex':'Texture est.',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'Drag/Arrows: rotate / Wheel · +−: zoom / Double-click · Home: reset',
@@ -1143,7 +1145,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
     licenseName: pick(meta.license,
       ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
       'Redistribution_Prohibited'),
-    otherLicenseUrl: '',
+    otherLicenseUrl: str(meta.licenseUrl,''),
   };
 
   const humanBones = HB.map(hb=>({bone:hb, node:nodeOf(build.humanoid[hb]), useDefaultValues:true}));
@@ -1403,7 +1405,7 @@ _rmMQ.addEventListener('change', e => { reduceMotion = e.matches; });
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
 let activePresetId = null, lastGachaSeed = null;
 let params = HINA.defaults();
-const META_DEFAULTS = {title:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited'};
+const META_DEFAULTS = {title:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
 let meta = Object.assign({}, META_DEFAULTS);
 let build = null;
 const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
@@ -2053,6 +2055,7 @@ function renderOut(bd){
   selRow('out.commercial','commercial',['Disallow','Allow'],'usage');
   selRow('out.license','license',
     ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],'license');
+  txt('out.license.url','licenseUrl', t('out.license.url.ph'));
 
   bd.append(el('div',{class:'sect'}, t('out.stats')));
   const tbl=el('table',{class:'statTable'}); statEls={};

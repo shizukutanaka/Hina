@@ -11,7 +11,7 @@ _rmMQ.addEventListener('change', e => { reduceMotion = e.matches; });
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
 let activePresetId = null, lastGachaSeed = null;
 let params = HINA.defaults();
-const META_DEFAULTS = {title:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited'};
+const META_DEFAULTS = {title:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
 let meta = Object.assign({}, META_DEFAULTS);
 let build = null;
 const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
@@ -661,6 +661,7 @@ function renderOut(bd){
   selRow('out.commercial','commercial',['Disallow','Allow'],'usage');
   selRow('out.license','license',
     ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],'license');
+  txt('out.license.url','licenseUrl', t('out.license.url.ph'));
 
   bd.append(el('div',{class:'sect'}, t('out.stats')));
   const tbl=el('table',{class:'statTable'}); statEls={};

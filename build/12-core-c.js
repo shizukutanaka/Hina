@@ -154,7 +154,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
     licenseName: pick(meta.license,
       ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
       'Redistribution_Prohibited'),
-    otherLicenseUrl: '',
+    otherLicenseUrl: str(meta.licenseUrl,''),
   };
 
   const humanBones = HB.map(hb=>({bone:hb, node:nodeOf(build.humanoid[hb]), useDefaultValues:true}));

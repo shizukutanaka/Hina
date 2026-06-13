@@ -585,3 +585,15 @@ hina/
 | 帰結 | 3つを1ラウンドで修正。selfTest 件数変化なし（既存テストの強化）。テスト252→254 | |
 
 結論2往復で収束。テクスチャ品質・selfTest 完全性・コード一貫性を同時改善した。
+
+## ソクラテス問答記録（2026-06-13・`otherLicenseUrl` フィールド追加）
+
+| 種別 | 問い | 結論 → 対応 |
+|------|------|------------|
+| 明確化 | Round 41 で UI に `Other` ライセンス選択肢を追加したが、VRM の `otherLicenseUrl` フィールドはどこで設定できるか？ | 設定できない。VRM ライターが `otherLicenseUrl: ''` をハードコード。`Other` を選ぶユーザーはカスタムライセンスの URL を指定できない |
+| 前提検証 | `meta` オブジェクトに `licenseUrl` を追加したら既存の serialize/deserialize はどう動くか？ | 追加フィールドは自動的に JSON に含まれ、`deserialize()` も `j.meta` をそのまま返すので透過的に保存・復元される |
+| 根拠 | URL フィールドは `Other` 選択時のみ表示すべきか、常時表示すべきか？ | 常時表示が実装コスト最小。`Other` 以外のライセンスでは VRM spec 上 `otherLicenseUrl` は空文字が正しく、常時表示しても混乱は少ない |
+| 視点転換 | `META_DEFAULTS` に `licenseUrl:''` を追加しないと、リセット時に旧 URL が残らないか？ | Yes。`META_DEFAULTS` に追加してリセット対象にする必要がある |
+| 帰結 | `out.license.url` 入力欄追加 + `str(meta.licenseUrl,'')` でライター連携 + `META_DEFAULTS` 更新 + i18n 4キー追加。テスト254→257 | |
+
+結論2往復で収束。`Other` ライセンス選択時にカスタム URL を指定できるようになり機能が完結した。

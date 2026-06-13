@@ -102,6 +102,15 @@ ok(html.includes('HINA.PRESETS.some') && html.includes("j.activePresetId"), 'act
 ok(/camDist.*camDist.*H.*prevH/.test(html), 'camDist scales proportionally with avatar height in uploadGeometry()');
 ok(/if \(!drag\)\{\s*gazeX=M\.clamp/.test(html), 'gaze update skipped during drag and M.clamp prevents eye over-rotation outside canvas');
 ok(H.I18N.ja['license.Other'] && H.I18N.en['license.Other'], 'license.Other i18n in both languages');
+ok(H.I18N.ja['out.license.url'] && H.I18N.en['out.license.url'], 'out.license.url label i18n in both languages');
+ok(html.includes("'licenseUrl'") && html.includes("META_DEFAULTS") && html.includes("licenseUrl:''"), 'licenseUrl in META_DEFAULTS and wired to UI');
+{
+  const png = H.b64ToBytes(H.PNG1);
+  const b0 = H.buildAvatar(H.defaults());
+  const ex = H.exportVRM(b0, H.defaults(), { license: 'Other', licenseUrl: 'https://example.com/lic' }, png);
+  ok(ex.json.extensions.VRM.meta.licenseName === 'Other' && ex.json.extensions.VRM.meta.otherLicenseUrl === 'https://example.com/lic',
+    'otherLicenseUrl passes through to VRM meta when license=Other');
+}
 ok(html.includes('CLAMP_TO_EDGE') && !html.includes('TEXTURE_WRAP_S,gl.REPEAT'), 'texture atlas uses CLAMP_TO_EDGE to prevent edge bleed (not REPEAT)');
 ok(!html.includes('HINA.M.clamp'), 'no HINA.M.clamp calls — use local M alias consistently');
 ok(html.includes("'Other'],'license'"), 'Other license option added to UI selector (matches VRM writer accepted values)');
