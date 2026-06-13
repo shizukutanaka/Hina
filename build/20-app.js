@@ -797,6 +797,7 @@ function applyLang(){
   cv.setAttribute('aria-label', t('a11y.canvas'));
   $('stage').setAttribute('aria-label', t('a11y.stage'));
   $('panel').setAttribute('aria-label', t('a11y.panel'));
+  $('btnAbout').setAttribute('aria-label', t('a11y.about.btn'));
   $('aboutTxt').textContent = t('about');
   $('aboutClose').textContent = t('about.close');
   document.documentElement.lang = lang;

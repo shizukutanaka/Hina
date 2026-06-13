@@ -75,6 +75,8 @@ ok(H.I18N.ja['hint.glLost'] && H.I18N.en['hint.glLost'], 'WebGL context-lost hin
 ok(html.includes("GLOK ? t('hint.drag') : t('hint.noGL')"), 'applyLang() uses localized hint conditionally');
 ok(html.includes('aria-labelledby="aboutH2"'), 'About dialog has aria-labelledby for accessible name');
 ok(html.includes('<noscript>'), 'noscript fallback message present for JS-disabled users');
+ok(H.I18N.ja['a11y.about.btn'] && H.I18N.en['a11y.about.btn'], 'About button aria-label i18n in both languages');
+ok(html.includes("$('btnAbout').setAttribute('aria-label'"), 'About button aria-label set dynamically in applyLang()');
 ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button label i18n in both languages');
 
 /* ---- math sanity ---- */
