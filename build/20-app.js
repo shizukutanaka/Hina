@@ -830,6 +830,19 @@ window.addEventListener('beforeunload',()=>{
   clearTimeout(_saveTimer);
   try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activePresetId, lastGachaSeed})); }catch(e){}
 });
+// Drag-and-drop JSON loading — complement the file button; 'Files' check avoids conflicts with 3D canvas drag
+document.body.addEventListener('dragover',e=>{ if (e.dataTransfer.types.includes('Files')) e.preventDefault(); });
+document.body.addEventListener('drop',e=>{
+  if (!e.dataTransfer.files.length) return;
+  e.preventDefault();
+  const f=e.dataTransfer.files[0];
+  if (!f.name.endsWith('.json') && f.type!=='application/json') { alert(t('err.loadFailed')); return; }
+  const rd=new FileReader();
+  rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
+    if (d){ params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }
+    else { alert(t('err.loadFailed')); } };
+  rd.readAsText(f);
+});
 // Roving tabindex: arrow keys navigate between tabs (ARIA tablist pattern)
 $('tabs').addEventListener('keydown',e=>{
   const idx=TABS.indexOf(activeTab), n=TABS.length; let ni=-1;
