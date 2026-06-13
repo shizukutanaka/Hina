@@ -104,6 +104,8 @@ ok(/if \(!drag\)\{\s*gazeX=M\.clamp/.test(html), 'gaze update skipped during dra
 ok(H.I18N.ja['license.Other'] && H.I18N.en['license.Other'], 'license.Other i18n in both languages');
 ok(H.I18N.ja['out.license.url'] && H.I18N.en['out.license.url'], 'out.license.url label i18n in both languages');
 ok(H.I18N.ja['out.version'] && H.I18N.en['out.version'], 'out.version label i18n in both languages');
+ok(html.includes("e.key==='?'") && html.includes('aboutDlg'), '? key opens About dialog (keyboard discoverability)');
+ok(html.includes("type:'button'") && /type:'button'[\s\S]{0,80}class:'sw'/.test(html), 'color swatch buttons have type=button (form-safe)');
 ok(html.includes("'out.version','version'") && html.includes("version:''"), 'version field in UI and META_DEFAULTS');
 ok(html.includes("'licenseUrl'") && html.includes("META_DEFAULTS") && html.includes("licenseUrl:''"), 'licenseUrl in META_DEFAULTS and wired to UI');
 {

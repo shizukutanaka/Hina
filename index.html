@@ -1971,7 +1971,7 @@ function paramRow(k){
     oninput:e=>{params[k]=e.target.value; onParam(k);}});
   const sw=el('div',{class:'swatches'});
   for(const c of HINA.PAL[s.pal])
-    sw.append(el('button',{class:'sw', style:'background:'+c, 'aria-label':label+' '+c,
+    sw.append(el('button',{type:'button', class:'sw', style:'background:'+c, 'aria-label':label+' '+c,
       onclick:()=>{params[k]=c; inp.value=c; onParam(k);}}));
   return el('div',{class:'row'}, el('label',{'for':pid},label), inp, sw);
 }
@@ -2223,9 +2223,13 @@ rebuild();
 applyLang();
 // Ctrl/Cmd+S → export VRM (muscle-memory shortcut for creative tools)
 document.addEventListener('keydown',e=>{
+  const tag=document.activeElement.tagName;
   if ((e.ctrlKey||e.metaKey) && e.key==='s' &&
-      !['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)){
+      !['INPUT','SELECT','TEXTAREA'].includes(tag)){
     e.preventDefault(); doExport();
+  }
+  if (e.key==='?' && !e.ctrlKey && !e.metaKey && !['INPUT','SELECT','TEXTAREA'].includes(tag)){
+    e.preventDefault(); $('aboutDlg').showModal();
   }
 });
 window.addEventListener('beforeunload',()=>{
