@@ -299,7 +299,7 @@ const I18N = {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
     'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。',
     'mode.easy':'かんたん','mode.detail':'詳細',
-    'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
+    'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.filename':'ファイル名','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物チェーン','st.tex':'テクスチャ推定',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
@@ -334,7 +334,7 @@ const I18N = {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
     'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.',
     'mode.easy':'Easy','mode.detail':'Detail',
-    'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
+    'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.filename':'File name','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring chains','st.tex':'Texture est.',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
@@ -1975,7 +1975,14 @@ function renderOut(bd){
   const txt=(key,mk,ph)=>{ bd.append(el('div',{class:'row'},
     el('label',{},t(key)),
     el('input',{type:'text', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
-  txt('out.title','title', t('out.title.ph'));
+  const fnPrev=el('div',{class:'limit', id:'fnPreview'});
+  const updateFnPrev=()=>{ fnPrev.textContent=t('out.filename')+': '+fnameStem()+'.vrm'; };
+  bd.append(el('div',{class:'row'},
+    el('label',{},t('out.title')),
+    el('input',{type:'text', value:meta.title||'', placeholder:t('out.title.ph'),
+      oninput:e=>{ meta.title=e.target.value; saveState(); updateFnPrev(); }})));
+  updateFnPrev();
+  bd.append(fnPrev);
   txt('out.author','author', t('out.author.ph'));
   txt('out.contact','contact', t('out.contact.ph'));
   txt('out.reference','reference', t('out.reference.ph'));
@@ -2083,6 +2090,7 @@ function download(bytes, name, type){
   setTimeout(()=>URL.revokeObjectURL(u), 8000);
 }
 function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_'); return v||fb; }
+function fnameStem(){ return safeName(meta.title, 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 async function doExport(){
   if (!build) return;
@@ -2099,7 +2107,7 @@ async function doExport(){
     }
     const ab = await (await canvasBlob(atlas)).arrayBuffer();
     const {bytes} = HINA.exportVRM(build, params, meta, new Uint8Array(ab), thumbBytes);
-    const fname = safeName(meta.title,'hina')+'.vrm';
+    const fname = fnameStem()+'.vrm';
     download(bytes, fname, 'application/octet-stream');
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
@@ -2107,7 +2115,7 @@ async function doExport(){
 }
 function saveJson(){
   download(new TextEncoder().encode(HINA.serialize(params, meta)),
-    safeName(meta.title,'hina')+'.hina.json', 'application/json');
+    fnameStem()+'.hina.json', 'application/json');
 }
 
 /* ---------- rebuild ---------- */

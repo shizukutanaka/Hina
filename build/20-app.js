@@ -619,7 +619,14 @@ function renderOut(bd){
   const txt=(key,mk,ph)=>{ bd.append(el('div',{class:'row'},
     el('label',{},t(key)),
     el('input',{type:'text', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
-  txt('out.title','title', t('out.title.ph'));
+  const fnPrev=el('div',{class:'limit', id:'fnPreview'});
+  const updateFnPrev=()=>{ fnPrev.textContent=t('out.filename')+': '+fnameStem()+'.vrm'; };
+  bd.append(el('div',{class:'row'},
+    el('label',{},t('out.title')),
+    el('input',{type:'text', value:meta.title||'', placeholder:t('out.title.ph'),
+      oninput:e=>{ meta.title=e.target.value; saveState(); updateFnPrev(); }})));
+  updateFnPrev();
+  bd.append(fnPrev);
   txt('out.author','author', t('out.author.ph'));
   txt('out.contact','contact', t('out.contact.ph'));
   txt('out.reference','reference', t('out.reference.ph'));
@@ -727,6 +734,7 @@ function download(bytes, name, type){
   setTimeout(()=>URL.revokeObjectURL(u), 8000);
 }
 function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_'); return v||fb; }
+function fnameStem(){ return safeName(meta.title, 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 async function doExport(){
   if (!build) return;
@@ -743,7 +751,7 @@ async function doExport(){
     }
     const ab = await (await canvasBlob(atlas)).arrayBuffer();
     const {bytes} = HINA.exportVRM(build, params, meta, new Uint8Array(ab), thumbBytes);
-    const fname = safeName(meta.title,'hina')+'.vrm';
+    const fname = fnameStem()+'.vrm';
     download(bytes, fname, 'application/octet-stream');
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
@@ -751,7 +759,7 @@ async function doExport(){
 }
 function saveJson(){
   download(new TextEncoder().encode(HINA.serialize(params, meta)),
-    safeName(meta.title,'hina')+'.hina.json', 'application/json');
+    fnameStem()+'.hina.json', 'application/json');
 }
 
 /* ---------- rebuild ---------- */
