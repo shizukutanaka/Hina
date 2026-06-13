@@ -1987,7 +1987,7 @@ function renderBody(){
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'),
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
-      onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>0) runGacha(n); }});
+      onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>=0) runGacha(n); }});
     seedRow.append(el('span',{class:'limit'},t('gacha.seed')), seedIn);
     gDiv.append(seedRow);
     bd.append(grid, gDiv);
