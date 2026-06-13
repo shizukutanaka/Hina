@@ -298,7 +298,7 @@ function randomParams(seed){
 const I18N = {
   ja: {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
-    'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','hint.ctrlS':'Ctrl+S でいつでも書き出し',
+    'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','hint.ctrlS':'Ctrl+S でいつでも書き出し',
     'mode.easy':'かんたん','mode.detail':'詳細',
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.filename':'ファイル名','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
@@ -334,7 +334,7 @@ const I18N = {
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','hint.ctrlS':'Tip: Ctrl+S to export anytime',
+    'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','hint.ctrlS':'Tip: Ctrl+S to export anytime',
     'mode.easy':'Easy','mode.detail':'Detail',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.filename':'File name','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
@@ -1955,11 +1955,18 @@ function renderBody(){
         el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en), cols));
     }
     const gDiv=el('div',{style:'margin-top:14px'});
-    gDiv.append(el('button',{class:'btn wide', onclick:()=>{
-      lastGachaSeed=(Math.random()*1e9|0); params=HINA.randomParams(lastGachaSeed);
-      activePresetId=null; rebuild(); renderBody(); }}, t('btn.gacha')));
-    if (lastGachaSeed!==null)
-      gDiv.append(el('div',{class:'gacha-seed'}, t('gacha.seed')+lastGachaSeed));
+    const runGacha=seed=>{
+      lastGachaSeed=seed; params=HINA.randomParams(seed);
+      activePresetId=null; rebuild(); renderBody();
+    };
+    gDiv.append(el('button',{class:'btn wide', onclick:()=>runGacha((Math.random()*1e9|0))}, t('btn.gacha')));
+    const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
+    const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
+      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'),
+      ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
+      onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>0) runGacha(n); }});
+    seedRow.append(el('span',{class:'limit'},t('gacha.seed')), seedIn);
+    gDiv.append(seedRow);
     bd.append(grid, gDiv);
     return;
   }

@@ -596,11 +596,18 @@ function renderBody(){
         el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en), cols));
     }
     const gDiv=el('div',{style:'margin-top:14px'});
-    gDiv.append(el('button',{class:'btn wide', onclick:()=>{
-      lastGachaSeed=(Math.random()*1e9|0); params=HINA.randomParams(lastGachaSeed);
-      activePresetId=null; rebuild(); renderBody(); }}, t('btn.gacha')));
-    if (lastGachaSeed!==null)
-      gDiv.append(el('div',{class:'gacha-seed'}, t('gacha.seed')+lastGachaSeed));
+    const runGacha=seed=>{
+      lastGachaSeed=seed; params=HINA.randomParams(seed);
+      activePresetId=null; rebuild(); renderBody();
+    };
+    gDiv.append(el('button',{class:'btn wide', onclick:()=>runGacha((Math.random()*1e9|0))}, t('btn.gacha')));
+    const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
+    const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
+      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'),
+      ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
+      onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>0) runGacha(n); }});
+    seedRow.append(el('span',{class:'limit'},t('gacha.seed')), seedIn);
+    gDiv.append(seedRow);
     bd.append(grid, gDiv);
     return;
   }
