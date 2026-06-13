@@ -18,6 +18,7 @@
 - **`rebuild()` エラーバウンダリ追加**: `buildAvatar()` が例外を投げた場合 `build` が null のまま機能停止していた。try/catch を追加し `err.buildFailed` i18n キーで alert 通知。テスト担保。
 - **メタ入力欄に placeholder ヒント追加**: タイトル・作者フィールドに placeholder（`out.title.ph`・`out.author.ph`、ja/en）を追加。タイトル未入力のままエクスポートすると全ファイルが `hina.vrm` になる問題への入力促進。
 - **i18n `note.upload` 死エントリ除去**: 両言語（ja/en）の i18n オブジェクトに、修正済みの正エントリとは別に旧エントリ（`docs/UPLOAD_GUIDE.md` を参照するテキスト）が重複キーとして残存していた。JavaScript はオブジェクトリテラルの重複キーで後勝ちのため動作上の影響はなかったが、混乱を招くコードスメルだったため削除。
+- **`<noscript>` フォールバック追加**: JavaScript 無効時に空白ページを表示する代わりに、日英両言語で「JavaScript が必要です」と案内するメッセージを `<body>` 開始直後に追加。既存 CSS 変数（`--bg` / `--text` / `--text-dim`）を使用してデザインを統一。
 - **selfTest 強化 — bone/node インデックス整合性検証追加**: selfTest() に (1)ヒューマノイドボーンの全 node インデックスが `nodes[]` 範囲内か (2)SpringBone colliderGroup の node インデックスが範囲内か、の2件を追加（18件→20件）。無効な node 参照による UniVRM 読み込み失敗を早期発見できる。
 - **About ダイアログのアクセシビリティ強化**: `<dialog>` に `aria-labelledby="aboutH2"`、`<h2>` に `id="aboutH2"` を追加。スクリーンリーダーが「雛 (Hina) v0.1.0 ダイアログ」とタイトル付きで読み上げるようになった。閉じるボタンのテキストを `OK` から `about.close` i18n キー（ja: 「閉じる」/ en: 「Close」）に変更し言語切替に対応。
 - **WebGL エラーメッセージの i18n 対応**: WebGL 使用不可時（`hint.noGL`）とコンテキスト消失時（`hint.glLost`）のヒントをハードコード英語から i18n キー（ja/en）に変更。`applyLang()` が言語切替時に WebGL 状態を確認して適切なメッセージを表示するよう修正（以前は無条件で `hint.drag` を設定し WebGL エラーメッセージを上書きしていた）。
