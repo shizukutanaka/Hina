@@ -364,8 +364,10 @@ function selfTest(){
   T('spring bone node indices in range', ()=>{
     if (!ex.json.extensions.VRM.secondaryAnimation.boneGroups.length) return true;
     const nLen=ex.json.nodes.length;
+    const bg=ex.json.extensions.VRM.secondaryAnimation.boneGroups;
     const cg=ex.json.extensions.VRM.secondaryAnimation.colliderGroups;
-    return cg.every(g=>g.node>=0 && g.node<nLen);
+    return cg.every(g=>g.node>=0 && g.node<nLen) &&
+           bg.every(g=>g.bones.every(n=>n>=0 && n<nLen));
   });
   T('UV coordinates in [0,1]', ()=>{
     const uv=build.geom.uv;

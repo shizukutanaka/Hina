@@ -102,6 +102,8 @@ ok(html.includes('HINA.PRESETS.some') && html.includes("j.activePresetId"), 'act
 ok(/camDist.*camDist.*H.*prevH/.test(html), 'camDist scales proportionally with avatar height in uploadGeometry()');
 ok(/if \(!drag\)\{\s*gazeX=M\.clamp/.test(html), 'gaze update skipped during drag and M.clamp prevents eye over-rotation outside canvas');
 ok(H.I18N.ja['license.Other'] && H.I18N.en['license.Other'], 'license.Other i18n in both languages');
+ok(html.includes('CLAMP_TO_EDGE') && !html.includes('TEXTURE_WRAP_S,gl.REPEAT'), 'texture atlas uses CLAMP_TO_EDGE to prevent edge bleed (not REPEAT)');
+ok(!html.includes('HINA.M.clamp'), 'no HINA.M.clamp calls — use local M alias consistently');
 ok(html.includes("'Other'],'license'"), 'Other license option added to UI selector (matches VRM writer accepted values)');
 {
   const r0 = H.randomParams(0);

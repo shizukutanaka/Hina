@@ -56,6 +56,9 @@
 - **WebGL コンテキスト回復時の自動リロード**: `webglcontextlost` の `preventDefault()` でコンテキスト回復を許可していたが、`webglcontextrestored` ハンドラがなかったためリソースが無効のまま停止する問題を修正。回復イベントで `location.reload()` を実行し、localStorage から状態を復元しながら完全再初期化。テスト246→247で担保。
 - **`activePresetId` の復元時に有効性を検証**: localStorage から復元した `activePresetId` が廃止されたプリセット ID（バージョン間の変更等）の場合、`hina_obsolete.vrm` のような不正なファイル名が生成されていた。`HINA.PRESETS.some(p=>p.id===j.activePresetId)` で存在確認してから復元するように修正。テスト247→248で担保。
 - **カメラ距離を身長変更に比例追従**: プリセット切替・ガチャ等で身長が変わっても `camDist` が初期値のまま固定され、低身長アバターが遠く見えすぎる問題を修正。`uploadGeometry()` 内で `prevH`（旧身長）と `H`（新身長）の比率で `camDist` を比例スケーリング。ユーザーが手動ズームした場合もその比率を維持。テスト248→249で担保。
+- **テクスチャラップモードを `REPEAT` → `CLAMP_TO_EDGE` に変更**: `uploadTexture()` が `gl.REPEAT` を使用していたため、バイリニアフィルタリングによりテクスチャアトラスの境界ピクセルが対辺から色を混ぜる「エッジブリード」が発生しえた。UV 座標は [0,1] 内（selfTest 検証済み）なので `CLAMP_TO_EDGE` が正しい設定。テスト担保。
+- **selfTest「springボーンノードインデックス範囲」チェックの完全化**: テスト名が「spring bone node indices in range」なのに `colliderGroups` の `node` しか検証せず、`boneGroups[0].bones`（スプリングボーンルートのノードインデックス配列）が未チェックだった。両方を検証するよう拡張。selfTest の件数変化なし（既存テストの強化）。
+- **`HINA.M.clamp` → `M.clamp`（コード一貫性）**: `poseAndSkin()` のばね物理部分で `HINA.M.clamp` を使用していたが、ファイル冒頭で `const M = HINA.M` を宣言済みのため `M.clamp` が正しい表記。テスト担保。
 - **ライセンス選択に `Other`（その他）を追加**: Export タブのライセンスドロップダウンから `Other` を選択できなかった（VRM ライターは `'Other'` を有効値として受理するにもかかわらず UI から設定不能）。`Other` オプションと `license.Other` i18n キー（ja: 「その他」/ en: 「Other」）を追加し、両者の整合を実現。テスト250→252で担保。
 - **カメラドラッグ中の視線更新を停止・視線角度をクランプ**: `pointermove` ハンドラがポインターキャプチャ中（ドラッグ=カメラ回転中）も `gazeX`/`gazeY` を更新し続けていた。(1) カメラ回転中にアバターの目がカーソルを追って不自然に動く (2) キャンバス外に大きくドラッグすると `gazeX/gazeY` が [-1,1] を大きく超え目が極端な方向を向く問題を修正。ドラッグ中はガチャ更新をスキップ（`if (!drag){...return;}`）し、更新時は `M.clamp(..., -1, 1)` でクランプ。テスト249→250で担保。
 

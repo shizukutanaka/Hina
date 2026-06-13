@@ -197,8 +197,8 @@ function uploadTexture(){
   gl.generateMipmap(gl.TEXTURE_2D);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
 }
 
 /* skinning + animation state */
@@ -304,7 +304,7 @@ function poseAndSkin(time){
       const anchor = M.mApply(worldMats[root.parent],
         M.sub(ch.bind[0], build.bones[root.parent].w));
       ch.pts[0] = anchor;
-      const drag = HINA.M.clamp(params.hairDrag,0,1)*0.10;
+      const drag = M.clamp(params.hairDrag,0,1)*0.10;
       const stiff = params.hairStiff*0.16;
       for(let i=1;i<ch.pts.length;i++){
         const cur=ch.pts[i], prev=ch.prev[i];
