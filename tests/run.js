@@ -103,6 +103,8 @@ ok(/camDist.*camDist.*H.*prevH/.test(html), 'camDist scales proportionally with 
 ok(/if \(!drag\)\{\s*gazeX=M\.clamp/.test(html), 'gaze update skipped during drag and M.clamp prevents eye over-rotation outside canvas');
 ok(H.I18N.ja['license.Other'] && H.I18N.en['license.Other'], 'license.Other i18n in both languages');
 ok(H.I18N.ja['out.license.url'] && H.I18N.en['out.license.url'], 'out.license.url label i18n in both languages');
+ok(H.I18N.ja['out.version'] && H.I18N.en['out.version'], 'out.version label i18n in both languages');
+ok(html.includes("'out.version','version'") && html.includes("version:''"), 'version field in UI and META_DEFAULTS');
 ok(html.includes("'licenseUrl'") && html.includes("META_DEFAULTS") && html.includes("licenseUrl:''"), 'licenseUrl in META_DEFAULTS and wired to UI');
 {
   const png = H.b64ToBytes(H.PNG1);
@@ -110,6 +112,8 @@ ok(html.includes("'licenseUrl'") && html.includes("META_DEFAULTS") && html.inclu
   const ex = H.exportVRM(b0, H.defaults(), { license: 'Other', licenseUrl: 'https://example.com/lic' }, png);
   ok(ex.json.extensions.VRM.meta.licenseName === 'Other' && ex.json.extensions.VRM.meta.otherLicenseUrl === 'https://example.com/lic',
     'otherLicenseUrl passes through to VRM meta when license=Other');
+  const ex2 = H.exportVRM(b0, H.defaults(), { version: '2.3' }, png);
+  ok(ex2.json.extensions.VRM.meta.version === '2.3', 'meta.version passes through to VRM writer');
 }
 ok(html.includes('CLAMP_TO_EDGE') && !html.includes('TEXTURE_WRAP_S,gl.REPEAT'), 'texture atlas uses CLAMP_TO_EDGE to prevent edge bleed (not REPEAT)');
 ok(!html.includes('HINA.M.clamp'), 'no HINA.M.clamp calls — use local M alias consistently');
@@ -175,7 +179,7 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   ok(H.I18N.ja['err.loadFailed'] && H.I18N.en['err.loadFailed'], 'err.loadFailed key in both languages');
   ok(H.I18N.ja['err.buildFailed'] && H.I18N.en['err.buildFailed'], 'err.buildFailed key in both languages');
   // every license option has a user-readable localized label (not raw technical id)
-  const licenseOpts = ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND'];
+  const licenseOpts = ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'];
   ok(licenseOpts.every(l => H.I18N.ja['license.'+l] && H.I18N.en['license.'+l]), 'all license options have ja+en labels');
   // title/author placeholder keys present
   ok(H.I18N.ja['out.title.ph'] && H.I18N.en['out.title.ph'], 'out.title.ph placeholder in both languages');

@@ -11,7 +11,7 @@ _rmMQ.addEventListener('change', e => { reduceMotion = e.matches; });
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
 let activePresetId = null, lastGachaSeed = null;
 let params = HINA.defaults();
-const META_DEFAULTS = {title:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
+const META_DEFAULTS = {title:'', version:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
 let meta = Object.assign({}, META_DEFAULTS);
 let build = null;
 const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
@@ -645,6 +645,7 @@ function renderOut(bd){
       oninput:e=>{ meta.title=e.target.value; saveState(); updateFnPrev(); }})));
   updateFnPrev();
   bd.append(fnPrev);
+  txt('out.version','version', t('out.version.ph'));
   txt('out.author','author', t('out.author.ph'));
   txt('out.contact','contact', t('out.contact.ph'));
   txt('out.reference','reference', t('out.reference.ph'));
