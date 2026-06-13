@@ -218,6 +218,15 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   ok(allOK, 'randomParams within bounds (20 seeds)');
   ok(springOK, 'randomParams never sets springOff');
   ok(stable, 'randomParams sanitize-stable');
+  let buildOK = true, posOK = true;
+  for (let s = 0; s < 10; s++){
+    try {
+      const b = H.buildAvatar(H.randomParams(s));
+      if (!b.geom.pos.every(Number.isFinite) || !b.geom.nrm.every(Number.isFinite)) posOK = false;
+    } catch(e) { buildOK = false; }
+  }
+  ok(buildOK, 'buildAvatar(randomParams(s)) does not throw for 10 seeds');
+  ok(posOK, 'randomParams builds produce finite pos/nrm (10 seeds)');
 }
 
 /* ---- atlas UV helpers ---- */
@@ -516,6 +525,7 @@ function accData(j, bin, ai){
     const est = H.estimate(b, p);
     ok(est.tris < 7500 && est.bones < 75, `${pre.id}: tris<7500, bones<75`);
     ok(H.rank(est, 'pc').rank === 'Excellent', `${pre.id}: PC Excellent`);
+    ok(['Excellent','Good'].includes(H.rank(est, 'quest').rank), `${pre.id}: Quest Good or better with springs`);
     const estOff = H.estimate(b, Object.assign({}, p, { springOff: true }));
     ok(H.rank(estOff, 'quest').rank === 'Excellent', `${pre.id}: Quest Excellent with springOff`);
     const G = parseGLB(H.exportVRM(b, p, {}, png).bytes);
