@@ -278,10 +278,39 @@ function accData(j, bin, ai){
   const SZ = { 5126: 4, 5123: 2, 5121: 1 };
   const NC = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 };
   ok(j.accessors.every(a => {
+    const blen = j.buffers[0].byteLength;
+    if (a.bufferView === undefined && a.sparse) {
+      if (!a.sparse.count) return true;
+      const iv = j.bufferViews[a.sparse.indices.bufferView];
+      const vv = j.bufferViews[a.sparse.values.bufferView];
+      return iv && vv &&
+        a.sparse.count * 2 <= iv.byteLength && (iv.byteOffset || 0) + iv.byteLength <= blen &&
+        a.sparse.count * SZ[a.componentType] * NC[a.type] <= vv.byteLength &&
+        (vv.byteOffset || 0) + vv.byteLength <= blen;
+    }
     const v = j.bufferViews[a.bufferView];
+    if (!v) return false;
     return a.count * SZ[a.componentType] * NC[a.type] <= v.byteLength &&
            (v.byteOffset || 0) + v.byteLength <= j.buffers[0].byteLength;
   }), 'all accessors within views within buffer');
+  // sparse morph accessor structure + size savings
+  {
+    const morphAcc = j.accessors[prim.targets[0].POSITION];
+    ok(morphAcc.bufferView === undefined && morphAcc.sparse !== undefined,
+      'morph accessor uses glTF sparse (no base bufferView)');
+    ok(morphAcc.sparse.count > 0 && morphAcc.sparse.indices.componentType === 5123,
+      'sparse morph "a" has entries with UNSIGNED_SHORT indices');
+    const sparseBytes = prim.targets.reduce((s, tgt) => {
+      const acc = j.accessors[tgt.POSITION];
+      if (!acc.sparse || !acc.sparse.count) return s;
+      const iv = j.bufferViews[acc.sparse.indices.bufferView];
+      const vv = j.bufferViews[acc.sparse.values.bufferView];
+      return s + iv.byteLength + vv.byteLength;
+    }, 0);
+    const fullBytes = prim.targets.length * nV * 3 * 4;
+    ok(sparseBytes < fullBytes * 0.5,
+      `sparse morph data ${sparseBytes}B < 50% of full-array equivalent ${fullBytes}B`);
+  }
   ok(j.bufferViews.every(v => (v.byteOffset || 0) % 4 === 0), 'bufferViews 4-byte aligned');
   // material
   ok(j.materials[0].alphaMode === 'MASK' && j.materials[0].alphaCutoff === 0.5 && j.materials[0].doubleSided === true,

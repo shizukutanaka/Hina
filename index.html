@@ -1021,13 +1021,30 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
   const aWgt=addAcc(addView(bw.push(fWgt),fWgt.byteLength,34962),5126,nV,'VEC4');
   const aIdx=addAcc(addView(bw.push(uIdx),uIdx.byteLength,34963),5123,uIdx.length,'SCALAR');
 
-  /* morph targets (full delta arrays; min/max mandatory for POSITION) */
+  /* morph targets — glTF sparse accessor (only non-zero delta verts; SPEC §9 "スパース化") */
   const targetNames = build.morphs.names.slice();
   const targets = targetNames.map(name=>{
-    const full=new Float32Array(nV*3);
-    for(const e of build.morphs.sparse[name]){ full[e[0]*3]=e[1]; full[e[0]*3+1]=e[2]; full[e[0]*3+2]=e[3]; }
-    const mm=minMax3(full);
-    return {POSITION: addAcc(addView(bw.push(full),full.byteLength,34962),5126,nV,'VEC3',{min:mm.min,max:mm.max})};
+    const entries = build.morphs.sparse[name];
+    // glTF sparse requires ascending index order
+    const sorted = entries.slice().sort((a,b)=>a[0]-b[0]);
+    const sc = sorted.length;
+    // min/max must include implicit zeros from non-sparse entries
+    let mnx=0,mny=0,mnz=0,mxx=0,mxy=0,mxz=0;
+    for(const e of sorted){
+      if(e[1]<mnx)mnx=e[1]; if(e[1]>mxx)mxx=e[1];
+      if(e[2]<mny)mny=e[2]; if(e[2]>mxy)mxy=e[2];
+      if(e[3]<mnz)mnz=e[3]; if(e[3]>mxz)mxz=e[3];
+    }
+    const acc={componentType:5126,count:nV,type:'VEC3',min:[mnx,mny,mnz],max:[mxx,mxy,mxz]};
+    if(sc>0){
+      const idxBuf=new Uint16Array(sc), valBuf=new Float32Array(sc*3);
+      sorted.forEach((e,i)=>{ idxBuf[i]=e[0]; valBuf[i*3]=e[1]; valBuf[i*3+1]=e[2]; valBuf[i*3+2]=e[3]; });
+      const idxView=addView(bw.push(idxBuf),idxBuf.byteLength);
+      const valView=addView(bw.push(valBuf),valBuf.byteLength);
+      acc.sparse={count:sc,indices:{bufferView:idxView,componentType:5123},values:{bufferView:valView}};
+    }
+    accessors.push(acc);
+    return {POSITION: accessors.length-1};
   });
 
   /* inverse bind matrices: translate(-world), column-major */
@@ -1147,7 +1164,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
       _ShadeShift:0, _ShadeToony:0.9, _LightColorAttenuation:0, _IndirectLightIntensity:0.1,
       _RimLightingMix:0, _RimFresnelPower:1, _RimLift:0,
       _OutlineWidth:0.07, _OutlineScaledMaxDistance:1, _OutlineLightingMix:1,
-      _OutlineColorMode:0, _OutlineWidthMode:1, _OutlineCullMode:1,
+      _OutlineColorMode:0, _OutlineWidthMode:0, _OutlineCullMode:1,
       _UvAnimScrollX:0, _UvAnimScrollY:0, _UvAnimRotation:0,
       _MToonVersion:38, _DebugMode:0, _BlendMode:1, _CullMode:0,
       _SrcBlend:1, _DstBlend:0, _ZWrite:1,
@@ -1265,10 +1282,19 @@ function selfTest(){
   T('blendShapeGroups = 17', ()=>ex.json.extensions.VRM.blendShapeMaster.blendShapeGroups.length===17);
   T('accessors within buffer', ()=>{
     const SZ={5126:4,5123:2,5121:1}, N={SCALAR:1,VEC2:2,VEC3:3,VEC4:4,MAT4:16};
+    const blen=ex.json.buffers[0].byteLength;
     return ex.json.accessors.every(a=>{
+      if(a.bufferView===undefined && a.sparse){
+        if(!a.sparse.count) return true;
+        const iv=ex.json.bufferViews[a.sparse.indices.bufferView];
+        const vv=ex.json.bufferViews[a.sparse.values.bufferView];
+        return iv && vv &&
+          a.sparse.count*2<=iv.byteLength && (iv.byteOffset||0)+iv.byteLength<=blen &&
+          a.sparse.count*SZ[a.componentType]*N[a.type]<=vv.byteLength && (vv.byteOffset||0)+vv.byteLength<=blen;
+      }
       const v=ex.json.bufferViews[a.bufferView];
-      return a.count*SZ[a.componentType]*N[a.type] <= v.byteLength &&
-             v.byteOffset+v.byteLength <= ex.json.buffers[0].byteLength;
+      return v && a.count*SZ[a.componentType]*N[a.type] <= v.byteLength &&
+             (v.byteOffset||0)+v.byteLength <= blen;
     });
   });
   T('rank: PC Excellent', ()=>rank(estimate(build,p),'pc').rank==='Excellent');
