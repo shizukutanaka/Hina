@@ -357,6 +357,16 @@ function selfTest(){
     const p2=Object.assign({},p,{springOff:true});
     return rank(estimate(build,p2),'quest').rank==='Excellent';
   });
+  T('humanoid bone node indices in range', ()=>{
+    const nLen=ex.json.nodes.length;
+    return ex.json.extensions.VRM.humanoid.humanBones.every(hb=>hb.node>=0 && hb.node<nLen);
+  });
+  T('spring bone node indices in range', ()=>{
+    if (!ex.json.extensions.VRM.secondaryAnimation.boneGroups.length) return true;
+    const nLen=ex.json.nodes.length;
+    const cg=ex.json.extensions.VRM.secondaryAnimation.colliderGroups;
+    return cg.every(g=>g.node>=0 && g.node<nLen);
+  });
   T('serialize roundtrip', ()=>{
     const d=deserialize(serialize(p,{title:'t'}));
     return !!d && d.params.height===p.height && d.params.hairStyle===p.hairStyle;

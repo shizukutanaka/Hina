@@ -499,7 +499,7 @@ function accData(j, bin, ai){
 {
   const st = H.selfTest();
   ok(st.ok === true, 'selfTest ok');
-  ok(st.results.length >= 18 && st.results.every(r => r.ok), 'selfTest all 18+ checks pass');
+  ok(st.results.length >= 20 && st.results.every(r => r.ok), 'selfTest all 20+ checks pass (incl. node index validation)');
 }
 
 /* ---- summary ---- */
