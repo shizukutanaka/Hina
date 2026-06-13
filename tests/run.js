@@ -49,6 +49,8 @@ ok(html.includes('TABS.indexOf(activeTab)'), 'tab list has arrow-key navigation 
 ok(H.I18N.ja['btn.reset.confirm'] && H.I18N.en['btn.reset.confirm'], 'reset confirm message in both languages');
 ok(html.includes("'btn.reset.confirm'"), 'Reset button guarded by confirmation');
 ok(H.I18N.ja['gacha.seed'] && H.I18N.en['gacha.seed'], 'gacha seed label i18n in both languages');
+ok(H.I18N.ja['out.contact'] && H.I18N.en['out.contact'], 'VRM contact field label in both languages');
+ok(H.I18N.ja['out.reference'] && H.I18N.en['out.reference'], 'VRM reference field label in both languages');
 ok(html.includes('activePresetId'), 'active preset selection state tracked');
 ok(html.includes('lastGachaSeed'), 'gacha seed tracked for reproducibility');
 

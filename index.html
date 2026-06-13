@@ -299,7 +299,8 @@ const I18N = {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
     'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。',
     'mode.easy':'かんたん','mode.detail':'詳細',
-    'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
+    'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
+    'out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物チェーン','st.tex':'テクスチャ推定',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'ドラッグ/矢印キー: 回転 / ホイール・+−: ズーム / ダブルクリック・Home: リセット',
@@ -333,7 +334,8 @@ const I18N = {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
     'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.',
     'mode.easy':'Easy','mode.detail':'Detail',
-    'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
+    'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
+    'out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring chains','st.tex':'Texture est.',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'hint.drag':'Drag/Arrows: rotate / Wheel · +−: zoom / Double-click · Home: reset',
@@ -1363,7 +1365,7 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
 let activePresetId = null, lastGachaSeed = null;
 let params = HINA.defaults();
-let meta = {title:'', author:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow',
+let meta = {title:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow',
             commercial:'Disallow', license:'Redistribution_Prohibited'};
 let build = null;
 const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
@@ -1975,6 +1977,8 @@ function renderOut(bd){
     el('input',{type:'text', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
   txt('out.title','title', t('out.title.ph'));
   txt('out.author','author', t('out.author.ph'));
+  txt('out.contact','contact', t('out.contact.ph'));
+  txt('out.reference','reference', t('out.reference.ph'));
   const selRow=(key,mk,opts,tp)=>{
     const sel=el('select',{onchange:e=>{meta[mk]=e.target.value; saveState();}});
     for(const o of opts) sel.append(el('option',{value:o, ...(meta[mk]===o?{selected:''}:{})},

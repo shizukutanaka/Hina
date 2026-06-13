@@ -126,3 +126,42 @@ hina/
 | メタ | 最小コスト最大是正は？ | (1)8×2 `license.*` i18nキー+selRow引数変更 (2)`err.buildFailed`付きtry/catch (3)placeholder 2キー追加。合計30行・テスト183→190で担保 |
 
 結論3往復で収束。エクスポートUI品質・回復力・入力ヒントの3軸を同時改善。
+
+## ソクラテス問答記録（2026-06-13・タブナビゲーション・ARIA完全準拠）
+
+| 種別 | 問い | 結論 → 対応 |
+|------|------|------------|
+| 明確化 | `role="tablist"` を名乗るために何が必要か？ | WAI-ARIA Authoring Practices 1.2: tablist内の各buttonに `role="tab"` `aria-selected` `tabindex`（active=0/非active=-1）、tabpanelに `aria-labelledby`。いずれも未実装 |
+| 前提検証 | 現在のタブ切替はキーボードから操作可能か？ | 不可。全tabに `tabindex` 不在のため、Tabキーで全ボタンが順番に獲得フォーカスし、ARIAパターン違反。矢印キー操作も無い |
+| 根拠 | クリック操作でフォーカスが次のタブに残るか？ | 否。`onclick` は `activeTab` を更新してリフォームするが `focus()` を呼んでいないため、DOMが差し替わって以前のDOM要素を参照するフォーカスが失われる |
+| 視点転換 | `tabindex` をレンダリング外の1箇所で管理するリスクは？ | renderTabs() が呼ばれるたびに全tabを作り直す構造のため、roving tabindex（active=0/非active=-1）をrenderTabs内で設定するのが自然で一貫 |
+| 帰結 | ArrowKey handler はどこに置くべきか？ | boot時1回の `$('tabs').addEventListener('keydown',…)` で済む。DOMを差し替えてもイベントは親要素(`#tabs`)に委譲されるため安全 |
+| メタ | 最小コスト最大是正は？ | renderTabs(): role=tab + aria-selected + roving-tabindex + 切替後focus()。boot: keydown委譲(ArrowL/R/U/D + Home/End)。tabBody: role=tabpanel + aria-labelledby。テスト190→197で担保 |
+
+結論3往復で収束。ARIA tablistパターンを完全準拠に更新し、キーボードのみでタブ全操作を可能にした。
+
+## ソクラテス問答記録（2026-06-13・プリセット選択状態・再現性）
+
+| 種別 | 問い | 結論 → 対応 |
+|------|------|------------|
+| 明確化 | ユーザーがプリセットを選んだ後にスライダーを動かすと、どのプリセットが「選択中」と見えるか？ | 全プリセットカードが未選択表示のまま。`activePresetId` 変数が存在せず、「Kotone を選んだ後に身長を変えても Kotone が選択状態として光る」という期待を満たせない |
+| 前提検証 | ガチャ結果は再現可能か？ | 不可。シードが一時変数に保存されず、ガチャ後に別タブを開いてもシード値が消える。再実行は不可能 |
+| 根拠 | `onParam()` をデバウンスしないとプリセット選択状態のリセットタイミングは？ | 即時リセット（正しい）。ただし変数が存在しないためreseti後もUI上では全カードが無選択のままで差がない |
+| 視点転換 | 「どのプリセットから派生したか」の情報はVRM書き出しに影響するか？ | 書き出しには影響しない。あくまでUI操作コンテキストの視覚フィードバック。ただしsaveStateに含める必要もない（ページリロード時にはpreset状態を復元不要） |
+| 帰結 | ガチャのシードUIとして何が最小実装か？ | `lastGachaSeed` 変数に保持→ガチャ実行後に seed 番号を小テキストで表示。入力欄は過剰。将来的にURLパラメータで共有可能な形式に |
+| メタ | 最小コスト最大是正は？ | (1)`activePresetId` 変数でプリセット選択ハイライト (2)`onParam()` でリセット (3)`lastGachaSeed` 表示 (4)CSS `.preCard.selected` + `.gacha-seed`。テスト197→200で担保 |
+
+結論3往復で収束。プリセット選択フィードバックとガチャ再現性の2軸を最小コストで改善。
+
+## ソクラテス問答記録（2026-06-13・VRMメタ完全性）
+
+| 種別 | 問い | 結論 → 対応 |
+|------|------|------------|
+| 明確化 | VRM 0.x `extensions.VRM.meta` の必須フィールドと任意フィールドは何か？ | 必須: `title`（UniVRM許容だが空は非推奨）・`author`。推奨任意: `contactInformation`（=contact）・`reference`。全て文字列。UIに出ていないフィールドはVRM側で空文字のまま |
+| 前提検証 | `contact` と `reference` が常に空のままVRMを配布する問題は？ | 二次配布者が元制作者に連絡する手段がなくなる。VRChat Worldに配置時、アバター同定が困難。VRM意図（帰属の機械可読化）が機能しない |
+| 根拠 | UniVRM は `contactInformation` 空文字をエラーにするか？ | しない。任意フィールドなので互換性問題はない。ただし「存在は知っているが入れる場所がない」というUX問題 |
+| 視点転換 | ExportタブはmetaフィールドをどこまでUIに出すべきか？ | title/authorは既存。contact/referenceはユーザーの制作背景に依存するが入力機会は提供すべき。violent/sexual/commercial許可フラグはv0.1スコープ（すでに実装済み） |
+| 帰結 | `version`（アバターバージョン文字列）もUIに出すか？ | v0.1スコープ外。空文字のままUniVRM通過可能。管理コストに見合う頻度の低い入力 |
+| メタ | 最小コスト最大是正は？ | `meta` オブジェクトに `contact`/`reference` フィールド追加。Export UIに2行のtxt()追加。i18n 4キー（ja/en）追加。VRMライター側はすでに `meta.contact`/`meta.reference` を使うか確認→利用済み。テスト202で担保 |
+
+結論2往復で収束。VRMメタ帰属フィールドをUIに露出し、権利関係の機械可読化を実現した。

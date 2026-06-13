@@ -18,6 +18,7 @@
 - **`rebuild()` エラーバウンダリ追加**: `buildAvatar()` が例外を投げた場合 `build` が null のまま機能停止していた。try/catch を追加し `err.buildFailed` i18n キーで alert 通知。テスト担保。
 - **メタ入力欄に placeholder ヒント追加**: タイトル・作者フィールドに placeholder（`out.title.ph`・`out.author.ph`、ja/en）を追加。タイトル未入力のままエクスポートすると全ファイルが `hina.vrm` になる問題への入力促進。
 - **i18n `note.upload` 死エントリ除去**: 両言語（ja/en）の i18n オブジェクトに、修正済みの正エントリとは別に旧エントリ（`docs/UPLOAD_GUIDE.md` を参照するテキスト）が重複キーとして残存していた。JavaScript はオブジェクトリテラルの重複キーで後勝ちのため動作上の影響はなかったが、混乱を招くコードスメルだったため削除。
+- **VRMメタ `contact`/`reference` フィールドをUIに追加**: Exportタブにアバター作者の連絡先（`contactInformation`）と参照元（`reference`）の入力欄を追加。VRM 0.x 仕様の帰属フィールドがUIから設定可能になり、二次配布・権利管理の機械可読化を実現。`out.contact`・`out.reference`・各 placeholder の i18n 4キー（ja/en）追加。テスト200→202で担保。
 - **JSON読込失敗のサイレント失敗を解消**: `deserialize()` が null を返した場合（形式不正・`app` フィールド不一致・空ファイル等）、UIが無音のまま変化しなかった。`err.loadFailed` i18n キー（ja/en）を追加し `alert()` で明示通知するよう修正。テスト担保。
 - **`saveState()` の過剰 localStorage 書き込みを抑制**: スライダー操作中に毎刻 `localStorage.setItem` が同期実行されていた（height 全可動域で最大 120 回）。500ms デバウンスを追加し最終値のみを永続化。プレビュー `rebuild()` は引き続き即時実行（UX維持）。
 - **WCAG 2.1.1（キーボード操作）対応**: 3Dプレビューがポインタ操作のみでキーボード非対応だった問題を修正（SPEC §7のWCAG AA主張の未達ギャップ）。canvasを `tabindex="0"` でフォーカス可能にし、矢印キー=回転／`+``−`=ズーム／`Home`=リセットのキー操作と、言語連動の `aria-label` を追加。ヒント文も更新。

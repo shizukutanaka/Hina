@@ -9,7 +9,7 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
 let activePresetId = null, lastGachaSeed = null;
 let params = HINA.defaults();
-let meta = {title:'', author:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow',
+let meta = {title:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow',
             commercial:'Disallow', license:'Redistribution_Prohibited'};
 let build = null;
 const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
@@ -621,6 +621,8 @@ function renderOut(bd){
     el('input',{type:'text', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
   txt('out.title','title', t('out.title.ph'));
   txt('out.author','author', t('out.author.ph'));
+  txt('out.contact','contact', t('out.contact.ph'));
+  txt('out.reference','reference', t('out.reference.ph'));
   const selRow=(key,mk,opts,tp)=>{
     const sel=el('select',{onchange:e=>{meta[mk]=e.target.value; saveState();}});
     for(const o of opts) sel.append(el('option',{value:o, ...(meta[mk]===o?{selected:''}:{})},
