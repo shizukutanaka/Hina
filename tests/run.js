@@ -52,6 +52,7 @@ ok(H.I18N.ja['gacha.seed'] && H.I18N.en['gacha.seed'], 'gacha seed label i18n in
 ok(H.I18N.ja['out.contact'] && H.I18N.en['out.contact'], 'VRM contact field label in both languages');
 ok(H.I18N.ja['out.reference'] && H.I18N.en['out.reference'], 'VRM reference field label in both languages');
 ok(H.I18N.ja['out.filename'] && H.I18N.en['out.filename'], 'out.filename label in both languages');
+ok(html.includes('--text-faint:#7a868f'), 'text-faint color meets WCAG AA contrast ratio on dark bg');
 ok(html.includes('fnameStem'), 'fnameStem() used for export filename');
 ok(html.includes("activePresetId||'custom'"), 'filename fallback uses preset ID');
 ok(html.includes('activePresetId'), 'active preset selection state tracked');
