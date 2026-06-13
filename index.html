@@ -1142,11 +1142,11 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
     sexualUssageName: pick(meta.sexual,['Disallow','Allow'],'Disallow'),
     commercialUssageName: pick(meta.commercial,['Disallow','Allow'],'Disallow'),
     otherPermissionUrl: '',
-    licenseName: pick(meta.license,
-      ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
-      'Redistribution_Prohibited'),
-    otherLicenseUrl: str(meta.licenseUrl,''),
   };
+  vrmMeta.licenseName = pick(meta.license,
+    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
+    'Redistribution_Prohibited');
+  vrmMeta.otherLicenseUrl = vrmMeta.licenseName==='Other' ? str(meta.licenseUrl,'') : '';
 
   const humanBones = HB.map(hb=>({bone:hb, node:nodeOf(build.humanoid[hb]), useDefaultValues:true}));
 
@@ -1985,7 +1985,7 @@ function onParam(k){
 }
 
 function renderBody(){
-  const bd=$('tabBody'); bd.textContent='';
+  const bd=$('tabBody'); bd.scrollTop=0; bd.textContent='';
   if (activeTab==='preset'){
     const grid=el('div',{class:'presetGrid'});
     for(const pre of HINA.PRESETS){

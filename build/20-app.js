@@ -591,7 +591,7 @@ function onParam(k){
 }
 
 function renderBody(){
-  const bd=$('tabBody'); bd.textContent='';
+  const bd=$('tabBody'); bd.scrollTop=0; bd.textContent='';
   if (activeTab==='preset'){
     const grid=el('div',{class:'presetGrid'});
     for(const pre of HINA.PRESETS){

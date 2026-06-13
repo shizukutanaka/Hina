@@ -108,12 +108,15 @@ ok(html.includes("e.key==='?'") && html.includes('aboutDlg'), '? key opens About
 ok(html.includes("type:'button'") && /type:'button'[\s\S]{0,80}class:'sw'/.test(html), 'color swatch buttons have type=button (form-safe)');
 ok(html.includes("'out.version','version'") && html.includes("version:''"), 'version field in UI and META_DEFAULTS');
 ok(html.includes("'licenseUrl'") && html.includes("META_DEFAULTS") && html.includes("licenseUrl:''"), 'licenseUrl in META_DEFAULTS and wired to UI');
+ok(/bd\.scrollTop\s*=\s*0/.test(html), 'renderBody() resets scrollTop to 0 so tab switches start at top');
 {
   const png = H.b64ToBytes(H.PNG1);
   const b0 = H.buildAvatar(H.defaults());
   const ex = H.exportVRM(b0, H.defaults(), { license: 'Other', licenseUrl: 'https://example.com/lic' }, png);
   ok(ex.json.extensions.VRM.meta.licenseName === 'Other' && ex.json.extensions.VRM.meta.otherLicenseUrl === 'https://example.com/lic',
     'otherLicenseUrl passes through to VRM meta when license=Other');
+  const exCC0 = H.exportVRM(b0, H.defaults(), { license: 'CC0', licenseUrl: 'https://stale.url/lic' }, png);
+  ok(exCC0.json.extensions.VRM.meta.otherLicenseUrl === '', 'otherLicenseUrl is empty when license is not Other (stale URL not leaked)');
   const ex2 = H.exportVRM(b0, H.defaults(), { version: '2.3' }, png);
   ok(ex2.json.extensions.VRM.meta.version === '2.3', 'meta.version passes through to VRM writer');
 }
