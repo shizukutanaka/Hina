@@ -608,6 +608,7 @@ function renderOut(bd){
     tbl.append(el('tr',{}, el('td',{},t(key)), td)); };
   row('st.tris','tris'); row('st.bones','bones'); row('st.mat','mat');
   row('st.mesh','skinned'); row('st.spring','pbTrans'); row('st.tex','texMB');
+  row('st.vrm','approxBytes');
   const rkPC=el('td',{}); statEls.rkPC=rkPC;
   const rkQ=el('td',{}); statEls.rkQ=rkQ;
   tbl.append(el('tr',{}, el('td',{},'PC'), rkPC));
@@ -655,6 +656,7 @@ function updateStats(){
     statEls.skinned.textContent=est.skinned;
     statEls.pbTrans.textContent=params.springOff?0:est.pbTrans;
     statEls.texMB.textContent='~'+est.texMB+' MB';
+    statEls.approxBytes.textContent='~'+Math.round(est.approxBytes/1024)+' KB';
     statEls.rkPC.innerHTML=''; statEls.rkQ.innerHTML='';
     const badge=r=>{ const lim=limitText(r);
       const b=el('span',{class:'rk'}, t('rank.'+r.rank));
@@ -714,6 +716,8 @@ function rebuild(){
 }
 
 /* ---------- header / dialogs / boot ---------- */
+// version from core — single source of truth (HINA.VERSION)
+if ($('aboutVer')) $('aboutVer').textContent = 'v' + HINA.VERSION;
 function applyLang(){
   $('btnLang').textContent = lang==='ja'?'EN':'JA';
   $('btnMode').textContent = mode==='easy'?t('mode.easy'):t('mode.detail');

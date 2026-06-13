@@ -10,6 +10,9 @@
 - 性能カテゴリ（tris/bones/pbComp 等）に日英ラベル `cat.*` を追加。
 - モーフターゲットをフル配列（全頂点×3float）から **glTF sparse accessor**（差分頂点のみ）に変更（Plan.md §リスク「v0.2でsparse化」を前倒し）。既定ビルドで 193,968 B → 2,058 B（98.9% 削減）。UniVRM互換・テスト担保。
 - MToon `_OutlineWidthMode` を `1`（WorldSpace ON）から `0`（OFF）に修正。SPEC §5.5「アウトラインは既定OFF（Unity側で任意有効化）」の充足。
+- 出力タブの統計表に**VRM推定ファイルサイズ**を追加（`~XXX KB`形式・テクスチャ込み）。`estimate()` が `approxBytes` を返すようになり、テストで妥当範囲を担保。
+- Aboutダイアログのバージョン表示を `HINA.VERSION` から動的に設定（ハードコード `v0.1.0` を排除）。
+- `note.upload` テキストから存在しない `docs/UPLOAD_GUIDE.md` の参照を削除（アプリ内ガイドで代替済み）。
 
 ## [0.1.0] - 2026-06-11
 ### Added

@@ -195,6 +195,8 @@ const I18N = {
     'enum.outfit.onepiece':'ワンピース','enum.outfit.sailor':'セーラー','enum.outfit.shirts':'シャツ','enum.outfit.hoodie':'パーカー',
     'enum.sleeves.long':'長袖','enum.sleeves.short':'半袖',
     'cat.tris':'三角形','cat.bones':'ボーン','cat.skinned':'スキンメッシュ','cat.mesh':'メッシュ','cat.mat':'マテリアル','cat.pbComp':'揺れ物部品','cat.pbTrans':'揺れ物ボーン','cat.pbCol':'コライダ','cat.pbCheck':'衝突判定','cat.texMB':'テクスチャ',
+    'st.vrm':'VRMサイズ推定',
+    'note.upload':'VRChatへは Unity + VRM Converter for VRChat 経由でアップロード。以下の手順を参照。',
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
@@ -219,6 +221,8 @@ const I18N = {
     'enum.outfit.onepiece':'One-piece','enum.outfit.sailor':'Sailor','enum.outfit.shirts':'Shirt','enum.outfit.hoodie':'Hoodie',
     'enum.sleeves.long':'Long','enum.sleeves.short':'Short',
     'cat.tris':'Triangles','cat.bones':'Bones','cat.skinned':'Skinned meshes','cat.mesh':'Meshes','cat.mat':'Materials','cat.pbComp':'PhysBones','cat.pbTrans':'PB transforms','cat.pbCol':'Colliders','cat.pbCheck':'Collision checks','cat.texMB':'Texture memory',
+    'st.vrm':'VRM size est.',
+    'note.upload':'Upload to VRChat via Unity + VRM Converter for VRChat. Follow the steps below.',
   }
 };
 
@@ -255,13 +259,19 @@ const RANK_NAMES = ['Excellent','Good','Medium','Poor','VeryPoor'];
 function estimate(build, p){
   const tris = build.geom.idx.length/3;
   const bones = build.bones.length;
+  const nV = build.geom.pos.length/3;
   const chains = p.springOff ? 0 : build.springs.length;
   const springBones = p.springOff ? 0 : build.springs.reduce((s,c)=>s+c.boneIdxs.length,0);
   const colliders = chains ? 1 : 0;
+  // geometry-only byte estimate; PNG texture (typically 20-50 KB) added separately
+  const geomBytes = nV*52 + tris*6 + bones*64;   // attrs(52B/v) + indices(6B/tri) + IBM(64B/bone)
+  const morphBytes = build.morphs.names.reduce((s,n)=>s+build.morphs.sparse[n].length*16+8, 0);
+  const approxBytes = geomBytes + morphBytes + 30720 + 12000;  // +30KB atlas PNG est. +12KB JSON
   return {
     tris, bones, skinned:1, mesh:0, mat:1,
     pbComp: chains, pbTrans: springBones, pbCol: colliders, pbCheck: springBones*colliders,
     texMB: Math.round(TEX*TEX*4*1.33/1048576*10)/10,
+    approxBytes,
   };
 }
 function rank(stats, platform){
