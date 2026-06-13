@@ -1973,7 +1973,8 @@ function renderBody(){
         el('span',{class:'c',style:'background:'+pp.hairColor}),
         el('span',{class:'c',style:'background:'+pp.eyeColor}),
         el('span',{class:'c',style:'background:'+pp.clothMain}));
-      grid.append(el('button',{class:'preCard'+(activePresetId===pre.id?' selected':''), onclick:()=>{
+      grid.append(el('button',{class:'preCard'+(activePresetId===pre.id?' selected':''),
+        'aria-pressed':String(activePresetId===pre.id), onclick:()=>{
         params=pp; activePresetId=pre.id; rebuild(); renderBody(); }},
         el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en), cols));
     }

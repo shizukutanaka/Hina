@@ -424,3 +424,16 @@ hina/
 | メタ | コスト/効果 | core 2行 + app 5行・テスト235→237 |
 
 結論2往復で収束。書き出しの言語整合性と冪等性を確保した。
+
+## ソクラテス問答記録（2026-06-13・プリセットカード aria-pressed + WCAG 3.1.1 確認）
+
+| 種別 | 問い | 結論 → 対応 |
+|------|------|------------|
+| 明確化 | 選択中のプリセットカードを SR はどう読み上げるか？ | `.selected` CSS クラスは視覚的のみ。ARIA 状態がなく SR は「ボタン」とのみ読む |
+| 前提検証 | WCAG 4.1.2 は何を要求するか？ | UI コンポーネントの状態（選択・展開等）を名前・役割・値で SR に伝えること |
+| 根拠 | 複数カードの中で1つが選択状態を持つパターンに適切な ARIA は？ | `aria-pressed="true/false"` が toggle button パターンとして最適。`aria-selected` は ARIA tablist や listbox 専用 |
+| 視点転換 | WCAG 3.1.1（`<html lang>`）は実装済みか？テストで担保されているか？ | `applyLang()` 内で `document.documentElement.lang = lang` を設定済みだが、テストが存在しなかった |
+| 帰結 | (1) preset card に `'aria-pressed':String(activePresetId===pre.id)` を追加 (2) WCAG 3.1.1 のテストを追加 | WCAG 4.1.2 と 3.1.1 を同時に担保 |
+| メタ | コスト/効果 | app 1行変更・テスト237→239 |
+
+結論2往復で収束。プリセット選択状態が SR に伝わるようになり WCAG 4.1.2 を充足した。

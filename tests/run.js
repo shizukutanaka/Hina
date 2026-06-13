@@ -32,6 +32,10 @@ ok(html.includes("'guide.s1'") && html.indexOf("guide.s1") !== html.lastIndexOf(
 ok(/<canvas[^>]*\btabindex=/.test(html), 'canvas is keyboard-focusable (tabindex)');
 ok(/addEventListener\(['"]keydown['"]/.test(html), 'keyboard camera handler wired');
 ok(html.includes("'a11y.canvas'"), 'canvas aria-label i18n key present');
+// WCAG 3.1.1 — page language updated on language switch
+ok(html.includes('documentElement.lang'), 'applyLang() updates <html lang> attribute (WCAG 3.1.1)');
+// Preset cards expose active state to assistive tech
+ok(html.includes("'aria-pressed':String(activePresetId===pre.id)"), 'preset cards have aria-pressed for screen reader active-state');
 // WCAG 4.1.3 — status messages: a polite live region announces rank/export changes
 ok(/id="srStatus"[^>]*aria-live=/.test(html), 'live status region present with aria-live');
 ok(/announceRank\s*\(/.test(html), 'rank-change announcer wired');
