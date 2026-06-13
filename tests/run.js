@@ -101,6 +101,8 @@ ok(html.includes('webglcontextrestored') && html.includes('location.reload'), 'w
 ok(html.includes('HINA.PRESETS.some') && html.includes("j.activePresetId"), 'activePresetId validated against PRESETS list on load to guard against stale IDs');
 ok(/camDist.*camDist.*H.*prevH/.test(html), 'camDist scales proportionally with avatar height in uploadGeometry()');
 ok(/if \(!drag\)\{\s*gazeX=M\.clamp/.test(html), 'gaze update skipped during drag and M.clamp prevents eye over-rotation outside canvas');
+ok(H.I18N.ja['license.Other'] && H.I18N.en['license.Other'], 'license.Other i18n in both languages');
+ok(html.includes("'Other'],'license'"), 'Other license option added to UI selector (matches VRM writer accepted values)');
 {
   const r0 = H.randomParams(0);
   ok(r0 && typeof r0.height === 'number', 'randomParams(0) — seed 0 produces valid params');

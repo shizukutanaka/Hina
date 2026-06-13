@@ -319,7 +319,7 @@ const I18N = {
     'usage.Disallow':'不可','usage.Allow':'可',
     'license.Redistribution_Prohibited':'再配布禁止','license.CC0':'CC0（パブリックドメイン）',
     'license.CC_BY':'CC BY','license.CC_BY_NC':'CC BY-NC','license.CC_BY_SA':'CC BY-SA',
-    'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND',
+    'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND','license.Other':'その他',
     'out.title.ph':'例: 雛アバター','out.author.ph':'例: あなたの名前',
     'selftest.ok':'自己診断: 全て正常','selftest.ng':'自己診断: 異常あり',
     'err.loadFailed':'JSONファイルを読み込めませんでした（形式が不正か、雛のJSONではありません）',
@@ -358,7 +358,7 @@ const I18N = {
     'usage.Disallow':'Disallow','usage.Allow':'Allow',
     'license.Redistribution_Prohibited':'No redistribution','license.CC0':'CC0 (Public domain)',
     'license.CC_BY':'CC BY','license.CC_BY_NC':'CC BY-NC','license.CC_BY_SA':'CC BY-SA',
-    'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND',
+    'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND','license.Other':'Other',
     'out.title.ph':'e.g. my-avatar','out.author.ph':'e.g. Your Name',
     'selftest.ok':'Self-test: all OK','selftest.ng':'Self-test: FAILED',
     'err.loadFailed':'Could not load JSON (invalid format or not a Hina file)',
@@ -2050,7 +2050,7 @@ function renderOut(bd){
   selRow('out.sexual','sexual',['Disallow','Allow'],'usage');
   selRow('out.commercial','commercial',['Disallow','Allow'],'usage');
   selRow('out.license','license',
-    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND'],'license');
+    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],'license');
 
   bd.append(el('div',{class:'sect'}, t('out.stats')));
   const tbl=el('table',{class:'statTable'}); statEls={};

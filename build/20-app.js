@@ -660,7 +660,7 @@ function renderOut(bd){
   selRow('out.sexual','sexual',['Disallow','Allow'],'usage');
   selRow('out.commercial','commercial',['Disallow','Allow'],'usage');
   selRow('out.license','license',
-    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND'],'license');
+    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],'license');
 
   bd.append(el('div',{class:'sect'}, t('out.stats')));
   const tbl=el('table',{class:'statTable'}); statEls={};
