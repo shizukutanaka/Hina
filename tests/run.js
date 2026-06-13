@@ -36,7 +36,10 @@ ok(html.includes("'a11y.canvas'"), 'canvas aria-label i18n key present');
 ok(/id="srStatus"[^>]*aria-live=/.test(html), 'live status region present with aria-live');
 ok(/announceRank\s*\(/.test(html), 'rank-change announcer wired');
 ok(/err\.loadFailed/.test(html), 'JSON load-failure uses err.loadFailed i18n key');
+ok(/err\.buildFailed/.test(html), 'buildAvatar failure uses err.buildFailed i18n key');
 ok(/saveState/.test(html) && /clearTimeout/.test(html), 'saveState is debounced (clearTimeout present)');
+ok(/buildAvatar[\s\S]{0,60}catch/.test(html), 'rebuild() catches buildAvatar errors');
+ok(/'license'\)/.test(html) || /"license"\)/.test(html), 'license selRow uses translation prefix');
 
 /* ---- math sanity ---- */
 {
@@ -90,6 +93,13 @@ ok(/saveState/.test(html) && /clearTimeout/.test(html), 'saveState is debounced 
   ok(cats.every(c => H.I18N.ja['cat.' + c] && H.I18N.en['cat.' + c]), 'every rank category has ja+en label');
   ok(H.I18N.ja['rank.limit'] && H.I18N.en['rank.limit'], 'limiting-factor label present');
   ok(H.I18N.ja['err.loadFailed'] && H.I18N.en['err.loadFailed'], 'err.loadFailed key in both languages');
+  ok(H.I18N.ja['err.buildFailed'] && H.I18N.en['err.buildFailed'], 'err.buildFailed key in both languages');
+  // every license option has a user-readable localized label (not raw technical id)
+  const licenseOpts = ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND'];
+  ok(licenseOpts.every(l => H.I18N.ja['license.'+l] && H.I18N.en['license.'+l]), 'all license options have ja+en labels');
+  // title/author placeholder keys present
+  ok(H.I18N.ja['out.title.ph'] && H.I18N.en['out.title.ph'], 'out.title.ph placeholder in both languages');
+  ok(H.I18N.ja['out.author.ph'] && H.I18N.en['out.author.ph'], 'out.author.ph placeholder in both languages');
   // note.upload must not reference a file that doesn't exist in single-file distribution
   ok(!H.I18N.ja['note.upload'].includes('UPLOAD_GUIDE'), 'ja note.upload no stale file reference');
   ok(!H.I18N.en['note.upload'].includes('UPLOAD_GUIDE'), 'en note.upload no stale file reference');

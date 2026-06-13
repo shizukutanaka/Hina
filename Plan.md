@@ -113,3 +113,16 @@ hina/
 | メタ | 3つを合わせた最小コスト最大是正は？ | (1)両言語の死エントリ削除 (2)`err.loadFailed`+alertフィードバック (3)saveState 500ms debounce。合計20行未満・テスト178→183で担保 |
 
 結論3往復で収束。i18n重複エントリ・サイレント失敗・過剰LocalStorage書き込みの3問題を同時解消。
+
+## ソクラテス問答記録（2026-06-13・エクスポート品質・回復力）
+
+| 種別 | 問い | 結論 → 対応 |
+|------|------|------------|
+| 明確化 | Exportタブのライセンスドロップダウンに実際に表示される文字列は？ | `Redistribution_Prohibited`、`CC_BY_NC_SA` 等のraw技術値。VRC初心者には難解。`selRow` の第4引数が `null` のため翻訳が無効化されていた → `license.*` i18n 8キー追加＋引数を `'license'` に変更 |
+| 前提検証 | `buildAvatar()` が例外を投げた場合、何が起きるか？ | `build` が null のまま、UIは無音で機能停止。エラーバウンダリなし → `rebuild()` に try/catch を追加。`err.buildFailed` i18n キーで alert 通知 |
+| 視点転換 | タイトル未入力でエクスポートすると？ | `hina.vrm` 固定。複数バリアント試行時に全ファイルが同名 → title/author 入力欄に placeholder ヒント追加（`out.title.ph`・`out.author.ph`） |
+| 根拠 | VRMメタ `version` フィールドの仕様上の意味は？ | アバター製作者バージョン文字列。空文字列はUniVRM通過可能。v0.2課題として残置 |
+| 帰結 | 3問題の優先順位は？ | (1)ライセンス表示ローカライズ — 全エクスポーターに影響 (2)error boundary — 稀だが致命的 (3)placeholder — UXヒント |
+| メタ | 最小コスト最大是正は？ | (1)8×2 `license.*` i18nキー+selRow引数変更 (2)`err.buildFailed`付きtry/catch (3)placeholder 2キー追加。合計30行・テスト183→190で担保 |
+
+結論3往復で収束。エクスポートUI品質・回復力・入力ヒントの3軸を同時改善。

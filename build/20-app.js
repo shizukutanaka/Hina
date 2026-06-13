@@ -604,10 +604,11 @@ function renderBody(){
 let statEls={};
 function renderOut(bd){
   bd.append(el('div',{class:'sect'}, t('out.meta')));
-  const txt=(key,mk)=>{ bd.append(el('div',{class:'row'},
+  const txt=(key,mk,ph)=>{ bd.append(el('div',{class:'row'},
     el('label',{},t(key)),
-    el('input',{type:'text', value:meta[mk]||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
-  txt('out.title','title'); txt('out.author','author');
+    el('input',{type:'text', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
+  txt('out.title','title', t('out.title.ph'));
+  txt('out.author','author', t('out.author.ph'));
   const selRow=(key,mk,opts,tp)=>{
     const sel=el('select',{onchange:e=>{meta[mk]=e.target.value; saveState();}});
     for(const o of opts) sel.append(el('option',{value:o, ...(meta[mk]===o?{selected:''}:{})},
@@ -619,7 +620,7 @@ function renderOut(bd){
   selRow('out.sexual','sexual',['Disallow','Allow'],'usage');
   selRow('out.commercial','commercial',['Disallow','Allow'],'usage');
   selRow('out.license','license',
-    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND'],null);
+    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND'],'license');
 
   bd.append(el('div',{class:'sect'}, t('out.stats')));
   const tbl=el('table',{class:'statTable'}); statEls={};
@@ -741,7 +742,8 @@ function saveJson(){
 /* ---------- rebuild ---------- */
 function rebuild(){
   params=HINA.sanitize(params);
-  build=HINA.buildAvatar(params);
+  try{ build=HINA.buildAvatar(params); }
+  catch(e){ alert(t('err.buildFailed')+': '+e.message); return; }
   drawAtlas(params);
   uploadTexture();
   uploadGeometry();

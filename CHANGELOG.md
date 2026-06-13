@@ -14,6 +14,9 @@
 - Aboutダイアログのバージョン表示を `HINA.VERSION` から動的に設定（ハードコード `v0.1.0` を排除）。
 - `note.upload` テキストから存在しない `docs/UPLOAD_GUIDE.md` の参照を削除（アプリ内ガイドで代替済み）。
 ### Fixed
+- **ライセンスドロップダウンのローカライズ**: Exportタブのライセンス選択肢が `Redistribution_Prohibited`、`CC_BY_NC_SA` 等のraw技術値で表示されていた（`selRow` 第4引数が `null`）。`license.*` i18n キー8種（ja/en）を追加し、ユーザー向け表示（「再配布禁止」「No redistribution」等）に変更。
+- **`rebuild()` エラーバウンダリ追加**: `buildAvatar()` が例外を投げた場合 `build` が null のまま機能停止していた。try/catch を追加し `err.buildFailed` i18n キーで alert 通知。テスト担保。
+- **メタ入力欄に placeholder ヒント追加**: タイトル・作者フィールドに placeholder（`out.title.ph`・`out.author.ph`、ja/en）を追加。タイトル未入力のままエクスポートすると全ファイルが `hina.vrm` になる問題への入力促進。
 - **i18n `note.upload` 死エントリ除去**: 両言語（ja/en）の i18n オブジェクトに、修正済みの正エントリとは別に旧エントリ（`docs/UPLOAD_GUIDE.md` を参照するテキスト）が重複キーとして残存していた。JavaScript はオブジェクトリテラルの重複キーで後勝ちのため動作上の影響はなかったが、混乱を招くコードスメルだったため削除。
 - **JSON読込失敗のサイレント失敗を解消**: `deserialize()` が null を返した場合（形式不正・`app` フィールド不一致・空ファイル等）、UIが無音のまま変化しなかった。`err.loadFailed` i18n キー（ja/en）を追加し `alert()` で明示通知するよう修正。テスト担保。
 - **`saveState()` の過剰 localStorage 書き込みを抑制**: スライダー操作中に毎刻 `localStorage.setItem` が同期実行されていた（height 全可動域で最大 120 回）。500ms デバウンスを追加し最終値のみを永続化。プレビュー `rebuild()` は引き続き即時実行（UX維持）。
