@@ -56,6 +56,8 @@ ok(html.includes('--text-faint:#7a868f'), 'text-faint color meets WCAG AA contra
 ok(html.includes("ctrlKey||e.metaKey") && html.includes("e.key==='s'"), 'Ctrl/Cmd+S shortcut wired to export');
 ok(html.includes("'for':id") || html.includes('"for":id'), 'Export tab labels have for attribute (WCAG 1.3.1)');
 ok(html.includes("'meta-title'") || html.includes('"meta-title"'), 'title input has id for label association');
+ok(H.I18N.ja['hint.ctrlS'] && H.I18N.en['hint.ctrlS'], 'Ctrl+S hint label in both languages');
+ok(html.includes('document.title'), 'document.title updated dynamically with avatar name');
 ok(html.includes('fnameStem'), 'fnameStem() used for export filename');
 ok(html.includes("activePresetId||'custom'"), 'filename fallback uses preset ID');
 ok(html.includes('activePresetId'), 'active preset selection state tracked');

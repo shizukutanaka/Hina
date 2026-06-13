@@ -18,6 +18,8 @@
 - **`rebuild()` エラーバウンダリ追加**: `buildAvatar()` が例外を投げた場合 `build` が null のまま機能停止していた。try/catch を追加し `err.buildFailed` i18n キーで alert 通知。テスト担保。
 - **メタ入力欄に placeholder ヒント追加**: タイトル・作者フィールドに placeholder（`out.title.ph`・`out.author.ph`、ja/en）を追加。タイトル未入力のままエクスポートすると全ファイルが `hina.vrm` になる問題への入力促進。
 - **i18n `note.upload` 死エントリ除去**: 両言語（ja/en）の i18n オブジェクトに、修正済みの正エントリとは別に旧エントリ（`docs/UPLOAD_GUIDE.md` を参照するテキスト）が重複キーとして残存していた。JavaScript はオブジェクトリテラルの重複キーで後勝ちのため動作上の影響はなかったが、混乱を招くコードスメルだったため削除。
+- **ブラウザタブタイトル動的更新**: タイトル入力欄を変更すると `document.title` が `雛 — {ファイル名}` に即時更新されるようになった。複数タブで異なるアバターを作業する際のタブ識別が容易になる。
+- **Ctrl+S ヒント表示**: Export タブの書き出しボタン直下に `hint.ctrlS` キーのヒント文（ja/en）を追加。
 - **WCAG 1.3.1（情報と関係性）対応 — Exportタブのラベル関連付け**: `txt()` / `selRow()` ヘルパーの `<label>` 要素に `for` 属性、対応する `<input>`/`<select>` に `id` を追加（`meta-title`・`meta-author` 等）。ラベルクリックでフォーカス遷移するようになり、スクリーンリーダーが form 要素を正しく識別できるようになった。
 - **Ctrl/Cmd+S キーボードショートカット**: グローバル `keydown` ハンドラを追加し、テキスト入力欄以外でCtrl+S（macOSはCmd+S）を押すとVRM書き出しを即時実行。制作ツールの筋肉記憶ショートカットに対応。
 - **WCAG AA コントラスト比修正**: `--text-faint` を `#5f6b78`（コントラスト比 ~2.5:1）から `#7a868f`（~4.7:1）に引き上げ。CSS変数1点の変更で `.row label`・`.sect`・`.rankBadge .lbl`・`.note`・`.limit` 等の全適用箇所がWCAG AA（4.5:1）を充足。

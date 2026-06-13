@@ -620,7 +620,7 @@ function renderOut(bd){
     el('label',{'for':id},t(key)),
     el('input',{id, type:'text', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
   const fnPrev=el('div',{class:'limit', id:'fnPreview'});
-  const updateFnPrev=()=>{ fnPrev.textContent=t('out.filename')+': '+fnameStem()+'.vrm'; };
+  const updateFnPrev=()=>{ const s=fnameStem(); fnPrev.textContent=t('out.filename')+': '+s+'.vrm'; document.title='雛 — '+s; };
   bd.append(el('div',{class:'row'},
     el('label',{'for':'meta-title'},t('out.title')),
     el('input',{id:'meta-title', type:'text', value:meta.title||'', placeholder:t('out.title.ph'),
@@ -658,6 +658,7 @@ function renderOut(bd){
   bd.append(tbl);
 
   bd.append(el('button',{class:'btn primary wide', onclick:doExport}, t('btn.export')));
+  bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:10px'}, t('hint.ctrlS')));
   bd.append(el('button',{class:'btn wide', onclick:saveJson}, t('btn.saveJson')));
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
