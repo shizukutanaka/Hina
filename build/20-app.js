@@ -7,6 +7,7 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- state ---------- */
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
+let activePresetId = null, lastGachaSeed = null;
 let params = HINA.defaults();
 let meta = {title:'', author:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow',
             commercial:'Disallow', license:'Redistribution_Prohibited'};
@@ -572,6 +573,7 @@ function paramRow(k){
 }
 
 function onParam(k){
+  activePresetId=null;
   const s=PARAMS[k];
   if (s.k==='color'){ drawAtlas(params); uploadTexture(); saveState(); return; }
   if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
@@ -588,13 +590,17 @@ function renderBody(){
         el('span',{class:'c',style:'background:'+pp.hairColor}),
         el('span',{class:'c',style:'background:'+pp.eyeColor}),
         el('span',{class:'c',style:'background:'+pp.clothMain}));
-      grid.append(el('button',{class:'preCard', onclick:()=>{
-        params=pp; rebuild(); renderBody(); }},
+      grid.append(el('button',{class:'preCard'+(activePresetId===pre.id?' selected':''), onclick:()=>{
+        params=pp; activePresetId=pre.id; rebuild(); renderBody(); }},
         el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en), cols));
     }
-    bd.append(grid,
-      el('div',{style:'margin-top:14px'},
-        el('button',{class:'btn wide', onclick:()=>{ params=HINA.randomParams(); rebuild(); }}, t('btn.gacha'))));
+    const gDiv=el('div',{style:'margin-top:14px'});
+    gDiv.append(el('button',{class:'btn wide', onclick:()=>{
+      lastGachaSeed=(Math.random()*1e9|0); params=HINA.randomParams(lastGachaSeed);
+      activePresetId=null; rebuild(); renderBody(); }}, t('btn.gacha')));
+    if (lastGachaSeed!==null)
+      gDiv.append(el('div',{class:'gacha-seed'}, t('gacha.seed')+lastGachaSeed));
+    bd.append(grid, gDiv);
     return;
   }
   if (activeTab==='out'){ renderOut(bd); return; }

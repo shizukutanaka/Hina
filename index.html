@@ -58,6 +58,8 @@ main{flex:1;display:flex;min-height:0}
 .presetGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .preCard{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:left;transition:border-color .15s}
 .preCard:hover{border-color:var(--accent)}
+.preCard.selected{border-color:var(--accent);background:rgba(0,196,204,.07);}
+.gacha-seed{font-size:11px;color:var(--text-faint);margin-top:8px;text-align:center;font-variant-numeric:tabular-nums}
 .preCard .nm{font-size:14px;margin-bottom:6px}
 .preCard .cols{display:flex;gap:4px}
 .preCard .c{width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,.15)}
@@ -295,7 +297,7 @@ function randomParams(seed){
 const I18N = {
   ja: {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
-    'btn.gacha':'ガチャ（ランダム生成）','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。',
+    'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。',
     'mode.easy':'かんたん','mode.detail':'詳細',
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物チェーン','st.tex':'テクスチャ推定',
@@ -329,7 +331,7 @@ const I18N = {
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.',
+    'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.',
     'mode.easy':'Easy','mode.detail':'Detail',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring chains','st.tex':'Texture est.',
@@ -1359,6 +1361,7 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- state ---------- */
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
+let activePresetId = null, lastGachaSeed = null;
 let params = HINA.defaults();
 let meta = {title:'', author:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow',
             commercial:'Disallow', license:'Redistribution_Prohibited'};
@@ -1924,6 +1927,7 @@ function paramRow(k){
 }
 
 function onParam(k){
+  activePresetId=null;
   const s=PARAMS[k];
   if (s.k==='color'){ drawAtlas(params); uploadTexture(); saveState(); return; }
   if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
@@ -1940,13 +1944,17 @@ function renderBody(){
         el('span',{class:'c',style:'background:'+pp.hairColor}),
         el('span',{class:'c',style:'background:'+pp.eyeColor}),
         el('span',{class:'c',style:'background:'+pp.clothMain}));
-      grid.append(el('button',{class:'preCard', onclick:()=>{
-        params=pp; rebuild(); renderBody(); }},
+      grid.append(el('button',{class:'preCard'+(activePresetId===pre.id?' selected':''), onclick:()=>{
+        params=pp; activePresetId=pre.id; rebuild(); renderBody(); }},
         el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en), cols));
     }
-    bd.append(grid,
-      el('div',{style:'margin-top:14px'},
-        el('button',{class:'btn wide', onclick:()=>{ params=HINA.randomParams(); rebuild(); }}, t('btn.gacha'))));
+    const gDiv=el('div',{style:'margin-top:14px'});
+    gDiv.append(el('button',{class:'btn wide', onclick:()=>{
+      lastGachaSeed=(Math.random()*1e9|0); params=HINA.randomParams(lastGachaSeed);
+      activePresetId=null; rebuild(); renderBody(); }}, t('btn.gacha')));
+    if (lastGachaSeed!==null)
+      gDiv.append(el('div',{class:'gacha-seed'}, t('gacha.seed')+lastGachaSeed));
+    bd.append(grid, gDiv);
     return;
   }
   if (activeTab==='out'){ renderOut(bd); return; }
