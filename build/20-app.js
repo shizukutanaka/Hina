@@ -530,10 +530,11 @@ function renderTabs(){
 function paramRow(k){
   const s=PARAMS[k];
   const label = lang==='ja'?s.ja:s.en;
+  const pid='pr-'+k;
   if (s.k==='num'){
     // detail mode exposes a direct numeric entry (SPEC §2); easy mode shows a read-only value
     let valEl;
-    const r=el('input',{type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
+    const r=el('input',{id:pid, type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
       'aria-label':label,
       oninput:e=>{ params[k]=parseFloat(e.target.value);
         if (valEl.tagName==='INPUT') valEl.value=String(params[k]); else valEl.textContent=String(params[k]);
@@ -548,28 +549,28 @@ function paramRow(k){
     } else {
       valEl=el('span',{class:'num'}, String(params[k]));
     }
-    return el('div',{class:'row'}, el('label',{},label), r, valEl);
+    return el('div',{class:'row'}, el('label',{'for':pid},label), r, valEl);
   }
   if (s.k==='enum'){
     const optLabel=o=>{ const key='enum.'+k+'.'+o; const lbl=t(key); return lbl===key?o:lbl; };
-    const sel=el('select',{'aria-label':label, onchange:e=>{params[k]=e.target.value; onParam(k);}});
+    const sel=el('select',{id:pid, 'aria-label':label, onchange:e=>{params[k]=e.target.value; onParam(k);}});
     for(const o of s.opts) sel.append(el('option',{value:o, ...(params[k]===o?{selected:''}:{})}, optLabel(o)));
-    return el('div',{class:'row'}, el('label',{},label), sel);
+    return el('div',{class:'row'}, el('label',{'for':pid},label), sel);
   }
   if (s.k==='bool'){
-    const cb=el('input',{type:'checkbox','aria-label':label,
+    const cb=el('input',{id:pid, type:'checkbox','aria-label':label,
       onchange:e=>{params[k]=e.target.checked; onParam(k);}});
     cb.checked=params[k];
-    return el('div',{class:'row'}, el('label',{},label), cb);
+    return el('div',{class:'row'}, el('label',{'for':pid},label), cb);
   }
   // color
-  const inp=el('input',{type:'color', value:params[k], 'aria-label':label,
+  const inp=el('input',{id:pid, type:'color', value:params[k], 'aria-label':label,
     oninput:e=>{params[k]=e.target.value; onParam(k);}});
   const sw=el('div',{class:'swatches'});
   for(const c of HINA.PAL[s.pal])
     sw.append(el('button',{class:'sw', style:'background:'+c, 'aria-label':label+' '+c,
       onclick:()=>{params[k]=c; inp.value=c; onParam(k);}}));
-  return el('div',{class:'row'}, el('label',{},label), inp, sw);
+  return el('div',{class:'row'}, el('label',{'for':pid},label), inp, sw);
 }
 
 function onParam(k){

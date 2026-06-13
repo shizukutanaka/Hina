@@ -230,3 +230,16 @@ hina/
 | メタ | コスト/効果 | head に1行追加・テスト211→212 |
 
 結論2往復で収束。インライン単一 HTML の制約内で適用可能な最大 CSP を設定し、構造的な攻撃面を縮小した。
+
+## ソクラテス問答記録（2026-06-13・`paramRow` WCAG 1.3.1 完全対応）
+
+| 種別 | 問い | 結論 → 対応 |
+|------|------|------------|
+| 明確化 | Round 11 で Export タブの label/for を修正したが、パラメータタブは？ | `paramRow()` の全入力（range・select・checkbox・color）で `for`/`id` が未設定。ラベルクリックでフォーカス遷移しない |
+| 前提検証 | `aria-label` があれば `for`/`id` は不要か？ | SR は `aria-label` で読み上げ可能だが、マウスでラベルクリックした時のフォーカス遷移（WCAG 1.3.1・マウスUX）は `for`/`id` なしでは不可 |
+| 根拠 | paramRow が生成するパラメータ名は一意か？ | PARAMS のキー名（`height`・`eyeSize`・`hairStyle` 等）はグローバル一意 → `pid='pr-'+k` で一意 id を生成できる |
+| 視点転換 | color 行では label は color picker と swatches どちらを指すべきか？ | color picker（`<input type=color>`）を primary control として指定。swatches は補助的ボタン群で個別に `aria-label` を持つ |
+| 帰結 | bool（checkbox）行: label の `for` が checkbox を指すとラベルクリックで toggle されるか？ | Yes。これが HTML の `<label>` 本来の動作。スペースキーでも toggle 可能になる |
+| メタ | コスト/効果 | `paramRow()` 4ケースに各1行の `id:pid` / `'for':pid` 追加。テスト212→213 |
+
+結論2往復で収束。全タブの全パラメータ行でWCAG 1.3.1 を充足した。

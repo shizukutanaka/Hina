@@ -18,6 +18,7 @@
 - **`rebuild()` エラーバウンダリ追加**: `buildAvatar()` が例外を投げた場合 `build` が null のまま機能停止していた。try/catch を追加し `err.buildFailed` i18n キーで alert 通知。テスト担保。
 - **メタ入力欄に placeholder ヒント追加**: タイトル・作者フィールドに placeholder（`out.title.ph`・`out.author.ph`、ja/en）を追加。タイトル未入力のままエクスポートすると全ファイルが `hina.vrm` になる問題への入力促進。
 - **i18n `note.upload` 死エントリ除去**: 両言語（ja/en）の i18n オブジェクトに、修正済みの正エントリとは別に旧エントリ（`docs/UPLOAD_GUIDE.md` を参照するテキスト）が重複キーとして残存していた。JavaScript はオブジェクトリテラルの重複キーで後勝ちのため動作上の影響はなかったが、混乱を招くコードスメルだったため削除。
+- **WCAG 1.3.1 完全対応 — `paramRow` の全入力にラベル関連付け追加**: `paramRow()` が生成するすべての入力要素（range・enum select・checkbox・color picker）に `id='pr-{param}'` を付与し、対応する `<label>` の `for` 属性を設定。ラベルをクリックするとフォーカスが対応するスライダー/セレクト/チェックボックス/カラーピッカーに移動するようになった（Round 11 の Exportタブ対応と合わせて全タブで充足）。
 - **Content Security Policy 追加**: `<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">` を追加。インラインスクリプトを持つ単一 HTML の制約内で適用可能な最大 CSP（Flash/ActiveX 禁止・base タグ書き換え禁止・form 外部送信禁止）を設定。
 - **ブラウザタブタイトル動的更新**: タイトル入力欄を変更すると `document.title` が `雛 — {ファイル名}` に即時更新されるようになった。複数タブで異なるアバターを作業する際のタブ識別が容易になる。
 - **Ctrl+S ヒント表示**: Export タブの書き出しボタン直下に `hint.ctrlS` キーのヒント文（ja/en）を追加。
