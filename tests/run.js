@@ -84,6 +84,7 @@ ok(html.includes('activePresetId, lastGachaSeed'), 'activePresetId and lastGacha
 ok(html.includes('Number.isFinite(j.lastGachaSeed)'), 'lastGachaSeed restored safely handling 0 value');
 ok(html.includes("addEventListener('beforeunload'") && html.includes('clearTimeout(_saveTimer)'), 'beforeunload flushes debounced saveState to avoid losing last edit');
 ok(/deserialize[\s\S]{0,120}activePresetId=null/.test(html), 'JSON load clears stale activePresetId so preset highlight resets');
+ok(html.includes('META_DEFAULTS') && /reset\.confirm[\s\S]{0,200}META_DEFAULTS/.test(html), 'reset button restores meta to defaults via META_DEFAULTS');
 ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button label i18n in both languages');
 
 /* ---- math sanity ---- */

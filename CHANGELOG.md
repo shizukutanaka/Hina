@@ -44,6 +44,7 @@
 - **localStorage に `activePresetId` / `lastGachaSeed` を永続化**: ページリロード後にプリセット選択ハイライトが失われ、ファイル名が `hina_custom.vrm` にフォールバックする問題を修正。`saveState()` に両フィールドを追加し、`loadState()` では `Number.isFinite()` で `lastGachaSeed=0` を正しく復元。テスト230→232で担保。
 - **`beforeunload` で saveState をフラッシュ**: 500ms デバウンス中にタブを閉じると最後の編集が保存されない問題を修正。`beforeunload` ハンドラで保留タイマーをキャンセルし即時 `localStorage.setItem` を実行。テスト232→233で担保。
 - **JSON 読込後の残留プリセットハイライト修正**: JSON ファイルを読み込んだ後も前に選択していたプリセットカードのハイライトが残り、ファイル名も旧プリセット ID（例: `hina_kotone.vrm`）のまま書き出される問題を修正。JSON 読込成功時に `activePresetId=null` / `lastGachaSeed=null` をリセットし `saveState()` を呼出。テスト233→234で担保。
+- **リセットボタンの完全リセット**: リセットボタンがパラメータのみリセットし、meta（タイトル・作者等）・プリセット選択状態・ガチャシードが残留する問題を修正。`META_DEFAULTS` 定数を導入しリセット時に `meta=Object.assign({},META_DEFAULTS)` / `activePresetId=null` / `lastGachaSeed=null` / `saveState()` を実行。テスト234→235で担保。
 
 ## [0.1.0] - 2026-06-11
 ### Added

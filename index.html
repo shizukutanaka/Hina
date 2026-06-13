@@ -1387,8 +1387,8 @@ _rmMQ.addEventListener('change', e => { reduceMotion = e.matches; });
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
 let activePresetId = null, lastGachaSeed = null;
 let params = HINA.defaults();
-let meta = {title:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow',
-            commercial:'Disallow', license:'Redistribution_Prohibited'};
+const META_DEFAULTS = {title:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited'};
+let meta = Object.assign({}, META_DEFAULTS);
 let build = null;
 const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
 
@@ -2059,7 +2059,7 @@ function renderOut(bd){
   bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
   bd.append(el('button',{class:'btn wide', onclick:()=>{
     if (!confirm(t('btn.reset.confirm'))) return;
-    params=HINA.defaults(); rebuild(); renderBody(); }}, t('btn.reset')));
+    params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }}, t('btn.reset')));
   bd.append(el('div',{class:'note'}, t('note.upload')));
   const gd=el('div',{class:'note'}, el('b',{}, t('guide.t')));
   for(const k of ['guide.s1','guide.s2','guide.s3','guide.s4','guide.s5'])
