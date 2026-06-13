@@ -43,6 +43,7 @@
 - **WCAG 4.1.3（ステータスメッセージ）対応**: 性能ランクや書き出し結果が視覚的にのみ更新され、支援技術へ伝わらなかった問題を修正。視覚的に隠した `aria-live="polite"` ライブリージョン（`#srStatus`）を追加し、(1) ランク文字列が**実際に変化した時のみ**「性能ランク — PC: … / Quest: …（律速: …）」を通知（スライダー1刻みごとの読み上げ氾濫を重複排除で抑止）、(2) VRM書き出し成功時にファイル名とサイズを通知。
 - **localStorage に `activePresetId` / `lastGachaSeed` を永続化**: ページリロード後にプリセット選択ハイライトが失われ、ファイル名が `hina_custom.vrm` にフォールバックする問題を修正。`saveState()` に両フィールドを追加し、`loadState()` では `Number.isFinite()` で `lastGachaSeed=0` を正しく復元。テスト230→232で担保。
 - **`beforeunload` で saveState をフラッシュ**: 500ms デバウンス中にタブを閉じると最後の編集が保存されない問題を修正。`beforeunload` ハンドラで保留タイマーをキャンセルし即時 `localStorage.setItem` を実行。テスト232→233で担保。
+- **JSON 読込後の残留プリセットハイライト修正**: JSON ファイルを読み込んだ後も前に選択していたプリセットカードのハイライトが残り、ファイル名も旧プリセット ID（例: `hina_kotone.vrm`）のまま書き出される問題を修正。JSON 読込成功時に `activePresetId=null` / `lastGachaSeed=null` をリセットし `saveState()` を呼出。テスト233→234で担保。
 
 ## [0.1.0] - 2026-06-11
 ### Added

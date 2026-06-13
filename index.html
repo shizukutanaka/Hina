@@ -2052,7 +2052,7 @@ function renderOut(bd){
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
-        if (d){ params=d.params; Object.assign(meta,d.meta); rebuild(); renderBody(); }
+        if (d){ params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }
         else { alert(t('err.loadFailed')); } };
       rd.readAsText(f); e.target.value=''; }});
   bd.append(file);

@@ -83,6 +83,7 @@ ok(html.includes('apple-mobile-web-app-capable'), 'apple-mobile-web-app-capable 
 ok(html.includes('activePresetId, lastGachaSeed'), 'activePresetId and lastGachaSeed saved to localStorage');
 ok(html.includes('Number.isFinite(j.lastGachaSeed)'), 'lastGachaSeed restored safely handling 0 value');
 ok(html.includes("addEventListener('beforeunload'") && html.includes('clearTimeout(_saveTimer)'), 'beforeunload flushes debounced saveState to avoid losing last edit');
+ok(/deserialize[\s\S]{0,120}activePresetId=null/.test(html), 'JSON load clears stale activePresetId so preset highlight resets');
 ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button label i18n in both languages');
 
 /* ---- math sanity ---- */
