@@ -18,6 +18,7 @@
 - **`rebuild()` エラーバウンダリ追加**: `buildAvatar()` が例外を投げた場合 `build` が null のまま機能停止していた。try/catch を追加し `err.buildFailed` i18n キーで alert 通知。テスト担保。
 - **メタ入力欄に placeholder ヒント追加**: タイトル・作者フィールドに placeholder（`out.title.ph`・`out.author.ph`、ja/en）を追加。タイトル未入力のままエクスポートすると全ファイルが `hina.vrm` になる問題への入力促進。
 - **i18n `note.upload` 死エントリ除去**: 両言語（ja/en）の i18n オブジェクトに、修正済みの正エントリとは別に旧エントリ（`docs/UPLOAD_GUIDE.md` を参照するテキスト）が重複キーとして残存していた。JavaScript はオブジェクトリテラルの重複キーで後勝ちのため動作上の影響はなかったが、混乱を招くコードスメルだったため削除。
+- **`prefers-reduced-motion` 動的追従**: OS のアクセシビリティ設定変更をページリロードなしにリアルタイム反映するよう修正。`MediaQueryList.addEventListener('change', ...)` で `reduceMotion` 変数を更新し、次の `renderFrame()` から即時に反映される（呼吸・頭揺れ・瞬き・髪物理が即停止/再開）。
 - **About ボタンの `aria-label` ローカライズ**: `aria-label="About"` をハードコード英語から `a11y.about.btn` i18n キー（ja: 「雛について」/ en: 「About Hina」）に変更。`applyLang()` が言語切替時に動的更新。日本語モードで「About ボタン」と英語で読まれる問題を解消。
 - **`<noscript>` フォールバック追加**: JavaScript 無効時に空白ページを表示する代わりに、日英両言語で「JavaScript が必要です」と案内するメッセージを `<body>` 開始直後に追加。既存 CSS 変数（`--bg` / `--text` / `--text-dim`）を使用してデザインを統一。
 - **selfTest 強化 — bone/node インデックス整合性検証追加**: selfTest() に (1)ヒューマノイドボーンの全 node インデックスが `nodes[]` 範囲内か (2)SpringBone colliderGroup の node インデックスが範囲内か、の2件を追加（18件→20件）。無効な node 参照による UniVRM 読み込み失敗を早期発見できる。

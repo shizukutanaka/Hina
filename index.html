@@ -1377,7 +1377,9 @@ if (typeof module!=='undefined' && module.exports) module.exports = HINA;
 (() => {
 const $ = id => document.getElementById(id);
 const M = HINA.M, PARAMS = HINA.PARAMS, TEXSZ = HINA.TEX, ATLAS = HINA.ATLAS;
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const _rmMQ = matchMedia('(prefers-reduced-motion: reduce)');
+let reduceMotion = _rmMQ.matches;
+_rmMQ.addEventListener('change', e => { reduceMotion = e.matches; });
 
 /* ---------- state ---------- */
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
