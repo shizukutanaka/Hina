@@ -109,7 +109,7 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
   </section>
   <aside id="panel">
     <nav id="tabs" role="tablist"></nav>
-    <div id="tabBody"></div>
+    <div id="tabBody" role="tabpanel" tabindex="0"></div>
   </aside>
 </main>
 <dialog id="aboutDlg">
@@ -295,7 +295,7 @@ function randomParams(seed){
 const I18N = {
   ja: {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
-    'btn.gacha':'ガチャ（ランダム生成）','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化',
+    'btn.gacha':'ガチャ（ランダム生成）','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。',
     'mode.easy':'かんたん','mode.detail':'詳細',
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物チェーン','st.tex':'テクスチャ推定',
@@ -329,7 +329,7 @@ const I18N = {
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset',
+    'btn.gacha':'Gacha (randomize)','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.',
     'mode.easy':'Easy','mode.detail':'Detail',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring chains','st.tex':'Texture est.',
@@ -1867,9 +1867,15 @@ function el(tag, attrs, ...kids){
 function renderTabs(){
   const nav=$('tabs'); nav.textContent='';
   for(const tb of TABS){
-    nav.append(el('button',{class:'tab', role:'tab', 'aria-selected':String(tb===activeTab),
-      onclick:()=>{activeTab=tb; renderTabs(); renderBody();}}, t('tab.'+tb)));
+    nav.append(el('button',{
+      id:'tab-'+tb, class:'tab', role:'tab',
+      'aria-selected':String(tb===activeTab),
+      'aria-controls':'tabBody',
+      tabindex: tb===activeTab?'0':'-1',
+      onclick:()=>{ activeTab=tb; renderTabs(); renderBody(); $('tab-'+tb).focus(); },
+    }, t('tab.'+tb)));
   }
+  $('tabBody').setAttribute('aria-labelledby','tab-'+activeTab);
 }
 
 function paramRow(k){
@@ -1999,6 +2005,7 @@ function renderOut(bd){
   bd.append(file);
   bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
   bd.append(el('button',{class:'btn wide', onclick:()=>{
+    if (!confirm(t('btn.reset.confirm'))) return;
     params=HINA.defaults(); rebuild(); renderBody(); }}, t('btn.reset')));
   bd.append(el('div',{class:'note'}, t('note.upload')));
   const gd=el('div',{class:'note'}, el('b',{}, t('guide.t')));
@@ -2126,6 +2133,17 @@ $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 loadState();
 rebuild();
 applyLang();
+// Roving tabindex: arrow keys navigate between tabs (ARIA tablist pattern)
+$('tabs').addEventListener('keydown',e=>{
+  const idx=TABS.indexOf(activeTab), n=TABS.length; let ni=-1;
+  if (e.key==='ArrowRight'||e.key==='ArrowDown') ni=(idx+1)%n;
+  else if (e.key==='ArrowLeft'||e.key==='ArrowUp') ni=(idx-1+n)%n;
+  else if (e.key==='Home') ni=0;
+  else if (e.key==='End') ni=n-1;
+  if (ni<0) return;
+  e.preventDefault();
+  activeTab=TABS[ni]; renderTabs(); renderBody(); $('tab-'+TABS[ni]).focus();
+});
 camDist=build.dims.H*1.85; camTarget=[0,build.dims.H*0.55,0];
 if (!GLOK) $('hint').textContent='WebGL unavailable — preview disabled (export still works)';
 cv.addEventListener('webglcontextlost', e=>{ e.preventDefault();

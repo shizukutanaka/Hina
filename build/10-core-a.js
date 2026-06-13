@@ -174,7 +174,7 @@ function randomParams(seed){
 const I18N = {
   ja: {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
-    'btn.gacha':'ガチャ（ランダム生成）','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化',
+    'btn.gacha':'ガチャ（ランダム生成）','btn.export':'VRM 書き出し','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。',
     'mode.easy':'かんたん','mode.detail':'詳細',
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.author':'作者','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物チェーン','st.tex':'テクスチャ推定',
@@ -208,7 +208,7 @@ const I18N = {
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset',
+    'btn.gacha':'Gacha (randomize)','btn.export':'Export VRM','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.',
     'mode.easy':'Easy','mode.detail':'Detail',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.author':'Author','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring chains','st.tex':'Texture est.',

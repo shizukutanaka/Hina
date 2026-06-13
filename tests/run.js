@@ -40,6 +40,14 @@ ok(/err\.buildFailed/.test(html), 'buildAvatar failure uses err.buildFailed i18n
 ok(/saveState/.test(html) && /clearTimeout/.test(html), 'saveState is debounced (clearTimeout present)');
 ok(/buildAvatar[\s\S]{0,60}catch/.test(html), 'rebuild() catches buildAvatar errors');
 ok(/'license'\)/.test(html) || /"license"\)/.test(html), 'license selRow uses translation prefix');
+// ARIA tablist pattern (WCAG 2.1.1 for tab navigation)
+ok(html.includes('role="tabpanel"'), 'tabBody has role=tabpanel');
+ok(html.includes('aria-controls'), 'tab buttons have aria-controls');
+ok(html.includes('tabindex="-1"') || /tabindex:.*-1/.test(html), 'non-active tabs use tabindex=-1 (roving)');
+ok(html.includes("'aria-labelledby','tab-"), 'tabpanel aria-labelledby wired to active tab');
+ok(html.includes('TABS.indexOf(activeTab)'), 'tab list has arrow-key navigation (indexOf pattern)');
+ok(H.I18N.ja['btn.reset.confirm'] && H.I18N.en['btn.reset.confirm'], 'reset confirm message in both languages');
+ok(html.includes("'btn.reset.confirm'"), 'Reset button guarded by confirmation');
 
 /* ---- math sanity ---- */
 {

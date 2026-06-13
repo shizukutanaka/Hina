@@ -515,9 +515,15 @@ function el(tag, attrs, ...kids){
 function renderTabs(){
   const nav=$('tabs'); nav.textContent='';
   for(const tb of TABS){
-    nav.append(el('button',{class:'tab', role:'tab', 'aria-selected':String(tb===activeTab),
-      onclick:()=>{activeTab=tb; renderTabs(); renderBody();}}, t('tab.'+tb)));
+    nav.append(el('button',{
+      id:'tab-'+tb, class:'tab', role:'tab',
+      'aria-selected':String(tb===activeTab),
+      'aria-controls':'tabBody',
+      tabindex: tb===activeTab?'0':'-1',
+      onclick:()=>{ activeTab=tb; renderTabs(); renderBody(); $('tab-'+tb).focus(); },
+    }, t('tab.'+tb)));
   }
+  $('tabBody').setAttribute('aria-labelledby','tab-'+activeTab);
 }
 
 function paramRow(k){
@@ -647,6 +653,7 @@ function renderOut(bd){
   bd.append(file);
   bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
   bd.append(el('button',{class:'btn wide', onclick:()=>{
+    if (!confirm(t('btn.reset.confirm'))) return;
     params=HINA.defaults(); rebuild(); renderBody(); }}, t('btn.reset')));
   bd.append(el('div',{class:'note'}, t('note.upload')));
   const gd=el('div',{class:'note'}, el('b',{}, t('guide.t')));
@@ -774,6 +781,17 @@ $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 loadState();
 rebuild();
 applyLang();
+// Roving tabindex: arrow keys navigate between tabs (ARIA tablist pattern)
+$('tabs').addEventListener('keydown',e=>{
+  const idx=TABS.indexOf(activeTab), n=TABS.length; let ni=-1;
+  if (e.key==='ArrowRight'||e.key==='ArrowDown') ni=(idx+1)%n;
+  else if (e.key==='ArrowLeft'||e.key==='ArrowUp') ni=(idx-1+n)%n;
+  else if (e.key==='Home') ni=0;
+  else if (e.key==='End') ni=n-1;
+  if (ni<0) return;
+  e.preventDefault();
+  activeTab=TABS[ni]; renderTabs(); renderBody(); $('tab-'+TABS[ni]).focus();
+});
 camDist=build.dims.H*1.85; camTarget=[0,build.dims.H*0.55,0];
 if (!GLOK) $('hint').textContent='WebGL unavailable — preview disabled (export still works)';
 cv.addEventListener('webglcontextlost', e=>{ e.preventDefault();
