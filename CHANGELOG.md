@@ -18,6 +18,7 @@
 - **`rebuild()` エラーバウンダリ追加**: `buildAvatar()` が例外を投げた場合 `build` が null のまま機能停止していた。try/catch を追加し `err.buildFailed` i18n キーで alert 通知。テスト担保。
 - **メタ入力欄に placeholder ヒント追加**: タイトル・作者フィールドに placeholder（`out.title.ph`・`out.author.ph`、ja/en）を追加。タイトル未入力のままエクスポートすると全ファイルが `hina.vrm` になる問題への入力促進。
 - **i18n `note.upload` 死エントリ除去**: 両言語（ja/en）の i18n オブジェクトに、修正済みの正エントリとは別に旧エントリ（`docs/UPLOAD_GUIDE.md` を参照するテキスト）が重複キーとして残存していた。JavaScript はオブジェクトリテラルの重複キーで後勝ちのため動作上の影響はなかったが、混乱を招くコードスメルだったため削除。
+- **Ctrl/Cmd+S キーボードショートカット**: グローバル `keydown` ハンドラを追加し、テキスト入力欄以外でCtrl+S（macOSはCmd+S）を押すとVRM書き出しを即時実行。制作ツールの筋肉記憶ショートカットに対応。
 - **WCAG AA コントラスト比修正**: `--text-faint` を `#5f6b78`（コントラスト比 ~2.5:1）から `#7a868f`（~4.7:1）に引き上げ。CSS変数1点の変更で `.row label`・`.sect`・`.rankBadge .lbl`・`.note`・`.limit` 等の全適用箇所がWCAG AA（4.5:1）を充足。
 - **スマートデフォルトファイル名**: `title` 未入力時のVRM/JSONファイル名フォールバックを `hina` から `hina_<プリセットID|custom>` に変更（例: `hina_kotone.vrm`）。`fnameStem()` 関数を導入し `doExport()`/`saveJson()` 双方で使用。Exportタブのタイトル欄下にリアルタイムファイル名プレビューを追加（`out.filename` i18nキー、ja/en）。テスト202→205で担保。
 - **VRMメタ `contact`/`reference` フィールドをUIに追加**: Exportタブにアバター作者の連絡先（`contactInformation`）と参照元（`reference`）の入力欄を追加。VRM 0.x 仕様の帰属フィールドがUIから設定可能になり、二次配布・権利管理の機械可読化を実現。`out.contact`・`out.reference`・各 placeholder の i18n 4キー（ja/en）追加。テスト200→202で担保。

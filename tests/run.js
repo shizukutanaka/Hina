@@ -53,6 +53,7 @@ ok(H.I18N.ja['out.contact'] && H.I18N.en['out.contact'], 'VRM contact field labe
 ok(H.I18N.ja['out.reference'] && H.I18N.en['out.reference'], 'VRM reference field label in both languages');
 ok(H.I18N.ja['out.filename'] && H.I18N.en['out.filename'], 'out.filename label in both languages');
 ok(html.includes('--text-faint:#7a868f'), 'text-faint color meets WCAG AA contrast ratio on dark bg');
+ok(html.includes("ctrlKey||e.metaKey") && html.includes("e.key==='s'"), 'Ctrl/Cmd+S shortcut wired to export');
 ok(html.includes('fnameStem'), 'fnameStem() used for export filename');
 ok(html.includes("activePresetId||'custom'"), 'filename fallback uses preset ID');
 ok(html.includes('activePresetId'), 'active preset selection state tracked');
