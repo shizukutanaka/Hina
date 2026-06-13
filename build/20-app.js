@@ -25,13 +25,15 @@ function loadState(){
     if (j.meta && typeof j.meta==='object') Object.assign(meta, j.meta);
     if (j.lang==='en' || j.lang==='ja') lang = j.lang;
     if (j.mode==='detail') mode = 'detail';
+    if (j.activePresetId) activePresetId = j.activePresetId;
+    if (Number.isFinite(j.lastGachaSeed)) lastGachaSeed = j.lastGachaSeed;
   }catch(e){}
 }
 let _saveTimer = null;
 function saveState(){
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(()=>{
-    try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode})); }catch(e){}
+    try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activePresetId, lastGachaSeed})); }catch(e){}
   }, 500);
 }
 

@@ -80,6 +80,8 @@ ok(html.includes("$('btnAbout').setAttribute('aria-label'"), 'About button aria-
 ok(html.includes("_rmMQ.addEventListener('change'"), 'prefers-reduced-motion MediaQuery change event wired for live updates');
 ok(html.includes('name="theme-color"') && html.includes('#0F1216'), 'theme-color meta present for mobile browser theming');
 ok(html.includes('apple-mobile-web-app-capable'), 'apple-mobile-web-app-capable meta for iOS home screen');
+ok(html.includes('activePresetId, lastGachaSeed'), 'activePresetId and lastGachaSeed saved to localStorage');
+ok(html.includes('Number.isFinite(j.lastGachaSeed)'), 'lastGachaSeed restored safely handling 0 value');
 ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button label i18n in both languages');
 
 /* ---- math sanity ---- */
