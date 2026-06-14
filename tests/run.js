@@ -2182,6 +2182,37 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 166: dims formula sheet — shX, legX, armL, elbowX exact values ---- */
+{
+  // Complete formula reference for dims computed by buildSkeleton:
+  //   shX     = shoulderW × H × 0.5
+  //   legX    = hipW × H × 0.5 × 0.52
+  //   armL    = H × 0.34 × armLen
+  //   elbowX  = shX + armL × 0.47
+  // (wristX = shX + armL × 0.92 tested in Round 151)
+  const d = B.dims;
+  ok(Math.abs(d.shX - P.shoulderW * d.H * 0.5) < 1e-9,
+    `shX = shoulderW×H×0.5 = ${(P.shoulderW*d.H*0.5).toFixed(6)}`);
+  ok(Math.abs(d.legX - P.hipW * d.H * 0.5 * 0.52) < 1e-9,
+    `legX = hipW×H×0.5×0.52 = ${(P.hipW*d.H*0.5*0.52).toFixed(6)}`);
+  ok(Math.abs(d.armL - d.H * 0.34 * P.armLen) < 1e-9,
+    `armL = H×0.34×armLen = ${(d.H*0.34*P.armLen).toFixed(6)}`);
+  ok(Math.abs(d.elbowX - (d.shX + d.armL * 0.47)) < 1e-9,
+    `elbowX = shX + armL×0.47 = ${(d.shX+d.armL*0.47).toFixed(6)}`);
+
+  // All 6 presets satisfy these formulas
+  let fail = 0;
+  for(const pre of H.PRESETS){
+    const pp = H.presetParams(pre);
+    const dd = H.buildAvatar(pp).dims;
+    if(Math.abs(dd.shX - pp.shoulderW * dd.H * 0.5) > 1e-6) fail++;
+    if(Math.abs(dd.legX - pp.hipW * dd.H * 0.5 * 0.52) > 1e-6) fail++;
+    if(Math.abs(dd.armL - dd.H * 0.34 * pp.armLen) > 1e-6) fail++;
+    if(Math.abs(dd.elbowX - (dd.shX + dd.armL * 0.47)) > 1e-6) fail++;
+  }
+  ok(fail === 0, 'shX/legX/armL/elbowX formulas hold across all 6 presets');
+}
+
 /* ---- Round 165: mouthW and mouth fan geometry formula ---- */
 {
   // mrx = headR×0.14×mouthW (half-width, scales with mouthW)
