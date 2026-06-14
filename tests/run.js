@@ -618,9 +618,25 @@ function accData(j, bin, ai){
   const dm = dirty.json.extensions.VRM.meta;
   ok(!/[\u0000-\u001f]/.test(dm.title) && dm.title.length <= 256, 'meta title stripped + clipped');
   ok(dm.allowedUserName === 'OnlyAuthor' && dm.licenseName === 'Redistribution_Prohibited', 'meta bad enums fall back');
+  ok(dm.violentUssageName === 'Disallow' && dm.sexualUssageName === 'Disallow' && dm.commercialUssageName === 'Disallow',
+    'meta violent/sexual/commercial not in dirty input → safe defaults');
+  // bad usage enum values also fall back
+  const badUsage = H.exportVRM(B, P, { violent: 'Always', sexual: 'YES', commercial: 'Maybe' }, png);
+  const bu = badUsage.json.extensions.VRM.meta;
+  ok(bu.violentUssageName === 'Disallow' && bu.sexualUssageName === 'Disallow' && bu.commercialUssageName === 'Disallow',
+    'meta bad violent/sexual/commercial enum values fall back to Disallow');
   // str() must use the default when the cleaned result is empty (all-control-char input)
   const ctrlOnly = H.exportVRM(B, P, { author: '\x01\x02\x03' }, png);
   ok(ctrlOnly.json.extensions.VRM.meta.author === 'unknown', 'meta author defaults when input is all control chars');
+  // meta.version default is '1.0' when not provided
+  const noVer = H.exportVRM(B, P, {}, png);
+  ok(noVer.json.extensions.VRM.meta.version === '1.0', 'meta.version defaults to 1.0 when empty');
+  // meta.contact / meta.reference with control chars are stripped
+  const ctrlMeta = H.exportVRM(B, P, { contact: 'ok\x00bad', reference: '\x1ftest\x1f' }, png);
+  ok(!/[\u0000-\u001f]/.test(ctrlMeta.json.extensions.VRM.meta.contactInformation),
+    'meta.contact control chars stripped');
+  ok(!/[\u0000-\u001f]/.test(ctrlMeta.json.extensions.VRM.meta.reference),
+    'meta.reference control chars stripped');
 
   // springOff export
   const off = H.exportVRM(B, Object.assign({}, P, { springOff: true }), {}, png);
