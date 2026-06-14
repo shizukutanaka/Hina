@@ -1666,6 +1666,40 @@ function accData(j, bin, ai){
     'fnameStem() includes "hina_gacha_{seed}" prefix when gacha was run (reproducibility)');
 }
 
+/* ---- Round 111: blink morph symmetry + vowel vertex coverage + expr hint feedback ---- */
+{
+  // blink_l and blink_r must affect disjoint vertex sets (each controls one eye)
+  const bLVerts = new Set(B.morphs.sparse.blink_l.map(e => e[0]));
+  const bRVerts = new Set(B.morphs.sparse.blink_r.map(e => e[0]));
+  ok(bLVerts.size > 0 && bRVerts.size > 0, 'blink_l and blink_r each affect at least one vertex');
+  ok([...bLVerts].every(v => !bRVerts.has(v)),
+    'blink_l and blink_r affect disjoint vertex sets (L eye ≠ R eye)');
+  ok(bLVerts.size === bRVerts.size,
+    'blink_l and blink_r affect equal vertex count (symmetric eyes)');
+
+  // combined blink must be a superset of blink_l ∪ blink_r
+  const blinkVerts = new Set(B.morphs.sparse.blink.map(e => e[0]));
+  ok([...bLVerts].every(v => blinkVerts.has(v)) && [...bRVerts].every(v => blinkVerts.has(v)),
+    'combined blink morph vertex set is a superset of blink_l ∪ blink_r');
+
+  // vowel morph vertices must be disjoint from eye/brow (blink) vertices
+  // (different scale factors may yield different sparse sets due to zero-displacement filtering,
+  //  but all vowels are mouth-only, so no vowel vertex should appear in the blink set)
+  const vowelAllVerts = new Set(['a','i','u','e','o'].flatMap(n => B.morphs.sparse[n].map(e => e[0])));
+  ok([...vowelAllVerts].every(v => !blinkVerts.has(v)),
+    'vowel morph vertices are disjoint from blink vertices (mouth ≠ eye+brow regions)');
+
+  // setExpr() updates hint bar with expression name when active
+  ok(/setExpr[\s\S]{0,200}hintEl.*textContent.*expr\..*exprOff/.test(html.replace(/\s+/g,' ')),
+    'setExpr() updates hint bar with expression name and deactivation hint');
+  ok(/setExpr[\s\S]{0,320}hint\.drag/.test(html),
+    'setExpr() restores hint.drag text when returning to neutral');
+
+  // hint.exprOff i18n key in both languages
+  ok(H.I18N.ja['hint.exprOff'] === 'クリックで解除', 'hint.exprOff JA = クリックで解除');
+  ok(H.I18N.en['hint.exprOff'] === 'click to deactivate', 'hint.exprOff EN = click to deactivate');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

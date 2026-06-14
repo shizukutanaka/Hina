@@ -294,6 +294,10 @@ function setExpr(name){
   morphW = {};
   if (activeExpr) morphW[activeExpr] = 1;
   morphDirty = true;
+  const hintEl = $('hint');
+  if (hintEl) hintEl.textContent = activeExpr
+    ? t('expr.'+activeExpr) + ' — ' + t('hint.exprOff')
+    : (GLOK ? t('hint.drag') : t('hint.noGL'));
   const bar = $('exprBar');
   if (!bar) return;
   bar.querySelectorAll('.eBtn').forEach(b => {
