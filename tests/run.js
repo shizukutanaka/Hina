@@ -899,6 +899,17 @@ function accData(j, bin, ai){
   ok(o1 === 0 && o2 === 4 && bw.len === 8, 'BinWriter 4-byte alignment');
   const bytes = bw.bytes();
   ok(bytes.length === 8 && bytes[0] === 1 && bytes[3] === 0, 'BinWriter zero padding');
+  // empty BinWriter
+  const bw2 = new H.BinWriter();
+  ok(bw2.len === 0 && bw2.bytes().length === 0, 'empty BinWriter: len=0, bytes empty');
+  // uint16 array after 3-byte write: align(4) pads 1 byte, then Uint16 starts at offset 4
+  const bw3 = new H.BinWriter();
+  bw3.push(new Uint8Array([0xAA, 0xBB, 0xCC]));
+  const oa = bw3.push(new Uint16Array([0x1234]));
+  ok(oa === 4 && bw3.len === 6, 'BinWriter Uint16Array: starts at 4-byte aligned offset after 3-byte write');
+  const b3 = bw3.bytes();
+  ok(b3[3] === 0 && b3[4] === 0x34 && b3[5] === 0x12,
+    'BinWriter Uint16Array: pad byte at 3, little-endian 0x1234 at bytes 4-5');
 }
 
 /* ---- selfTest ---- */
