@@ -2182,6 +2182,37 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 158: bangs vertex/triangle count snapshots + morph stability across bangs ---- */
+{
+  // Exact counts per bangs style (default twin hairStyle). Regression guard for bang-strip geometry.
+  // full=5 strips, see=5 narrower strips, center=4 side strips (fewer strips overall).
+  const BANGS_SNAP = {full:{verts:1381,tris:1961}, see:{verts:1371,tris:1955}, center:{verts:1366,tris:1952}};
+  let snapFail = 0;
+  for(const [bangs, {verts, tris}] of Object.entries(BANGS_SNAP)){
+    const C = H.buildAvatar(Object.assign(H.defaults(), {bangs}));
+    if(C.geom.pos.length/3 !== verts) snapFail++;
+    if(C.geom.idx.length/3 !== tris) snapFail++;
+  }
+  ok(snapFail === 0,
+    'bangs vertex/tris snapshot: full=1381v/1961t, see=1371v/1955t, center=1366v/1952t (regression guard)');
+
+  // Ordering: full has more verts than see, see more than center (more strips = more geometry)
+  ok(BANGS_SNAP.full.verts > BANGS_SNAP.see.verts && BANGS_SNAP.see.verts > BANGS_SNAP.center.verts,
+    'bangs vertex count: full > see > center (more bang strips = more geometry)');
+
+  // Morph counts must be invariant across bangs styles (morphs only reference face tag vertices)
+  const EXPECTED = {a:8,i:8,u:9,e:8,o:9,blink:16,'blink_l':8,'blink_r':8,joy:24,angry:25,sorrow:25,fun:24};
+  let morphFail = 0;
+  for(const bangs of ['full','see','center']){
+    const C = H.buildAvatar(Object.assign(H.defaults(), {bangs}));
+    for(const [n, exp] of Object.entries(EXPECTED)){
+      if(C.morphs.sparse[n].length !== exp) morphFail++;
+    }
+  }
+  ok(morphFail === 0,
+    'morph sparse counts invariant across all bangs styles (morphs only reference face tag verts)');
+}
+
 /* ---- Round 157: face tag vertex count snapshots + morph POSITION-only + tag ordering ---- */
 {
   // Face tag vertex counts are topology-invariant (faceQuad=4, mouth fan=9)
