@@ -336,6 +336,13 @@ const B = H.buildAvatar(P);
   ok(B.bones[B.idx.lUA].w[0] < 0 && B.bones[B.idx.rUA].w[0] > 0, 'VRM0: leftUpperArm x<0, rightUpperArm x>0');
   ok(B.bones[B.idx.lE].w[0] < 0 && B.bones[B.idx.rE].w[0] > 0, 'left/right eye sides');
   ok(B.bones[B.idx.lE].w[2] < 0, 'eyes face Z-minus');
+  // VRM §5.1 coordinate invariants: Y-up, floor at y=0, avatar centered on X=Z=0
+  ok(B.bones[B.idx.hips].w[1] > 0, 'hips above ground (Y-up world, floor at y=0)');
+  ok(B.bones[B.idx.head].w[1] > B.bones[B.idx.hips].w[1], 'head Y > hips Y (vertical order)');
+  ok(B.bones[B.idx.hips].w[0] === 0 && B.bones[B.idx.hips].w[2] === 0,
+    'hips centered at x=0, z=0 (symmetric avatar)');
+  ok(B.bones[B.idx.neck].w[0] === 0 && B.bones[B.idx.neck].w[2] === 0,
+    'neck centered at x=0, z=0');
   ok(B.bones.every((b, i) => b.parent < i), 'bone parents precede children');
   const g = B.geom, nV = g.pos.length / 3;
   ok(nV > 300 && nV < 65536, 'vertex count in uint16 range');
