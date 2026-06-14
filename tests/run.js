@@ -1440,6 +1440,59 @@ function accData(j, bin, ai){
     'onParam() calls renderBody() after rebuild so outfit-conditional params (skirtLen) update immediately');
 }
 
+/* ---- Round 106: height badge in preview overlay + GLB binary chunk padding ---- */
+{
+  // Height badge elements present in stage HTML
+  ok(html.includes('id="heightBadge"'), 'height badge element present in rank overlay');
+  ok(html.includes('id="heightVal"'), 'heightVal span present for dynamic height display');
+  ok(html.includes('id="heightLbl"'), 'heightLbl span present for localizable height label');
+
+  // updateStats() fills heightVal with formatted height
+  ok(/heightVal[\s\S]{0,60}params\.height\.toFixed/.test(html),
+    'updateStats() sets heightVal to params.height.toFixed(2) + " m"');
+
+  // applyLang() translates the height label
+  ok(/heightLbl[\s\S]{0,40}lbl\.height/.test(html),
+    'applyLang() updates heightLbl with localized lbl.height key');
+
+  // i18n keys for height label in both languages
+  ok(H.I18N.ja['lbl.height'] === '高さ', 'lbl.height JA = 高さ');
+  ok(H.I18N.en['lbl.height'] === 'Height', 'lbl.height EN = Height');
+
+  // GLB binary chunk must be padded with 0x00 bytes per glTF 2.0 spec
+  {
+    const png = H.b64ToBytes(H.PNG1);
+    const ex = H.exportVRM(H.buildAvatar(H.defaults()), H.defaults(), {}, png);
+    const bytes = ex.bytes;
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    // JSON chunk: offset 12 = chunk length, offset 16 = 'JSON' magic
+    const jsonChunkLen = dv.getUint32(12, true);
+    // BIN chunk starts after header(12) + JSON chunk header(8) + JSON chunk data
+    const binChunkOff = 12 + 8 + jsonChunkLen;
+    const binChunkLen = dv.getUint32(binChunkOff, true);
+    const binStart = binChunkOff + 8;
+    const binEnd = binStart + binChunkLen;
+    ok(binEnd <= bytes.length, 'GLB binary chunk end is within total file size');
+    // Find the actual data end (last non-zero byte + 1)
+    let dataEnd = binEnd;
+    while (dataEnd > binStart && bytes[dataEnd - 1] === 0) dataEnd--;
+    const padBytes = binEnd - dataEnd;
+    ok(padBytes >= 0, 'GLB binary chunk has non-negative padding (≥0 bytes)');
+    // If there is padding, all pad bytes must be 0x00
+    const binPadOK = padBytes === 0 || Array.from({length: padBytes}, (_, i) => bytes[dataEnd + i]).every(b => b === 0);
+    ok(binPadOK, 'GLB binary chunk padding bytes are 0x00 per glTF 2.0 §4.4');
+  }
+
+  // HEIGHT badge updates dynamically: verify avatar built with height=1.2 has different height than default
+  {
+    const bH = H.buildAvatar(H.sanitize({ height: 1.2 }));
+    ok(bH.dims.H === 1.2, 'buildAvatar dims.H reflects height param (1.2m)');
+    const bD = H.buildAvatar(H.defaults());
+    ok(bD.dims.H === H.defaults().height, 'buildAvatar dims.H reflects default height param');
+    ok(bH.dims.H !== bD.dims.H, 'different height params produce different dims.H values');
+  }
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

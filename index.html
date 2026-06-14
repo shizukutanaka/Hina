@@ -111,6 +111,7 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
     <div id="rankWrap">
       <div class="rankBadge"><span class="lbl">PC</span><span class="val" id="rankPC">—</span></div>
       <div class="rankBadge"><span class="lbl">QUEST</span><span class="val" id="rankQ">—</span></div>
+      <div class="rankBadge" id="heightBadge"><span class="lbl" id="heightLbl">高さ</span><span class="val" id="heightVal">—</span></div>
     </div>
     <div id="exprBar" role="toolbar" aria-label="expression preview"></div>
     <div id="hint"></div>
@@ -344,6 +345,7 @@ const I18N = {
     'note.upload':'VRChatへは Unity + VRM Converter for VRChat 経由でアップロード。以下の手順を参照。',
     'expr.neutral':'ニュートラル','expr.a':'あ','expr.i':'い','expr.u':'う','expr.e':'え','expr.o':'お',
     'expr.blink':'まばたき','expr.joy':'喜び','expr.angry':'怒り','expr.sorrow':'悲しみ','expr.fun':'楽しい',
+    'lbl.height':'高さ',
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
@@ -386,6 +388,7 @@ const I18N = {
     'note.upload':'Upload to VRChat via Unity + VRM Converter for VRChat. Follow the steps below.',
     'expr.neutral':'Neutral','expr.a':'A','expr.i':'I','expr.u':'U','expr.e':'E','expr.o':'O',
     'expr.blink':'Blink','expr.joy':'Joy','expr.angry':'Angry','expr.sorrow':'Sorrow','expr.fun':'Fun',
+    'lbl.height':'Height',
   }
 };
 
@@ -2201,6 +2204,7 @@ function updateStats(){
     elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx];
     elm.title=lim; elm.parentElement.title=lim; };
   set($('rankPC'),pc); set($('rankQ'),q);
+  const hv=$('heightVal'); if (hv) hv.textContent=params.height.toFixed(2)+' m';
   announceRank(pc, q);
   if (statEls.tris){
     statEls.tris.textContent=est.tris;
@@ -2298,6 +2302,7 @@ function applyLang(){
   $('btnAbout').setAttribute('aria-label', t('a11y.about.btn'));
   $('aboutTxt').textContent = t('about');
   $('aboutClose').textContent = t('about.close');
+  if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); buildExprBar(); updateStats();
 }

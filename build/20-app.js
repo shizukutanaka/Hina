@@ -798,6 +798,7 @@ function updateStats(){
     elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx];
     elm.title=lim; elm.parentElement.title=lim; };
   set($('rankPC'),pc); set($('rankQ'),q);
+  const hv=$('heightVal'); if (hv) hv.textContent=params.height.toFixed(2)+' m';
   announceRank(pc, q);
   if (statEls.tris){
     statEls.tris.textContent=est.tris;
@@ -895,6 +896,7 @@ function applyLang(){
   $('btnAbout').setAttribute('aria-label', t('a11y.about.btn'));
   $('aboutTxt').textContent = t('about');
   $('aboutClose').textContent = t('about.close');
+  if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); buildExprBar(); updateStats();
 }
