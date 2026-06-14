@@ -291,10 +291,10 @@ function estimate(build, p){
   const chains = p.springOff ? 0 : build.springs.length;
   const springBones = p.springOff ? 0 : build.springs.reduce((s,c)=>s+c.boneIdxs.length,0);
   const colliders = chains ? 1 : 0;
-  // geometry-only byte estimate; PNG texture (typically 20-50 KB) added separately
+  // geometry-only byte estimate; PNG texture (typically 100-150 KB compressed) added separately
   const geomBytes = nV*52 + tris*6 + bones*64;   // attrs(52B/v) + indices(6B/tri) + IBM(64B/bone)
   const morphBytes = build.morphs.names.reduce((s,n)=>s+build.morphs.sparse[n].length*16+8, 0);
-  const approxBytes = geomBytes + morphBytes + 30720 + 12000;  // +30KB atlas PNG est. +12KB JSON
+  const approxBytes = geomBytes + morphBytes + 122880 + 12000; // +120KB atlas PNG est. +12KB JSON
   return {
     tris, bones, skinned:1, mesh:0, mat:1,
     pbComp: chains, pbTrans: springBones, pbCol: colliders, pbCheck: springBones*colliders,

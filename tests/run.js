@@ -317,8 +317,8 @@ const B = H.buildAvatar(P);
   const off = H.estimate(B, Object.assign({}, P, { springOff: true }));
   ok(off.pbComp === 0 && off.pbTrans === 0 && off.pbCheck === 0, 'springOff zeroes physbones');
   ok(est.texMB > 0 && est.texMB < 10, 'texMB sane');
-  ok(typeof est.approxBytes === 'number' && est.approxBytes > 50000 && est.approxBytes < 500000,
-    'approxBytes in plausible VRM range (50KB–500KB)');
+  ok(typeof est.approxBytes === 'number' && est.approxBytes > 150000 && est.approxBytes < 600000,
+    'approxBytes in plausible VRM range (150KB–600KB, incl. ~120KB atlas PNG estimate)');
 }
 
 /* ---- GLB / VRM export ---- */
