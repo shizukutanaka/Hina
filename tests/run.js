@@ -495,12 +495,16 @@ function accData(j, bin, ai){
   ok(j.buffers[0].byteLength <= G.bLen, 'buffer fits BIN chunk');
   // CLAUDE.md invariants: 1 scene, 1 mesh, 1 skin, 1 material, 1 texture, 1 image
   ok(j.scenes.length === 1 && j.scene === 0, 'exactly 1 scene, scene 0 active');
+  ok(j.scenes[0].nodes.length === 1 && j.scenes[0].nodes[0] === 0,
+    'scene contains exactly Root node (index 0)');
   ok(j.meshes.length === 1, 'exactly 1 mesh (CLAUDE.md: 1 skinned mesh)');
   ok(j.meshes[0].primitives.length === 1, 'exactly 1 primitive (CLAUDE.md: 1 primitive)');
   ok(j.skins.length === 1, 'exactly 1 skin (CLAUDE.md: 1 skinned mesh)');
+  ok(j.skins[0].skeleton === 1, 'skin skeleton = node 1 (Hips, first bone after Root)');
   ok(j.materials.length === 1, 'exactly 1 material (CLAUDE.md: 1 material)');
   ok(j.textures.length === 1, 'exactly 1 texture in default export (single atlas)');
   ok(j.images.length === 1, 'exactly 1 image in default export (single atlas)');
+  ok(j.bufferViews.every(v => v.buffer === 0), 'all bufferViews reference buffer 0 (single buffer)');
   ok(j.nodes.length === B.bones.length + 2, 'nodes = bones + Root + mesh');
   ok(j.nodes[0].children.includes(1) && j.nodes[0].children.includes(B.bones.length + 1), 'Root children');
   ok(j.nodes[B.bones.length + 1].mesh === 0 && j.nodes[B.bones.length + 1].skin === 0, 'mesh node wired');
