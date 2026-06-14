@@ -2182,6 +2182,33 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 154: bone count snapshot per hairStyle + Quest budget guard ---- */
+{
+  // Exact bone counts per hairStyle. Deviations = regression in spring bone generation.
+  // short/bob: 21 humanoid bones (no springs). long: +3 chains×3. twin: +2 chains×4. pony: +1 chain×4.
+  const BONE_SNAP = {short: 21, bob: 21, long: 30, twin: 29, pony: 25};
+  let snapFail = 0, budgetFail = 0;
+  for(const [hairStyle, expected] of Object.entries(BONE_SNAP)){
+    const C = H.buildAvatar(Object.assign(H.defaults(), {hairStyle}));
+    if(C.bones.length !== expected) snapFail++;
+    if(C.bones.length >= 75) budgetFail++;  // Quest Excellent ≤74
+  }
+  ok(snapFail === 0,
+    'bone count snapshot per hairStyle: short=21, bob=21, long=30, twin=29, pony=25 (spring regression guard)');
+  ok(budgetFail === 0,
+    'all hairStyles have < 75 bones (Quest Excellent bone budget)');
+
+  // humanoid bone count: 21 body bones should always be constant regardless of hairStyle
+  const bodyBones = BONE_SNAP.short; // short has no spring bones
+  for(const hairStyle of Object.keys(BONE_SNAP)){
+    const C = H.buildAvatar(Object.assign(H.defaults(), {hairStyle}));
+    const humanoidCount = C.bones.filter(b => b.hb !== null).length;
+    if(humanoidCount !== bodyBones) budgetFail++;
+  }
+  ok(budgetFail === 0,
+    'all hairStyles have exactly 21 humanoid-mapped bones (spring bones are non-humanoid)');
+}
+
 /* ---- Round 153: spring chain parent-child validity + GLB determinism ---- */
 {
   // Spring chains must form a valid parent-child sequence: bones[n+1].parent === boneIdx[n]
