@@ -637,7 +637,7 @@ function paramRow(k){
   const sw=el('div',{class:'swatches'});
   for(const c of HINA.PAL[s.pal])
     sw.append(el('button',{type:'button', class:'sw', style:'background:'+c, 'aria-label':label+' '+c,
-      onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);}}));
+      title:c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);}}));
   return el('div',{class:'row'}, el('label',{'for':pid},label), inp, sw);
 }
 

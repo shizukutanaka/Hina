@@ -1493,6 +1493,54 @@ function accData(j, bin, ai){
   }
 }
 
+/* ---- Round 107: atlas layout integrity + b64ToBytes PNG magic + VERSION semver + swatch title ---- */
+{
+  // b64ToBytes(PNG1) produces a valid PNG (PNG magic: 0x89 50 4E 47 0D 0A 1A 0A)
+  const pngBytes = H.b64ToBytes(H.PNG1);
+  ok(pngBytes[0] === 0x89 && pngBytes[1] === 0x50 && pngBytes[2] === 0x4E && pngBytes[3] === 0x47,
+    'b64ToBytes(PNG1) produces valid PNG: correct 4-byte magic (89 50 4E 47)');
+  ok(pngBytes[4] === 0x0D && pngBytes[5] === 0x0A && pngBytes[6] === 0x1A && pngBytes[7] === 0x0A,
+    'b64ToBytes(PNG1) PNG magic bytes 5-8 correct (0D 0A 1A 0A)');
+
+  // VERSION is a valid semver string (X.Y.Z)
+  ok(/^\d+\.\d+\.\d+$/.test(H.VERSION), 'VERSION is a valid semver string (X.Y.Z format)');
+
+  // All ATLAS face regions are within [0, TEX]
+  const faceRegions = ['eyeL','eyeR','browL','browR','mouth','blush'];
+  ok(faceRegions.every(name => {
+    const r = H.ATLAS[name];
+    return r[0] >= 0 && r[1] >= 0 && r[2] <= H.TEX && r[3] <= H.TEX && r[0] < r[2] && r[1] < r[3];
+  }), 'all ATLAS face regions have valid coordinates within [0, TEX]');
+
+  // ATLAS face regions do not overlap each other
+  let noOverlap = true;
+  for (let a = 0; a < faceRegions.length; a++){
+    for (let b2 = a + 1; b2 < faceRegions.length; b2++){
+      const ra = H.ATLAS[faceRegions[a]], rb = H.ATLAS[faceRegions[b2]];
+      const xOverlap = ra[0] < rb[2] && ra[2] > rb[0];
+      const yOverlap = ra[1] < rb[3] && ra[3] > rb[1];
+      if (xOverlap && yOverlap){ noOverlap = false; break; }
+    }
+  }
+  ok(noOverlap, 'ATLAS face regions do not overlap each other (unique UV areas)');
+
+  // Solid block centers are within [0, TEX]
+  const blockNames = ['skin','hair','clothMain','clothSub','accent','shoe','white','hairHi'];
+  ok(blockNames.every(name => {
+    const b = H.ATLAS[name];
+    return b[0] + 32 < H.TEX && b[1] + 32 < H.TEX;
+  }), 'all ATLAS solid block center points (b[0]+32, b[1]+32) are within [0, TEX]');
+
+  // Color swatch buttons have title attribute for hex tooltip
+  ok(/class:'sw'[\s\S]{0,80}title:c/.test(html.replace(/\s+/g,' ')),
+    'color swatch buttons have title:c attribute (hex color tooltip on hover)');
+
+  // morph targetNames are unique (no duplicate expression names)
+  const morphNames = H.buildAvatar(H.defaults()).morphs.names;
+  ok(new Set(morphNames).size === morphNames.length,
+    'morph targetNames are all unique (no duplicate expression names in the mesh)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
