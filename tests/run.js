@@ -2182,6 +2182,36 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 130: sorrow + angry mouth corner droop (sad/angry corners pull down) ---- */
+{
+  const [ms, me] = B.geom.tags.mouth;
+  // Find right corner (max x) and top vertex (max y) in mouth range
+  let cornerI=ms+1, topI=ms+1;
+  for(let i=ms+1;i<me;i++){
+    if(B.geom.pos[i*3]   > B.geom.pos[cornerI*3])   cornerI=i;
+    if(B.geom.pos[i*3+1] > B.geom.pos[topI*3+1])     topI=i;
+  }
+
+  // sorrow: corner vertex should droop lower (more negative dy) than top vertex
+  const sorrowCorner = B.morphs.sparse.sorrow.find(e => e[0]===cornerI);
+  const sorrowTop    = B.morphs.sparse.sorrow.find(e => e[0]===topI);
+  ok(sorrowCorner && sorrowTop && sorrowCorner[2] < sorrowTop[2],
+    `sorrow corner dy (${sorrowCorner?sorrowCorner[2].toFixed(5):'?'}) < top dy (${sorrowTop?sorrowTop[2].toFixed(5):'?'}) — corners droop lower`);
+
+  // angry: corner vertex should also droop (negative dy from cornerLift)
+  const angryCorner = B.morphs.sparse.angry.find(e => e[0]===cornerI);
+  ok(angryCorner && angryCorner[2] < 0,
+    `angry corner vertex has negative dy (${angryCorner?angryCorner[2].toFixed(5):'?'}) — frown corner droop`);
+
+  // sorrow corner droop magnitude > angry corner droop magnitude (sorrow is more extreme)
+  ok(angryCorner && sorrowCorner && Math.abs(sorrowCorner[2]) > Math.abs(angryCorner[2]),
+    `|sorrow corner dy| > |angry corner dy| (sorrow droops more than angry)`);
+
+  // Sparse counts must still be 25 for both (center vertex still has dy≠0)
+  ok(B.morphs.sparse.sorrow.length === 25 && B.morphs.sparse.angry.length === 25,
+    'sorrow and angry sparse counts remain 25 after adding corner droop');
+}
+
 /* ---- Round 129: joy + fun mouth corner lift (smile corners turn up) ---- */
 {
   // Find the right-corner mouth vertex (maximum x in mouth tag range)
