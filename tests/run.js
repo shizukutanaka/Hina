@@ -499,6 +499,8 @@ function accData(j, bin, ai){
      V.meta.sexualUssageName === 'Disallow' && V.meta.commercialUssageName === 'Disallow' &&
      V.meta.licenseName === 'Redistribution_Prohibited', 'meta safe defaults (VRM0 Ussage spelling)');
   ok(V.humanoid.humanBones.length === 21, '21 humanBones');
+  ok(V.humanoid.humanBones.every(hb => hb.useDefaultValues === true),
+    'humanBones all have useDefaultValues:true (required by UniVRM 0.x importer)');
   ok(V.humanoid.humanBones.every(hb => H.HB.includes(hb.bone) && hb.node >= 1 && hb.node <= B.bones.length),
     'humanBones names + node range');
   ok(V.firstPerson.firstPersonBone === B.idx.head + 1, 'firstPersonBone = head node');
