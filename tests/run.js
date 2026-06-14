@@ -1891,6 +1891,30 @@ function accData(j, bin, ai){
     'sorrow morph has brow entries with dy>0 (inner brow worry raise)');
 }
 
+/* ---- Round 118: dims anatomical ordering + sorrow eye drooping ---- */
+{
+  // dims anatomical ordering: body landmarks must be in bottom-up order
+  const checkDims = (d, label) => {
+    ok(d.hipsY < d.spineY,   label + ' hipsY < spineY (hips below spine)');
+    ok(d.spineY < d.chestY,  label + ' spineY < chestY (spine below chest)');
+    ok(d.chestY < d.neckY,   label + ' chestY < neckY (chest below neck)');
+    ok(d.neckY < d.headCY,   label + ' neckY < headCY (neck below head centre)');
+    ok(d.eyeWY > d.neckY,    label + ' eyeWY > neckY (eyes above neck)');
+    ok(d.eyeX > 0,            label + ' eyeX > 0 (eyes are laterally apart)');
+    ok(d.headR > 0,           label + ' headR > 0');
+  };
+  // verify for default and for extremes
+  checkDims(B.dims, 'default');
+  const tall = H.buildAvatar(Object.assign(H.defaults(), { height: 2.0, headRatio: 0.18 }));
+  checkDims(tall.dims, 'tall(2.0m,ratio0.18)');
+  const chibiP = H.buildAvatar(Object.assign(H.defaults(), { height: 0.8, headRatio: 0.36 }));
+  checkDims(chibiP.dims, 'chibi(0.8m,ratio0.36)');
+
+  // sorrow eyes droop: after adding dy=-headR*0.012, some eye morph entry has dy < -headR*0.005
+  const sorrowEyes = B.morphs.sparse.sorrow.filter(e => e[2] < -B.dims.headR*0.005);
+  ok(sorrowEyes.length >= 2, 'sorrow eye morph includes downward droop (dy < -headR×0.005)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
