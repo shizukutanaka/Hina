@@ -195,6 +195,9 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
     'st.spring label says "bones" (not "chains") — matches pbTrans value shown in stat table');
   ok(html.includes("'st.spring','pbTrans'") || html.includes('"st.spring","pbTrans"'),
     'stat table row st.spring maps to pbTrans accessor (not pbComp chain count)');
+  ok(H.I18N.ja['st.chains'] && H.I18N.en['st.chains'], 'st.chains (pbComp) label in both languages');
+  ok(html.includes("'st.chains','pbComp'") || html.includes('"st.chains","pbComp"'),
+    'stat table has st.chains row wired to pbComp so users can see why Quest rank drops with springs');
   // skirtLen must be hidden for non-skirt outfits (shirts / hoodie have no skirt)
   ok(/k\s*===\s*['"]skirtLen['"]/.test(html) && /onepiece.*sailor|sailor.*onepiece/.test(html),
     'skirtLen hidden when outfit has no skirt (shirts/hoodie)');

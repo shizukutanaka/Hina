@@ -680,7 +680,7 @@ function renderOut(bd){
   const row=(key,id)=>{ const td=el('td',{}); statEls[id]=td;
     tbl.append(el('tr',{}, el('th',{scope:'row'},t(key)), td)); };
   row('st.tris','tris'); row('st.bones','bones'); row('st.mat','mat');
-  row('st.mesh','skinned'); row('st.spring','pbTrans'); row('st.tex','texMB');
+  row('st.mesh','skinned'); row('st.chains','pbComp'); row('st.spring','pbTrans'); row('st.tex','texMB');
   row('st.vrm','approxBytes');
   const rkPC=el('td',{}); statEls.rkPC=rkPC;
   const rkQ=el('td',{}); statEls.rkQ=rkQ;
@@ -744,6 +744,7 @@ function updateStats(){
     statEls.bones.textContent=est.bones;
     statEls.mat.textContent=est.mat;
     statEls.skinned.textContent=est.skinned;
+    statEls.pbComp.textContent=params.springOff?0:est.pbComp;
     statEls.pbTrans.textContent=params.springOff?0:est.pbTrans;
     statEls.texMB.textContent='~'+est.texMB+' MB';
     statEls.approxBytes.textContent='~'+Math.round(est.approxBytes/1024)+' KB';
