@@ -2182,6 +2182,45 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 173: primary height-derived dims — headR, headCY, neckY, hipsY ---- */
+{
+  // Root formulas that drive most other dims:
+  //   headR   = headRatio × H × 0.5
+  //   headCY  = H - headR                    (head sphere center = top of avatar minus headR)
+  //   neckTopY = headCY - headR × 0.8
+  //   neckY   = neckTopY - 0.015 × H
+  //   hipsY   = clamp(H × 0.5 × legLen,  0.32×H,  neckTopY - 0.16×H)
+  const d = B.dims;
+  ok(Math.abs(d.headR - P.headRatio * d.H * 0.5) < 1e-9,
+    `headR = headRatio×H×0.5 = ${(P.headRatio*d.H*0.5).toFixed(6)}`);
+  ok(Math.abs(d.headCY - (d.H - d.headR)) < 1e-9,
+    `headCY = H - headR = ${(d.H-d.headR).toFixed(6)}`);
+  const neckTopY = d.headCY - d.headR * 0.8;
+  ok(Math.abs(d.neckY - (neckTopY - 0.015 * d.H)) < 1e-9,
+    `neckY = (headCY - headR×0.8) - 0.015×H = ${(neckTopY - 0.015*d.H).toFixed(6)}`);
+  const hipsRaw = d.H * 0.5 * P.legLen;
+  const hipsMin = 0.32 * d.H, hipsMax = neckTopY - 0.16 * d.H;
+  const hipsExpected = Math.max(hipsMin, Math.min(hipsMax, hipsRaw));
+  ok(Math.abs(d.hipsY - hipsExpected) < 1e-9,
+    `hipsY = clamp(H×0.5×legLen=${hipsRaw.toFixed(4)}, ${hipsMin.toFixed(4)}, ${hipsMax.toFixed(4)}) = ${hipsExpected.toFixed(6)}`);
+
+  // All 6 presets satisfy these root formulas
+  let fail = 0;
+  for(const pre of H.PRESETS){
+    const pp = H.presetParams(pre);
+    const dd = H.buildAvatar(pp).dims;
+    const ntY = dd.headCY - dd.headR * 0.8;
+    const hR = pp.headRatio * dd.H * 0.5;
+    const hRaw = dd.H * 0.5 * pp.legLen;
+    const hE = Math.max(0.32*dd.H, Math.min(ntY - 0.16*dd.H, hRaw));
+    if(Math.abs(dd.headR - hR) > 1e-6) fail++;
+    if(Math.abs(dd.headCY - (dd.H - dd.headR)) > 1e-6) fail++;
+    if(Math.abs(dd.neckY - (ntY - 0.015*dd.H)) > 1e-6) fail++;
+    if(Math.abs(dd.hipsY - hE) > 1e-6) fail++;
+  }
+  ok(fail === 0, 'headR/headCY/neckY/hipsY root formulas hold across all 6 presets');
+}
+
 /* ---- Round 172: spine chain bone world positions vs dims ---- */
 {
   // The 5-bone spine chain must have world Y = corresponding dims value.
