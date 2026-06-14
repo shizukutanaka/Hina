@@ -2182,6 +2182,33 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 143: eyeY parameter monotonicity — higher eyeY = higher eye position ---- */
+{
+  const low  = H.buildAvatar(Object.assign(H.defaults(), {eyeY: 0.0}));
+  const mid  = H.buildAvatar(Object.assign(H.defaults(), {eyeY: 0.5}));
+  const high = H.buildAvatar(Object.assign(H.defaults(), {eyeY: 1.0}));
+
+  // Eye bone world Y should increase with eyeY
+  ok(low.bones[low.idx.lE].w[1] < mid.bones[mid.idx.lE].w[1] &&
+     mid.bones[mid.idx.lE].w[1] < high.bones[high.idx.lE].w[1],
+    'lE bone world Y strictly increases with eyeY (low < mid < high)');
+  ok(low.bones[low.idx.rE].w[1] < mid.bones[mid.idx.rE].w[1] &&
+     mid.bones[mid.idx.rE].w[1] < high.bones[high.idx.rE].w[1],
+    'rE bone world Y strictly increases with eyeY (left-right symmetric)');
+
+  // Eye quad vertices Y should also increase with eyeY
+  const eyeLTopY = A => {
+    const [s,e] = A.geom.tags.eyeL;
+    return Math.max(...Array.from({length:e-s},(_,i)=>A.geom.pos[(s+i)*3+1]));
+  };
+  ok(eyeLTopY(low) < eyeLTopY(mid) && eyeLTopY(mid) < eyeLTopY(high),
+    'eyeL quad top vertex Y strictly increases with eyeY param');
+
+  // eyeY also shifts the eyeWY dim accordingly
+  ok(low.dims.eyeWY < mid.dims.eyeWY && mid.dims.eyeWY < high.dims.eyeWY,
+    'dims.eyeWY strictly increases with eyeY param');
+}
+
 /* ---- Round 142: bust parameter effect on chest geometry ---- */
 {
   const noBust = H.buildAvatar(Object.assign(H.defaults(), {bust: 0.0}));
