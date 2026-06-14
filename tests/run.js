@@ -2182,6 +2182,35 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 134: i + e vowel corner lift for accurate lip-sync shapes ---- */
+{
+  const [ms, me] = B.geom.tags.mouth;
+  // Right corner = vertex with max x in mouth range
+  let cornerI=ms+1;
+  for(let i=ms+1;i<me;i++) if(B.geom.pos[i*3]>B.geom.pos[cornerI*3]) cornerI=i;
+
+  // i morph right corner: has positive dy from cornerLift (grin corners turn up)
+  const iCorner = B.morphs.sparse.i.find(e=>e[0]===cornerI);
+  ok(iCorner && iCorner[2] > 0,
+    `i vowel: right corner vertex has positive dy (${iCorner?iCorner[2].toExponential(3):'?'}) — grin corner lift`);
+
+  // e morph right corner: also has positive dy (smaller than i)
+  const eCorner = B.morphs.sparse.e.find(e=>e[0]===cornerI);
+  ok(eCorner && eCorner[2] > 0,
+    `e vowel: right corner vertex has positive dy (${eCorner?eCorner[2].toExponential(3):'?'}) — slight corner lift`);
+
+  // i corner lift > e corner lift (i is more of a grin than e)
+  ok(iCorner && eCorner && iCorner[2] > eCorner[2],
+    `i corner lift > e corner lift (i=${iCorner?iCorner[2].toExponential(3):'?'}, e=${eCorner?eCorner[2].toExponential(3):'?'})`);
+
+  // a, u, o corners have NO upward corner lift (neutral/rounded/puckered shapes)
+  const aCorner = B.morphs.sparse.a.find(e=>e[0]===cornerI);
+  const uCorner = B.morphs.sparse.u.find(e=>e[0]===cornerI);
+  const oCorner = B.morphs.sparse.o.find(e=>e[0]===cornerI);
+  ok((!aCorner || aCorner[2] <= 0) && (!uCorner || uCorner[2] <= 0) && (!oCorner || oCorner[2] <= 0),
+    'a, u, o vowels: right corner vertex has no positive corner lift (neutral/round shapes)');
+}
+
 /* ---- Round 133: faceStart integrity — face vertices are all above the body/face split ---- */
 {
   const faceTags = ['eyeL','eyeR','browL','browR','mouth'];

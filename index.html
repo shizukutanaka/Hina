@@ -982,9 +982,9 @@ function buildAvatar(p){
   const eC_L=[-eyeX,eyeWY,faceZ], eC_R=[eyeX,eyeWY,faceZ];
   // vowels
   scaleTag('a','mouth',mc,1.15,3.4);
-  scaleTag('i','mouth',mc,1.55,0.45);
+  scaleTag('i','mouth',mc,1.55,0.45,0,0,headR*0.015); // /iː/ grin: corners lift
   scaleTag('u','mouth',mc,0.55,1.7,-headR*0.05);
-  scaleTag('e','mouth',mc,1.30,2.0);
+  scaleTag('e','mouth',mc,1.30,2.0,0,0,headR*0.008); // /eː/ slight corner lift
   scaleTag('o','mouth',mc,0.75,2.7,-headR*0.035);
   // blinks
   scaleTag('blink','eyeL',eC_L,1,0.06); scaleTag('blink','eyeR',eC_R,1,0.06);
