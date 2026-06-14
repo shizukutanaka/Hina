@@ -2182,6 +2182,32 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 136: outfit × hairStyle geometry budget (all 20 combinations) ---- */
+{
+  const outfits = ['onepiece','sailor','shirts','hoodie'];
+  const hairStyles = ['short','bob','long','twin','pony'];
+  let maxTris = 0, maxBones = 0, badBudget = [];
+
+  for(const outfit of outfits){
+    for(const hair of hairStyles){
+      const p = Object.assign(H.defaults(), {outfit, hairStyle: hair, springOff: false});
+      const A = H.buildAvatar(p);
+      const tris = A.geom.idx.length / 3;
+      const bones = A.bones.length;
+      if(tris > maxTris) maxTris = tris;
+      if(bones > maxBones) maxBones = bones;
+      if(tris >= 7500 || bones >= 75) badBudget.push(`${outfit}×${hair}(t=${tris},b=${bones})`);
+    }
+  }
+
+  ok(badBudget.length === 0,
+    `all 20 outfit×hairStyle combos within Quest Excellent budget (bad: ${badBudget.join(', ')||'none'})`);
+  ok(maxTris < 7500,
+    `max tris across all combos = ${maxTris} (Quest Excellent < 7500)`);
+  ok(maxBones < 75,
+    `max bones across all combos = ${maxBones} (Quest Excellent < 75)`);
+}
+
 /* ---- Round 135: GLB morph sparse accessor index ordering (glTF spec §5.15.5) ---- */
 {
   // glTF spec requires sparse indices to be strictly increasing
