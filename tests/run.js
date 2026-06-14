@@ -2182,6 +2182,43 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 155: ATLAS rect non-overlap + bounds validation ---- */
+{
+  // All face atlas uvRect regions must be within [0, TEX) and must not overlap each other.
+  // Overlap would cause two face features to share texture pixels.
+  const TEX = 1024;
+  const rects = ['eyeL','eyeR','browL','browR','mouth','blush'];
+
+  // bounds check: all coords in [0, TEX]
+  ok(rects.every(name => {
+    const r = H.ATLAS[name];
+    return r[0] >= 0 && r[1] >= 0 && r[2] <= TEX && r[3] <= TEX && r[0] < r[2] && r[1] < r[3];
+  }), 'all face atlas rects within [0,TEX] with positive area');
+
+  // non-overlap: no two rects share any area
+  let overlapCount = 0;
+  for(let i = 0; i < rects.length; i++){
+    for(let j = i+1; j < rects.length; j++){
+      const a = H.ATLAS[rects[i]], b = H.ATLAS[rects[j]];
+      // overlap iff projections on both axes overlap
+      const xOverlap = a[0] < b[2] && b[0] < a[2];
+      const yOverlap = a[1] < b[3] && b[1] < a[3];
+      if(xOverlap && yOverlap) overlapCount++;
+    }
+  }
+  ok(overlapCount === 0,
+    'face atlas rects are non-overlapping (eyeL/eyeR/browL/browR/mouth/blush have distinct texels)');
+
+  // solid color blocks: all 8 must be within [0, TEX] and have distinct positions
+  const solidNames = ['skin','hair','clothMain','clothSub','accent','shoe','white','hairHi'];
+  const positions = solidNames.map(n => H.ATLAS[n]);
+  ok(positions.every(([x,y]) => x >= 0 && y >= 0 && x + 64 <= TEX && y + 64 <= TEX),
+    'all 8 solid atlas blocks fit within TEX×TEX with 64px side');
+  const posSet = new Set(positions.map(([x,y]) => `${x},${y}`));
+  ok(posSet.size === solidNames.length,
+    'all 8 solid atlas blocks have distinct positions (no two share a texel block)');
+}
+
 /* ---- Round 154: bone count snapshot per hairStyle + Quest budget guard ---- */
 {
   // Exact bone counts per hairStyle. Deviations = regression in spring bone generation.
