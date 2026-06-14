@@ -362,6 +362,12 @@ const B = H.buildAvatar(P);
   ok(B.morphs.names.length === 12, '12 morph targets');
   ok(B.morphs.names.every(n => B.morphs.sparse[n].length > 0), 'all 12 morph targets non-empty');
   ok(B.morphs.sparse.a.every(e => e.length === 4 && e[0] < nV), 'morph entries [vi,dx,dy,dz]');
+  // all morph vertices must be face vertices (>= faceStart)
+  ok(B.morphs.names.every(n => B.morphs.sparse[n].every(e => e[0] >= B.faceStart)),
+    'all morph vertices are face vertices (vi >= faceStart, body unaffected by blendshapes)');
+  // morph deltas must not all be zero (non-trivial deformation)
+  ok(B.morphs.names.every(n => B.morphs.sparse[n].some(e => e[1] !== 0 || e[2] !== 0 || e[3] !== 0)),
+    'every morph target has at least one non-zero delta (non-trivial deformation)');
   ok(B.springs.length === 2, 'twin: 2 spring chains');
   ok(B.collider && B.collider.bone === B.idx.head && B.collider.radius > 0, 'head collider present');
   // hairHi UV: center of the [448,768] atlas block = (480/1024, 800/1024)
