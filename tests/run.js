@@ -2182,6 +2182,46 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 142: bust parameter effect on chest geometry ---- */
+{
+  const noBust = H.buildAvatar(Object.assign(H.defaults(), {bust: 0.0}));
+  const maxBust = H.buildAvatar(Object.assign(H.defaults(), {bust: 1.0}));
+  const chestY = noBust.dims.chestY;
+
+  // Find the most-forward (min Z) chest-height vertex in each build
+  let minZ_no=0, minZ_max=0;
+  for(let i=0;i<noBust.geom.pos.length/3;i++){
+    const y=noBust.geom.pos[i*3+1];
+    if(Math.abs(y - chestY) < 0.06){
+      const z=noBust.geom.pos[i*3+2]; if(z<minZ_no) minZ_no=z;
+    }
+  }
+  for(let i=0;i<maxBust.geom.pos.length/3;i++){
+    const y=maxBust.geom.pos[i*3+1];
+    if(Math.abs(y - chestY) < 0.06){
+      const z=maxBust.geom.pos[i*3+2]; if(z<minZ_max) minZ_max=z;
+    }
+  }
+  ok(minZ_max < minZ_no,
+    `bust=1.0 chest protrudes further (minZ=${minZ_max.toFixed(4)}) than bust=0 (minZ=${minZ_no.toFixed(4)})`);
+
+  // Mid-bust should be intermediate
+  const midBust = H.buildAvatar(Object.assign(H.defaults(), {bust: 0.5}));
+  let minZ_mid=0;
+  for(let i=0;i<midBust.geom.pos.length/3;i++){
+    const y=midBust.geom.pos[i*3+1];
+    if(Math.abs(y - chestY) < 0.06){
+      const z=midBust.geom.pos[i*3+2]; if(z<minZ_mid) minZ_mid=z;
+    }
+  }
+  ok(minZ_mid > minZ_max && minZ_mid < minZ_no,
+    `bust=0.5 chest Z (${minZ_mid.toFixed(4)}) is between bust=0 (${minZ_no.toFixed(4)}) and bust=1 (${minZ_max.toFixed(4)})`);
+
+  // Bust effect is body-side only — total vertex count unchanged
+  ok(noBust.geom.pos.length === maxBust.geom.pos.length,
+    'bust parameter does not change vertex count (pure positional deformation)');
+}
+
 /* ---- Round 141: bone spatial ordering invariants — anatomically correct positions ---- */
 {
   const bn = B.bones, id = B.idx;
