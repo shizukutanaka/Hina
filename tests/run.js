@@ -2182,6 +2182,46 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 174: ankleY both-branch formula + socks tube ring Y positions ---- */
+{
+  // ankleY = max(0.035×H, hipsY×0.085) — two branches
+  // Branch A: hipsY×0.085 wins (normal/tall legs)
+  const d = B.dims;
+  ok(d.hipsY * 0.085 > 0.035 * d.H,
+    `default: hipsY×0.085=${(d.hipsY*0.085).toFixed(5)} > 0.035×H=${(0.035*d.H).toFixed(5)} (hipsY branch active)`);
+  ok(Math.abs(d.ankleY - d.hipsY * 0.085) < 1e-9,
+    `ankleY = hipsY×0.085 at default = ${d.ankleY.toFixed(6)}`);
+
+  // Branch B: 0.035×H wins when legLen=min (hipsY clamped to 0.32×H → hipsY×0.085=0.0272×H < 0.035×H)
+  const shortLegs = H.buildAvatar(Object.assign(H.defaults(), {legLen: H.PARAMS.legLen.min}));
+  const d2 = shortLegs.dims;
+  ok(0.035 * d2.H > d2.hipsY * 0.085,
+    `legLen=min: 0.035×H=${(0.035*d2.H).toFixed(5)} > hipsY×0.085=${(d2.hipsY*0.085).toFixed(5)} (floor branch active)`);
+  ok(Math.abs(d2.ankleY - 0.035 * d2.H) < 1e-9,
+    `ankleY = 0.035×H at legLen=min = ${d2.ankleY.toFixed(6)}`);
+
+  // Socks tube ring Y positions:
+  //   top ring Y = kneeY×0.72 + ankleY×0.28
+  //   bot ring Y = ankleY×1.1
+  // tube(segs=8) → 9 verts per ring, 2 rings × 9 verts × 2 legs = 36 extra verts
+  const noSocks = H.buildAvatar(Object.assign(H.defaults(), {socks: false}));
+  const sockTopY = d.kneeY * 0.72 + d.ankleY * 0.28;
+  const sockBotY = d.ankleY * 1.1;
+
+  function countAtY(geom, y0){
+    let n=0;
+    for(let vi=0;vi<geom.pos.length/3;vi++)
+      if(Math.abs(geom.pos[vi*3+1]-y0)<1e-6) n++;
+    return n;
+  }
+  const topDelta = countAtY(B.geom, sockTopY) - countAtY(noSocks.geom, sockTopY);
+  const botDelta = countAtY(B.geom, sockBotY) - countAtY(noSocks.geom, sockBotY);
+  ok(topDelta === 18,
+    `socks top ring (Y=${sockTopY.toFixed(5)}): +18 verts vs no-socks (got +${topDelta})`);
+  ok(botDelta === 18,
+    `socks bottom ring (Y=${sockBotY.toFixed(5)}): +18 verts vs no-socks (got +${botDelta})`);
+}
+
 /* ---- Round 173: primary height-derived dims — headR, headCY, neckY, hipsY ---- */
 {
   // Root formulas that drive most other dims:
