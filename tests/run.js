@@ -494,9 +494,12 @@ const B = H.buildAvatar(P);
   ok(est.tris === B.geom.idx.length / 3, 'estimate tris matches mesh');
   ok(est.bones === 29 && est.mat === 1 && est.skinned === 1 && est.mesh === 0, 'estimate bones/mat/skinned/mesh');
   ok(est.pbComp === 2 && est.pbTrans === 8, 'estimate physbones (twin springs on)');
+  ok(est.pbCol === 1, 'estimate pbCol = 1 (one collider group for hair)');
+  ok(est.pbCheck === 8, 'estimate pbCheck = pbTrans × pbCol = 8×1 = 8');
   const off = H.estimate(B, Object.assign({}, P, { springOff: true }));
   ok(off.pbComp === 0 && off.pbTrans === 0 && off.pbCheck === 0 && off.pbCol === 0, 'springOff zeroes all physbone stats');
-  ok(est.texMB > 0 && est.texMB < 10, 'texMB sane');
+  ok(est.texMB === 5.3, 'texMB = 5.3 MB (1024×1024 RGBA × 1.33 mipmap factor, Quest Excellent ≤10MB)');
+  ok(est.texMB < H.RANKS.quest.texMB[0], 'texMB within Quest Excellent threshold');
   ok(typeof est.approxBytes === 'number' && est.approxBytes > 150000 && est.approxBytes < 600000,
     'approxBytes in plausible VRM range (150KB–600KB, incl. ~120KB atlas PNG estimate)');
 }
