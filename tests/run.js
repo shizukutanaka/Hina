@@ -2182,6 +2182,45 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 133: faceStart integrity — face vertices are all above the body/face split ---- */
+{
+  const faceTags = ['eyeL','eyeR','browL','browR','mouth'];
+  const nV = B.geom.pos.length / 3;
+  const fs = B.faceStart;
+
+  // faceStart is in a valid range
+  ok(fs > 0 && fs < nV,
+    `faceStart=${fs} is in valid range (0 < fs < nV=${nV})`);
+
+  // ALL vertices in face tags must have index ≥ faceStart
+  let faceTagsBelowSplit = 0;
+  for(const tag of faceTags){
+    const [ts, te] = B.geom.tags[tag];
+    for(let i=ts; i<te; i++) if(i < fs) faceTagsBelowSplit++;
+  }
+  ok(faceTagsBelowSplit === 0,
+    `all face tag vertices (${faceTags.join(',')}) have index ≥ faceStart=${fs} (body/face split correct)`);
+
+  // No body vertex (index < faceStart) should appear in any face tag range
+  const faceRanges = faceTags.map(t => B.geom.tags[t]);
+  const minFaceVert = Math.min(...faceRanges.map(([s])=>s));
+  ok(minFaceVert >= fs,
+    `min face-tag vertex index (${minFaceVert}) ≥ faceStart (${fs})`);
+
+  // faceStart invariant holds for all 6 presets (body always comes before face)
+  let presetFaceSplitBad = 0;
+  for(const pre of H.PRESETS){
+    const A = H.buildAvatar(H.presetParams(pre));
+    const pNV = A.geom.pos.length/3, pFS = A.faceStart;
+    if(pFS <= 0 || pFS >= pNV) { presetFaceSplitBad++; continue; }
+    for(const tag of faceTags){
+      const [ts,te] = A.geom.tags[tag];
+      for(let i=ts;i<te;i++) if(i < pFS) presetFaceSplitBad++;
+    }
+  }
+  ok(presetFaceSplitBad === 0, 'all 6 preset avatars: face tags are all above faceStart split');
+}
+
 /* ---- Round 132: spring chain structural invariants + bone count regression ---- */
 {
   // short and bob hair styles have NO spring chains
