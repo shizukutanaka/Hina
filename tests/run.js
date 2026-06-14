@@ -2182,6 +2182,41 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 153: spring chain parent-child validity + GLB determinism ---- */
+{
+  // Spring chains must form a valid parent-child sequence: bones[n+1].parent === boneIdx[n]
+  // and the root bone must be a child of an existing body bone (not a chain member)
+  const hairsWithSprings = ['long','twin','pony'];
+  let chainParentFail = 0;
+  for(const hairStyle of hairsWithSprings){
+    const C = H.buildAvatar(Object.assign(H.defaults(), {hairStyle}));
+    for(const sp of C.springs){
+      const idxs = sp.boneIdxs;
+      // root's parent must be a non-chain bone (body bone)
+      const chainSet = new Set(idxs);
+      if(chainSet.has(C.bones[idxs[0]].parent)) chainParentFail++;
+      // each subsequent bone's parent must be the previous bone
+      for(let j=1; j<idxs.length; j++){
+        if(C.bones[idxs[j]].parent !== idxs[j-1]) chainParentFail++;
+      }
+    }
+  }
+  ok(chainParentFail === 0,
+    'spring chains: root parent is body bone, each bone[n+1].parent = bone[n] (valid hierarchy)');
+
+  // GLB export is deterministic: same params + same png → identical byte length
+  const png2 = H.b64ToBytes(H.PNG1);
+  const ex1 = H.exportVRM(B, P, {}, png2);
+  const ex2 = H.exportVRM(B, P, {}, png2);
+  ok(ex1.bytes.length === ex2.bytes.length,
+    'GLB export is deterministic: same inputs → same byte length');
+  // Also verify rebuild produces same length (build itself is deterministic)
+  const B2 = H.buildAvatar(P);
+  const ex3 = H.exportVRM(B2, P, {}, png2);
+  ok(ex3.bytes.length === ex1.bytes.length,
+    'GLB export byte length invariant across rebuild of same params');
+}
+
 /* ---- Round 152: outfit×hairStyle triangle-count regression snapshot ---- */
 {
   // Exact triangle counts per outfit/hairStyle combo. Any geometry change shifts these.
