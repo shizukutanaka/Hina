@@ -2182,6 +2182,45 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 139: morph vertices are exclusively in the face region (≥ faceStart) ---- */
+{
+  // All morph sparse entries must reference face vertices (index ≥ faceStart)
+  // Body vertices have no morph targets — morphing them would cause body distortion
+  const fs = B.faceStart;
+  let bodyMorphBad = 0, badNames = [];
+  for(const name of B.morphs.names){
+    const entries = B.morphs.sparse[name];
+    const bodyEntries = entries.filter(e => e[0] < fs);
+    if(bodyEntries.length > 0){ bodyMorphBad += bodyEntries.length; badNames.push(name); }
+  }
+  ok(bodyMorphBad === 0,
+    `all morph sparse entries reference face vertices (≥ faceStart=${fs}), no body-vertex morphs (bad: ${badNames.join(',')||'none'})`);
+
+  // Verify that morph vertex indices are within total vertex range
+  const nV = B.geom.pos.length / 3;
+  let outOfRange = 0;
+  for(const name of B.morphs.names){
+    for(const e of B.morphs.sparse[name]){
+      if(e[0] < 0 || e[0] >= nV) outOfRange++;
+    }
+  }
+  ok(outOfRange === 0,
+    `all ${B.morphs.names.length} morphs: every sparse entry index is in [0, nV=${nV})`);
+
+  // Property holds for all 6 presets
+  let presetBad = 0;
+  for(const pre of H.PRESETS){
+    const A = H.buildAvatar(H.presetParams(pre));
+    const pNV = A.geom.pos.length/3, pFS = A.faceStart;
+    for(const name of A.morphs.names){
+      for(const e of A.morphs.sparse[name]){
+        if(e[0] < pFS || e[0] >= pNV) presetBad++;
+      }
+    }
+  }
+  ok(presetBad === 0, 'all 6 presets: all morph entries in face-vertex range [faceStart, nV)');
+}
+
 /* ---- Round 138: blink brow tilt asymmetry — inner brow drops more than outer ---- */
 {
   // browL: inner = px > -eyeX (toward x=0), outer = px ≤ -eyeX (toward left)
