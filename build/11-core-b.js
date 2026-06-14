@@ -519,6 +519,7 @@ function buildAvatar(p){
   // emotions
   scaleTag('joy','eyeL',eC_L,1,0.12,0,headR*0.02); scaleTag('joy','eyeR',eC_R,1,0.12,0,headR*0.02);
   scaleTag('joy','mouth',mc,1.25,1.9);
+  browTilt('joy','browL', headR*0.04, headR*0.03); browTilt('joy','browR', headR*0.04, headR*0.03);
   browTilt('angry','browL',-headR*0.085, headR*0.025); browTilt('angry','browR',-headR*0.085, headR*0.025);
   scaleTag('angry','eyeL',eC_L,1,0.62); scaleTag('angry','eyeR',eC_R,1,0.62);
   scaleTag('angry','mouth',mc,0.7,0.85);
@@ -527,6 +528,7 @@ function buildAvatar(p){
   scaleTag('sorrow','eyeL',eC_L,1,0.62); scaleTag('sorrow','eyeR',eC_R,1,0.62);
   scaleTag('fun','mouth',mc,1.45,1.35);
   scaleTag('fun','eyeL',eC_L,1,0.55); scaleTag('fun','eyeR',eC_R,1,0.55);
+  browTilt('fun','browL', headR*0.06, headR*0.05); browTilt('fun','browR', headR*0.06, headR*0.05);
 
   return { geom:g, bones, springs, humanoid, dims, idx, faceStart,
     morphs:{names:morphNames, sparse},

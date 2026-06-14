@@ -1830,6 +1830,36 @@ function accData(j, bin, ai){
     'drawAtlas: eyeShape tare/tsuri/jito explicitly branched; round is the else default');
 }
 
+/* ---- Round 116: emotion brow deformation — joy + fun brow raises, angry/sorrow brow directions ---- */
+{
+  const B = H.buildAvatar(H.defaults());
+  const headR = B.dims.headR;
+  const eps = 1e-9;
+
+  // joy: browTilt added with innerDy=headR*0.04, outerDy=headR*0.03
+  const joyInner = B.morphs.sparse.joy.filter(e => Math.abs(e[2] - headR*0.04) < eps && e[1]===0 && e[3]===0);
+  const joyOuter = B.morphs.sparse.joy.filter(e => Math.abs(e[2] - headR*0.03) < eps && e[1]===0 && e[3]===0);
+  ok(joyInner.length >= 2, 'joy morph has ≥2 inner brow-raise entries (dy=headR×0.04)');
+  ok(joyOuter.length >= 2, 'joy morph has ≥2 outer brow-raise entries (dy=headR×0.03)');
+
+  // fun: browTilt added with innerDy=headR*0.06, outerDy=headR*0.05
+  const funInner = B.morphs.sparse.fun.filter(e => Math.abs(e[2] - headR*0.06) < eps && e[1]===0 && e[3]===0);
+  const funOuter = B.morphs.sparse.fun.filter(e => Math.abs(e[2] - headR*0.05) < eps && e[1]===0 && e[3]===0);
+  ok(funInner.length >= 2, 'fun morph has ≥2 inner brow-raise entries (dy=headR×0.06)');
+  ok(funOuter.length >= 2, 'fun morph has ≥2 outer brow-raise entries (dy=headR×0.05)');
+
+  // fun raises brows higher than joy (more exuberant expression)
+  ok(headR*0.06 > headR*0.04, 'fun inner brow raise (×0.06) exceeds joy inner brow raise (×0.04)');
+
+  // angry: inner brow pulled DOWN (dy < 0 for inner vertices)
+  ok(B.morphs.sparse.angry.some(e => e[2] < 0),
+    'angry morph has brow entries with dy<0 (inner brow furrow)');
+
+  // sorrow: inner brow raised UP (dy > 0 for inner vertices)
+  ok(B.morphs.sparse.sorrow.some(e => e[2] > 0 && e[1]===0 && e[3]===0),
+    'sorrow morph has brow entries with dy>0 (inner brow worry raise)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
