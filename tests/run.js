@@ -1616,6 +1616,56 @@ function accData(j, bin, ai){
     'hint.ctrlS i18n includes ? shortcut in both languages (discoverability)');
 }
 
+/* ---- Round 110: PARAMS/i18n parity (CLAUDE.md §Rules) + gacha seed filename ---- */
+{
+  // I18N bidirectional parity: every JA key must have an EN counterpart and vice versa
+  const jaKeys = new Set(Object.keys(H.I18N.ja));
+  const enKeys = new Set(Object.keys(H.I18N.en));
+  const missingInEn = [...jaKeys].filter(k => !enKeys.has(k));
+  const missingInJa = [...enKeys].filter(k => !jaKeys.has(k));
+  ok(missingInEn.length === 0,
+    'I18N parity: every JA key exists in EN (missing: ' + (missingInEn.join(',') || 'none') + ')');
+  ok(missingInJa.length === 0,
+    'I18N parity: every EN key exists in JA (missing: ' + (missingInJa.join(',') || 'none') + ')');
+
+  // PARAMS labels: every key has both .ja and .en
+  ok(Object.keys(H.PARAMS).every(k => typeof H.PARAMS[k].ja === 'string' && typeof H.PARAMS[k].en === 'string'),
+    'PARAMS schema: every key has .ja and .en label strings');
+
+  // PARAMS num: default within [min, max]
+  ok(Object.keys(H.PARAMS).filter(k => H.PARAMS[k].k === 'num').every(k => {
+    const s = H.PARAMS[k];
+    return s.def >= s.min && s.def <= s.max;
+  }), 'PARAMS num defaults: all within [min, max]');
+
+  // PARAMS enum: default is a valid option
+  ok(Object.keys(H.PARAMS).filter(k => H.PARAMS[k].k === 'enum').every(k => {
+    const s = H.PARAMS[k];
+    return s.opts.includes(s.def);
+  }), 'PARAMS enum defaults: all in opts[]');
+
+  // PARAMS enum option i18n: every enum.{key}.{opt} has JA and EN translations
+  const missingEnumI18n = [];
+  Object.keys(H.PARAMS).forEach(k => {
+    const s = H.PARAMS[k];
+    if (s.k === 'enum') s.opts.forEach(opt => {
+      const ik = 'enum.' + k + '.' + opt;
+      if (!H.I18N.ja[ik]) missingEnumI18n.push('JA:' + ik);
+      if (!H.I18N.en[ik]) missingEnumI18n.push('EN:' + ik);
+    });
+  });
+  ok(missingEnumI18n.length === 0,
+    'PARAMS enum i18n: all enum.{key}.{opt} keys present in both languages (missing: ' + (missingEnumI18n.join(',') || 'none') + ')');
+
+  // SPEC enum option counts: hairStyle=5, outfit=4 (SPEC §3 F-005/F-006)
+  ok(H.PARAMS.hairStyle.opts.length === 5 && H.PARAMS.outfit.opts.length === 4,
+    'SPEC F-005/F-006: hairStyle has 5 options, outfit has 4 options');
+
+  // gacha seed in filename: fnameStem() uses lastGachaSeed when set
+  ok(/lastGachaSeed\s*!==\s*null[\s\S]{0,40}'hina_gacha_'/.test(html),
+    'fnameStem() includes "hina_gacha_{seed}" prefix when gacha was run (reproducibility)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

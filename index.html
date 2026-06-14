@@ -2240,7 +2240,7 @@ function download(bytes, name, type){
   setTimeout(()=>URL.revokeObjectURL(u), 8000);
 }
 function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_'); return v||fb; }
-function fnameStem(){ return safeName(meta.title, 'hina_'+(activePresetId||'custom')); }
+function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 let _exporting = false, _exportBtn = null;
 async function doExport(){
