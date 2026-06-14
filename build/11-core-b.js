@@ -524,7 +524,7 @@ function buildAvatar(p){
   scaleTag('joy','mouth',mc,1.25,1.9,0,0,headR*0.022);
   browTilt('joy','browL', headR*0.04, headR*0.03); browTilt('joy','browR', headR*0.04, headR*0.03);
   browTilt('angry','browL',-headR*0.085, headR*0.025); browTilt('angry','browR',-headR*0.085, headR*0.025);
-  scaleTag('angry','eyeL',eC_L,1,0.62); scaleTag('angry','eyeR',eC_R,1,0.62);
+  scaleTag('angry','eyeL',eC_L,1,0.62,0,headR*0.008); scaleTag('angry','eyeR',eC_R,1,0.62,0,headR*0.008);
   scaleTag('angry','mouth',mc,0.7,0.85,0,-headR*0.01,-headR*0.02);
   browTilt('sorrow','browL', headR*0.07,-headR*0.02); browTilt('sorrow','browR', headR*0.07,-headR*0.02);
   scaleTag('sorrow','mouth',mc,0.9,0.5,0,-headR*0.015,-headR*0.03);

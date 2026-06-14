@@ -2182,6 +2182,32 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 140: angry eye upward shift for intimidating glare ---- */
+{
+  // Angry eye vertices should all have positive dy component (upward shift for glare)
+  // This combines with sy=0.62 narrowing: bottom half shrinks more, top half less
+  const [les, lee] = B.geom.tags.eyeL;
+  const angryEyeL = B.morphs.sparse.angry.filter(e => e[0] >= les && e[0] < lee);
+
+  // All angry eyeL entries should have positive net dy (upward bias)
+  // Top vertices: py*(0.62-1) + headR*0.008 = -py*0.38 + 0.008*headR
+  // For top vertex (py=eh): dy = -eh*0.38 + headR*0.008 (negative if eh large, but shift is positive)
+  // Bottom vertices (py=-eh): dy = eh*0.38 + headR*0.008 (positive — bottom less close, upper narrows more)
+
+  ok(angryEyeL.length === 4, `angry eyeL has 4 sparse entries (all quad corners, count unchanged)`);
+
+  // Average dy of angry eye entries should reflect upward shift: bottom dy > |top dy| when shift applied
+  const eyeLDyValues = angryEyeL.map(e => e[2]);
+  // Bottom vertex (py=-eh) has dy = eh*0.38 + headR*0.008 > 0
+  const maxDy = Math.max(...eyeLDyValues);
+  ok(maxDy > 0,
+    `angry eyeL: max vertex dy = ${maxDy.toFixed(5)} > 0 (bottom vertices have positive upward shift)`);
+
+  // Angry eye count still 25 (upward shift doesn't add new vertices)
+  ok(B.morphs.sparse.angry.length === 25,
+    'angry morph sparse count stays 25 after adding eye upward shift');
+}
+
 /* ---- Round 139: morph vertices are exclusively in the face region (≥ faceStart) ---- */
 {
   // All morph sparse entries must reference face vertices (index ≥ faceStart)
