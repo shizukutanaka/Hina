@@ -1915,6 +1915,40 @@ function accData(j, bin, ai){
   ok(sorrowEyes.length >= 2, 'sorrow eye morph includes downward droop (dy < -headR×0.005)');
 }
 
+/* ---- Round 119: eyeShape geometry invariant + ATLAS region non-overlap ---- */
+{
+  // eyeShape is texture-only (canvas); 3D geometry must be identical for all 4 values
+  const eyeBuilds = {};
+  for (const es of H.PARAMS.eyeShape.opts){
+    eyeBuilds[es] = H.buildAvatar(Object.assign(H.defaults(), { eyeShape: es }));
+  }
+  const refVerts = eyeBuilds.round.geom.pos.length;
+  const refIdx   = eyeBuilds.round.geom.idx.length;
+  ok(H.PARAMS.eyeShape.opts.every(es =>
+    eyeBuilds[es].geom.pos.length === refVerts && eyeBuilds[es].geom.idx.length === refIdx),
+    'eyeShape round/tare/tsuri/jito all produce identical vertex+index counts (texture-only param)');
+
+  // blink morph vertex sets must be identical across all eyeShape values
+  const refBlinkVerts = JSON.stringify(
+    eyeBuilds.round.morphs.sparse.blink.map(e => e[0]).sort((a,b)=>a-b));
+  ok(H.PARAMS.eyeShape.opts.every(es =>
+    JSON.stringify(eyeBuilds[es].morphs.sparse.blink.map(e=>e[0]).sort((a,b)=>a-b)) === refBlinkVerts),
+    'blink morph vertex indices identical for all eyeShape values (eye quad geometry unchanged)');
+
+  // ATLAS face rect regions must not overlap each other in pixel space
+  const faceRects = ['eyeL','eyeR','browL','browR','mouth','blush'].map(n => H.ATLAS[n]);
+  const rectOverlap = (a, b) => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
+  let noOverlap = true;
+  for (let i = 0; i < faceRects.length; i++)
+    for (let j = i+1; j < faceRects.length; j++)
+      if (rectOverlap(faceRects[i], faceRects[j])) noOverlap = false;
+  ok(noOverlap, 'all 6 ATLAS face rect regions are non-overlapping (15 pairs checked)');
+
+  // All face rects are fully above y=512 (well separated from solid blocks at y=768)
+  ok(faceRects.every(r => r[3] <= 512),
+    'all ATLAS face rects end at y≤512, well separated from solid color blocks at y=768');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
