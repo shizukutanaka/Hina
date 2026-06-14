@@ -2182,6 +2182,41 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 137: face vertex skinning correctness — eye/brow/mouth bone assignments ---- */
+{
+  const g = B.geom;
+  // eyeL vertices must be skinned exclusively to lE bone (weight=1)
+  {
+    const [s,e]=g.tags.eyeL;
+    let bad=0;
+    for(let i=s;i<e;i++){
+      if(g.jnt[i*4] !== B.idx.lE || Math.abs(g.wgt[i*4]-1) > 1e-6 ||
+         g.wgt[i*4+1] !== 0 || g.wgt[i*4+2] !== 0 || g.wgt[i*4+3] !== 0) bad++;
+    }
+    ok(bad===0, `eyeL tag: all ${e-s} vertices skinned exclusively to lE bone (weight=1.0)`);
+  }
+  // eyeR vertices must be skinned exclusively to rE bone (weight=1)
+  {
+    const [s,e]=g.tags.eyeR;
+    let bad=0;
+    for(let i=s;i<e;i++){
+      if(g.jnt[i*4] !== B.idx.rE || Math.abs(g.wgt[i*4]-1) > 1e-6 ||
+         g.wgt[i*4+1] !== 0 || g.wgt[i*4+2] !== 0 || g.wgt[i*4+3] !== 0) bad++;
+    }
+    ok(bad===0, `eyeR tag: all ${e-s} vertices skinned exclusively to rE bone (weight=1.0)`);
+  }
+  // browL, browR, mouth: all vertices skinned exclusively to head bone
+  for(const tag of ['browL','browR','mouth']){
+    const [s,e]=g.tags[tag];
+    let bad=0;
+    for(let i=s;i<e;i++){
+      if(g.jnt[i*4] !== B.idx.head || Math.abs(g.wgt[i*4]-1) > 1e-6 ||
+         g.wgt[i*4+1] !== 0 || g.wgt[i*4+2] !== 0 || g.wgt[i*4+3] !== 0) bad++;
+    }
+    ok(bad===0, `${tag} tag: all ${e-s} vertices skinned exclusively to head bone (weight=1.0)`);
+  }
+}
+
 /* ---- Round 136: outfit × hairStyle geometry budget (all 20 combinations) ---- */
 {
   const outfits = ['onepiece','sailor','shirts','hoodie'];
