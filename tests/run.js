@@ -703,6 +703,37 @@ function accData(j, bin, ai){
     }
     ok(ascOK, 'sparse morph indices are in strictly ascending order (glTF 2.0 §5.26)');
   }
+
+  /* ---- Round 117: GLB accessor count + targetNames order + morph min/max bounds ---- */
+  // 6 base mesh (pos/nrm/uv/jnt/wgt/idx) + 12 morph POSITION + 1 IBM = 19 (thumbnail adds no accessor)
+  ok(j.accessors.length === 19, 'GLB has exactly 19 accessors: 6 mesh + 12 morph + 1 IBM');
+  // IBM is always the last accessor (index 18) and covers all bones
+  ok(j.accessors[18].type === 'MAT4' && j.accessors[18].count === B.bones.length,
+    'accessor 18 = IBM MAT4 × bones.length');
+  // targetNames in GLB must match morphs.names exactly (order determines bind indices)
+  ok(JSON.stringify(j.meshes[0].extras.targetNames) === JSON.stringify(B.morphs.names),
+    'GLB targetNames array exactly matches build.morphs.names (order preserved)');
+  // morph target POSITION accessors occupy consecutive slots 6..17
+  ok(prim.targets.every((t, i) => t.POSITION === 6 + i),
+    'morph targets reference consecutive accessor indices 6–17');
+  // every bound blendShapeGroup has bind index ≥ 0 (no failed indexOf → -1 corruption)
+  {
+    const tn = j.meshes[0].extras.targetNames;
+    const bsg = j.extensions.VRM.blendShapeMaster.blendShapeGroups;
+    ok(bsg.every(g => g.binds.every(b => b.index >= 0 && b.index < tn.length)),
+      'all blendShapeGroup bind indices are valid (≥0 and within targetNames range)');
+  }
+  // morph accessor min/max must include zero (glTF 2.0: bounds cover implicit zeros in sparse)
+  ok(prim.targets.every(t => {
+    const a = j.accessors[t.POSITION];
+    return a.min.every(v => v <= 0) && a.max.every(v => v >= 0);
+  }), 'all morph accessor min[k]≤0≤max[k] (sparse implicit zeros within bounds)');
+  // all morph accessors have count === nV and type === VEC3
+  ok(prim.targets.every(t => {
+    const a = j.accessors[t.POSITION];
+    return a.count === nV && a.type === 'VEC3' && a.componentType === 5126;
+  }), 'all 12 morph accessors: count=nV, type=VEC3, componentType=FLOAT');
+
   ok(j.bufferViews.every(v => (v.byteOffset || 0) % 4 === 0), 'bufferViews 4-byte aligned');
   // material
   ok(j.materials[0].alphaMode === 'MASK' && j.materials[0].alphaCutoff === 0.5 && j.materials[0].doubleSided === true,
