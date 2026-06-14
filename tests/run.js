@@ -430,6 +430,18 @@ const B = H.buildAvatar(P);
   const r = H.rank(Object.assign({}, base, { tris: 70001 }), 'pc');
   ok(r.rank === 'VeryPoor' && r.worst.includes('tris'), 'pc tris 70001 = VeryPoor, worst lists tris');
   ok(H.RANK_NAMES.length === 5, '5 rank names');
+  // physbone limits: any spring bone drops Quest from Excellent to Good
+  ok(H.rank(Object.assign({}, base, { pbComp: 1 }), 'quest').rank === 'Good', 'quest pbComp=1 → Good (Excellent req pbComp≤0)');
+  ok(H.rank(Object.assign({}, base, { pbTrans: 1 }), 'quest').rank === 'Good', 'quest pbTrans=1 → Good (Excellent req pbTrans≤0)');
+  ok(H.rank(Object.assign({}, base, { pbComp: 0, pbTrans: 0 }), 'quest').rank === 'Excellent', 'quest pbComp=0 pbTrans=0 → Excellent (springs off)');
+  ok(H.rank(Object.assign({}, base, { pbComp: 5 }), 'quest').rank === 'Medium', 'quest pbComp=5 → Medium (Good req ≤4)');
+  // PC tris boundary
+  ok(H.rank(Object.assign({}, base, { tris: 32000 }), 'pc').rank === 'Excellent', 'pc tris 32000 = Excellent');
+  ok(H.rank(Object.assign({}, base, { tris: 32001 }), 'pc').rank === 'Good', 'pc tris 32001 = Good');
+  // rank().worst lists all tied-worst categories
+  const tied = H.rank(Object.assign({}, base, { tris: 7501, bones: 76 }), 'quest');
+  ok(tied.rank === 'Good' && tied.worst.includes('tris') && tied.worst.includes('bones'),
+    'rank worst lists all tied-worst categories (tris + bones both Good)');
 }
 
 /* ---- estimate ---- */
