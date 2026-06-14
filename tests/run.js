@@ -92,6 +92,9 @@ ok(html.includes("addEventListener('beforeunload'") && html.includes('clearTimeo
 ok(/deserialize[\s\S]{0,120}activePresetId=null/.test(html), 'JSON load clears stale activePresetId so preset highlight resets');
 ok(H.I18N.ja['err.exportFailed'] && H.I18N.en['err.exportFailed'], 'export error message i18n in both languages');
 ok(html.includes('_exporting') && html.includes('_exporting = false'), 'doExport has re-entrancy guard (_exporting flag)');
+ok(H.I18N.ja['btn.exporting'] && H.I18N.en['btn.exporting'], 'btn.exporting loading label in both languages');
+ok(html.includes('_exportBtn') && html.includes("_exportBtn.disabled = true"), 'export button disabled during export to prevent double-clicks');
+ok(html.includes("_exportBtn.textContent = t('btn.exporting')"), 'export button text changes to loading label during export');
 ok(html.includes('META_DEFAULTS') && /reset\.confirm[\s\S]{0,200}META_DEFAULTS/.test(html), 'reset button restores meta to defaults via META_DEFAULTS');
 ok(html.includes("dataTransfer.types.includes('Files')") && html.includes("dataTransfer.files"), 'drag-and-drop JSON loading wired with file-type guard');
 ok(/document\.title\s*=.*fnameStem/.test(html), 'document.title updated in rebuild() so browser tab reflects loaded title immediately');

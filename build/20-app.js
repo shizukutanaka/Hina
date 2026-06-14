@@ -688,7 +688,8 @@ function renderOut(bd){
   tbl.append(el('tr',{}, el('th',{scope:'row'},'Quest'), rkQ));
   bd.append(tbl);
 
-  bd.append(el('button',{class:'btn primary wide', onclick:doExport}, t('btn.export')));
+  _exportBtn = el('button',{class:'btn primary wide', onclick:doExport}, t('btn.export'));
+  bd.append(_exportBtn);
   bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:10px'}, t('hint.ctrlS')));
   bd.append(el('button',{class:'btn wide', onclick:saveJson}, t('btn.saveJson')));
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
@@ -769,10 +770,11 @@ function download(bytes, name, type){
 function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_'); return v||fb; }
 function fnameStem(){ return safeName(meta.title, 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
-let _exporting = false;
+let _exporting = false, _exportBtn = null;
 async function doExport(){
   if (!build || _exporting) return;
   _exporting = true;
+  if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.textContent = t('btn.exporting'); }
   try{
     let thumbBytes = null;
     if (GLOK){
@@ -791,7 +793,10 @@ async function doExport(){
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
   }catch(e){ alert(t('err.exportFailed')+': '+e.message); }
-  finally{ _exporting = false; }
+  finally{
+    _exporting = false;
+    if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.textContent = t('btn.export'); }
+  }
 }
 function saveJson(){
   download(new TextEncoder().encode(HINA.serialize(params, meta)),
