@@ -222,6 +222,7 @@ let basePos, baseNrm, morphPos, skPos, skNrm, nVerts=0, outlineCount=0;
 let localQ=[], worldMats=[], skinMats=[];
 let chains=[];           // [{boneIdxs, pts, prev, segs, bindDirs}]
 let morphW={}, morphDirty=true;
+let activeExpr = null;
 let camYaw=Math.PI, camPitch=0.10, camDist=2.6, camTarget=[0,0.8,0];
 let gazeX=0, gazeY=0;
 let blinkT=1.8, blinkPhase=-1;
@@ -284,6 +285,46 @@ function applyMorphs(){
     }
   }
   morphDirty = false;
+}
+
+// Expression preview: set/clear a locked morph for the preview bar
+const EXPR_LABELS = {a:'a',i:'i',u:'u',e:'e',o:'o',blink:'blk',joy:'joy',angry:'ang',sorrow:'sor',fun:'fun'};
+function setExpr(name){
+  activeExpr = name || null;
+  morphW = {};
+  if (activeExpr) morphW[activeExpr] = 1;
+  morphDirty = true;
+  const bar = $('exprBar');
+  if (!bar) return;
+  bar.querySelectorAll('.eBtn').forEach(b => {
+    const isActive = b.dataset.expr === (activeExpr || '');
+    b.classList.toggle('active', isActive);
+    b.setAttribute('aria-pressed', String(isActive));
+  });
+}
+function buildExprBar(){
+  const bar = $('exprBar');
+  if (!bar || !build) return;
+  bar.innerHTML = '';
+  const nb = document.createElement('button');
+  nb.className = 'eBtn' + (activeExpr === null ? ' active' : '');
+  nb.dataset.expr = '';
+  nb.textContent = 'N';
+  nb.title = t('expr.neutral');
+  nb.setAttribute('aria-pressed', String(activeExpr === null));
+  nb.addEventListener('click', () => setExpr(null));
+  bar.append(nb);
+  for(const name of build.morphs.names){
+    if (name === 'blink_l' || name === 'blink_r') continue;
+    const b = document.createElement('button');
+    b.className = 'eBtn' + (activeExpr === name ? ' active' : '');
+    b.dataset.expr = name;
+    b.textContent = EXPR_LABELS[name] || name.slice(0,3);
+    b.title = t('expr.'+name) || name;
+    b.setAttribute('aria-pressed', String(activeExpr === name));
+    b.addEventListener('click', () => setExpr(activeExpr === name ? null : name));
+    bar.append(b);
+  }
 }
 
 function poseAndSkin(time){
@@ -396,8 +437,8 @@ function resize(){
 function renderFrame(time){
   if (!build || !GLOK) return;
   resize();
-  // blink
-  if (!reduceMotion){
+  // blink — suppressed when an expression is locked via the preview bar
+  if (!activeExpr && !reduceMotion){
     blinkT -= 1/60;
     if (blinkT<=0 && blinkPhase<0){ blinkPhase=0; }
     if (blinkPhase>=0){
@@ -832,6 +873,8 @@ function rebuild(){
   uploadGeometry();
   initSprings();
   morphW={}; morphDirty=true;
+  activeExpr = null;
+  buildExprBar();
   document.title='雛 — '+fnameStem();
   updateStats();
   saveState();
@@ -852,7 +895,7 @@ function applyLang(){
   $('aboutTxt').textContent = t('about');
   $('aboutClose').textContent = t('about.close');
   document.documentElement.lang = lang;
-  renderTabs(); renderBody(); updateStats();
+  renderTabs(); renderBody(); buildExprBar(); updateStats();
 }
 $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); });
 $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); });

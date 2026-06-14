@@ -1340,6 +1340,45 @@ function accData(j, bin, ai){
     'Ctrl+S fires doExport only when Shift is NOT held (Shift+S is JSON save)');
 }
 
+/* ---- Round 104: expression preview bar ---- */
+{
+  // HTML structure: exprBar element present in stage
+  ok(html.includes('id="exprBar"'), 'exprBar element present in stage HTML');
+  ok(html.includes('role="toolbar"'), 'exprBar has role="toolbar" for ARIA (accessible expression buttons)');
+
+  // JS: state variable and functions
+  ok(/let activeExpr/.test(html), 'activeExpr state variable present');
+  ok(/function setExpr/.test(html), 'setExpr() function present');
+  ok(/function buildExprBar/.test(html), 'buildExprBar() function present');
+
+  // blink suppressed when expression is locked
+  ok(/!activeExpr[\s\S]{0,50}blinkT/.test(html),
+    'auto-blink is gated by !activeExpr so it stops when an expression is previewed');
+
+  // expression bar built on rebuild
+  ok(/activeExpr = null;[\s\S]{0,30}buildExprBar/.test(html),
+    'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
+
+  // expression bar rebuilt on language switch (tooltips must update)
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 800)),
+    'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
+
+  // expression bar iterates over build.morphs.names
+  ok(/morphs\.names/.test(html), 'buildExprBar iterates build.morphs.names for expression list');
+
+  // setExpr clears morphW when called with null (neutral)
+  ok(/morphW = \{\}/.test(html), 'setExpr() clears morphW = {} before applying new expression');
+
+  // i18n keys for all 11 expression labels present in both languages
+  const exprKeys = ['neutral','a','i','u','e','o','blink','joy','angry','sorrow','fun'];
+  ok(exprKeys.every(k => H.I18N.ja['expr.'+k] && H.I18N.en['expr.'+k]),
+    'expr.* i18n keys present for all 11 expressions in both ja and en');
+
+  // neutral i18n in both languages
+  ok(H.I18N.ja['expr.neutral'] === 'ニュートラル', 'expr.neutral JA = ニュートラル');
+  ok(H.I18N.en['expr.neutral'] === 'Neutral', 'expr.neutral EN = Neutral');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
