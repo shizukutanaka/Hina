@@ -153,6 +153,23 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   near(p[1], 3, 0, 'mApply translate');
   near(M.clamp(5, 0, 1), 1, 0, 'clamp hi');
   near(M.smooth(0, 1, 0.5), 0.5, 1e-9, 'smoothstep midpoint');
+  near(M.smooth(0, 1, 0), 0, 1e-9, 'smooth at a → 0');
+  near(M.smooth(0, 1, 1), 1, 1e-9, 'smooth at b → 1');
+  near(M.smooth(0, 1, -1), 0, 0, 'smooth below a → clamped to 0');
+  near(M.smooth(0, 1, 2), 1, 0, 'smooth above b → clamped to 1');
+  // qMul: yaw 90° twice = yaw 180°, mapping -Z → +Z
+  const q90 = M.qAxis([0,1,0], Math.PI/2);
+  const q180 = M.qMul(q90, q90);
+  const vz = M.qRot(q180, [0,0,-1]);
+  near(vz[2], 1, 1e-5, 'qMul: two 90° yaws → 180°, -Z becomes +Z');
+  // mCompose with identity quat = pure translation
+  const mc = M.mCompose(M.qid(), [3, 0, 0]);
+  near(mc[12], 3, 1e-9, 'mCompose identity quat + translation sets m[12]');
+  near(mc[0], 1, 1e-9, 'mCompose identity quat sets m[0]=1 (no rotation)');
+  // mApplyRot: rotation-only, translation column ignored
+  const mRot = M.mCompose(M.qAxis([0,1,0], Math.PI/2), [99,99,99]);
+  const rotV = M.mApplyRot(mRot, [0,0,-1]);
+  near(rotV[0], -1, 1e-5, 'mApplyRot ignores translation column');
 }
 
 /* ---- PARAMS schema ---- */
