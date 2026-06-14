@@ -921,6 +921,43 @@ function accData(j, bin, ai){
   ok(threw, 'export throws at uint16 vertex limit');
 }
 
+/* ---- Round 121: preset schema validation + EXPR_LABELS coverage + guide i18n ---- */
+{
+  // all preset IDs are unique
+  ok(new Set(H.PRESETS.map(p => p.id)).size === H.PRESETS.length,
+    'all preset IDs are unique');
+  // all presets have non-empty id, ja, en labels
+  ok(H.PRESETS.every(p => p.id && p.ja && p.en &&
+     typeof p.id === 'string' && typeof p.ja === 'string' && typeof p.en === 'string'),
+    'all presets have non-empty string id, ja, en');
+  // preset override params must be valid enum values and within num bounds
+  ok(H.PRESETS.every(pre => Object.entries(pre.p || {}).every(([k, v]) => {
+    const s = H.PARAMS[k];
+    if (!s) return false; // unknown param key
+    if (s.k === 'enum') return s.opts.includes(v);
+    if (s.k === 'num') return v >= s.min && v <= s.max;
+    if (s.k === 'bool') return typeof v === 'boolean';
+    if (s.k === 'color') return H.HEXRE.test(v);
+    return true;
+  })), 'all preset override params are valid per their PARAMS schema');
+  // presetParams is sanitize-stable: sanitizing the output again gives the same result
+  ok(H.PRESETS.every(pre => {
+    const p = H.presetParams(pre);
+    const p2 = H.sanitize(p);
+    return JSON.stringify(p) === JSON.stringify(p2);
+  }), 'presetParams() output is sanitize-stable (no out-of-range values)');
+
+  // EXPR_LABELS in app.js: all morph names (excl. blink_l/r) have a short label
+  const morphNamesForBar = B.morphs.names.filter(n => n !== 'blink_l' && n !== 'blink_r');
+  ok(morphNamesForBar.every(n => html.includes('"' + n + '"') || html.includes("'" + n + "'")),
+    'EXPR_LABELS entries cover all visible morphs (blink_l/blink_r filtered in buildExprBar)');
+
+  // guide i18n: all 5 step keys present in both languages (upload guide in out tab)
+  const guideKeys = ['guide.t','guide.s1','guide.s2','guide.s3','guide.s4','guide.s5'];
+  ok(guideKeys.every(k => H.I18N.ja[k] && H.I18N.en[k]),
+    'all 6 upload guide i18n keys present in both languages');
+}
+
 /* ---- per-preset builds + exports ---- */
 {
   const png = H.b64ToBytes(H.PNG1);
