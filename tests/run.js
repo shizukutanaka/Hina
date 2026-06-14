@@ -611,7 +611,16 @@ function accData(j, bin, ai){
   ok(mp.floatProperties._ShadeToony === 0.9, 'MToon _ShadeToony = 0.9 (SPEC §5.5)');
   ok(mp.floatProperties._ShadeShift === 0, 'MToon _ShadeShift = 0 (SPEC §5.5)');
   ok(mp.floatProperties._OutlineWidthMode === 0, 'MToon outline off by default (_OutlineWidthMode=0)');
+  // MToon vector properties: base color white, shade color slightly warm-blue
+  ok(Array.isArray(mp.vectorProperties._Color) && mp.vectorProperties._Color.every(v => v === 1),
+    'MToon _Color is [1,1,1,1] (tinting done in atlas texture, not material color)');
+  ok(mp.vectorProperties._ShadeColor[0] === 0.9 && mp.vectorProperties._ShadeColor[3] === 1,
+    'MToon _ShadeColor has expected cool-tone (r=0.9, a=1)');
   ok(mp.name === j.materials[0].name, 'MToon name matches glTF material');
+  // glTF sampler: CLAMP_TO_EDGE + LINEAR/LINEAR_MIPMAP_LINEAR in GLB JSON
+  ok(j.samplers[0].wrapS === 33071 && j.samplers[0].wrapT === 33071,
+    'glTF sampler wrapS/wrapT = CLAMP_TO_EDGE (33071) in exported GLB JSON');
+  ok(j.samplers[0].magFilter === 9729, 'glTF sampler magFilter = LINEAR (9729)');
 
   // node graph: everything reachable from scene
   {
