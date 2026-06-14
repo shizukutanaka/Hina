@@ -190,6 +190,10 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   ok(keys.filter(k => H.PARAMS[k].k === 'color').every(k => {
     const s = H.PARAMS[k]; return H.HEXRE.test(s.def) && Array.isArray(H.PAL[s.pal]); }),
     'color: def hex + palette exists');
+  // all palette entries must be valid hex (randomParams picks from them → must pass sanitize)
+  ok(Object.values(H.PAL).every(arr => arr.every(c => H.HEXRE.test(c))),
+    'all PAL entries are valid lowercase hex colors');
+  ok(/^\d+\.\d+\.\d+$/.test(H.VERSION), 'VERSION is valid semver (x.y.z)');
 }
 
 /* ---- i18n parity ---- */
