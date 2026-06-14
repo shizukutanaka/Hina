@@ -375,6 +375,26 @@ const B = H.buildAvatar(P);
     'sleeves=short same tri count as long (same ring topology, different endpoint position)');
 }
 
+/* ---- adv (detail-mode-only) parameters ---- */
+{
+  const advKeys = Object.keys(H.PARAMS).filter(k => H.PARAMS[k].adv);
+  ok(advKeys.length === 4 && ['armTh','legTh','irisSize','socks'].every(k => advKeys.includes(k)),
+    'exactly 4 adv:1 params: armTh, legTh, irisSize, socks');
+  // extreme arm/leg thickness builds must not crash or produce non-finite geometry
+  const wide = H.buildAvatar(Object.assign(H.defaults(), { armTh: 1.5, legTh: 1.5 }));
+  ok(wide.geom.pos.every(Number.isFinite) && wide.geom.nrm.every(Number.isFinite),
+    'armTh=1.5, legTh=1.5 (max): finite pos/nrm');
+  ok(wide.geom.idx.length % 3 === 0 && wide.geom.idx.every(i => i >= 0 && i < wide.geom.pos.length / 3),
+    'armTh/legTh max: valid indices');
+  const thin = H.buildAvatar(Object.assign(H.defaults(), { armTh: 0.7, legTh: 0.7 }));
+  ok(thin.geom.pos.every(Number.isFinite) && thin.geom.nrm.every(Number.isFinite),
+    'armTh=0.7, legTh=0.7 (min): finite pos/nrm');
+  // irisSize is canvas-only; verify sanitize accepts all values in range
+  ok(H.sanitize({ irisSize: 0.6 }).irisSize === 0.6, 'irisSize min accepted by sanitize');
+  ok(H.sanitize({ irisSize: 1.2 }).irisSize === 1.2, 'irisSize max accepted by sanitize');
+  ok(H.sanitize({ irisSize: 1.3 }).irisSize === H.PARAMS.irisSize.max, 'irisSize above max clamped');
+}
+
 /* ---- rank boundaries (synthetic stats) ---- */
 {
   const base = { tris: 1, bones: 1, skinned: 1, mesh: 0, mat: 1, pbComp: 0, pbTrans: 0, pbCol: 0, pbCheck: 0, texMB: 1 };
