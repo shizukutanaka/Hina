@@ -2182,6 +2182,29 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 141: bone spatial ordering invariants — anatomically correct positions ---- */
+{
+  const bn = B.bones, id = B.idx;
+  // Left arm chain: shoulder → upperArm → lowerArm → hand (x decreases monotonically leftward)
+  ok(bn[id.lSh].w[0] > bn[id.lUA].w[0] && bn[id.lUA].w[0] > bn[id.lLA].w[0] && bn[id.lLA].w[0] > bn[id.lH].w[0],
+    'left arm X: shoulder > upperArm > lowerArm > hand (arm extends leftward = negative X)');
+  // Right arm: mirrors left (positive X, each successive bone is further right)
+  ok(bn[id.rSh].w[0] < bn[id.rUA].w[0] && bn[id.rUA].w[0] < bn[id.rLA].w[0] && bn[id.rLA].w[0] < bn[id.rH].w[0],
+    'right arm X: shoulder < upperArm < lowerArm < hand (arm extends rightward = positive X)');
+  // Left leg: hip → upperLeg → lowerLeg → foot (Y decreases, all below hips)
+  ok(bn[id.lUL].w[1] > bn[id.lLL].w[1] && bn[id.lLL].w[1] > bn[id.lF].w[1],
+    'left leg Y: upperLeg > lowerLeg > foot (descends toward ground)');
+  // Spine chain: hips → spine → chest → neck → head (Y strictly increases)
+  ok(bn[id.hips].w[1] < bn[id.spine].w[1] && bn[id.spine].w[1] < bn[id.chest].w[1] &&
+     bn[id.chest].w[1] < bn[id.neck].w[1] && bn[id.neck].w[1] < bn[id.head].w[1],
+    'spine chain Y: hips < spine < chest < neck < head (ascending height)');
+  // Arm bones and leg bones are near zero Z (T-pose, no front/back offset)
+  const armBones = [id.lSh,id.lUA,id.lLA,id.lH,id.rSh,id.rUA,id.rLA,id.rH];
+  const legBones = [id.lUL,id.lLL,id.lF,id.rUL,id.rLL,id.rF];
+  ok([...armBones,...legBones].every(i => Math.abs(bn[i].w[2]) < 0.02),
+    'all arm/leg bones have |Z| < 0.02 m (T-pose, no front/back offset)');
+}
+
 /* ---- Round 140: angry eye upward shift for intimidating glare ---- */
 {
   // Angry eye vertices should all have positive dy component (upward shift for glare)
