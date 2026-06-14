@@ -2182,7 +2182,38 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
-/* ---- Round 143: eyeY parameter monotonicity — higher eyeY = higher eye position ---- */
+/* ---- Round 144: hairLen monotonically increases spring chain end-bone distance ---- */
+{
+  // For twin hair style, measure the end-bone Y of the spring chain
+  // More hairLen = longer chains = end bone is further from head
+  const shortLen = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:'twin', hairLen:0.7}));
+  const midLen   = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:'twin', hairLen:1.0}));
+  const longLen  = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:'twin', hairLen:1.4}));
+
+  // Twin hair has 2 chains; use chain 0 (TailL_)
+  const endBone = A => A.springs[0].boneIdxs[A.springs[0].boneIdxs.length - 1];
+  const endY = A => A.bones[endBone(A)].w[1];
+
+  ok(endY(shortLen) > endY(midLen) && endY(midLen) > endY(longLen),
+    'twin hair end-bone Y decreases (chains hang lower) as hairLen increases (0.7 > 1.0 > 1.4)');
+
+  // For pony hair style: end bone distance from head in Y
+  const shortPony = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:'pony', hairLen:0.7}));
+  const longPony  = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:'pony', hairLen:1.4}));
+  const ponyEndY = A => A.bones[A.springs[0].boneIdxs[A.springs[0].boneIdxs.length-1]].w[1];
+  ok(ponyEndY(longPony) < ponyEndY(shortPony),
+    'pony hair end-bone Y is lower (longer chain) for hairLen=1.4 vs 0.7');
+
+  // hairLen does not affect non-spring hair styles (short/bob)
+  const shortHair = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:'short', hairLen:0.7}));
+  const longHair  = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:'short', hairLen:1.4}));
+  ok(shortHair.springs.length === 0 && longHair.springs.length === 0,
+    'short hair: hairLen has no spring chains regardless of value');
+  ok(shortHair.bones.length === longHair.bones.length,
+    'short hair: hairLen does not change bone count (0 spring bones in both cases)');
+}
+
+/* ---- Round 143: eyeY monotonicity — higher eyeY = higher eye position ---- */
 {
   const low  = H.buildAvatar(Object.assign(H.defaults(), {eyeY: 0.0}));
   const mid  = H.buildAvatar(Object.assign(H.defaults(), {eyeY: 0.5}));
