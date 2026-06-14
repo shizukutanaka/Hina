@@ -491,11 +491,16 @@ function accData(j, bin, ai){
   const ibm = accData(j, G.bin, j.skins[0].inverseBindMatrices);
   ok(j.accessors[j.skins[0].inverseBindMatrices].type === 'MAT4', 'IBM MAT4');
   let ibmOK = true;
+  // T-pose IBM: column-major identity rotation + translation(-world)
+  // Expected: [1,0,0,0, 0,1,0,0, 0,0,1,0, -x,-y,-z,1]
   B.bones.forEach((b, i) => {
-    if (Math.abs(ibm[i*16+12] + b.w[0]) > 1e-6 || Math.abs(ibm[i*16+13] + b.w[1]) > 1e-6 ||
-        Math.abs(ibm[i*16+14] + b.w[2]) > 1e-6 || ibm[i*16] !== 1) ibmOK = false;
+    const m = ibm.subarray(i*16, i*16+16);
+    if (Math.abs(m[12] + b.w[0]) > 1e-6 || Math.abs(m[13] + b.w[1]) > 1e-6 ||
+        Math.abs(m[14] + b.w[2]) > 1e-6) ibmOK = false;
+    if (m[0] !== 1 || m[5] !== 1 || m[10] !== 1 || m[15] !== 1) ibmOK = false;
+    if (m[1]||m[2]||m[3]||m[4]||m[6]||m[7]||m[8]||m[9]||m[11]) ibmOK = false;
   });
-  ok(ibmOK, 'IBM = translate(-world), identity rotation');
+  ok(ibmOK, 'IBM = translate(-world), identity rotation (all 16 matrix elements verified)');
   // primitive
   const prim = j.meshes[0].primitives[0];
   ok(['POSITION','NORMAL','TEXCOORD_0','JOINTS_0','WEIGHTS_0'].every(a => prim.attributes[a] !== undefined),
