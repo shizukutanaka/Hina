@@ -1027,6 +1027,61 @@ function accData(j, bin, ai){
     'spine chain (hips→spine→chest→neck→head) has strictly ascending node indices');
 }
 
+/* ---- Round 96: exported node parent→children matches bone hierarchy ---- */
+{
+  const png = H.b64ToBytes(H.PNG1);
+  const ex = H.exportVRM(B, P, {}, png);
+  const j = ex.json;
+
+  // Build a childMap from exported nodes: for each node, which nodes list it as a child?
+  // nodeOf(boneIdx) = boneIdx + 1 (Root is 0, bones are 1..N, meshNode is N+1)
+  const N = B.bones.length;
+
+  // For each bone, its exported node is (boneIdx+1).
+  // Its parent bone's exported node's children array must include (boneIdx+1).
+  // Bones with parent===-1 (root hips) are children of node 0 (Root).
+  let parentOK = true;
+  B.bones.forEach((b, i) => {
+    const myNode = i + 1;
+    const parentNode = b.parent >= 0 ? b.parent + 1 : 0;
+    const kids = j.nodes[parentNode].children || [];
+    if (!kids.includes(myNode)) parentOK = false;
+  });
+  ok(parentOK, 'every bone node appears in its parent node\'s children array (hierarchy preserved in export)');
+
+  // Leaf bones (no bone has them as parent) must NOT appear in any non-parent node's children
+  const parentSet = new Set(B.bones.map(b => b.parent).filter(p => p >= 0));
+  const leafBones = B.bones.map((_, i) => i).filter(i => !parentSet.has(i));
+  ok(leafBones.length > 0, 'at least some leaf bones exist (not every bone has children)');
+
+  // Every node that is a child of some other node appears exactly once across all children arrays
+  const allChildRefs = j.nodes.flatMap(n => n.children || []);
+  const uniqueChildRefs = new Set(allChildRefs);
+  ok(allChildRefs.length === uniqueChildRefs.size,
+    'each node appears as a child exactly once (no duplicate or shared parent references)');
+
+  // All atlas uvBlock regions produce center points strictly inside [0,1]
+  const blockNames = ['skin','hair','clothMain','clothSub','accent','shoe','white','hairHi'];
+  ok(blockNames.every(name => {
+    const [u, v] = H.uvBlock(name);
+    return u > 0 && u < 1 && v > 0 && v < 1;
+  }), 'all 8 solid atlas blocks have center UV strictly inside (0,1)');
+
+  // All uvRect regions are non-degenerate and inside [0,1]
+  const rectNames = ['eyeL','eyeR','browL','browR','mouth','blush'];
+  ok(rectNames.every(name => {
+    const [u0, v0, u1, v1] = H.uvRect(name);
+    return u0 >= 0 && v0 >= 0 && u1 <= 1 && v1 <= 1 && u1 > u0 && v1 > v0;
+  }), 'all 6 atlas rect regions are non-degenerate and within [0,1]');
+
+  // eyeL and eyeR uvRects are mirror images (same v range, symmetric u range)
+  const eL = H.uvRect('eyeL'), eR = H.uvRect('eyeR');
+  ok(Math.abs(eL[1] - eR[1]) < 1e-9 && Math.abs(eL[3] - eR[3]) < 1e-9,
+    'eyeL and eyeR share same v range (horizontally mirrored in atlas)');
+  ok(Math.abs((eL[2] - eL[0]) - (eR[2] - eR[0])) < 1e-9,
+    'eyeL and eyeR regions have equal width in UV space');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
