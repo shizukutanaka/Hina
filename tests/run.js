@@ -463,6 +463,9 @@ function accData(j, bin, ai){
     'humanBones names + node range');
   ok(V.firstPerson.firstPersonBone === B.idx.head + 1, 'firstPersonBone = head node');
   ok(V.firstPerson.lookAtTypeName === 'Bone', 'lookAt Bone type');
+  const fpo = V.firstPerson.firstPersonBoneOffset;
+  ok(fpo.x === 0 && fpo.y > 0 && fpo.z < 0,
+    'firstPersonBoneOffset: x=0, y>0 (eyes above head bone), z<0 (forward into face)');
   const bsg = V.blendShapeMaster.blendShapeGroups;
   ok(bsg.length === 17, '17 blendShapeGroups');
   const tn = j.meshes[0].extras.targetNames;
@@ -474,6 +477,8 @@ function accData(j, bin, ai){
     'all VRM0 presets covered');
   const sa = V.secondaryAnimation;
   ok(sa.boneGroups.length === 1 && typeof sa.boneGroups[0].stiffiness === 'number', 'boneGroup with stiffiness (VRM0 typo)');
+  ok(sa.boneGroups[0].stiffiness === Math.round(P.hairStiff * 4 * 100) / 100,
+    'stiffiness matches hairStiff param (× 4 scale)');
   ok(sa.boneGroups[0].bones.length === 2 &&
      sa.boneGroups[0].bones.every(n => n === B.springs[0].boneIdxs[0] + 1 || n === B.springs[1].boneIdxs[0] + 1),
     'spring roots = twin chain roots');
