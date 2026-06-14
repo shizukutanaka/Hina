@@ -2042,6 +2042,35 @@ function accData(j, bin, ai){
   ok(angryMouthCenter.length >= 1, 'angry morph includes mouth center vertex with dy=-headR×0.01 (downward pull)');
 }
 
+/* ---- Round 125: eye bone position invariants ---- */
+{
+  // eye bones must be children of the head bone
+  ok(B.bones[B.idx.lE].parent === B.idx.head, 'leftEye bone parent = head bone');
+  ok(B.bones[B.idx.rE].parent === B.idx.head, 'rightEye bone parent = head bone');
+
+  // eye bone Y must match eyeWY (world position matches geometry position)
+  ok(Math.abs(B.bones[B.idx.lE].w[1] - B.dims.eyeWY) < 1e-9,
+    'leftEye bone w[1] = dims.eyeWY');
+  ok(Math.abs(B.bones[B.idx.rE].w[1] - B.dims.eyeWY) < 1e-9,
+    'rightEye bone w[1] = dims.eyeWY');
+
+  // eye bone X must match ±eyeX (horizontal symmetry and gap)
+  ok(Math.abs(B.bones[B.idx.lE].w[0] + B.dims.eyeX) < 1e-9,
+    'leftEye bone w[0] = -dims.eyeX');
+  ok(Math.abs(B.bones[B.idx.rE].w[0] - B.dims.eyeX) < 1e-9,
+    'rightEye bone w[0] = +dims.eyeX');
+
+  // eye bone Z must be at -headR*0.7 (rotation center set back from face surface)
+  ok(Math.abs(B.bones[B.idx.lE].w[2] + B.dims.headR*0.7) < 1e-9,
+    'leftEye bone w[2] = -headR×0.7 (rotation center inside head)');
+
+  // eye bone position is gap-dependent: wider eyeGap → larger eyeX
+  const narrowGap = H.buildAvatar(Object.assign(H.defaults(), { eyeGap: 0.0 }));
+  const wideGap   = H.buildAvatar(Object.assign(H.defaults(), { eyeGap: 1.0 }));
+  ok(wideGap.bones[wideGap.idx.rE].w[0] > narrowGap.bones[narrowGap.idx.rE].w[0],
+    'rightEye x increases with eyeGap (eyeGap=1.0 > eyeGap=0.0)');
+}
+
 /* ---- Round 124: vowel mouth puckering (dz) properties + socks gacha randomization ---- */
 {
   // u and o morphs have dz≠0 (lip puckering/forward movement for lip-sync realism)
