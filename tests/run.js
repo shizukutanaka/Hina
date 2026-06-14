@@ -2182,6 +2182,49 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 149: browTilt zero-dy guard + sparse non-zero invariant + eyeL/eyeR symmetry sweep ---- */
+{
+  // browTilt now filters zero-dy entries (matches scaleTag behaviour).
+  // Every sparse entry [i,dx,dy,dz] must carry a non-zero displacement.
+  ok(
+    B.morphs.names.every(n => B.morphs.sparse[n].every(e => e[1] !== 0 || e[2] !== 0 || e[3] !== 0)),
+    'every sparse entry has non-zero displacement (no idle vertices in any morph)'
+  );
+
+  // eyeL/eyeR vertex count parity under extreme parameter sweep
+  const eyeParamSweep = [
+    {height: H.PARAMS.height.min}, {height: H.PARAMS.height.max},
+    {eyeSize: H.PARAMS.eyeSize.min}, {eyeSize: H.PARAMS.eyeSize.max},
+    {eyeY: H.PARAMS.eyeY.min},      {eyeY: H.PARAMS.eyeY.max},
+    {eyeGap: H.PARAMS.eyeGap.min},  {eyeGap: H.PARAMS.eyeGap.max},
+    {headRatio: H.PARAMS.headRatio.min}, {headRatio: H.PARAMS.headRatio.max},
+  ];
+  let asymmetric = 0;
+  for(const ovr of eyeParamSweep){
+    const C = H.buildAvatar(Object.assign(H.defaults(), ovr));
+    const [sL,eL] = C.geom.tags['eyeL'], [sR,eR] = C.geom.tags['eyeR'];
+    if((eL-sL) !== (eR-sR)) asymmetric++;
+  }
+  ok(asymmetric === 0, 'eyeL/eyeR vertex count parity under extreme param sweep (10 cases)');
+
+  // browTilt morphs: count for blink/blink_l/blink_r/joy/angry/sorrow/fun must be even
+  // (symmetric left+right brows contribute equal counts)
+  const browMorphs = ['blink','blink_l','blink_r','joy','angry','sorrow','fun'];
+  ok(
+    browMorphs.every(n => {
+      const s = B.morphs.sparse[n];
+      const browEntries = s.filter(e => e[0] < B.faceStart || e[0] >= B.faceStart);
+      // count specifically brow vertices
+      const [sL0,eL0] = B.geom.tags['browL'], [sR0,eR0] = B.geom.tags['browR'];
+      const browCount = s.filter(e => (e[0]>=sL0&&e[0]<eL0)||(e[0]>=sR0&&e[0]<eR0)).length;
+      // single-sided morphs (blink_l, blink_r) skip - they only move one brow
+      if(n==='blink_l'||n==='blink_r') return true;
+      return browCount % 2 === 0;
+    }),
+    'bilateral brow morphs have even brow-vertex count (L+R symmetry)'
+  );
+}
+
 /* ---- Round 148: total avatar height = H invariant + headRatio proportionality ---- */
 {
   // The top of the head sphere = H (headCY + headR = (H-headR) + headR = H always)

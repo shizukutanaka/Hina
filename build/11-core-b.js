@@ -504,7 +504,7 @@ function buildAvatar(p){
       const px=g.pos[i*3];
       const inner = sign>0 ? (px > -eyeX) : (px < eyeX);
       const dy=inner?innerDy:outerDy;
-      sparse[t].push([i,0,dy,0]);
+      if(dy) sparse[t].push([i,0,dy,0]);
     }
   };
   const eC_L=[-eyeX,eyeWY,faceZ], eC_R=[eyeX,eyeWY,faceZ];
