@@ -2182,6 +2182,56 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 164: eyeSize formula verification for eye quad and brow position ---- */
+{
+  // ew = headR×0.21×eyeSize (eye half-width),  eh = headR×0.17×eyeSize (eye half-height)
+  // brow center Y = eyeWY + eh×1.55  (brow floats 1.55 eye half-heights above eye center)
+  const d = B.dims;
+  const [s, e] = B.geom.tags.eyeL;
+  const eyeYs = [], eyeXs = [];
+  for(let i = s; i < e; i++){
+    eyeYs.push(B.geom.pos[i*3+1]);
+    eyeXs.push(B.geom.pos[i*3]);
+  }
+  const actualEW = (Math.max(...eyeXs) - Math.min(...eyeXs)) / 2;
+  const actualEH = (Math.max(...eyeYs) - Math.min(...eyeYs)) / 2;
+  const expectedEW = d.headR * 0.21 * P.eyeSize;
+  const expectedEH = d.headR * 0.17 * P.eyeSize;
+  ok(Math.abs(actualEW - expectedEW) < 1e-9,
+    `eyeL half-width = headR×0.21×eyeSize = ${expectedEW.toFixed(5)}`);
+  ok(Math.abs(actualEH - expectedEH) < 1e-9,
+    `eyeL half-height = headR×0.17×eyeSize = ${expectedEH.toFixed(5)}`);
+
+  // Brow Y formula: center Y of browL = eyeWY + eh×1.55
+  const [bs, be] = B.geom.tags.browL;
+  const browYs = [];
+  for(let i = bs; i < be; i++) browYs.push(B.geom.pos[i*3+1]);
+  const actualBrowY = (Math.max(...browYs) + Math.min(...browYs)) / 2;
+  const expectedBrowY = d.eyeWY + expectedEH * 1.55;
+  ok(Math.abs(actualBrowY - expectedBrowY) < 1e-9,
+    `browL center Y = eyeWY + eh×1.55 = ${expectedBrowY.toFixed(5)}`);
+
+  // Monotone: larger eyeSize → larger eye span and higher brow position
+  const bSmall = H.buildAvatar(Object.assign({}, P, { eyeSize: 0.6 }));
+  const bLarge = H.buildAvatar(Object.assign({}, P, { eyeSize: 1.4 }));
+  const getEH = b => {
+    const [s2,e2]=b.geom.tags.eyeL;
+    const ys2=[];
+    for(let i=s2;i<e2;i++) ys2.push(b.geom.pos[i*3+1]);
+    return (Math.max(...ys2)-Math.min(...ys2))/2;
+  };
+  const getBrowY = b => {
+    const [bs2,be2]=b.geom.tags.browL;
+    const bys=[];
+    for(let i=bs2;i<be2;i++) bys.push(b.geom.pos[i*3+1]);
+    return (Math.max(...bys)+Math.min(...bys))/2;
+  };
+  ok(getEH(bLarge) > getEH(bSmall),
+    'eye half-height monotone: eyeSize=1.4 > eyeSize=0.6');
+  ok(getBrowY(bLarge) > getBrowY(bSmall),
+    'brow center Y monotone: larger eye → higher brow (brow follows eh×1.55)');
+}
+
 /* ---- Round 163: skirtLen ring position formula + no-skirt invariance ---- */
 {
   // skirtLen PARAMS range: [0.6, 1.6], default 1.0.
