@@ -2182,6 +2182,56 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 165: mouthW and mouth fan geometry formula ---- */
+{
+  // mrx = headR×0.14×mouthW (half-width, scales with mouthW)
+  // mry = headR×0.045       (half-height, constant)
+  // center: x=0, y = headCY - headR×0.42, z = faceZ
+  const d = B.dims;
+  const [ms, me] = B.geom.tags.mouth;
+  // center vertex (index ms) must be at x=0, y=headCY-headR×0.42
+  const cX = B.geom.pos[ms*3], cY = B.geom.pos[ms*3+1];
+  ok(Math.abs(cX) < 1e-9,
+    `mouth center X = 0 (bilateral symmetry), actual=${cX}`);
+  ok(Math.abs(cY - (d.headCY - d.headR * 0.42)) < 1e-9,
+    `mouth center Y = headCY - headR×0.42 = ${(d.headCY-d.headR*0.42).toFixed(5)}`);
+
+  // ring vertices (ms+1 … me-1) X-span = 2×mrx = 2×headR×0.14×mouthW
+  const ringXs = [], ringYs = [];
+  for(let i = ms+1; i < me; i++){
+    ringXs.push(B.geom.pos[i*3]);
+    ringYs.push(B.geom.pos[i*3+1]);
+  }
+  const actualMrx = (Math.max(...ringXs) - Math.min(...ringXs)) / 2;
+  const actualMry = (Math.max(...ringYs) - Math.min(...ringYs)) / 2;
+  const expectedMrx = d.headR * 0.14 * P.mouthW;
+  const expectedMry = d.headR * 0.045;
+  ok(Math.abs(actualMrx - expectedMrx) < 1e-9,
+    `mouth ring half-width = headR×0.14×mouthW = ${expectedMrx.toFixed(5)}`);
+  ok(Math.abs(actualMry - expectedMry) < 1e-9,
+    `mouth ring half-height = headR×0.045 = ${expectedMry.toFixed(5)} (constant, no mouthW scaling)`);
+
+  // mouthW monotone: wider mouth → larger X span
+  const bNarrow = H.buildAvatar(Object.assign({}, P, { mouthW: 0.7 }));
+  const bWide   = H.buildAvatar(Object.assign({}, P, { mouthW: 1.4 }));
+  const getXSpan = b => {
+    const [s2,e2] = b.geom.tags.mouth;
+    const xs = [];
+    for(let i = s2+1; i < e2; i++) xs.push(b.geom.pos[i*3]);
+    return Math.max(...xs) - Math.min(...xs);
+  };
+  const getYSpan = b => {
+    const [s2,e2] = b.geom.tags.mouth;
+    const ys = [];
+    for(let i = s2+1; i < e2; i++) ys.push(b.geom.pos[i*3+1]);
+    return Math.max(...ys) - Math.min(...ys);
+  };
+  ok(getXSpan(bWide) > getXSpan(bNarrow),
+    'mouth X span monotone: mouthW=1.4 > mouthW=0.7');
+  ok(Math.abs(getYSpan(bWide) - getYSpan(bNarrow)) < 1e-9,
+    'mouth Y span constant: mouthW has no effect on vertical opening');
+}
+
 /* ---- Round 164: eyeSize formula verification for eye quad and brow position ---- */
 {
   // ew = headR×0.21×eyeSize (eye half-width),  eh = headR×0.17×eyeSize (eye half-height)
