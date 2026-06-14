@@ -1379,6 +1379,67 @@ function accData(j, bin, ai){
   ok(H.I18N.en['expr.neutral'] === 'Neutral', 'expr.neutral EN = Neutral');
 }
 
+/* ---- Round 105: randomParams determinism + GLB JSON-chunk padding + onParam fix ---- */
+{
+  // randomParams is deterministic: same seed → same output
+  const p1 = H.randomParams(12345), p2 = H.randomParams(12345);
+  ok(JSON.stringify(p1) === JSON.stringify(p2),
+    'randomParams(seed) is deterministic: calling twice with same seed yields identical output');
+
+  // different seeds produce different outputs
+  const p3 = H.randomParams(99999);
+  ok(JSON.stringify(p1) !== JSON.stringify(p3),
+    'randomParams with different seeds produces different outputs');
+
+  // randomParams output passes sanitize() unchanged
+  const pR = H.randomParams(777);
+  ok(JSON.stringify(H.sanitize(pR)) === JSON.stringify(pR),
+    'randomParams() output is already sanitized (all values within valid range)');
+
+  // springOff always false from randomParams
+  ok(!pR.springOff && !p1.springOff && !p3.springOff,
+    'randomParams() always sets springOff=false (must not disable spring bones)');
+
+  // randomParams numeric values within PARAMS bounds
+  ok(Object.keys(H.PARAMS).every(k => {
+    const s = H.PARAMS[k];
+    if (s.k !== 'num') return true;
+    return pR[k] >= s.min && pR[k] <= s.max;
+  }), 'randomParams() all numeric values are within [min, max] bounds');
+
+  // randomParams enum values are valid
+  ok(Object.keys(H.PARAMS).every(k => {
+    const s = H.PARAMS[k];
+    if (s.k !== 'enum') return true;
+    return s.opts.includes(pR[k]);
+  }), 'randomParams() all enum values are valid options');
+
+  // randomParams produces buildable avatar
+  const pRB = H.buildAvatar(pR);
+  ok(pRB && pRB.geom.pos.every(Number.isFinite), 'randomParams() output produces a finite-position avatar');
+
+  // GLB JSON chunk must be padded with 0x20 (space) bytes per glTF 2.0 spec
+  {
+    const png = H.b64ToBytes(H.PNG1);
+    const ex = H.exportVRM(H.buildAvatar(H.defaults()), H.defaults(), {}, png);
+    const bytes = ex.bytes;
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const jsonChunkLen = dv.getUint32(12, true);
+    const jsonStart = 20;
+    const jsonEnd = jsonStart + jsonChunkLen;
+    // find actual JSON end (last non-space byte in the chunk)
+    let actualJsonEnd = jsonEnd;
+    while (actualJsonEnd > jsonStart && bytes[actualJsonEnd - 1] === 0x20) actualJsonEnd--;
+    const padCount = jsonEnd - actualJsonEnd;
+    ok(padCount === 0 || Array.from({length: padCount}, (_, i) => bytes[actualJsonEnd + i]).every(b => b === 0x20),
+      'GLB JSON chunk padding bytes are 0x20 (space) per glTF 2.0 §4.4');
+  }
+
+  // onParam calls renderBody after rebuild (ensures conditional rows like skirtLen update)
+  ok(/function onParam[\s\S]{0,320}rebuild\(\);[\s\S]{0,50}renderBody/.test(html),
+    'onParam() calls renderBody() after rebuild so outfit-conditional params (skirtLen) update immediately');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

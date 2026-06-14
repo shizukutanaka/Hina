@@ -647,6 +647,7 @@ function onParam(k){
   if (s.k==='color'){ drawAtlas(params); uploadTexture(); saveState(); return; }
   if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
   rebuild();
+  renderBody(); // refresh panel so conditional rows (e.g. skirtLen) reflect updated params
 }
 
 function renderBody(){
