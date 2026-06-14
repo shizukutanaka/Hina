@@ -288,6 +288,25 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   }
   ok(buildOK, 'buildAvatar(randomParams(s)) does not throw for 10 seeds');
   ok(posOK, 'randomParams builds produce finite pos/nrm (10 seeds)');
+  // extreme parameter corners: min height / max height / max headRatio / bust extremes
+  const extremes = [
+    { height: H.PARAMS.height.min },
+    { height: H.PARAMS.height.max },
+    { headRatio: H.PARAMS.headRatio.max },
+    { headRatio: H.PARAMS.headRatio.min },
+    { bust: H.PARAMS.bust.max },
+    { bust: H.PARAMS.bust.min },
+    { height: H.PARAMS.height.min, headRatio: H.PARAMS.headRatio.max },
+  ];
+  let extOK = true, extIdxOK = true;
+  for (const overrides of extremes){
+    const eb = H.buildAvatar(Object.assign(H.defaults(), overrides));
+    if (!eb.geom.pos.every(Number.isFinite) || !eb.geom.nrm.every(Number.isFinite)) extOK = false;
+    const nVE = eb.geom.pos.length / 3;
+    if (!eb.geom.idx.every(i => i >= 0 && i < nVE)) extIdxOK = false;
+  }
+  ok(extOK, 'extreme param corners (min/max height, headRatio, bust): finite pos/nrm');
+  ok(extIdxOK, 'extreme param corners: valid triangle indices');
 }
 
 /* ---- atlas UV helpers ---- */
