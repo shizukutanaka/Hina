@@ -2182,6 +2182,40 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 151: skeleton Y-ordering invariants + arm X-ordering ---- */
+{
+  // dims fields not yet validated: spine chain must ascend in Y, arm must ascend in X
+  const d = B.dims;
+
+  // Spine chain: bottom to top must strictly increase in Y
+  const spineOrder = [d.ankleY, d.kneeY, d.hipsY, d.spineY, d.chestY, d.shoulderY, d.neckY, d.headCY];
+  const spineNames = ['ankleY','kneeY','hipsY','spineY','chestY','shoulderY','neckY','headCY'];
+  let badPair = '';
+  for(let i=0; i<spineOrder.length-1; i++){
+    if(spineOrder[i] >= spineOrder[i+1]) badPair = `${spineNames[i]} >= ${spineNames[i+1]}`;
+  }
+  ok(badPair === '', `spine chain strictly ascending: ankleY<kneeY<hipsY<spineY<chestY<shoulderY<neckY<headCY${badPair?' (violated: '+badPair+')':''}`);
+
+  // Arm X-ordering: shoulder → elbow → wrist must strictly increase (outward from center)
+  ok(d.shX < d.elbowX && d.elbowX < d.wristX,
+    `arm X ascends outward: shX(${d.shX.toFixed(4)}) < elbowX(${d.elbowX.toFixed(4)}) < wristX(${d.wristX.toFixed(4)})`);
+
+  // Ordering must hold across all 6 presets (different body proportions)
+  let presetBad = 0;
+  for(const pre of H.PRESETS){
+    const C = H.buildAvatar(H.presetParams(pre));
+    const pd = C.dims;
+    const ch = [pd.ankleY, pd.kneeY, pd.hipsY, pd.spineY, pd.chestY, pd.shoulderY, pd.neckY, pd.headCY];
+    for(let i=0;i<ch.length-1;i++) if(ch[i] >= ch[i+1]) presetBad++;
+    if(pd.shX >= pd.elbowX || pd.elbowX >= pd.wristX) presetBad++;
+  }
+  ok(presetBad === 0, 'all 6 presets: spine Y-ordering and arm X-ordering invariants hold');
+
+  // wristX = shX + armL*0.92 (wrist is 92% along arm length from shoulder)
+  ok(Math.abs(d.wristX - (d.shX + d.armL*0.92)) < 1e-6,
+    `wristX = shX + armL×0.92 (wristX=${d.wristX.toFixed(4)}, shX+armL×0.92=${(d.shX+d.armL*0.92).toFixed(4)})`);
+}
+
 /* ---- Round 150: mouthW mesh X-extent + pathological combo finite-geometry ---- */
 {
   // mouthW scales mrx = headR*0.14*mouthW → mouth tag X-span is proportional to mouthW
