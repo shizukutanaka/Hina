@@ -2182,6 +2182,54 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 162: eyeWY and eyeX formula verification ---- */
+{
+  // eyeWY = headCY + headR×(-0.05 + (eyeY-0.5)×0.4)
+  // eyeX  = headR×(0.30 + (eyeGap-0.5)×0.24)
+  const d = B.dims;
+  const expectedWY = d.headCY + d.headR * (-0.05 + (P.eyeY - 0.5) * 0.4);
+  const expectedX  = d.headR * (0.30 + (P.eyeGap - 0.5) * 0.24);
+  ok(Math.abs(d.eyeWY - expectedWY) < 1e-9,
+    `eyeWY = headCY + headR×(-0.05+(eyeY-0.5)×0.4) = ${expectedWY.toFixed(6)}`);
+  ok(Math.abs(d.eyeX - expectedX) < 1e-9,
+    `eyeX = headR×(0.30+(eyeGap-0.5)×0.24) = ${expectedX.toFixed(6)}`);
+
+  // At eyeY=0.5 (midpoint): eyeWY = headCY - headR×0.05
+  const dMid = H.buildAvatar(Object.assign({}, P, { eyeY: 0.5 })).dims;
+  ok(Math.abs(dMid.eyeWY - (dMid.headCY - dMid.headR * 0.05)) < 1e-9,
+    'eyeY=0.5: eyeWY = headCY - headR×0.05 (formula at midpoint)');
+
+  // At eyeGap=0.5 (midpoint): eyeX = headR×0.30
+  const dGap = H.buildAvatar(Object.assign({}, P, { eyeGap: 0.5 })).dims;
+  ok(Math.abs(dGap.eyeX - dGap.headR * 0.30) < 1e-9,
+    'eyeGap=0.5: eyeX = headR×0.30 (formula at midpoint)');
+
+  // Monotonicity: higher eyeY → higher eyeWY
+  const dEyeLo = H.buildAvatar(Object.assign({}, P, { eyeY: 0.0 })).dims;
+  const dEyeHi = H.buildAvatar(Object.assign({}, P, { eyeY: 1.0 })).dims;
+  ok(dEyeHi.eyeWY > dEyeLo.eyeWY,
+    `eyeY monotone: eyeY=1.0 eyeWY=${dEyeHi.eyeWY.toFixed(5)} > eyeY=0.0 eyeWY=${dEyeLo.eyeWY.toFixed(5)}`);
+
+  // Monotonicity: wider eyeGap → larger eyeX
+  const dGapLo = H.buildAvatar(Object.assign({}, P, { eyeGap: 0.0 })).dims;
+  const dGapHi = H.buildAvatar(Object.assign({}, P, { eyeGap: 1.0 })).dims;
+  ok(dGapHi.eyeX > dGapLo.eyeX,
+    `eyeGap monotone: eyeGap=1.0 eyeX=${dGapHi.eyeX.toFixed(5)} > eyeGap=0.0 eyeX=${dGapLo.eyeX.toFixed(5)}`);
+
+  // Formula holds across all 6 presets
+  let formulaFail = 0;
+  for (const pre of H.PRESETS) {
+    const C = H.buildAvatar(H.presetParams(pre));
+    const cd = C.dims;
+    const cp = H.presetParams(pre);
+    const eWY = cd.headCY + cd.headR * (-0.05 + (cp.eyeY - 0.5) * 0.4);
+    const eX  = cd.headR * (0.30 + (cp.eyeGap - 0.5) * 0.24);
+    if (Math.abs(cd.eyeWY - eWY) > 1e-6) formulaFail++;
+    if (Math.abs(cd.eyeX  - eX)  > 1e-6) formulaFail++;
+  }
+  ok(formulaFail === 0, 'eyeWY and eyeX formulas hold across all 6 presets');
+}
+
 /* ---- Round 161: vertex count regression snapshot + all-vertices-referenced invariant ---- */
 {
   // Snapshot of vertex counts for all 20 outfit×hairStyle combos.
