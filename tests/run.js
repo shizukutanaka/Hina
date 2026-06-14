@@ -2182,6 +2182,41 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 132: spring chain structural invariants + bone count regression ---- */
+{
+  // short and bob hair styles have NO spring chains
+  for(const style of ['short','bob']){
+    const A = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:style}));
+    ok(A.springs.length === 0, `${style} hair: 0 spring chains (no hair physics needed)`);
+  }
+
+  // long/twin/pony hair styles have spring chains
+  const springCounts = {long:3, twin:2, pony:1};
+  for(const [style, count] of Object.entries(springCounts)){
+    const A = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:style}));
+    ok(A.springs.length === count, `${style} hair: ${count} spring chain(s)`);
+  }
+
+  // For every hair style with springs: first bone's parent = head; chain is linked sequentially
+  for(const style of ['long','twin','pony']){
+    const A = H.buildAvatar(Object.assign(H.defaults(), {hairStyle:style}));
+    let chainOK = true;
+    for(const sp of A.springs){
+      if(A.bones[sp.boneIdxs[0]].parent !== A.idx.head) chainOK=false;
+      for(let i=1;i<sp.boneIdxs.length;i++){
+        if(A.bones[sp.boneIdxs[i]].parent !== sp.boneIdxs[i-1]) chainOK=false;
+      }
+    }
+    ok(chainOK, `${style}: all spring chain bones form a valid parent-child sequence rooted at head`);
+  }
+
+  // Total bone count < 75 for all hair styles (Quest Excellent budget)
+  const styles = ['short','bob','long','twin','pony'];
+  const maxBones = Math.max(...styles.map(s =>
+    H.buildAvatar(Object.assign(H.defaults(), {hairStyle:s})).bones.length));
+  ok(maxBones < 75, `max bones across all hair styles = ${maxBones} < 75 (Quest Excellent budget)`);
+}
+
 /* ---- Round 131: degenerate triangle guard + blendshape group validity ---- */
 {
   // No triangle may have two or more equal vertex indices (degenerate = zero area)
