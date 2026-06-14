@@ -298,6 +298,10 @@ function setExpr(name){
   if (hintEl) hintEl.textContent = activeExpr
     ? t('expr.'+activeExpr) + ' — ' + t('hint.exprOff')
     : (GLOK ? t('hint.drag') : t('hint.noGL'));
+  const srEl = $('srStatus');
+  if (srEl) srEl.textContent = activeExpr
+    ? t('a11y.exprActive').replace('{expr}', t('expr.'+activeExpr))
+    : t('a11y.exprNeutral');
   const bar = $('exprBar');
   if (!bar) return;
   bar.querySelectorAll('.eBtn').forEach(b => {

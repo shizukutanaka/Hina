@@ -1765,6 +1765,35 @@ function accData(j, bin, ai){
     'ahoge=true adds exactly 3 indices (1 triangle)');
 }
 
+/* ---- Round 114: screen reader announcements for expression changes + a11y i18n coverage ---- */
+{
+  // New i18n keys for expression screen reader announcements
+  ok(H.I18N.ja['a11y.exprActive'] === '表情: {expr}', 'a11y.exprActive JA contains {expr} placeholder');
+  ok(H.I18N.en['a11y.exprActive'] === 'Expression: {expr}', 'a11y.exprActive EN contains {expr} placeholder');
+  ok(H.I18N.ja['a11y.exprNeutral'] === 'ニュートラルに戻りました', 'a11y.exprNeutral JA');
+  ok(H.I18N.en['a11y.exprNeutral'] === 'Returned to neutral', 'a11y.exprNeutral EN');
+
+  // setExpr() updates srStatus with expression announcement
+  ok(/setExpr[\s\S]{0,400}srEl[\s\S]{0,80}a11y\.exprActive/.test(html),
+    'setExpr() updates srStatus with a11y.exprActive message when expression is active');
+  ok(/setExpr[\s\S]{0,500}a11y\.exprNeutral/.test(html),
+    'setExpr() updates srStatus with a11y.exprNeutral when returning to neutral');
+
+  // a11y.rankStatus template has {pc} and {q} placeholders in both languages
+  ok(H.I18N.ja['a11y.rankStatus'] && H.I18N.ja['a11y.rankStatus'].includes('{pc}') &&
+     H.I18N.ja['a11y.rankStatus'].includes('{q}'), 'a11y.rankStatus JA has {pc} and {q} placeholders');
+  ok(H.I18N.en['a11y.rankStatus'] && H.I18N.en['a11y.rankStatus'].includes('{pc}') &&
+     H.I18N.en['a11y.rankStatus'].includes('{q}'), 'a11y.rankStatus EN has {pc} and {q} placeholders');
+
+  // All a11y.* keys must be present in both languages (i18n parity for accessibility strings)
+  const a11yJa = Object.keys(H.I18N.ja).filter(k => k.startsWith('a11y.'));
+  const a11yEn = Object.keys(H.I18N.en).filter(k => k.startsWith('a11y.'));
+  ok(a11yJa.every(k => H.I18N.en[k] !== undefined),
+    'all a11y.* JA keys have EN counterparts');
+  ok(a11yEn.every(k => H.I18N.ja[k] !== undefined),
+    'all a11y.* EN keys have JA counterparts');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

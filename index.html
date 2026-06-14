@@ -318,6 +318,7 @@ const I18N = {
     'hint.glLost':'WebGL コンテキストが失われました — ページを再読み込みしてください',
     'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、＋／−でズーム、Homeで初期位置に戻ります。',
     'a11y.stage':'3Dプレビューエリア','a11y.panel':'アバター設定パネル','a11y.about.btn':'雛について',
+    'a11y.exprActive':'表情: {expr}','a11y.exprNeutral':'ニュートラルに戻りました',
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
     'a11y.exported':'{name} を書き出しました（約{size}）',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。',
@@ -361,6 +362,7 @@ const I18N = {
     'hint.glLost':'WebGL context lost — reload to restore preview',
     'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, +/− zoom, Home resets the view.',
     'a11y.stage':'3D preview area','a11y.panel':'Avatar settings panel','a11y.about.btn':'About Hina',
+    'a11y.exprActive':'Expression: {expr}','a11y.exprNeutral':'Returned to neutral',
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
     'a11y.exported':'Exported {name} (~{size})',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).',
@@ -1705,6 +1707,10 @@ function setExpr(name){
   if (hintEl) hintEl.textContent = activeExpr
     ? t('expr.'+activeExpr) + ' — ' + t('hint.exprOff')
     : (GLOK ? t('hint.drag') : t('hint.noGL'));
+  const srEl = $('srStatus');
+  if (srEl) srEl.textContent = activeExpr
+    ? t('a11y.exprActive').replace('{expr}', t('expr.'+activeExpr))
+    : t('a11y.exprNeutral');
   const bar = $('exprBar');
   if (!bar) return;
   bar.querySelectorAll('.eBtn').forEach(b => {
