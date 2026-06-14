@@ -2182,6 +2182,37 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 138: blink brow tilt asymmetry — inner brow drops more than outer ---- */
+{
+  // browL: inner = px > -eyeX (toward x=0), outer = px ≤ -eyeX (toward left)
+  // Find inner and outer brow vertices for browL
+  const [bls, ble] = B.geom.tags.browL;
+  let innerBrowIdx=-1, outerBrowIdx=-1;
+  for(let i=bls;i<ble;i++){
+    const px = B.geom.pos[i*3];
+    if(px > -B.dims.eyeX) innerBrowIdx=i;   // closest to center
+    else                  outerBrowIdx=i;   // farthest from center
+  }
+  // Find the blink morph entries for these vertices
+  const blinkInner = B.morphs.sparse.blink.find(e=>e[0]===innerBrowIdx);
+  const blinkOuter = B.morphs.sparse.blink.find(e=>e[0]===outerBrowIdx);
+  ok(blinkInner && blinkOuter,
+    'blink morph has entries for both inner and outer browL vertices');
+  ok(blinkInner[2] < blinkOuter[2],
+    `blink inner brow dy (${blinkInner?blinkInner[2].toFixed(5):'?'}) < outer brow dy (${blinkOuter?blinkOuter[2].toFixed(5):'?'}) — inner drops lower`);
+
+  // blink_l has the same asymmetry on browL
+  const blinkLInner = B.morphs.sparse.blink_l.find(e=>e[0]===innerBrowIdx);
+  const blinkLOuter = B.morphs.sparse.blink_l.find(e=>e[0]===outerBrowIdx);
+  ok(blinkLInner && blinkLOuter && blinkLInner[2] < blinkLOuter[2],
+    'blink_l inner brow drops more than outer (same asymmetry as blink)');
+
+  // Asymmetry magnitude: inner ≈ -0.045headR, outer ≈ -0.02headR
+  ok(Math.abs(blinkInner[2] + B.dims.headR*0.045) < 1e-9 &&
+     Math.abs(blinkOuter[2] + B.dims.headR*0.02) < 1e-9,
+    `blink brow: inner=-headR×0.045, outer=-headR×0.020 (orbicularis motion pattern)`);
+}
+
 /* ---- Round 137: face vertex skinning correctness — eye/brow/mouth bone assignments ---- */
 {
   const g = B.geom;

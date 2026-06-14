@@ -514,11 +514,11 @@ function buildAvatar(p){
   scaleTag('u','mouth',mc,0.55,1.7,-headR*0.05);
   scaleTag('e','mouth',mc,1.30,2.0,0,0,headR*0.008); // /eː/ slight corner lift
   scaleTag('o','mouth',mc,0.75,2.7,-headR*0.035);
-  // blinks
+  // blinks — inner brow pulls down more than outer (natural orbicularis motion)
   scaleTag('blink','eyeL',eC_L,1,0.06); scaleTag('blink','eyeR',eC_R,1,0.06);
-  browTilt('blink','browL',-headR*0.035,-headR*0.035); browTilt('blink','browR',-headR*0.035,-headR*0.035);
-  scaleTag('blink_l','eyeL',eC_L,1,0.06); browTilt('blink_l','browL',-headR*0.035,-headR*0.035);
-  scaleTag('blink_r','eyeR',eC_R,1,0.06); browTilt('blink_r','browR',-headR*0.035,-headR*0.035);
+  browTilt('blink','browL',-headR*0.045,-headR*0.02); browTilt('blink','browR',-headR*0.045,-headR*0.02);
+  scaleTag('blink_l','eyeL',eC_L,1,0.06); browTilt('blink_l','browL',-headR*0.045,-headR*0.02);
+  scaleTag('blink_r','eyeR',eC_R,1,0.06); browTilt('blink_r','browR',-headR*0.045,-headR*0.02);
   // emotions
   scaleTag('joy','eyeL',eC_L,1,0.12,0,headR*0.02); scaleTag('joy','eyeR',eC_R,1,0.12,0,headR*0.02);
   scaleTag('joy','mouth',mc,1.25,1.9,0,0,headR*0.022);
