@@ -37,7 +37,7 @@ ok(html.includes('documentElement.lang'), 'applyLang() updates <html lang> attri
 // WCAG 1.3.1 — stat table row headers
 ok(html.includes("el('th',{scope:'row'}"), 'stat table uses th[scope=row] for label cells (WCAG 1.3.1)');
 // Preset cards expose active state to assistive tech
-ok(html.includes("'aria-pressed':String(activePresetId===pre.id)"), 'preset cards have aria-pressed for screen reader active-state');
+ok(html.includes("'aria-pressed':String(isSelected)") || html.includes("'aria-pressed':String(activePresetId===pre.id)"), 'preset cards have aria-pressed for screen reader active-state');
 // WCAG 4.1.3 — status messages: a polite live region announces rank/export changes
 ok(/id="srStatus"[^>]*aria-live=/.test(html), 'live status region present with aria-live');
 ok(html.includes("'aria-label':t('out.stats')"), 'stat table has aria-label for screen reader identification (WCAG 1.3.1)');

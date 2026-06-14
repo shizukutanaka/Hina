@@ -662,16 +662,24 @@ function renderBody(){
   const bd=$('tabBody'); bd.scrollTop=0; bd.textContent='';
   if (activeTab==='preset'){
     const grid=el('div',{class:'presetGrid'});
+    const _sCur = JSON.stringify(HINA.sanitize(params));
     for(const pre of HINA.PRESETS){
       const pp=HINA.presetParams(pre);
+      const isSelected = activePresetId===pre.id;
+      const isModified = isSelected && JSON.stringify(pp) !== _sCur;
       const cols=el('div',{class:'cols'},
         el('span',{class:'c',style:'background:'+pp.hairColor}),
         el('span',{class:'c',style:'background:'+pp.eyeColor}),
         el('span',{class:'c',style:'background:'+pp.clothMain}));
-      grid.append(el('button',{class:'preCard'+(activePresetId===pre.id?' selected':''),
-        'aria-pressed':String(activePresetId===pre.id), onclick:()=>{
+      const nmDiv=el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en);
+      if (isModified) nmDiv.append(el('span',{
+        style:'color:var(--accent);font-size:9px;vertical-align:super;margin-left:3px',
+        title:lang==='ja'?'プリセットから変更中':'Modified from preset'
+      }, '●'));
+      grid.append(el('button',{class:'preCard'+(isSelected?' selected':''),
+        'aria-pressed':String(isSelected), onclick:()=>{
         captureUndo(); params=pp; activePresetId=pre.id; rebuild(); renderBody(); }},
-        el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en), cols));
+        nmDiv, cols));
     }
     const gDiv=el('div',{style:'margin-top:14px'});
     const runGacha=seed=>{
