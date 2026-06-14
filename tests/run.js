@@ -192,6 +192,9 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
     'st.spring label says "bones" (not "chains") — matches pbTrans value shown in stat table');
   ok(html.includes("'st.spring','pbTrans'") || html.includes('"st.spring","pbTrans"'),
     'stat table row st.spring maps to pbTrans accessor (not pbComp chain count)');
+  // skirtLen must be hidden for non-skirt outfits (shirts / hoodie have no skirt)
+  ok(/k\s*===\s*['"]skirtLen['"]/.test(html) && /onepiece.*sailor|sailor.*onepiece/.test(html),
+    'skirtLen hidden when outfit has no skirt (shirts/hoodie)');
   // every license option has a user-readable localized label (not raw technical id)
   const licenseOpts = ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'];
   ok(licenseOpts.every(l => H.I18N.ja['license.'+l] && H.I18N.en['license.'+l]), 'all license options have ja+en labels');

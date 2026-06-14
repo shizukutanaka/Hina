@@ -2020,6 +2020,7 @@ function renderBody(){
     const s=PARAMS[k];
     if (s.tab!==activeTab) continue;
     if (mode==='easy' && s.adv) continue;
+    if (k==='skirtLen' && !['onepiece','sailor'].includes(params.outfit)) continue;
     bd.append(paramRow(k));
   }
   if (activeTab==='phys'){
