@@ -419,6 +419,24 @@ const B = H.buildAvatar(P);
     'sleeves=short same tri count as long (same ring topology, different endpoint position)');
 }
 
+/* ---- eyeShape + bangs enum variant builds ---- */
+{
+  for (const eyeShape of H.PARAMS.eyeShape.opts){
+    const b = H.buildAvatar(Object.assign(H.defaults(), { eyeShape }));
+    ok(b.geom.pos.every(Number.isFinite) && b.geom.nrm.every(Number.isFinite),
+      `eyeShape=${eyeShape}: finite pos/nrm`);
+    ok(b.geom.idx.length % 3 === 0 && b.geom.idx.every(i => i >= 0 && i < b.geom.pos.length / 3),
+      `eyeShape=${eyeShape}: valid triangle indices`);
+  }
+  for (const bangs of H.PARAMS.bangs.opts){
+    const b = H.buildAvatar(Object.assign(H.defaults(), { bangs }));
+    ok(b.geom.pos.every(Number.isFinite) && b.geom.nrm.every(Number.isFinite),
+      `bangs=${bangs}: finite pos/nrm`);
+    ok(b.geom.idx.length % 3 === 0 && b.geom.idx.every(i => i >= 0 && i < b.geom.pos.length / 3),
+      `bangs=${bangs}: valid triangle indices`);
+  }
+}
+
 /* ---- adv (detail-mode-only) parameters ---- */
 {
   const advKeys = Object.keys(H.PARAMS).filter(k => H.PARAMS[k].adv);
