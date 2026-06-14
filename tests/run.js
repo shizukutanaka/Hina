@@ -2182,6 +2182,31 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 152: outfit×hairStyle triangle-count regression snapshot ---- */
+{
+  // Exact triangle counts per outfit/hairStyle combo. Any geometry change shifts these.
+  // All counts must be < 7500 (Quest Excellent tris budget).
+  const SNAP = {
+    onepiece: {short:1782, bob:1830, long:1800, twin:1958, pony:1870},
+    sailor:   {short:1785, bob:1833, long:1803, twin:1961, pony:1873},
+    shirts:   {short:1758, bob:1806, long:1776, twin:1934, pony:1846},
+    hoodie:   {short:1822, bob:1870, long:1840, twin:1998, pony:1910},
+  };
+  let snapFail = 0, budgetFail = 0;
+  for(const [outfit, hairMap] of Object.entries(SNAP)){
+    for(const [hairStyle, expectedTris] of Object.entries(hairMap)){
+      const C = H.buildAvatar(Object.assign(H.defaults(), {outfit, hairStyle}));
+      const tris = C.geom.idx.length / 3;
+      if(tris !== expectedTris) snapFail++;
+      if(tris >= 7500) budgetFail++;
+    }
+  }
+  ok(snapFail === 0,
+    'outfit×hairStyle triangle-count snapshot: all 20 combos match expected counts (geometry regression guard)');
+  ok(budgetFail === 0,
+    'all 20 outfit×hairStyle combos are under Quest Excellent 7500-tris budget');
+}
+
 /* ---- Round 151: skeleton Y-ordering invariants + arm X-ordering ---- */
 {
   // dims fields not yet validated: spine chain must ascend in Y, arm must ascend in X
