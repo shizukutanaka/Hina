@@ -29,6 +29,22 @@ function loadState(){
     if (Number.isFinite(j.lastGachaSeed)) lastGachaSeed = j.lastGachaSeed;
   }catch(e){}
 }
+// Single-level undo (Ctrl+Z) — captures state before user-initiated changes
+let _undoSnap = null, _undoAt = 0;
+function captureUndo(){
+  const now = Date.now();
+  if (!_undoSnap || now - _undoAt > 1500){
+    _undoSnap = { p: JSON.parse(JSON.stringify(params)), m: JSON.parse(JSON.stringify(meta)), aid: activePresetId, seed: lastGachaSeed };
+    _undoAt = now;
+  }
+}
+function doUndo(){
+  if (!_undoSnap) return;
+  const s = _undoSnap; _undoSnap = null;
+  params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed;
+  rebuild(); renderBody(); saveState();
+}
+
 let _saveTimer = null;
 function saveState(){
   clearTimeout(_saveTimer);
@@ -545,13 +561,14 @@ function paramRow(k){
     let valEl;
     const r=el('input',{id:pid, type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
       'aria-label':label,
+      onpointerdown:()=>captureUndo(),
       oninput:e=>{ params[k]=parseFloat(e.target.value);
         if (valEl.tagName==='INPUT') valEl.value=String(params[k]); else valEl.textContent=String(params[k]);
         onParam(k); }});
     if (mode==='detail'){
       valEl=el('input',{type:'number',class:'num numIn',min:s.min,max:s.max,step:s.step,value:params[k],
         'aria-label':label,
-        onchange:e=>{ let n=parseFloat(e.target.value);
+        onchange:e=>{ captureUndo(); let n=parseFloat(e.target.value);
           if (!Number.isFinite(n)) n=params[k];
           n=M.clamp(n,s.min,s.max);
           params[k]=n; e.target.value=String(n); r.value=String(n); onParam(k); }});
@@ -562,23 +579,24 @@ function paramRow(k){
   }
   if (s.k==='enum'){
     const optLabel=o=>{ const key='enum.'+k+'.'+o; const lbl=t(key); return lbl===key?o:lbl; };
-    const sel=el('select',{id:pid, 'aria-label':label, onchange:e=>{params[k]=e.target.value; onParam(k);}});
+    const sel=el('select',{id:pid, 'aria-label':label, onchange:e=>{captureUndo(); params[k]=e.target.value; onParam(k);}});
     for(const o of s.opts) sel.append(el('option',{value:o, ...(params[k]===o?{selected:''}:{})}, optLabel(o)));
     return el('div',{class:'row'}, el('label',{'for':pid},label), sel);
   }
   if (s.k==='bool'){
     const cb=el('input',{id:pid, type:'checkbox','aria-label':label,
-      onchange:e=>{params[k]=e.target.checked; onParam(k);}});
+      onchange:e=>{captureUndo(); params[k]=e.target.checked; onParam(k);}});
     cb.checked=params[k];
     return el('div',{class:'row'}, el('label',{'for':pid},label), cb);
   }
   // color
   const inp=el('input',{id:pid, type:'color', value:params[k], 'aria-label':label,
+    onpointerdown:()=>captureUndo(),
     oninput:e=>{params[k]=e.target.value; onParam(k);}});
   const sw=el('div',{class:'swatches'});
   for(const c of HINA.PAL[s.pal])
     sw.append(el('button',{type:'button', class:'sw', style:'background:'+c, 'aria-label':label+' '+c,
-      onclick:()=>{params[k]=c; inp.value=c; onParam(k);}}));
+      onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);}}));
   return el('div',{class:'row'}, el('label',{'for':pid},label), inp, sw);
 }
 
@@ -602,12 +620,12 @@ function renderBody(){
         el('span',{class:'c',style:'background:'+pp.clothMain}));
       grid.append(el('button',{class:'preCard'+(activePresetId===pre.id?' selected':''),
         'aria-pressed':String(activePresetId===pre.id), onclick:()=>{
-        params=pp; activePresetId=pre.id; rebuild(); renderBody(); }},
+        captureUndo(); params=pp; activePresetId=pre.id; rebuild(); renderBody(); }},
         el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en), cols));
     }
     const gDiv=el('div',{style:'margin-top:14px'});
     const runGacha=seed=>{
-      lastGachaSeed=seed; params=HINA.randomParams(seed);
+      captureUndo(); lastGachaSeed=seed; params=HINA.randomParams(seed);
       activePresetId=null; rebuild(); renderBody();
     };
     gDiv.append(el('button',{class:'btn wide', onclick:()=>runGacha((Math.random()*1e9|0))}, t('btn.gacha')));
@@ -844,17 +862,18 @@ $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 loadState();
 rebuild();
 applyLang();
-// Ctrl/Cmd+S → export VRM; Ctrl/Cmd+Shift+S → save JSON (muscle-memory shortcuts for creative tools)
+// Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;
-  if ((e.ctrlKey||e.metaKey) && e.key==='S' && e.shiftKey &&
-      !['INPUT','SELECT','TEXTAREA'].includes(tag)){
+  const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag);
+  if ((e.ctrlKey||e.metaKey) && e.key==='S' && e.shiftKey && notField){
     e.preventDefault(); saveJson();
-  } else if ((e.ctrlKey||e.metaKey) && e.key==='s' && !e.shiftKey &&
-      !['INPUT','SELECT','TEXTAREA'].includes(tag)){
+  } else if ((e.ctrlKey||e.metaKey) && e.key==='s' && !e.shiftKey && notField){
     e.preventDefault(); doExport();
+  } else if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey && notField){
+    e.preventDefault(); doUndo();
   }
-  if (e.key==='?' && !e.ctrlKey && !e.metaKey && !['INPUT','SELECT','TEXTAREA'].includes(tag)){
+  if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){
     e.preventDefault(); $('aboutDlg').showModal();
   }
 });

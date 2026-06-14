@@ -1268,6 +1268,35 @@ function accData(j, bin, ai){
     'chibi preset reaches Quest Excellent (with springOff if needed)');
 }
 
+/* ---- Round 102: Ctrl+Z undo + i18n hint update ---- */
+{
+  // captureUndo and doUndo functions must exist in source
+  ok(html.includes('function captureUndo()') || html.includes('captureUndo=function'),
+    'captureUndo() function defined in app source');
+  ok(html.includes('function doUndo()') || html.includes('doUndo=function'),
+    'doUndo() function defined in app source');
+
+  // Ctrl+Z triggers doUndo
+  ok(/e\.key==='z'[\s\S]{0,80}doUndo/.test(html),
+    'Ctrl+Z key handler calls doUndo()');
+
+  // Slider onpointerdown captures undo
+  ok(/onpointerdown.*captureUndo|captureUndo.*onpointerdown/.test(html.replace(/\s+/g,' ')),
+    'slider onpointerdown fires captureUndo() before drag');
+
+  // Preset button captures undo
+  ok(/captureUndo\(\).*params=pp|captureUndo.*preCard/.test(html.replace(/\s+/g,' ')),
+    'preset selection calls captureUndo() before applying preset params');
+
+  // Gacha captures undo
+  ok(/captureUndo\(\).*randomParams|runGacha[\s\S]{0,40}captureUndo/.test(html),
+    'gacha runGacha() calls captureUndo() before randomizing');
+
+  // hint.ctrlS updated to mention Ctrl+Z
+  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl+Z') && H.I18N.en['hint.ctrlS'].includes('Ctrl+Z'),
+    'hint.ctrlS i18n updated to mention Ctrl+Z undo in both languages');
+}
+
 /* ---- Round 101: mouth texture scales with mouthW + Ctrl+Shift+S shortcut ---- */
 {
   // mouth texture ellipse must scale with mouthW: verify source code contains p.mouthW factor
