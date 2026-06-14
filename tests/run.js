@@ -2182,6 +2182,32 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 128: vertex position finiteness + VRM0 orientation invariants ---- */
+{
+  // All vertex positions must be finite (catches NaN/Infinity from geometry math errors)
+  const pos = B.geom.pos;
+  const nanCount = pos.filter(v => !Number.isFinite(v)).length;
+  ok(nanCount === 0, `all ${pos.length} vertex position components are finite (non-finite: ${nanCount})`);
+
+  // VRM0 orientation: character faces -Z, right=+X, T-pose
+  // → left arm bones must have negative X world position, right arm positive X
+  const lUA = B.bones[B.idx.lUA], rUA = B.bones[B.idx.rUA];
+  ok(lUA.w[0] < 0, `leftUpperArm world X < 0 (= ${lUA.w[0].toFixed(4)}) — VRM0 right=+X orientation`);
+  ok(rUA.w[0] > 0, `rightUpperArm world X > 0 (= ${rUA.w[0].toFixed(4)}) — VRM0 right=+X orientation`);
+
+  // Symmetry: |leftUpperArm.x| should equal rightUpperArm.x (T-pose is symmetric)
+  ok(Math.abs(Math.abs(lUA.w[0]) - rUA.w[0]) < 1e-9,
+    `left/right upper arm X positions are symmetric (|lUA.x|=${Math.abs(lUA.w[0]).toFixed(6)}, rUA.x=${rUA.w[0].toFixed(6)})`);
+
+  // Position finiteness holds for all 6 presets
+  let presetNanBad = 0;
+  for (const pre of H.PRESETS){
+    const A = H.buildAvatar(H.presetParams(pre));
+    if (A.geom.pos.some(v => !Number.isFinite(v))) presetNanBad++;
+  }
+  ok(presetNanBad === 0, 'all 6 preset avatars have fully-finite vertex positions');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
