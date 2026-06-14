@@ -783,6 +783,16 @@ function accData(j, bin, ai){
   ok(mp.vectorProperties._ShadeColor[0] === 0.9 && mp.vectorProperties._ShadeColor[3] === 1,
     'MToon _ShadeColor has expected cool-tone (r=0.9, a=1)');
   ok(mp.name === j.materials[0].name, 'MToon name matches glTF material');
+  // MToon additional properties
+  ok(mp.renderQueue === 2450, 'MToon renderQueue = 2450 (Cutout transparent queue in Unity)');
+  ok(mp.textureProperties._ShadeTexture === 0, 'MToon _ShadeTexture = 0 (same atlas as _MainTex)');
+  ok(Array.isArray(mp.vectorProperties._EmissionColor) && mp.vectorProperties._EmissionColor.every((v, i) => i < 3 ? v === 0 : v === 1),
+    'MToon _EmissionColor = [0,0,0,1] (no emission)');
+  ok(Array.isArray(mp.vectorProperties._RimColor) && mp.vectorProperties._RimColor.every((v, i) => i < 3 ? v === 0 : v === 1),
+    'MToon _RimColor = [0,0,0,1] (no rim lighting)');
+  ok(mp.floatProperties._ZWrite === 1, 'MToon _ZWrite = 1 (write depth for Cutout)');
+  ok(mp.floatProperties._SrcBlend === 1 && mp.floatProperties._DstBlend === 0,
+    'MToon blend = One/Zero (opaque Cutout, not additive)');
   // glTF sampler: CLAMP_TO_EDGE + LINEAR/LINEAR_MIPMAP_LINEAR in GLB JSON
   ok(j.samplers[0].wrapS === 33071 && j.samplers[0].wrapT === 33071,
     'glTF sampler wrapS/wrapT = CLAMP_TO_EDGE (33071) in exported GLB JSON');
