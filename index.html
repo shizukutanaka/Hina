@@ -444,7 +444,7 @@ function serialize(p, meta){ return JSON.stringify({app:'hina', version:VERSION,
 function deserialize(text){
   let j; try{ j=JSON.parse(text); }catch(e){ return null; }
   if (!j || j.app!=='hina') return null;
-  return { params: sanitize(j.params), meta: (j.meta && typeof j.meta==='object') ? j.meta : {} };
+  return { params: sanitize(j.params), meta: (j.meta && typeof j.meta==='object' && !Array.isArray(j.meta)) ? j.meta : {} };
 }
 
 /* 1x1 transparent PNG (fallback / Node tests) */

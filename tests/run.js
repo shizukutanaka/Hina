@@ -789,6 +789,22 @@ function accData(j, bin, ai){
   ok(H.deserialize('{"app":"other"}') === null, 'deserialize rejects wrong app');
   const c = H.deserialize(H.serialize(Object.assign({}, P, { height: 99 }), {}));
   ok(c.params.height === H.PARAMS.height.max, 'deserialize clamps out-of-range');
+  // serialize output contains version field == H.VERSION
+  const raw = JSON.parse(H.serialize(P, {}));
+  ok(raw.version === H.VERSION, 'serialize output contains version field matching H.VERSION');
+  ok(raw.app === 'hina', 'serialize output contains app = "hina"');
+  // deserialize is version-agnostic: works with old or missing version strings
+  ok(H.deserialize('{"app":"hina","version":"0.0.1","params":{}}') !== null,
+    'deserialize accepts old version string (forward-compatible)');
+  ok(H.deserialize('{"app":"hina"}') !== null,
+    'deserialize with missing params returns defaults (not null)');
+  // deserialize with non-object meta returns empty object, not null
+  const nm = H.deserialize('{"app":"hina","meta":42}');
+  ok(nm !== null && typeof nm.meta === 'object' && !Array.isArray(nm.meta),
+    'deserialize with non-object meta returns empty {} (not null)');
+  const am = H.deserialize('{"app":"hina","meta":["a","b"]}');
+  ok(am !== null && JSON.stringify(am.meta) === '{}',
+    'deserialize with array meta returns empty {}');
 }
 
 /* ---- BinWriter alignment ---- */
