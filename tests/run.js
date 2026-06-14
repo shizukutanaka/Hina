@@ -663,6 +663,16 @@ function accData(j, bin, ai){
   const fpo = V.firstPerson.firstPersonBoneOffset;
   ok(fpo.x === 0 && fpo.y > 0 && fpo.z < 0,
     'firstPersonBoneOffset: x=0, y>0 (eyes above head bone), z<0 (forward into face)');
+  // meshAnnotations: body mesh must be "Auto" so VRChat handles first-person visibility
+  ok(V.firstPerson.meshAnnotations.length === 1 &&
+     V.firstPerson.meshAnnotations[0].mesh === 0 &&
+     V.firstPerson.meshAnnotations[0].firstPersonFlag === 'Auto',
+    'firstPerson meshAnnotations: mesh 0 = Auto (VRChat first-person visibility)');
+  // lookAt curves: all 4 must be present (Bone LookAt requires range definitions)
+  const lookAtKeys = ['lookAtHorizontalInner','lookAtHorizontalOuter','lookAtVerticalDown','lookAtVerticalUp'];
+  ok(lookAtKeys.every(k => V.firstPerson[k] && typeof V.firstPerson[k].xRange === 'number' &&
+     typeof V.firstPerson[k].yRange === 'number' && Array.isArray(V.firstPerson[k].curve)),
+    'all 4 lookAt range objects present with xRange, yRange, curve');
   const bsg = V.blendShapeMaster.blendShapeGroups;
   ok(bsg.length === 17, '17 blendShapeGroups');
   const tn = j.meshes[0].extras.targetNames;
