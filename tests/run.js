@@ -1268,6 +1268,29 @@ function accData(j, bin, ai){
     'chibi preset reaches Quest Excellent (with springOff if needed)');
 }
 
+/* ---- Round 101: mouth texture scales with mouthW + Ctrl+Shift+S shortcut ---- */
+{
+  // mouth texture ellipse must scale with mouthW: verify source code contains p.mouthW factor
+  ok(/ax\.ellipse\(0,0,w\*0\.\d+\*p\.mouthW/.test(html),
+    'mouth texture outer ellipse x-radius scales with p.mouthW (wide mouth = wider atlas drawing)');
+  ok(/ax\.ellipse\(0,-h\*0\.\d+,w\*0\.\d+\*p\.mouthW/.test(html),
+    'mouth texture inner ellipse x-radius also scales with p.mouthW');
+
+  // the scaling must stay within atlas bounds: max is mouthW=1.5, w*0.32*1.5 = 0.48*w < 0.5*w
+  // verify the multiplier stays < 0.5 so ellipse fits in atlas half-width
+  const outerM = html.match(/ax\.ellipse\(0,0,w\*(\d+\.\d+)\*p\.mouthW/);
+  ok(outerM && parseFloat(outerM[1]) * 1.5 < 0.5,
+    'mouth outer ellipse at mouthW=1.5 stays within atlas half-width (< 0.5*w)');
+
+  // Ctrl+Shift+S keyboard shortcut for JSON save
+  ok(/e\.key==='S'.*e\.shiftKey.*saveJson|shiftKey.*e\.key==='S'.*saveJson/.test(html.replace(/\s+/g,' ')),
+    'Ctrl+Shift+S keyboard shortcut calls saveJson() (JSON parameter save)');
+
+  // verify VRM Ctrl+S shortcut guards: !e.shiftKey appears before doExport call
+  ok(/!e\.shiftKey[\s\S]{0,200}doExport/.test(html),
+    'Ctrl+S fires doExport only when Shift is NOT held (Shift+S is JSON save)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

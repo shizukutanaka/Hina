@@ -118,15 +118,15 @@ function drawAtlas(p){
   ax.restore();
   drawBrow(ATLAS.browL, p, false);
   drawBrow(ATLAS.browR, p, true);
-  // mouth
+  // mouth — rx scales with mouthW so texture matches 3D ellipse (max w*0.47 stays within atlas half-width)
   { const r=ATLAS.mouth, w=r[2]-r[0], h=r[3]-r[1];
     ax.save(); ax.translate(r[0]+w/2, r[1]+h/2);
     const g = ax.createLinearGradient(0,-h*0.3,0,h*0.36);
     g.addColorStop(0,'#8a3c46'); g.addColorStop(1,'#c96a72');
     ax.fillStyle=g;
-    ax.beginPath(); ax.ellipse(0,0,w*0.32,h*0.34,0,0,Math.PI*2); ax.fill();
+    ax.beginPath(); ax.ellipse(0,0,w*0.32*p.mouthW,h*0.34,0,0,Math.PI*2); ax.fill();
     ax.fillStyle='rgba(60,20,28,0.85)';
-    ax.beginPath(); ax.ellipse(0,-h*0.06,w*0.20,h*0.16,0,0,Math.PI*2); ax.fill();
+    ax.beginPath(); ax.ellipse(0,-h*0.06,w*0.20*p.mouthW,h*0.16,0,0,Math.PI*2); ax.fill();
     ax.restore(); }
   // blush (alpha < 0.5 discarded by MASK → radius scales with intensity)
   { const r=ATLAS.blush, w=r[2]-r[0];
@@ -844,10 +844,13 @@ $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 loadState();
 rebuild();
 applyLang();
-// Ctrl/Cmd+S → export VRM (muscle-memory shortcut for creative tools)
+// Ctrl/Cmd+S → export VRM; Ctrl/Cmd+Shift+S → save JSON (muscle-memory shortcuts for creative tools)
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;
-  if ((e.ctrlKey||e.metaKey) && e.key==='s' &&
+  if ((e.ctrlKey||e.metaKey) && e.key==='S' && e.shiftKey &&
+      !['INPUT','SELECT','TEXTAREA'].includes(tag)){
+    e.preventDefault(); saveJson();
+  } else if ((e.ctrlKey||e.metaKey) && e.key==='s' && !e.shiftKey &&
       !['INPUT','SELECT','TEXTAREA'].includes(tag)){
     e.preventDefault(); doExport();
   }
