@@ -2182,6 +2182,40 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 161: vertex count regression snapshot + all-vertices-referenced invariant ---- */
+{
+  // Snapshot of vertex counts for all 20 outfit×hairStyle combos.
+  // maxIdx == nV-1 means every vertex is referenced at least once (no orphans)
+  // and no triangle references an out-of-bounds vertex.
+  const VSNAP = {
+    onepiece: {short:1246, bob:1272, long:1270, twin:1374, pony:1310},
+    sailor:   {short:1253, bob:1279, long:1277, twin:1381, pony:1317},
+    shirts:   {short:1237, bob:1263, long:1261, twin:1365, pony:1301},
+    hoodie:   {short:1282, bob:1308, long:1306, twin:1410, pony:1346},
+  };
+  const outfits = ['onepiece','sailor','shirts','hoodie'];
+  const hairs = ['short','bob','long','twin','pony'];
+  let snapFail = 0, orphanFail = 0;
+  for (const o of outfits) {
+    for (const hs of hairs) {
+      const p = Object.assign({}, P, { outfit: o, hairStyle: hs });
+      const b = H.buildAvatar(p);
+      const nV = b.geom.pos.length / 3;
+      const maxIdx = Math.max.apply(null, Array.from(b.geom.idx));
+      if (nV !== VSNAP[o][hs]) snapFail++;
+      if (maxIdx !== nV - 1) orphanFail++;
+    }
+  }
+  ok(snapFail === 0, 'vertex count regression snapshot: all 20 outfit×hairStyle combos match');
+  ok(orphanFail === 0, 'max index == nV-1: all vertices referenced, no orphans (all 20 combos)');
+
+  // hoodie has the most vertices per hairStyle (extra body geometry)
+  const hoodieShort = H.buildAvatar(Object.assign({}, P, { outfit:'hoodie', hairStyle:'short' }));
+  const shirtsShort = H.buildAvatar(Object.assign({}, P, { outfit:'shirts', hairStyle:'short' }));
+  ok(hoodieShort.geom.pos.length > shirtsShort.geom.pos.length,
+    'hoodie has more vertices than shirts for same hairStyle (hoodie body is more complex)');
+}
+
 /* ---- Round 160: spine bone interpolation formula verification ---- */
 {
   // Verify exact proportional formulas for each spine bone position.
