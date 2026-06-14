@@ -2182,6 +2182,45 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 148: total avatar height = H invariant + headRatio proportionality ---- */
+{
+  // The top of the head sphere = H (headCY + headR = (H-headR) + headR = H always)
+  // Verify that the top vertex of the head sphere reaches headCY + headR ≈ H
+  // The head sphere is centered at [0,headCY,0.005*H] with radius headR.
+  // Top of sphere (phi=0) is at headCY + headR = H.
+  const A = B; // use default build
+  const topY = A.dims.headR * 2; // headCY + headR = H, but let me compute:
+  const computedTop = A.dims.headCY + A.dims.headR;
+  ok(Math.abs(computedTop - H.defaults().height) < 1e-9,
+    `headCY + headR = H = ${H.defaults().height}m (total height invariant)`);
+
+  // headRatio = headR / H * 2  →  headR = headRatio * H * 0.5
+  const testCases = [{headRatio: 0.18}, {headRatio: 0.24}, {headRatio: 0.36}];
+  let proportional = true;
+  for(const {headRatio} of testCases){
+    const C = H.buildAvatar(Object.assign(H.defaults(), {headRatio}));
+    const expected = headRatio * H.defaults().height * 0.5;
+    if(Math.abs(C.dims.headR - expected) > 1e-9) proportional = false;
+  }
+  ok(proportional, 'dims.headR = headRatio × H × 0.5 for all tested headRatio values');
+
+  // Height invariant holds across all presets (headCY + headR = H)
+  let heightBad = 0;
+  for(const pre of H.PRESETS){
+    const p2 = H.presetParams(pre);
+    const C2 = H.buildAvatar(p2);
+    const top = C2.dims.headCY + C2.dims.headR;
+    if(Math.abs(top - p2.height) > 1e-9) heightBad++;
+  }
+  ok(heightBad === 0, 'all 6 presets: headCY + headR = p.height (total height invariant)');
+
+  // Larger headRatio → smaller headCY (head center is lower; bigger head relative to body)
+  const smallHead = H.buildAvatar(Object.assign(H.defaults(), {headRatio: 0.18}));
+  const bigHead   = H.buildAvatar(Object.assign(H.defaults(), {headRatio: 0.36}));
+  ok(bigHead.dims.headCY < smallHead.dims.headCY,
+    'bigger headRatio → lower headCY (head center moves down as head grows)');
+}
+
 /* ---- Round 147: shoulderW and hipW proportional effects on body geometry ---- */
 {
   // shoulderW: wider shoulders → leftUpperArm X more negative (further left)
