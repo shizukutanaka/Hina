@@ -1173,6 +1173,57 @@ function accData(j, bin, ai){
   ok(l1[0] === 7 && l1[1] === 8 && l1[2] === 9, 'M.lerp t=1 = b');
 }
 
+/* ---- Round 99: M math completeness — clamp/mMul/qFromTo degenerate/qid ---- */
+{
+  // clamp: middle value passes through unchanged
+  near(M.clamp(0.5, 0, 1), 0.5, 0, 'clamp mid: value in range passes through');
+  near(M.clamp(-5, 0, 1), 0, 0, 'clamp lo: below range → min');
+  near(M.clamp(0, 0, 1), 0, 0, 'clamp at lo bound: exactly min passes');
+  near(M.clamp(1, 0, 1), 1, 0, 'clamp at hi bound: exactly max passes');
+
+  // mMul associativity: (A*B)*C === A*(B*C) for translation matrices
+  const mA = M.mT(1, 0, 0), mB = M.mT(0, 2, 0), mC = M.mT(0, 0, 3);
+  const abc1 = M.mMul(M.mMul(mA, mB), mC);
+  const abc2 = M.mMul(mA, M.mMul(mB, mC));
+  ok(abc1.every((v, i) => Math.abs(v - abc2[i]) < 1e-9), 'mMul associative: (A*B)*C = A*(B*C)');
+  // combined translation is sum of individual translations
+  near(abc1[12], 1, 1e-9, 'mMul chained translations: x component sums');
+  near(abc1[13], 2, 1e-9, 'mMul chained translations: y component sums');
+  near(abc1[14], 3, 1e-9, 'mMul chained translations: z component sums');
+
+  // mId is identity for mMul (left and right)
+  const mX = M.mT(5, 6, 7);
+  const leftId = M.mMul(M.mId(), mX);
+  const rightId = M.mMul(mX, M.mId());
+  ok(leftId.every((v, i) => Math.abs(v - mX[i]) < 1e-9), 'mMul: mId is left identity');
+  ok(rightId.every((v, i) => Math.abs(v - mX[i]) < 1e-9), 'mMul: mId is right identity');
+
+  // qid: identity quaternion produces identity rotation
+  const qid = M.qid();
+  ok(qid[0] === 0 && qid[1] === 0 && qid[2] === 0 && qid[3] === 1, 'qid = [0,0,0,1]');
+  const vec = [1, 2, 3];
+  const rotByQid = M.qRot(qid, vec);
+  ok(rotByQid.every((v, i) => Math.abs(v - vec[i]) < 1e-9), 'qRot by qid is identity');
+
+  // qFromTo degenerate: a === b → identity quaternion
+  const qa = M.qFromTo([0, 1, 0], [0, 1, 0]);
+  ok(Math.abs(qa[3] - 1) < 1e-6 && Math.abs(qa[0]) < 1e-6, 'qFromTo same vectors → identity');
+
+  // qFromTo degenerate: a = -b → rotation by π around orthogonal axis (unit length)
+  const q180 = M.qFromTo([0, 1, 0], [0, -1, 0]);
+  near(M.len(q180), 1, 1e-6, 'qFromTo opposite vectors → unit quaternion');
+  // rotating [0,1,0] by this quat should give [0,-1,0]
+  const rotated = M.qRot(q180, [0, 1, 0]);
+  near(rotated[1], -1, 1e-5, 'qFromTo opposite: 180deg rotation maps +Y to -Y');
+
+  // qMul with qid is identity (left and right)
+  const qr = M.qAxis([1, 0, 0], Math.PI / 4);
+  const ql = M.qMul(M.qid(), qr);
+  const qrr = M.qMul(qr, M.qid());
+  ok(ql.every((v, i) => Math.abs(v - qr[i]) < 1e-9), 'qMul: qid is left identity');
+  ok(qrr.every((v, i) => Math.abs(v - qr[i]) < 1e-9), 'qMul: qid is right identity');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
