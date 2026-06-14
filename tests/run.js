@@ -2142,6 +2142,46 @@ function accData(j, bin, ai){
   ok(presetNormalBad === 0, 'all 6 preset avatars: every vertex normal has unit length');
 }
 
+/* ---- Round 127: skeleton completeness — humanoid mapping + parent chain validity ---- */
+{
+  // All 21 VRM required humanoid bones must be mapped
+  const required = ['hips','spine','chest','neck','head',
+    'leftShoulder','leftUpperArm','leftLowerArm','leftHand',
+    'rightShoulder','rightUpperArm','rightLowerArm','rightHand',
+    'leftUpperLeg','leftLowerLeg','leftFoot',
+    'rightUpperLeg','rightLowerLeg','rightFoot',
+    'leftEye','rightEye'];
+  const missing = required.filter(n => B.humanoid[n] === undefined);
+  ok(missing.length === 0,
+    `all 21 VRM humanoid bones mapped (missing: ${missing.join(', ')||'none'})`);
+
+  // Every bone has a valid parent: -1 for root, or a valid bone index
+  const bones = B.bones;
+  const badParent = bones.filter((b,i) => !(b.parent === -1 || (Number.isInteger(b.parent) && b.parent >= 0 && b.parent < bones.length && b.parent !== i)));
+  ok(badParent.length === 0,
+    `all ${bones.length} bones have valid parent indices (bad: ${badParent.map(b=>b.name).join(', ')||'none'})`);
+
+  // No parent-chain cycles: following parents from any bone must reach root within bones.length steps
+  let cycleBone = null;
+  for (let i = 0; i < bones.length; i++){
+    let cur = i, depth = 0;
+    while (bones[cur].parent !== -1){
+      cur = bones[cur].parent;
+      if (++depth > bones.length){ cycleBone = bones[i].name; break; }
+    }
+    if (cycleBone) break;
+  }
+  ok(cycleBone === null, `no parent-chain cycles detected (cycle at: ${cycleBone||'none'})`);
+
+  // All humanoid bone indices point to bones that actually have that humanoid label
+  const mismatch = required.filter(n => {
+    const idx = B.humanoid[n];
+    return idx !== undefined && B.bones[idx].hb !== n;
+  });
+  ok(mismatch.length === 0,
+    `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
