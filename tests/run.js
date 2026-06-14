@@ -709,6 +709,14 @@ function accData(j, bin, ai){
     'humanBones all have useDefaultValues:true (required by UniVRM 0.x importer)');
   ok(V.humanoid.humanBones.every(hb => H.HB.includes(hb.bone) && hb.node >= 1 && hb.node <= B.bones.length),
     'humanBones names + node range');
+  // VRM humanoid physics fields — must match VRM0 standard values for VRChat IK compatibility
+  ok(V.humanoid.hasTranslationDoF === false, 'humanoid.hasTranslationDoF = false (VRChat IK compatibility)');
+  ok(V.humanoid.armStretch === 0.05 && V.humanoid.legStretch === 0.05,
+    'humanoid arm/legStretch = 0.05 (VRM0 standard, affects reach IK)');
+  ok(V.humanoid.upperArmTwist === 0.5 && V.humanoid.lowerArmTwist === 0.5,
+    'humanoid upper/lowerArmTwist = 0.5 (VRM0 standard)');
+  ok(V.humanoid.feetSpacing === 0,
+    'humanoid.feetSpacing = 0 (VRM0 standard, no foot offset)');
   ok(V.firstPerson.firstPersonBone === B.idx.head + 1, 'firstPersonBone = head node');
   ok(V.firstPerson.lookAtTypeName === 'Bone', 'lookAt Bone type');
   const fpo = V.firstPerson.firstPersonBoneOffset;
