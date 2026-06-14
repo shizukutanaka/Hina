@@ -187,6 +187,11 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   ok(H.I18N.ja['err.buildFailed'] && H.I18N.en['err.buildFailed'], 'err.buildFailed key in both languages');
   ok(H.I18N.ja['note.quest.nospring'] && H.I18N.en['note.quest.nospring'], 'note.quest.nospring key in both languages (for hairstyles without spring bones)');
   ok(html.includes("'note.quest.nospring'") && html.includes("'note.quest'") && /hasS.*note\.quest/.test(html), 'phys tab shows dynamic spring note based on actual spring count');
+  // stat row st.spring shows pbTrans (bone count), so label must say "bones" not "chains"
+  ok(H.I18N.en['st.spring'].toLowerCase().includes('bone') && H.I18N.ja['st.spring'].includes('ボーン'),
+    'st.spring label says "bones" (not "chains") — matches pbTrans value shown in stat table');
+  ok(html.includes("'st.spring','pbTrans'") || html.includes('"st.spring","pbTrans"'),
+    'stat table row st.spring maps to pbTrans accessor (not pbComp chain count)');
   // every license option has a user-readable localized label (not raw technical id)
   const licenseOpts = ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'];
   ok(licenseOpts.every(l => H.I18N.ja['license.'+l] && H.I18N.en['license.'+l]), 'all license options have ja+en labels');
