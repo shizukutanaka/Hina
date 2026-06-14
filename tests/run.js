@@ -596,6 +596,12 @@ function accData(j, bin, ai){
   ok(sa.boneGroups.length === 1 && typeof sa.boneGroups[0].stiffiness === 'number', 'boneGroup with stiffiness (VRM0 typo)');
   ok(sa.boneGroups[0].stiffiness === Math.round(P.hairStiff * 4 * 100) / 100,
     'stiffiness matches hairStiff param (× 4 scale)');
+  ok(sa.boneGroups[0].gravityPower === P.hairGrav, 'boneGroup.gravityPower matches hairGrav param');
+  ok(sa.boneGroups[0].dragForce === P.hairDrag, 'boneGroup.dragForce matches hairDrag param');
+  const gd = sa.boneGroups[0].gravityDir;
+  ok(gd && gd.x === 0 && gd.y === -1 && gd.z === 0, 'gravityDir = {x:0, y:-1, z:0} (downward)');
+  ok(sa.boneGroups[0].hitRadius === 0.02, 'boneGroup hitRadius = 0.02 m');
+  ok(sa.boneGroups[0].center === -1, 'boneGroup center = -1 (no center bone, world-space simulation)');
   ok(sa.boneGroups[0].bones.length === 2 &&
      sa.boneGroups[0].bones.every(n => n === B.springs[0].boneIdxs[0] + 1 || n === B.springs[1].boneIdxs[0] + 1),
     'spring roots = twin chain roots');
