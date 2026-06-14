@@ -2182,6 +2182,46 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 131: degenerate triangle guard + blendshape group validity ---- */
+{
+  // No triangle may have two or more equal vertex indices (degenerate = zero area)
+  const idx = B.geom.idx;
+  let degenCount = 0;
+  for(let t=0; t<idx.length/3; t++){
+    const a=idx[t*3], b=idx[t*3+1], c=idx[t*3+2];
+    if(a===b || b===c || a===c) degenCount++;
+  }
+  ok(degenCount === 0, `no degenerate triangles in default avatar (${idx.length/3} tris checked)`);
+
+  // Degenerate triangle check passes for all 6 presets
+  let presetDegenBad = 0;
+  for(const pre of H.PRESETS){
+    const A = H.buildAvatar(H.presetParams(pre));
+    const pi = A.geom.idx;
+    for(let t=0; t<pi.length/3; t++){
+      const a=pi[t*3], b=pi[t*3+1], c=pi[t*3+2];
+      if(a===b || b===c || a===c) presetDegenBad++;
+    }
+  }
+  ok(presetDegenBad === 0, 'no degenerate triangles across all 6 preset avatars');
+
+  // Blendshape group validity: all presetNames must be in valid VRM0 set
+  const VALID_PRESET = new Set(['neutral','a','i','u','e','o','blink','blink_l','blink_r',
+    'joy','angry','sorrow','fun','lookup','lookdown','lookleft','lookright','unknown']);
+  const ex2 = H.exportVRM(B, H.defaults(), {}, new Uint8Array([]));
+  const G2 = parseGLB(ex2.bytes);
+  const bsg = G2.json.extensions.VRM.blendShapeMaster.blendShapeGroups;
+  const invalidPreset = bsg.filter(g => !VALID_PRESET.has(g.presetName));
+  ok(invalidPreset.length === 0,
+    `all ${bsg.length} blendshape groups have valid VRM0 presetName (invalid: ${invalidPreset.map(g=>g.presetName).join(',')||'none'})`);
+
+  // All bind indices reference valid morph target slots (no -1 from indexOf miss)
+  const morphCount = G2.json.meshes[0].primitives[0].extras.targetNames.length;
+  const badBind = bsg.flatMap(g => g.binds).filter(b => b.index < 0 || b.index >= morphCount);
+  ok(badBind.length === 0,
+    `all blendshape bind indices are valid (0..${morphCount-1}) — no missing morph targets`);
+}
+
 /* ---- Round 130: sorrow + angry mouth corner droop (sad/angry corners pull down) ---- */
 {
   const [ms, me] = B.geom.tags.mouth;
