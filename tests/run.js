@@ -531,6 +531,8 @@ function accData(j, bin, ai){
   ok(ibmOK, 'IBM = translate(-world), identity rotation (all 16 matrix elements verified)');
   // primitive
   const prim = j.meshes[0].primitives[0];
+  ok(prim.mode === 4, 'primitive mode = 4 (TRIANGLES, glTF 2.0 §3.7.2.1)');
+  ok(prim.material === 0, 'primitive references material 0 (single-material model)');
   ok(['POSITION','NORMAL','TEXCOORD_0','JOINTS_0','WEIGHTS_0'].every(a => prim.attributes[a] !== undefined),
     'all vertex attributes present');
   ok(prim.targets.length === 12, '12 morph targets');
@@ -558,6 +560,10 @@ function accData(j, bin, ai){
     if (Math.abs(s - 1) > 1e-3) wOK = false;
   }
   ok(wOK, 'exported weights sum to 1');
+  // each individual weight must be in [0,1] (glTF 2.0 §3.7.2.1 joint weight normalization)
+  let wRangeOK = true;
+  for (let i = 0; i < wgt.length; i++) if (wgt[i] < 0 || wgt[i] > 1.0001) wRangeOK = false;
+  ok(wRangeOK, 'all exported weight values in [0,1]');
   // glTF 2.0 accessor type + componentType for every vertex attribute
   ok(j.accessors[prim.attributes.POSITION].type === 'VEC3', 'POSITION accessor type = VEC3');
   ok(j.accessors[prim.attributes.POSITION].componentType === 5126, 'POSITION componentType = FLOAT(5126)');
