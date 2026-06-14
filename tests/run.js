@@ -337,11 +337,24 @@ const B = H.buildAvatar(P);
 
 /* ---- spring chains per hairstyle ---- */
 {
-  const counts = { twin: 2, pony: 1, long: 3, short: 0, bob: 0 };
-  for (const style in counts){
+  // chain count and bone count per chain (SPEC §5.2: 0-3 chains each 3-4 bones)
+  const chainSpec = {
+    twin:  { chains: 2, bonesPerChain: 4, pbTrans: 8 },
+    pony:  { chains: 1, bonesPerChain: 4, pbTrans: 4 },
+    long:  { chains: 3, bonesPerChain: 3, pbTrans: 9 },
+    short: { chains: 0, bonesPerChain: 0, pbTrans: 0 },
+    bob:   { chains: 0, bonesPerChain: 0, pbTrans: 0 },
+  };
+  for (const [style, spec] of Object.entries(chainSpec)){
     const b = H.buildAvatar(Object.assign(H.defaults(), { hairStyle: style }));
-    ok(b.springs.length === counts[style], `springs(${style}) = ${counts[style]}`);
+    ok(b.springs.length === spec.chains, `springs(${style}) = ${spec.chains}`);
     ok(b.springs.every(sp => sp.boneIdxs.every(bi => b.bones[bi].hb === null)), `chain bones non-humanoid (${style})`);
+    if (spec.chains > 0){
+      ok(b.springs.every(sp => sp.boneIdxs.length === spec.bonesPerChain),
+        `${style}: each chain has ${spec.bonesPerChain} bones`);
+      const totalBones = b.springs.reduce((s, sp) => s + sp.boneIdxs.length, 0);
+      ok(totalBones === spec.pbTrans, `${style}: total pbTrans = ${spec.pbTrans}`);
+    }
   }
 }
 
