@@ -1268,6 +1268,26 @@ function accData(j, bin, ai){
     'chibi preset reaches Quest Excellent (with springOff if needed)');
 }
 
+/* ---- Round 103: undo wired to file load + dialog backdrop close ---- */
+{
+  // captureUndo wired to file-button load (inside rd.onload before params mutation)
+  ok(/captureUndo\(\);[\s\S]{0,30}params=d\.params/.test(html),
+    'file-button JSON load calls captureUndo() before applying params');
+
+  // captureUndo wired to drag-and-drop load
+  const dropSection = html.slice(html.indexOf('addEventListener(\'drop\''), html.indexOf('addEventListener(\'drop\'')+600);
+  ok(/captureUndo/.test(dropSection),
+    'drag-and-drop JSON load calls captureUndo() before applying params');
+
+  // about dialog closes on backdrop click (e.target === dialog itself)
+  ok(/e\.target===\$\('aboutDlg'\)[\s\S]{0,30}close\(\)/.test(html),
+    'about dialog closes on backdrop click (e.target === dialog element)');
+
+  // i18n hint.ctrlS updated to mention Ctrl+Z in both languages
+  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl+Z') && H.I18N.en['hint.ctrlS'].includes('Ctrl+Z'),
+    'hint.ctrlS i18n includes Ctrl+Z undo mention in both languages');
+}
+
 /* ---- Round 102: Ctrl+Z undo + i18n hint update ---- */
 {
   // captureUndo and doUndo functions must exist in source

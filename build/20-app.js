@@ -714,7 +714,7 @@ function renderOut(bd){
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
-        if (d){ params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }
+        if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }
         else { alert(t('err.loadFailed')); } };
       rd.readAsText(f); e.target.value=''; }});
   bd.append(file);
@@ -858,6 +858,8 @@ $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveStat
 $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); });
 $('btnAbout').addEventListener('click',()=>$('aboutDlg').showModal());
 $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
+// close dialog on backdrop click (click on the dialog element itself = outside the content box)
+$('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('aboutDlg').close(); });
 
 loadState();
 rebuild();
@@ -890,7 +892,7 @@ document.body.addEventListener('drop',e=>{
   if (!f.name.endsWith('.json') && f.type!=='application/json') { alert(t('err.loadFailed')); return; }
   const rd=new FileReader();
   rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
-    if (d){ params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }
+    if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }
     else { alert(t('err.loadFailed')); } };
   rd.readAsText(f);
 });
