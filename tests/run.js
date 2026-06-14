@@ -1082,6 +1082,42 @@ function accData(j, bin, ai){
     'eyeL and eyeR regions have equal width in UV space');
 }
 
+/* ---- Round 97: rank category boundaries for mat/skinned/mesh/texMB ---- */
+{
+  const base = { tris: 1, bones: 1, skinned: 1, mesh: 0, mat: 1, pbComp: 0, pbTrans: 0, pbCol: 0, pbCheck: 0, texMB: 1 };
+
+  // Quest mat: Excellent=1, Good=1 (same), Medium=2 — but quest mat[E]=1, mat[G]=1 so >1 → Medium
+  ok(H.rank(Object.assign({}, base, { mat: 1 }), 'quest').rank === 'Excellent', 'quest mat=1 → Excellent');
+  ok(H.rank(Object.assign({}, base, { mat: 2 }), 'quest').rank === 'Medium', 'quest mat=2 → Medium (E=G=1, M=2)');
+
+  // Quest skinned: Excellent=1, Good=1 (same threshold), Medium=2
+  ok(H.rank(Object.assign({}, base, { skinned: 1 }), 'quest').rank === 'Excellent', 'quest skinned=1 → Excellent');
+  ok(H.rank(Object.assign({}, base, { skinned: 2 }), 'quest').rank === 'Medium', 'quest skinned=2 → Medium (E=G=1, M=2)');
+
+  // Quest mesh: Excellent=1, Good=1 (same threshold), mesh=0 is below threshold → also Excellent
+  ok(H.rank(Object.assign({}, base, { mesh: 0 }), 'quest').rank === 'Excellent', 'quest mesh=0 → Excellent (≤1)');
+  ok(H.rank(Object.assign({}, base, { mesh: 1 }), 'quest').rank === 'Excellent', 'quest mesh=1 → Excellent');
+  ok(H.rank(Object.assign({}, base, { mesh: 2 }), 'quest').rank === 'Medium', 'quest mesh=2 → Medium (E=G=1, M=2)');
+
+  // Quest texMB boundary: Excellent≤10, Good≤18
+  ok(H.rank(Object.assign({}, base, { texMB: 10 }), 'quest').rank === 'Excellent', 'quest texMB=10 → Excellent');
+  ok(H.rank(Object.assign({}, base, { texMB: 10.1 }), 'quest').rank === 'Good', 'quest texMB=10.1 → Good');
+  ok(H.rank(Object.assign({}, base, { texMB: 18 }), 'quest').rank === 'Good', 'quest texMB=18 → Good');
+  ok(H.rank(Object.assign({}, base, { texMB: 18.1 }), 'quest').rank === 'Medium', 'quest texMB=18.1 → Medium');
+
+  // PC mat boundary: Excellent≤4, Good≤8
+  ok(H.rank(Object.assign({}, base, { mat: 4 }), 'pc').rank === 'Excellent', 'pc mat=4 → Excellent');
+  ok(H.rank(Object.assign({}, base, { mat: 5 }), 'pc').rank === 'Good', 'pc mat=5 → Good');
+
+  // PC skinned boundary: Excellent=1, Good≤2
+  ok(H.rank(Object.assign({}, base, { skinned: 1 }), 'pc').rank === 'Excellent', 'pc skinned=1 → Excellent');
+  ok(H.rank(Object.assign({}, base, { skinned: 2 }), 'pc').rank === 'Good', 'pc skinned=2 → Good');
+
+  // PC texMB boundary: Excellent≤40, Good≤75
+  ok(H.rank(Object.assign({}, base, { texMB: 40 }), 'pc').rank === 'Excellent', 'pc texMB=40 → Excellent');
+  ok(H.rank(Object.assign({}, base, { texMB: 40.1 }), 'pc').rank === 'Good', 'pc texMB=40.1 → Good');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
