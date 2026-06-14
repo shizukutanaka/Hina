@@ -747,7 +747,7 @@ function buildAvatar(p){
       {y:skirtTop, rx:hipR*1.10, rz:hipR*0.92, skin:[[idx.hips,1]]},
       {y:skirtTop-skirtLenW*0.5, rx:hipR*1.35, rz:hipR*1.15, skin:[[idx.hips,1]]},
       {y:skirtTop-skirtLenW, rx:hipR*1.62, rz:hipR*1.40, skin:[[idx.hips,1]]},
-    ], 14, p.outfit==='onepiece'?uC:uC, (pos,th,i)=>{
+    ], 14, uC, (pos,th,i)=>{
       return {p:pos};
     });
     // re-skin skirt lower rings toward legs (angular): patch last latheY verts
