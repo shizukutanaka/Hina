@@ -639,6 +639,12 @@ function accData(j, bin, ai){
   // material
   ok(j.materials[0].alphaMode === 'MASK' && j.materials[0].alphaCutoff === 0.5 && j.materials[0].doubleSided === true,
     'material MASK cutoff 0.5 doubleSided');
+  ok(j.materials[0].pbrMetallicRoughness.baseColorTexture.index === 0,
+    'material baseColorTexture references atlas (index 0)');
+  ok(j.materials[0].pbrMetallicRoughness.metallicFactor === 0,
+    'material metallicFactor = 0 (non-metallic, toon style)');
+  ok(j.textures[0].sampler === 0,
+    'texture references sampler 0 (CLAMP_TO_EDGE)');
   ok(j.images[0].mimeType === 'image/png' && j.textures[0].source === 0, 'png image wired');
   // VRM ext
   const V = j.extensions.VRM;
