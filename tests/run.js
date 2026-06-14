@@ -2182,6 +2182,39 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 167: sleeve length formula — arm tube ring2/ring3 X positions ---- */
+{
+  // Sleeve arm tube rings (segs=8, 9 verts per ring):
+  //   ring2_x = shX + (wristX-shX) × tEnd × 0.5    (mid-sleeve)
+  //   ring3_x = shX + (wristX-shX) × tEnd            (sleeve tip)
+  //   where tEnd = 0.94 (long) or 0.40 (short)
+  // Use short hair to isolate sleeve geometry.
+  const bLong  = H.buildAvatar(Object.assign({}, P, { sleeves:'long',  hairStyle:'short' }));
+  const bShort = H.buildAvatar(Object.assign({}, P, { sleeves:'short', hairStyle:'short' }));
+  const d = bLong.dims;
+  const tLong = 0.94, tShort = 0.40;
+  const ring2Long  = d.shX + (d.wristX - d.shX) * tLong  * 0.5;
+  const ring3Long  = d.shX + (d.wristX - d.shX) * tLong;
+  const ring2Short = d.shX + (d.wristX - d.shX) * tShort * 0.5;
+  const ring3Short = d.shX + (d.wristX - d.shX) * tShort;
+
+  // Verify 9 verts in right arm at each ring X (long sleeves)
+  const nAtLong2  = Array.from(bLong.geom.pos).filter((_,i)=>i%3===0).filter(x=>Math.abs(x-ring2Long) <1e-4).length;
+  const nAtLong3  = Array.from(bLong.geom.pos).filter((_,i)=>i%3===0).filter(x=>Math.abs(x-ring3Long) <1e-4).length;
+  ok(nAtLong2 === 9, `long sleeve: 9 verts at ring2_x=${ring2Long.toFixed(4)} (right arm)`);
+  ok(nAtLong3 === 9, `long sleeve: 9 verts at ring3_x=${ring3Long.toFixed(4)} (sleeve tip)`);
+
+  // Verify 9 verts at each ring X for short sleeves
+  const nAtShort2 = Array.from(bShort.geom.pos).filter((_,i)=>i%3===0).filter(x=>Math.abs(x-ring2Short)<1e-4).length;
+  const nAtShort3 = Array.from(bShort.geom.pos).filter((_,i)=>i%3===0).filter(x=>Math.abs(x-ring3Short)<1e-4).length;
+  ok(nAtShort2 === 9, `short sleeve: 9 verts at ring2_x=${ring2Short.toFixed(4)}`);
+  ok(nAtShort3 === 9, `short sleeve: 9 verts at ring3_x=${ring3Short.toFixed(4)} (sleeve tip)`);
+
+  // Long sleeve extends further outward than short
+  ok(ring3Long > ring3Short,
+    `long sleeve tip X (${ring3Long.toFixed(4)}) > short sleeve tip X (${ring3Short.toFixed(4)})`);
+}
+
 /* ---- Round 166: dims formula sheet — shX, legX, armL, elbowX exact values ---- */
 {
   // Complete formula reference for dims computed by buildSkeleton:
