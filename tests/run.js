@@ -1118,6 +1118,61 @@ function accData(j, bin, ai){
   ok(H.rank(Object.assign({}, base, { texMB: 40.1 }), 'pc').rank === 'Good', 'pc texMB=40.1 → Good');
 }
 
+/* ---- Round 98: M vector math primitives (untested: v3/add/sub/scale/dot/cross/len/norm/lerp) ---- */
+{
+  // v3
+  const v = M.v3(1, 2, 3);
+  ok(v[0] === 1 && v[1] === 2 && v[2] === 3, 'M.v3 constructs [x,y,z]');
+  ok(M.v3().every(c => c === 0), 'M.v3() defaults to [0,0,0]');
+
+  // add
+  const s = M.add([1, 2, 3], [4, 5, 6]);
+  ok(s[0] === 5 && s[1] === 7 && s[2] === 9, 'M.add component-wise sum');
+
+  // sub
+  const d = M.sub([4, 5, 6], [1, 2, 3]);
+  ok(d[0] === 3 && d[1] === 3 && d[2] === 3, 'M.sub component-wise difference');
+
+  // scale
+  const sc = M.scale([1, -2, 3], 2);
+  ok(sc[0] === 2 && sc[1] === -4 && sc[2] === 6, 'M.scale multiplies each component');
+
+  // dot
+  near(M.dot([1, 0, 0], [0, 1, 0]), 0, 1e-12, 'M.dot perpendicular vectors = 0');
+  near(M.dot([1, 0, 0], [1, 0, 0]), 1, 1e-12, 'M.dot parallel unit vectors = 1');
+  near(M.dot([2, 3, 4], [1, 2, 3]), 2+6+12, 1e-12, 'M.dot general case');
+
+  // cross
+  const cx = M.cross([1, 0, 0], [0, 1, 0]);
+  ok(Math.abs(cx[0]) < 1e-12 && Math.abs(cx[1]) < 1e-12 && Math.abs(cx[2] - 1) < 1e-12, 'M.cross X×Y = Z');
+  const cy = M.cross([0, 1, 0], [0, 0, 1]);
+  ok(Math.abs(cy[0] - 1) < 1e-12 && Math.abs(cy[1]) < 1e-12 && Math.abs(cy[2]) < 1e-12, 'M.cross Y×Z = X');
+  // anticommutativity: a×b = -(b×a)
+  const a = [1, 2, 3], b = [4, 5, 6];
+  const ab = M.cross(a, b), ba = M.cross(b, a);
+  ok(ab.every((c, i) => Math.abs(c + ba[i]) < 1e-12), 'M.cross anticommutative: a×b = -(b×a)');
+
+  // len
+  near(M.len([3, 4, 0]), 5, 1e-10, 'M.len Pythagorean 3-4-5');
+  near(M.len([0, 0, 0]), 0, 1e-12, 'M.len zero vector = 0');
+  near(M.len([1, 1, 1]), Math.sqrt(3), 1e-10, 'M.len [1,1,1] = sqrt(3)');
+
+  // norm
+  const n1 = M.norm([5, 0, 0]);
+  near(M.len(n1), 1, 1e-10, 'M.norm produces unit vector');
+  ok(Math.abs(n1[0] - 1) < 1e-10 && Math.abs(n1[1]) < 1e-10, 'M.norm [5,0,0] → [1,0,0]');
+  const nz = M.norm([0, 0, 0]);
+  ok(nz.every(Number.isFinite), 'M.norm zero vector: no NaN (l||1 fallback prevents /0)');
+
+  // lerp
+  const l = M.lerp([0, 0, 0], [10, 20, 30], 0.5);
+  ok(l[0] === 5 && l[1] === 10 && l[2] === 15, 'M.lerp t=0.5 midpoint');
+  const l0 = M.lerp([1, 2, 3], [7, 8, 9], 0);
+  ok(l0[0] === 1 && l0[1] === 2 && l0[2] === 3, 'M.lerp t=0 = a');
+  const l1 = M.lerp([1, 2, 3], [7, 8, 9], 1);
+  ok(l1[0] === 7 && l1[1] === 8 && l1[2] === 9, 'M.lerp t=1 = b');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
