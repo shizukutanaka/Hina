@@ -2182,6 +2182,34 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 159: head collider offset formula + proportionality with height ---- */
+{
+  // collider offset = [0, 0, 0.01*H] (slight forward Z offset to center sphere in head)
+  const coll = B.collider;
+  ok(coll.offset[0] === 0 && coll.offset[1] === 0,
+    'head collider offset: x=0, y=0 (no lateral offset from head bone)');
+  ok(Math.abs(coll.offset[2] - 0.01 * P.height) < 1e-9,
+    `head collider offset z = 0.01×H = ${(0.01*P.height).toFixed(6)} (correct formula)`);
+
+  // Exported VRM collider offset matches build.collider.offset
+  const png2 = H.b64ToBytes(H.PNG1);
+  const ex = H.exportVRM(B, P, {}, png2);
+  const cg = ex.json.extensions.VRM.secondaryAnimation.colliderGroups[0];
+  ok(cg.colliders[0].offset.x === 0 && cg.colliders[0].offset.y === 0,
+    'exported VRM collider offset x=y=0');
+  ok(Math.abs(cg.colliders[0].offset.z - 0.01 * P.height) < 1e-9,
+    'exported VRM collider offset z = 0.01×H (round-trips correctly)');
+
+  // Collider Z offset scales proportionally with avatar height
+  const tall = H.buildAvatar(Object.assign(H.defaults(), {height: H.PARAMS.height.max}));
+  const short2 = H.buildAvatar(Object.assign(H.defaults(), {height: H.PARAMS.height.min}));
+  ok(tall.collider.offset[2] > short2.collider.offset[2],
+    'collider offset z proportional to height: taller avatar > shorter avatar');
+  ok(Math.abs(tall.collider.offset[2] / short2.collider.offset[2] -
+              H.PARAMS.height.max / H.PARAMS.height.min) < 1e-6,
+    'collider offset z / height ratio is constant (offset ∝ H)');
+}
+
 /* ---- Round 158: bangs vertex/triangle count snapshots + morph stability across bangs ---- */
 {
   // Exact counts per bangs style (default twin hairStyle). Regression guard for bang-strip geometry.
