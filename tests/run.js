@@ -989,6 +989,44 @@ function accData(j, bin, ai){
     'invalid violent/sexual/commercial fall back to Disallow');
 }
 
+/* ---- Round 95: humanBone→node exact mapping + bone symmetry ---- */
+{
+  const png = H.b64ToBytes(H.PNG1);
+  const ex = H.exportVRM(B, P, {}, png);
+  const hbs = ex.json.extensions.VRM.humanoid.humanBones;
+
+  // each humanBone's node must equal B.humanoid[boneName] + 1 (nodeOf)
+  ok(hbs.every(hb => hb.node === B.humanoid[hb.bone] + 1),
+    'each humanBone node === buildAvatar humanoid[bone] + 1 (nodeOf mapping)');
+
+  // all 21 HB bone names appear exactly once in humanBones
+  const boneNames = hbs.map(hb => hb.bone);
+  ok(H.HB.every(name => boneNames.filter(n => n === name).length === 1),
+    'each of 21 VRM0 humanoid bone names appears exactly once in exported humanBones');
+
+  // left/right bone symmetry: leftX node != rightX node, and both are present
+  const pairs = [
+    ['leftShoulder','rightShoulder'],
+    ['leftUpperArm','rightUpperArm'],
+    ['leftLowerArm','rightLowerArm'],
+    ['leftHand','rightHand'],
+    ['leftUpperLeg','rightUpperLeg'],
+    ['leftLowerLeg','rightLowerLeg'],
+    ['leftFoot','rightFoot'],
+    ['leftEye','rightEye'],
+  ];
+  ok(pairs.every(([l, r]) => {
+    const ln = hbs.find(hb => hb.bone === l);
+    const rn = hbs.find(hb => hb.bone === r);
+    return ln && rn && ln.node !== rn.node;
+  }), 'all 8 left/right bone pairs map to distinct nodes');
+
+  // spine chain order: hips < spine < chest < neck < head (ascending node indices)
+  const chain = ['hips','spine','chest','neck','head'].map(n => hbs.find(hb => hb.bone === n).node);
+  ok(chain.every((v, i) => i === 0 || v > chain[i - 1]),
+    'spine chain (hips→spine→chest→neck→head) has strictly ascending node indices');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
