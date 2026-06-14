@@ -2182,6 +2182,49 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 156: firstPersonBoneOffset.z exact formula + ahoge vertex position ---- */
+{
+  // fpZ = round(-headR × 0.7, 3dp) — places camera inside head at eye depth
+  const png2 = H.b64ToBytes(H.PNG1);
+  const ex = H.exportVRM(B, P, {}, png2);
+  const fp = ex.json.extensions.VRM.firstPerson.firstPersonBoneOffset;
+  const expectedFpZ = Math.round(-B.dims.headR * 0.7 * 1000) / 1000;
+  ok(Math.abs(fp.z - expectedFpZ) < 1e-9,
+    `firstPersonBoneOffset.z = round(-headR×0.7, 3dp) = ${expectedFpZ}`);
+
+  // firstPersonBoneOffset.y = eyeWY - headBone.w[1] (rounded to 3dp)
+  const headBoneY = B.bones[B.idx.head].w[1];
+  const expectedFpY = Math.round((B.dims.eyeWY - headBoneY) * 1000) / 1000;
+  ok(Math.abs(fp.y - expectedFpY) < 1e-9,
+    `firstPersonBoneOffset.y = round(eyeWY - headBone.y, 3dp) = ${expectedFpY}`);
+
+  // ahoge tip vertex must be above head sphere top — find ahoge verts by first array divergence
+  const bAhoge = H.buildAvatar(Object.assign(H.defaults(), {ahoge: true}));
+  const bNoAhoge = H.buildAvatar(Object.assign(H.defaults(), {ahoge: false}));
+  let ahogeStartVtx = -1;
+  for(let i = 0; i < bNoAhoge.geom.pos.length; i++){
+    if(bAhoge.geom.pos[i] !== bNoAhoge.geom.pos[i]){ ahogeStartVtx = Math.floor(i/3); break; }
+  }
+  let ahogeMaxY = -Infinity;
+  for(let i = ahogeStartVtx; i < ahogeStartVtx + 3; i++){
+    ahogeMaxY = Math.max(ahogeMaxY, bAhoge.geom.pos[i*3 + 1]);
+  }
+  const headSphereTop = bAhoge.dims.headCY + bAhoge.dims.headR;
+  ok(ahogeStartVtx >= 0 && ahogeMaxY > headSphereTop,
+    `ahoge tip Y (${ahogeMaxY.toFixed(4)}) > head sphere top (${headSphereTop.toFixed(4)})`);
+
+  // ahoge vertices must be skinned 100% to head bone
+  const headIdx = bAhoge.idx.head;
+  let ahogeWgtOK = true;
+  for(let i = ahogeStartVtx; i < ahogeStartVtx + 3; i++){
+    const j0 = bAhoge.geom.jnt[i*4];
+    const w0 = bAhoge.geom.wgt[i*4];
+    const wSum = bAhoge.geom.wgt[i*4]+bAhoge.geom.wgt[i*4+1]+bAhoge.geom.wgt[i*4+2]+bAhoge.geom.wgt[i*4+3];
+    if(j0 !== headIdx || Math.abs(w0 - 1.0) > 1e-6 || Math.abs(wSum - 1.0) > 1e-6) ahogeWgtOK = false;
+  }
+  ok(ahogeWgtOK, 'ahoge vertices skinned 100% to head bone (correct rigid attachment)');
+}
+
 /* ---- Round 155: ATLAS rect non-overlap + bounds validation ---- */
 {
   // All face atlas uvRect regions must be within [0, TEX) and must not overlap each other.
