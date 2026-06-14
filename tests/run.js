@@ -322,7 +322,7 @@ const B = H.buildAvatar(P);
   ok(B.faceStart > 0 && B.faceStart < nV, 'faceStart inside mesh');
   ok(g.idx.slice(0, 60).every(i => i < B.faceStart), 'body indices precede face');
   ok(B.morphs.names.length === 12, '12 morph targets');
-  ok(['a','i','u','e','o','blink','joy'].every(n => B.morphs.sparse[n].length > 0), 'key morphs non-empty');
+  ok(B.morphs.names.every(n => B.morphs.sparse[n].length > 0), 'all 12 morph targets non-empty');
   ok(B.morphs.sparse.a.every(e => e.length === 4 && e[0] < nV), 'morph entries [vi,dx,dy,dz]');
   ok(B.springs.length === 2, 'twin: 2 spring chains');
   ok(B.collider && B.collider.bone === B.idx.head && B.collider.radius > 0, 'head collider present');
@@ -351,6 +351,28 @@ const B = H.buildAvatar(P);
   ok(sockOff.geom.idx.length < B.geom.idx.length, 'socks=false produces fewer triangles than default (socks=true)');
   ok(sockOff.geom.pos.every(Number.isFinite) && sockOff.geom.nrm.every(Number.isFinite), 'socks=false build has finite pos/nrm');
   ok(sockOff.geom.idx.length % 3 === 0 && sockOff.geom.idx.every(i => i >= 0 && i < sockOff.geom.pos.length / 3), 'socks=false indices valid');
+}
+
+/* ---- outfit variant builds ---- */
+{
+  for (const outfit of ['onepiece','sailor','shirts','hoodie']){
+    const b = H.buildAvatar(Object.assign(H.defaults(), { outfit }));
+    ok(b.geom.pos.every(Number.isFinite) && b.geom.nrm.every(Number.isFinite),
+      `outfit=${outfit}: finite pos/nrm`);
+    ok(b.geom.idx.length % 3 === 0 && b.geom.idx.every(i => i >= 0 && i < b.geom.pos.length / 3),
+      `outfit=${outfit}: valid triangle indices`);
+    ok(b.geom.wgt.every(Number.isFinite) && b.geom.jnt.every(Number.isFinite),
+      `outfit=${outfit}: finite skin weights/joints`);
+  }
+  // sleeves:short — same ring count as long, just shorter endpoint; verify finite + valid
+  const shortSleeve = H.buildAvatar(Object.assign(H.defaults(), { sleeves: 'short' }));
+  ok(shortSleeve.geom.pos.every(Number.isFinite) && shortSleeve.geom.nrm.every(Number.isFinite),
+    'sleeves=short: finite pos/nrm');
+  ok(shortSleeve.geom.idx.length % 3 === 0 &&
+     shortSleeve.geom.idx.every(i => i >= 0 && i < shortSleeve.geom.pos.length / 3),
+    'sleeves=short: valid triangle indices');
+  ok(shortSleeve.geom.idx.length === B.geom.idx.length,
+    'sleeves=short same tri count as long (same ring topology, different endpoint position)');
 }
 
 /* ---- rank boundaries (synthetic stats) ---- */
