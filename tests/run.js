@@ -2182,6 +2182,55 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 172: spine chain bone world positions vs dims ---- */
+{
+  // The 5-bone spine chain must have world Y = corresponding dims value.
+  // Head bone is placed at headCY - headR×0.55 (base of skull, not sphere center).
+  // All 5 spine chain bones have X=0 and Z=0 (centred on body axis).
+  const d = B.dims;
+  const spineChain = [
+    { name:'hips',  bone:B.idx.hips,  expY: d.hipsY },
+    { name:'spine', bone:B.idx.spine, expY: d.spineY },
+    { name:'chest', bone:B.idx.chest, expY: d.chestY },
+    { name:'neck',  bone:B.idx.neck,  expY: d.neckY  },
+    { name:'head',  bone:B.idx.head,  expY: d.headCY - d.headR * 0.55 },
+  ];
+  let yFail = 0, xzFail = 0;
+  for(const {name, bone, expY} of spineChain){
+    const w = B.bones[bone].w;
+    if(Math.abs(w[1] - expY) > 1e-9) yFail++;
+    if(Math.abs(w[0]) > 1e-9 || Math.abs(w[2]) > 1e-9) xzFail++;
+  }
+  ok(yFail === 0,
+    `spine chain Y: hips=${d.hipsY.toFixed(4)} spine=${d.spineY.toFixed(4)} chest=${d.chestY.toFixed(4)} neck=${d.neckY.toFixed(4)} head=${(d.headCY-d.headR*0.55).toFixed(4)}`);
+  ok(xzFail === 0,
+    'all 5 spine chain bones have X=0 Z=0 (centred on body axis)');
+
+  // Head bone is offset from headCY by -headR×0.55 (base of skull)
+  const headBoneY = B.bones[B.idx.head].w[1];
+  ok(Math.abs(headBoneY - (d.headCY - d.headR * 0.55)) < 1e-9,
+    `head bone Y = headCY - headR×0.55 = ${(d.headCY-d.headR*0.55).toFixed(5)} (base of skull, not sphere center)`);
+
+  // All 6 presets satisfy spine chain world positions
+  let fail = 0;
+  for(const pre of H.PRESETS){
+    const C = H.buildAvatar(H.presetParams(pre));
+    const cd = C.dims;
+    const expectations = [
+      [C.idx.hips,  cd.hipsY],
+      [C.idx.spine, cd.spineY],
+      [C.idx.chest, cd.chestY],
+      [C.idx.neck,  cd.neckY],
+      [C.idx.head,  cd.headCY - cd.headR * 0.55],
+    ];
+    for(const [bi, expY] of expectations){
+      if(Math.abs(C.bones[bi].w[1] - expY) > 1e-6) fail++;
+      if(Math.abs(C.bones[bi].w[0]) > 1e-6 || Math.abs(C.bones[bi].w[2]) > 1e-6) fail++;
+    }
+  }
+  ok(fail === 0, 'spine chain bone positions match dims for all 6 presets');
+}
+
 /* ---- Round 171: arm bone world position formulas ---- */
 {
   // Left arm bone world positions (T-pose, arms horizontal at shoulderY):
