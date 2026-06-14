@@ -2182,6 +2182,27 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 168: morph sparse count invariance across all 20 outfit×hairStyle combos ---- */
+{
+  // Morph entries only reference face tag vertices, so counts must be topology-invariant
+  // across all outfit and hairStyle combinations. This guards against outfit changes that
+  // accidentally add or remove face geometry and break morph target data.
+  const EXPECTED = {a:8,i:8,u:9,e:8,o:9,blink:16,'blink_l':8,'blink_r':8,joy:24,angry:25,sorrow:25,fun:24};
+  const outfits = ['onepiece','sailor','shirts','hoodie'];
+  const hairs   = ['short','bob','long','twin','pony'];
+  let failCount = 0;
+  for(const outfit of outfits){
+    for(const hairStyle of hairs){
+      const b = H.buildAvatar(Object.assign({}, P, { outfit, hairStyle }));
+      for(const [mn, exp] of Object.entries(EXPECTED)){
+        if(b.morphs.sparse[mn].length !== exp) failCount++;
+      }
+    }
+  }
+  ok(failCount === 0,
+    `morph sparse counts topology-invariant across all 20 outfit×hairStyle combos (${Object.keys(EXPECTED).length} morphs × 20 combos)`);
+}
+
 /* ---- Round 167: sleeve length formula — arm tube ring2/ring3 X positions ---- */
 {
   // Sleeve arm tube rings (segs=8, 9 verts per ring):
