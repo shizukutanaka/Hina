@@ -969,6 +969,18 @@ function accData(j, bin, ai){
     ok(est.tris < 7500 && est.bones < 75, `${pre.id}: tris<7500, bones<75`);
     ok(H.rank(est, 'pc').rank === 'Excellent', `${pre.id}: PC Excellent`);
     ok(['Excellent','Good'].includes(H.rank(est, 'quest').rank), `${pre.id}: Quest Good or better with springs`);
+    /* ---- Round 122: per-preset skinning invariants ---- */
+    {
+      const g2 = b.geom, nV2 = g2.pos.length/3;
+      let wOK2=true, jOK2=true;
+      for(let v=0;v<nV2;v++){
+        const s=g2.wgt[v*4]+g2.wgt[v*4+1]+g2.wgt[v*4+2]+g2.wgt[v*4+3];
+        if(Math.abs(s-1)>1e-4) wOK2=false;
+        for(let k=0;k<4;k++) if(g2.jnt[v*4+k]<0||g2.jnt[v*4+k]>=b.bones.length) jOK2=false;
+      }
+      ok(wOK2, `${pre.id}: all weights sum to 1 (skinning normalized)`);
+      ok(jOK2, `${pre.id}: all joint indices in range [0, bones.length)`);
+    }
     const estOff = H.estimate(b, Object.assign({}, p, { springOff: true }));
     ok(H.rank(estOff, 'quest').rank === 'Excellent', `${pre.id}: Quest Excellent with springOff`);
     const G = parseGLB(H.exportVRM(b, p, {}, png).bytes);
