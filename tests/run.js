@@ -2099,6 +2099,49 @@ function accData(j, bin, ai){
   ok(socksT && socksF, 'randomParams socks is randomly true or false across 60 seeds');
 }
 
+/* ---- Round 126: skin weight normalization + normal unit-length for all vertices ---- */
+{
+  // Every vertex must have skin weights that sum exactly to 1.0 (guaranteed by addV normalization)
+  const wgt = B.geom.wgt;
+  const nVerts = wgt.length / 4;
+  let weightBad = 0, weightMax = 0;
+  for (let vi = 0; vi < nVerts; vi++){
+    const s = wgt[vi*4] + wgt[vi*4+1] + wgt[vi*4+2] + wgt[vi*4+3];
+    const d = Math.abs(s - 1.0);
+    if (d > 1e-6) weightBad++;
+    if (d > weightMax) weightMax = d;
+  }
+  ok(weightBad === 0,
+    `all ${nVerts} vertex skin weights sum to 1.0 (max deviation ${weightMax.toExponential(2)})`);
+
+  // Every vertex normal must be unit length (M.norm is called in addV)
+  const nrm = B.geom.nrm;
+  let normalBad = 0, normalMin = Infinity;
+  for (let vi = 0; vi < nVerts; vi++){
+    const x=nrm[vi*3], y=nrm[vi*3+1], z=nrm[vi*3+2];
+    const l = Math.sqrt(x*x + y*y + z*z);
+    if (Math.abs(l - 1.0) > 1e-4) normalBad++;
+    if (l < normalMin) normalMin = l;
+  }
+  ok(normalBad === 0,
+    `all ${nVerts} vertex normals have unit length (min magnitude ${normalMin.toFixed(6)})`);
+
+  // Skin weight and normal invariants hold across all 6 presets (not just default)
+  let presetWeightBad = 0, presetNormalBad = 0;
+  for (const pre of H.PRESETS){
+    const A = H.buildAvatar(H.presetParams(pre));
+    const pw = A.geom.wgt, pn = A.geom.nrm, nV = pw.length / 4;
+    for (let vi = 0; vi < nV; vi++){
+      const sw = pw[vi*4]+pw[vi*4+1]+pw[vi*4+2]+pw[vi*4+3];
+      if (Math.abs(sw-1.0) > 1e-6) presetWeightBad++;
+      const x=pn[vi*3], y=pn[vi*3+1], z=pn[vi*3+2];
+      if (Math.abs(Math.sqrt(x*x+y*y+z*z)-1.0) > 1e-4) presetNormalBad++;
+    }
+  }
+  ok(presetWeightBad === 0, 'all 6 preset avatars: every vertex weight sums to 1.0');
+  ok(presetNormalBad === 0, 'all 6 preset avatars: every vertex normal has unit length');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
