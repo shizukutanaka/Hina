@@ -326,6 +326,14 @@ const B = H.buildAvatar(P);
   }
 }
 
+/* ---- socks toggle ---- */
+{
+  const sockOff = H.buildAvatar(Object.assign(H.defaults(), { socks: false }));
+  ok(sockOff.geom.idx.length < B.geom.idx.length, 'socks=false produces fewer triangles than default (socks=true)');
+  ok(sockOff.geom.pos.every(Number.isFinite) && sockOff.geom.nrm.every(Number.isFinite), 'socks=false build has finite pos/nrm');
+  ok(sockOff.geom.idx.length % 3 === 0 && sockOff.geom.idx.every(i => i >= 0 && i < sockOff.geom.pos.length / 3), 'socks=false indices valid');
+}
+
 /* ---- rank boundaries (synthetic stats) ---- */
 {
   const base = { tris: 1, bones: 1, skinned: 1, mesh: 0, mat: 1, pbComp: 0, pbTrans: 0, pbCol: 0, pbCheck: 0, texMB: 1 };
@@ -342,10 +350,10 @@ const B = H.buildAvatar(P);
 {
   const est = H.estimate(B, P);
   ok(est.tris === B.geom.idx.length / 3, 'estimate tris matches mesh');
-  ok(est.bones === 29 && est.mat === 1 && est.skinned === 1, 'estimate bones/mat/skinned');
+  ok(est.bones === 29 && est.mat === 1 && est.skinned === 1 && est.mesh === 0, 'estimate bones/mat/skinned/mesh');
   ok(est.pbComp === 2 && est.pbTrans === 8, 'estimate physbones (twin springs on)');
   const off = H.estimate(B, Object.assign({}, P, { springOff: true }));
-  ok(off.pbComp === 0 && off.pbTrans === 0 && off.pbCheck === 0, 'springOff zeroes physbones');
+  ok(off.pbComp === 0 && off.pbTrans === 0 && off.pbCheck === 0 && off.pbCol === 0, 'springOff zeroes all physbone stats');
   ok(est.texMB > 0 && est.texMB < 10, 'texMB sane');
   ok(typeof est.approxBytes === 'number' && est.approxBytes > 150000 && est.approxBytes < 600000,
     'approxBytes in plausible VRM range (150KB–600KB, incl. ~120KB atlas PNG estimate)');
