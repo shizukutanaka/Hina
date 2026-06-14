@@ -1224,6 +1224,50 @@ function accData(j, bin, ai){
   ok(qrr.every((v, i) => Math.abs(v - qr[i]) < 1e-9), 'qMul: qid is right identity');
 }
 
+/* ---- Round 100: proportion param extremes (legLen/armLen/mouthW/eyeSize/shoulderW/hipW/skirtLen) ---- */
+{
+  // Each proportion param at both min and max: geometry must be finite with valid indices
+  const proportionParams = ['legLen','armLen','mouthW','eyeSize','shoulderW','hipW','skirtLen'];
+  for (const key of proportionParams){
+    const s = H.PARAMS[key];
+    for (const val of [s.min, s.max]){
+      const p = Object.assign(H.defaults(), { [key]: val });
+      const b = H.buildAvatar(p);
+      const nV = b.geom.pos.length / 3;
+      ok(b.geom.pos.every(Number.isFinite) && b.geom.nrm.every(Number.isFinite),
+        `${key}=${val}: finite pos/nrm`);
+      ok(b.geom.idx.length % 3 === 0 && b.geom.idx.every(i => i >= 0 && i < nV),
+        `${key}=${val}: valid triangle indices`);
+    }
+  }
+
+  // shoulderW > hipW and shoulderW < hipW both produce valid geometry
+  const wideShoulders = H.buildAvatar(Object.assign(H.defaults(), { shoulderW: 0.34, hipW: 0.14 }));
+  const wideHips = H.buildAvatar(Object.assign(H.defaults(), { shoulderW: 0.14, hipW: 0.34 }));
+  ok(wideShoulders.geom.pos.every(Number.isFinite), 'wide shoulders (shoulderW=max, hipW=min): finite');
+  ok(wideHips.geom.pos.every(Number.isFinite), 'wide hips (shoulderW=min, hipW=max): finite');
+
+  // blush=0 and blush=1 both export valid VRM (blush is a UV/texture effect, not geometry)
+  const png = H.b64ToBytes(H.PNG1);
+  const bNoBlush = H.buildAvatar(Object.assign(H.defaults(), { blush: 0 }));
+  const bFullBlush = H.buildAvatar(Object.assign(H.defaults(), { blush: 1 }));
+  ok(H.exportVRM(bNoBlush, Object.assign(H.defaults(), { blush: 0 }), {}, png).bytes.length > 100,
+    'blush=0: exports valid VRM');
+  ok(H.exportVRM(bFullBlush, Object.assign(H.defaults(), { blush: 1 }), {}, png).bytes.length > 100,
+    'blush=1: exports valid VRM');
+
+  // chibi preset specific: height=1.0m, headRatio=0.34 → head Y > hips Y (vertical order holds even at 1m)
+  const chibi = H.presetParams(H.PRESETS.find(p => p.id === 'chibi'));
+  const chibiB = H.buildAvatar(chibi);
+  ok(chibiB.bones[chibiB.idx.head].w[1] > chibiB.bones[chibiB.idx.hips].w[1],
+    'chibi preset: head Y > hips Y (vertical order holds at 1m height)');
+  ok(chibiB.dims && chibiB.dims.H === chibi.height,
+    'chibi preset: dims.H matches height param (1.0m)');
+  ok(H.rank(H.estimate(chibiB, chibi), 'quest').rank === 'Excellent' ||
+     H.rank(H.estimate(chibiB, Object.assign({}, chibi, { springOff: true })), 'quest').rank === 'Excellent',
+    'chibi preset reaches Quest Excellent (with springOff if needed)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
