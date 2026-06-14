@@ -1794,6 +1794,42 @@ function accData(j, bin, ai){
     'all a11y.* EN keys have JA counterparts');
 }
 
+/* ---- Round 115: browType tests (previously untested) + bangs count ordering + atlas enum coverage ---- */
+{
+  // browType is texture-only (canvas) — geometry should be identical for all 3 values
+  const browBuilds = {};
+  for (const bt of H.PARAMS.browType.opts){
+    const b = H.buildAvatar(Object.assign(H.defaults(), { browType: bt }));
+    ok(b.geom.pos.every(Number.isFinite) && b.geom.nrm.every(Number.isFinite),
+      `browType=${bt}: finite pos/nrm`);
+    ok(b.geom.idx.length % 3 === 0 && b.geom.idx.every(i => i >= 0 && i < b.geom.pos.length / 3),
+      `browType=${bt}: valid triangle indices`);
+    browBuilds[bt] = b;
+  }
+  // browType is texture-only: all 3 variants have identical geometry
+  ok(browBuilds.soft.geom.pos.length === browBuilds.straight.geom.pos.length &&
+     browBuilds.soft.geom.pos.length === browBuilds.arch.geom.pos.length,
+    'browType soft/straight/arch all produce identical vertex counts (texture-only param)');
+
+  // bangs geometric ordering: center (4 strips) < see (5 strips) < full (7 strips)
+  const bFull   = H.buildAvatar(Object.assign(H.defaults(), { bangs: 'full'   }));
+  const bSee    = H.buildAvatar(Object.assign(H.defaults(), { bangs: 'see'    }));
+  const bCenter = H.buildAvatar(Object.assign(H.defaults(), { bangs: 'center' }));
+  ok(bCenter.geom.pos.length < bSee.geom.pos.length,
+    'bangs center (4 strips) has fewer vertices than see (5 strips)');
+  ok(bSee.geom.pos.length < bFull.geom.pos.length,
+    'bangs see (5 strips) has fewer vertices than full (7 strips)');
+
+  // source code: drawAtlas explicitly handles non-default browType and eyeShape values
+  // 'soft' is the default else-case for browType; 'round' is the default else-case for eyeShape
+  ok(['straight','arch'].every(v => html.includes("browType==='" + v + "'")) &&
+     !html.includes("browType==='soft'"),
+    'drawAtlas: browType straight/arch explicitly branched; soft is the else default');
+  ok(['tare','tsuri','jito'].every(v => html.includes("shape==='" + v + "'") || html.includes("eyeShape==='" + v + "'")) &&
+     !html.includes("shape==='round'") && !html.includes("eyeShape==='round'"),
+    'drawAtlas: eyeShape tare/tsuri/jito explicitly branched; round is the else default');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
