@@ -1541,6 +1541,42 @@ function accData(j, bin, ai){
     'morph targetNames are all unique (no duplicate expression names in the mesh)');
 }
 
+/* ---- Round 108: per-preset spring chain validation + copy-seed clipboard button ---- */
+{
+  const png = H.b64ToBytes(H.PNG1);
+  const CHAINS_BY_STYLE = {short:0, bob:0, long:3, twin:2, pony:1};
+  for (const pre of H.PRESETS){
+    const p = H.presetParams(pre);
+    const b = H.buildAvatar(p);
+    const expectedChains = CHAINS_BY_STYLE[p.hairStyle];
+    ok(b.springs.length === expectedChains,
+      `${pre.id}: springs.length=${expectedChains} for hairStyle=${p.hairStyle}`);
+    const vrmSA = H.exportVRM(b, p, {}, png).json.extensions.VRM.secondaryAnimation;
+    const expectBG = expectedChains > 0 ? 1 : 0;
+    ok(vrmSA.boneGroups.length === expectBG,
+      `${pre.id}: VRM secondaryAnimation.boneGroups.length=${expectBG} (hairStyle=${p.hairStyle})`);
+    if (expectedChains > 0){
+      ok(vrmSA.boneGroups[0].bones.length === expectedChains,
+        `${pre.id}: VRM boneGroups[0].bones.length=${expectedChains} (one entry per chain)`);
+    }
+  }
+
+  // copy-seed button: i18n keys present in both languages
+  ok(H.I18N.ja['btn.copySeed'] === 'コピー', 'btn.copySeed JA = コピー');
+  ok(H.I18N.en['btn.copySeed'] === 'Copy', 'btn.copySeed EN = Copy');
+
+  // copy-seed button referenced in app source (t() call with the key)
+  ok(/btn\.copySeed/.test(html), 'btn.copySeed i18n key referenced in app source');
+
+  // copy-seed button uses navigator.clipboard.writeText
+  ok(/navigator\.clipboard/.test(html) && /writeText/.test(html),
+    'copy-seed button calls navigator.clipboard?.writeText for clipboard access');
+
+  // copy-seed button no-ops when no gacha has been run
+  ok(/lastGachaSeed===null[\s\S]{0,20}return/.test(html),
+    'copy-seed button guards against null seed (no-op when no gacha run yet)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

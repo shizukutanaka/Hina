@@ -676,7 +676,11 @@ function renderBody(){
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'),
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
       onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>=0) runGacha(n); }});
-    seedRow.append(el('span',{class:'limit'},t('gacha.seed')), seedIn);
+    const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
+      'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
+      onclick:()=>{ if(lastGachaSeed===null) return; navigator.clipboard?.writeText(String(lastGachaSeed)).catch(()=>{}); }
+    }, t('btn.copySeed'));
+    seedRow.append(el('span',{class:'limit'},t('gacha.seed')), seedIn, cpBtn);
     gDiv.append(seedRow);
     bd.append(grid, gDiv);
     return;
