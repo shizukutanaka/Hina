@@ -2182,6 +2182,44 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 169: ahoge geometry — triangle delta, tip Y, head bone skinning ---- */
+{
+  // ahoge=true adds exactly 1 triangle (3 vertices) across ALL hairStyles.
+  // The tip must extend above the hair sphere top, and all 3 verts are 100% head bone.
+  const hairs = ['short','bob','long','twin','pony'];
+  let deltaFail = 0, heightFail = 0, skinFail = 0;
+  for(const hairStyle of hairs){
+    const bNo = H.buildAvatar(Object.assign({}, P, { ahoge:false, hairStyle }));
+    const bYe = H.buildAvatar(Object.assign({}, P, { ahoge:true,  hairStyle }));
+    const vDelta = bYe.geom.pos.length/3 - bNo.geom.pos.length/3;
+    const tDelta = bYe.geom.idx.length/3  - bNo.geom.idx.length/3;
+    if(vDelta !== 3 || tDelta !== 1) deltaFail++;
+
+    // Find where ahoge verts start (first position divergence)
+    let aStart = -1;
+    for(let i = 0; i < bNo.geom.pos.length; i++){
+      if(bYe.geom.pos[i] !== bNo.geom.pos[i]){ aStart = Math.floor(i/3); break; }
+    }
+    if(aStart < 0){ heightFail++; skinFail++; continue; }
+
+    // Tip is the 3rd new vertex (aStart+2); it must be above the hair sphere top
+    const d = bYe.dims;
+    const hr = d.headR * 1.085 * P.hairVol;
+    const hairSphereTop = d.headCY + d.headR * 0.02 + hr;
+    const tipY = bYe.geom.pos[(aStart+2)*3+1];
+    if(tipY <= hairSphereTop) heightFail++;
+
+    // All 3 ahoge verts must be 100% skinned to the head bone
+    for(let k = 0; k < 3; k++){
+      const vi = aStart + k;
+      if(bYe.geom.jnt[vi*4] !== bYe.idx.head || bYe.geom.wgt[vi*4] !== 1) skinFail++;
+    }
+  }
+  ok(deltaFail === 0, 'ahoge=true adds exactly +3 verts +1 tri for all 5 hairStyles');
+  ok(heightFail === 0, 'ahoge tip Y > hair sphere top (sticks up above head) for all hairStyles');
+  ok(skinFail === 0,   'all 3 ahoge verts are 100% skinned to head bone for all hairStyles');
+}
+
 /* ---- Round 168: morph sparse count invariance across all 20 outfit×hairStyle combos ---- */
 {
   // Morph entries only reference face tag vertices, so counts must be topology-invariant
