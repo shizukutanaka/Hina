@@ -2182,6 +2182,46 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 171: arm bone world position formulas ---- */
+{
+  // Left arm bone world positions (T-pose, arms horizontal at shoulderY):
+  //   lSh.x = -shX×0.42,  lSh.y = shoulderY
+  //   lUA.x = -shX,        lUA.y = shoulderY
+  //   lLA.x = -elbowX,     lLA.y = shoulderY
+  //   lH.x  = -wristX,     lH.y  = shoulderY
+  // Right side mirrors: +X, same Y
+  const d = B.dims;
+  const lSh = B.bones[B.idx.lSh].w, rSh = B.bones[B.idx.rSh].w;
+  const lUA = B.bones[B.idx.lUA].w, rUA = B.bones[B.idx.rUA].w;
+  const lLA = B.bones[B.idx.lLA].w, rLA = B.bones[B.idx.rLA].w;
+  const lH  = B.bones[B.idx.lH].w,  rH  = B.bones[B.idx.rH].w;
+
+  // Shoulder bones
+  ok(Math.abs(lSh[0] + d.shX * 0.42) < 1e-9, `lSh.x = -shX×0.42 = ${(-d.shX*0.42).toFixed(5)}`);
+  ok(Math.abs(rSh[0] - d.shX * 0.42) < 1e-9, `rSh.x = +shX×0.42`);
+
+  // Upper arm bones
+  ok(Math.abs(lUA[0] + d.shX) < 1e-9, `lUA.x = -shX = ${(-d.shX).toFixed(5)}`);
+  ok(Math.abs(rUA[0] - d.shX) < 1e-9, `rUA.x = +shX`);
+
+  // Lower arm (elbow) bones
+  ok(Math.abs(lLA[0] + d.elbowX) < 1e-9, `lLA.x = -elbowX = ${(-d.elbowX).toFixed(5)}`);
+  ok(Math.abs(rLA[0] - d.elbowX) < 1e-9, `rLA.x = +elbowX`);
+
+  // Hand (wrist) bones
+  ok(Math.abs(lH[0] + d.wristX) < 1e-9, `lH.x = -wristX = ${(-d.wristX).toFixed(5)}`);
+  ok(Math.abs(rH[0] - d.wristX) < 1e-9, `rH.x = +wristX`);
+
+  // All arm bones have Y = shoulderY (T-pose horizontal)
+  const armBones = [lSh, rSh, lUA, rUA, lLA, rLA, lH, rH];
+  ok(armBones.every(w => Math.abs(w[1] - d.shoulderY) < 1e-9),
+    `all 8 arm bones have y = shoulderY = ${d.shoulderY.toFixed(5)} (horizontal T-pose)`);
+
+  // All arm bones have Z = 0 (no forward/backward offset in T-pose)
+  ok(armBones.every(w => Math.abs(w[2]) < 1e-9),
+    'all 8 arm bones have z = 0 (no Z offset in T-pose)');
+}
+
 /* ---- Round 170: leg bone world position formulas ---- */
 {
   // Left/right leg bone world positions:
