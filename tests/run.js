@@ -2182,6 +2182,37 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 157: face tag vertex count snapshots + morph POSITION-only + tag ordering ---- */
+{
+  // Face tag vertex counts are topology-invariant (faceQuad=4, mouth fan=9)
+  const tagCounts = {eyeL:4, eyeR:4, browL:4, browR:4, mouth:9};
+  ok(Object.entries(tagCounts).every(([tag, expected]) => {
+    const [s,e] = B.geom.tags[tag]; return (e-s) === expected;
+  }), 'face tag vertex counts: eyeL=4, eyeR=4, browL=4, browR=4, mouth=9 (topology snapshot)');
+
+  // Face tags must be in strictly ascending index order (eyeL→eyeR→browL→browR→mouth)
+  const tagOrder = ['eyeL','eyeR','browL','browR','mouth'];
+  let prevEnd = B.faceStart;
+  let orderOK = true;
+  for(const tag of tagOrder){
+    const [s,e] = B.geom.tags[tag];
+    if(s < prevEnd) orderOK = false;
+    prevEnd = e;
+  }
+  ok(orderOK, 'face tags strictly ascending in index space: faceStart≤eyeL<eyeR<browL<browR<mouth');
+
+  // All face tag start indices must equal faceStart for eyeL (the first face geometry)
+  ok(B.geom.tags.eyeL[0] === B.faceStart,
+    'eyeL tag starts exactly at faceStart (eyeL is first tagged face geometry)');
+
+  // Morph targets in GLB must have only POSITION attribute (no UV or NORMAL morphs)
+  const png2 = H.b64ToBytes(H.PNG1);
+  const ex = H.exportVRM(B, P, {}, png2);
+  const prim = ex.json.meshes[0].primitives[0];
+  ok(prim.targets.every(t => Object.keys(t).length === 1 && t.POSITION !== undefined),
+    'all 12 morph targets have only POSITION attribute (no UV/NORMAL morphs)');
+}
+
 /* ---- Round 156: firstPersonBoneOffset.z exact formula + ahoge vertex position ---- */
 {
   // fpZ = round(-headR × 0.7, 3dp) — places camera inside head at eye depth
