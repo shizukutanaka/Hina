@@ -2182,6 +2182,36 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 146: legLen/armLen proportional effects on bone positions ---- */
+{
+  // legLen: higher legLen → higher hips bone Y (longer legs = hips set higher)
+  const shortLeg = H.buildAvatar(Object.assign(H.defaults(), {legLen: 0.8}));
+  const midLeg   = H.buildAvatar(Object.assign(H.defaults(), {legLen: 1.0}));
+  const longLeg  = H.buildAvatar(Object.assign(H.defaults(), {legLen: 1.2}));
+
+  const hipsY = A => A.bones[A.idx.hips].w[1];
+  ok(hipsY(shortLeg) < hipsY(midLeg) && hipsY(midLeg) < hipsY(longLeg),
+    'hips bone Y strictly increases with legLen (0.8 < 1.0 < 1.2)');
+
+  // Longer legs → foot bone Y stays near ground, upper leg Y increases
+  const UpperLegY = A => A.bones[A.idx.lUL].w[1];
+  ok(UpperLegY(shortLeg) < UpperLegY(midLeg) && UpperLegY(midLeg) < UpperLegY(longLeg),
+    'leftUpperLeg bone Y increases with legLen');
+
+  // armLen: higher armLen → leftHand bone further from center (more negative X)
+  const shortArm = H.buildAvatar(Object.assign(H.defaults(), {armLen: 0.8}));
+  const longArm  = H.buildAvatar(Object.assign(H.defaults(), {armLen: 1.2}));
+
+  const handX = A => A.bones[A.idx.lH].w[0]; // negative = further left
+  ok(handX(shortArm) > handX(longArm),
+    'leftHand X more negative with armLen=1.2 (longer arms reach further left)');
+
+  // elbowX and wristX scale with armLen
+  const elbowX = A => A.bones[A.idx.lLA].w[0]; // lowerArm = elbow
+  ok(elbowX(shortArm) > elbowX(longArm),
+    'leftLowerArm X more negative with armLen=1.2 (elbow further out)');
+}
+
 /* ---- Round 145: POSITION accessor min/max bounds (glTF spec compliance) ---- */
 {
   const ex2 = H.exportVRM(B, H.defaults(), {}, new Uint8Array([]));
