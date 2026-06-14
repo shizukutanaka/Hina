@@ -958,6 +958,37 @@ function accData(j, bin, ai){
     'BinWriter Uint16Array: pad byte at 3, little-endian 0x1234 at bytes 4-5');
 }
 
+/* ---- Round 94: usage/allowed enum valid pass-through ---- */
+{
+  const png = H.b64ToBytes(H.PNG1);
+  // allowedUserName: all 3 valid values
+  const allowedValues = ['OnlyAuthor','ExplicitlyLicensedPerson','Everyone'];
+  ok(allowedValues.every(v => {
+    const ex = H.exportVRM(B, P, { allowed: v }, png);
+    return ex.json.extensions.VRM.meta.allowedUserName === v;
+  }), 'all 3 allowedUserName values pass through to VRM meta');
+
+  // violentUssageName: Allow passes through
+  const exV = H.exportVRM(B, P, { violent: 'Allow' }, png);
+  ok(exV.json.extensions.VRM.meta.violentUssageName === 'Allow', 'violent=Allow passes through to violentUssageName');
+
+  // sexualUssageName: Allow passes through
+  const exS = H.exportVRM(B, P, { sexual: 'Allow' }, png);
+  ok(exS.json.extensions.VRM.meta.sexualUssageName === 'Allow', 'sexual=Allow passes through to sexualUssageName');
+
+  // commercialUssageName: Allow passes through
+  const exC = H.exportVRM(B, P, { commercial: 'Allow' }, png);
+  ok(exC.json.extensions.VRM.meta.commercialUssageName === 'Allow', 'commercial=Allow passes through to commercialUssageName');
+
+  // invalid usage values fall back to safe defaults
+  const exBad = H.exportVRM(B, P, { violent: 'YES', sexual: 'YES', commercial: 'YES', allowed: 'Anyone' }, png);
+  ok(exBad.json.extensions.VRM.meta.allowedUserName === 'OnlyAuthor', 'invalid allowed falls back to OnlyAuthor');
+  ok(exBad.json.extensions.VRM.meta.violentUssageName === 'Disallow' &&
+     exBad.json.extensions.VRM.meta.sexualUssageName === 'Disallow' &&
+     exBad.json.extensions.VRM.meta.commercialUssageName === 'Disallow',
+    'invalid violent/sexual/commercial fall back to Disallow');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
