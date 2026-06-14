@@ -306,6 +306,14 @@ const B = H.buildAvatar(P);
   ok(B.bones.length === 29, 'default bones = 29 (21 humanoid + 2x4 twin)');
   ok(H.HB.length === 21 && H.HB.every(hb => Number.isInteger(B.humanoid[hb])), 'humanoid 21 mapped');
   ok(new Set(H.HB.map(hb => B.humanoid[hb])).size === 21, 'humanoid mappings unique');
+  // VRM0 requires exactly these 21 bone names (vrm.dev humanoid spec)
+  const REQUIRED_HB = ['hips','spine','chest','neck','head',
+    'leftShoulder','leftUpperArm','leftLowerArm','leftHand',
+    'rightShoulder','rightUpperArm','rightLowerArm','rightHand',
+    'leftUpperLeg','leftLowerLeg','leftFoot',
+    'rightUpperLeg','rightLowerLeg','rightFoot',
+    'leftEye','rightEye'];
+  ok(REQUIRED_HB.every(n => H.HB.includes(n)), 'all 21 required VRM0 humanoid bone names present in H.HB');
   ok(B.bones[B.idx.lUA].w[0] < 0 && B.bones[B.idx.rUA].w[0] > 0, 'VRM0: leftUpperArm x<0, rightUpperArm x>0');
   ok(B.bones[B.idx.lE].w[0] < 0 && B.bones[B.idx.rE].w[0] > 0, 'left/right eye sides');
   ok(B.bones[B.idx.lE].w[2] < 0, 'eyes face Z-minus');
@@ -473,6 +481,14 @@ function accData(j, bin, ai){
   ok(j.asset.version === '2.0', 'asset version 2.0');
   ok(j.extensionsUsed.includes('VRM'), 'extensionsUsed VRM');
   ok(j.buffers[0].byteLength <= G.bLen, 'buffer fits BIN chunk');
+  // CLAUDE.md invariants: 1 scene, 1 mesh, 1 skin, 1 material, 1 texture, 1 image
+  ok(j.scenes.length === 1 && j.scene === 0, 'exactly 1 scene, scene 0 active');
+  ok(j.meshes.length === 1, 'exactly 1 mesh (CLAUDE.md: 1 skinned mesh)');
+  ok(j.meshes[0].primitives.length === 1, 'exactly 1 primitive (CLAUDE.md: 1 primitive)');
+  ok(j.skins.length === 1, 'exactly 1 skin (CLAUDE.md: 1 skinned mesh)');
+  ok(j.materials.length === 1, 'exactly 1 material (CLAUDE.md: 1 material)');
+  ok(j.textures.length === 1, 'exactly 1 texture in default export (single atlas)');
+  ok(j.images.length === 1, 'exactly 1 image in default export (single atlas)');
   ok(j.nodes.length === B.bones.length + 2, 'nodes = bones + Root + mesh');
   ok(j.nodes[0].children.includes(1) && j.nodes[0].children.includes(B.bones.length + 1), 'Root children');
   ok(j.nodes[B.bones.length + 1].mesh === 0 && j.nodes[B.bones.length + 1].skin === 0, 'mesh node wired');
