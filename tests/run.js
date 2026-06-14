@@ -1733,6 +1733,38 @@ function accData(j, bin, ai){
     'fun morph affects both eye regions (squinted eyes for delight)');
 }
 
+/* ---- Round 113: all outfit×hairStyle tris budget + spring chain hierarchy + ahoge geometry ---- */
+{
+  // All 5 hairStyle × 4 outfit combinations must stay under Quest Excellent tris limit (7500)
+  let worstTris = 0, worstCombo = '';
+  for (const hs of H.PARAMS.hairStyle.opts){
+    for (const ot of H.PARAMS.outfit.opts){
+      const p = H.sanitize({ hairStyle: hs, outfit: ot });
+      const b = H.buildAvatar(p);
+      const tris = H.estimate(b, p).tris;
+      if (tris > worstTris){ worstTris = tris; worstCombo = hs + '+' + ot; }
+      ok(tris < 7500, `${hs}+${ot}: tris=${tris} < 7500 (Quest Excellent poly budget)`);
+    }
+  }
+
+  // spring chain root bones must be direct children of head (all hairStyles with springs)
+  ok(B.springs.every(s => B.bones[s.boneIdxs[0]].parent === B.idx.head),
+    'all spring chain root bones are direct children of the head bone');
+  // spring chain internal bones form a strict parent→child sequence
+  ok(B.springs.every(s =>
+    s.boneIdxs.every((bi, j) => j === 0 || B.bones[bi].parent === s.boneIdxs[j-1])),
+    'spring chain bones form a strict sequential parent→child chain');
+
+  // ahoge adds exactly 3 vertices and 1 triangle when enabled
+  const bNoAhoge = H.buildAvatar(H.sanitize({ ahoge: false }));
+  const bWithAhoge = H.buildAvatar(H.sanitize({ ahoge: true }));
+  const nWithout = bNoAhoge.geom.pos.length / 3;
+  const nWith = bWithAhoge.geom.pos.length / 3;
+  ok(nWith === nWithout + 3, 'ahoge=true adds exactly 3 vertices (single triangle)');
+  ok(bWithAhoge.geom.idx.length === bNoAhoge.geom.idx.length + 3,
+    'ahoge=true adds exactly 3 indices (1 triangle)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
