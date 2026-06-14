@@ -359,6 +359,17 @@ const B = H.buildAvatar(P);
   ok(g.idx.length / 3 < 7500, 'default tris < 7500 (Quest Excellent)');
   ok(B.faceStart > 0 && B.faceStart < nV, 'faceStart inside mesh');
   ok(g.idx.slice(0, 60).every(i => i < B.faceStart), 'body indices precede face');
+  // full body/face index separation: body triangles only reference body vertices, and vice versa
+  {
+    let faceIdxStart = g.idx.length;
+    for (let i = 0; i < g.idx.length; i++) if (g.idx[i] >= B.faceStart){ faceIdxStart = i; break; }
+    faceIdxStart -= faceIdxStart % 3; // snap to triangle boundary
+    ok(g.idx.slice(0, faceIdxStart).every(i => i < B.faceStart),
+      'ALL body triangles reference only body vertices (no face verts in body tris)');
+    ok(g.idx.slice(faceIdxStart).every(i => i >= B.faceStart),
+      'ALL face triangles reference only face vertices (no body verts in face tris)');
+    ok(faceIdxStart % 3 === 0, 'face/body index buffer split is triangle-aligned');
+  }
   ok(B.morphs.names.length === 12, '12 morph targets');
   ok(B.morphs.names.every(n => B.morphs.sparse[n].length > 0), 'all 12 morph targets non-empty');
   ok(B.morphs.sparse.a.every(e => e.length === 4 && e[0] < nV), 'morph entries [vi,dx,dy,dz]');
