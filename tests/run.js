@@ -135,6 +135,7 @@ ok(/licUrlRow\.style\.display/.test(html) && /meta\.license\s*===\s*['"]Other['"
 }
 ok(!html.includes('gacha-seed'), 'dead .gacha-seed CSS class removed');
 ok(!html.includes("outfit==='onepiece'?uC:uC"), 'dead ternary (onepiece?uC:uC) removed — skirt UV is simply uC');
+ok(!html.includes('angular leg-follow weights'), 'dead sw() placeholder removed from skirt block');
 ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button label i18n in both languages');
 
 /* ---- math sanity ---- */
