@@ -307,6 +307,22 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   }
   ok(extOK, 'extreme param corners (min/max height, headRatio, bust): finite pos/nrm');
   ok(extIdxOK, 'extreme param corners: valid triangle indices');
+
+  /* ---- Round 123: gacha-specific param constraints ---- */
+  // height restricted to [1.15, 1.75]; headRatio restricted to [0.21, 0.30] in gacha
+  {
+    let hOK=true, hrOK=true, ahogeT=false, ahogeF=false;
+    for(let s=0; s<60; s++){
+      const p2 = H.randomParams(s);
+      if(p2.height < 1.15 || p2.height > 1.75) hOK=false;
+      if(p2.headRatio < 0.21 || p2.headRatio > 0.30) hrOK=false;
+      if(p2.ahoge === true) ahogeT = true;
+      if(p2.ahoge === false) ahogeF = true;
+    }
+    ok(hOK, 'randomParams height always in [1.15, 1.75] (gacha height constraint, 60 seeds)');
+    ok(hrOK, 'randomParams headRatio always in [0.21, 0.30] (gacha chibi-prevention constraint, 60 seeds)');
+    ok(ahogeT && ahogeF, 'randomParams ahoge is randomly true or false across 60 seeds (bool randomization works)');
+  }
 }
 
 /* ---- atlas UV helpers ---- */
