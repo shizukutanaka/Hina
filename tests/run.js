@@ -2182,6 +2182,42 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 176: torso lathe ring Y positions — segs=12, 13 verts per ring ---- */
+{
+  // Torso latheY(segs=12) → 13 verts per ring. Ring Y values (from core-b.js):
+  //   [0] hipsY-0.07×H  [1] hipsY-0.03×H  [2] hipsY+0.02×H  [3] spineY
+  //   [4] chestY        [5] shoulderY      [6] neckY+0.01×H
+  // Outfit top-shell (segs=12) adds another 13 verts at chestY → 26 total there.
+  // Using default build B (onepiece, no pants/hoodie) for clean isolation.
+  const d = B.dims, H_ = d.H;
+  function countAtY(geom, y0){
+    let n=0; for(let vi=0;vi<geom.pos.length/3;vi++) if(Math.abs(geom.pos[vi*3+1]-y0)<1e-6) n++; return n;
+  }
+
+  // 4 rings unique to the torso (not shared with outfit/skirt/sleeves)
+  const uniq = [
+    [d.hipsY-0.07*H_, 'hipsY-0.07H'],
+    [d.hipsY-0.03*H_, 'hipsY-0.03H'],
+    [d.hipsY+0.02*H_, 'hipsY+0.02H'],
+    [d.spineY,        'spineY'],
+  ];
+  let fail=0;
+  for(const [y,lbl] of uniq) if(countAtY(B.geom,y)!==13) fail++;
+  ok(fail===0, `torso unique rings (13v each): `+uniq.map(([y,l])=>`${l}=${y.toFixed(4)}(${countAtY(B.geom,y)})`).join(' '));
+
+  // chestY shared by torso ring[4] AND outfit top ring[1] → 13+13 = 26
+  ok(countAtY(B.geom, d.chestY) === 26,
+    `chestY=${d.chestY.toFixed(4)}: torso+outfit=26 verts (got ${countAtY(B.geom,d.chestY)})`);
+
+  // neckY+0.01×H (torso top) distinct from outfit's neckY+0.012×H → 13 only
+  ok(countAtY(B.geom, d.neckY+0.01*H_) === 13,
+    `neckY+0.01H=${(d.neckY+0.01*H_).toFixed(4)}: torso collar ring=13 (got ${countAtY(B.geom,d.neckY+0.01*H_)})`);
+
+  // all 7 ring Ys strictly ascending (torso grows from hip to neck)
+  const rYs=[d.hipsY-0.07*H_,d.hipsY-0.03*H_,d.hipsY+0.02*H_,d.spineY,d.chestY,d.shoulderY,d.neckY+0.01*H_];
+  ok(rYs.every((y,i)=>i===0||y>rYs[i-1]), `torso ring Y ascending: ${rYs.map(y=>y.toFixed(3)).join('<')}`);
+}
+
 /* ---- Round 175: leg tube ring Y positions — all 5 rings at exact formula values ---- */
 {
   // Leg tube rings (segs=8, so 9 verts per ring × 2 legs = 18 verts per Y):
