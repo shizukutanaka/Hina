@@ -1700,6 +1700,39 @@ function accData(j, bin, ai){
   ok(H.I18N.en['hint.exprOff'] === 'click to deactivate', 'hint.exprOff EN = click to deactivate');
 }
 
+/* ---- Round 112: emotion morph coverage — eye participation in joy/sorrow/angry/fun ---- */
+{
+  // Recompute blink vertex sets (blink_l=left eye, blink_r=right eye, blink=both)
+  const bLV = new Set(B.morphs.sparse.blink_l.map(e => e[0]));
+  const bRV = new Set(B.morphs.sparse.blink_r.map(e => e[0]));
+  const vowelV = new Set(['a','i','u','e','o'].flatMap(n => B.morphs.sparse[n].map(e => e[0])));
+
+  // joy: affects both L and R eye vertices
+  const joyV = new Set(B.morphs.sparse.joy.map(e => e[0]));
+  ok([...bLV].some(v => joyV.has(v)) && [...bRV].some(v => joyV.has(v)),
+    'joy morph affects vertices from both left and right eye regions');
+  // joy also affects mouth
+  ok([...vowelV].some(v => joyV.has(v)),
+    'joy morph includes mouth vertices (combined smile + eye squint)');
+
+  // sorrow: affects both L and R eye vertices
+  const sorrowV = new Set(B.morphs.sparse.sorrow.map(e => e[0]));
+  ok([...bLV].some(v => sorrowV.has(v)) && [...bRV].some(v => sorrowV.has(v)),
+    'sorrow morph affects vertices from both left and right eye regions');
+
+  // angry: now affects L+R eyes (narrowed eyes added in Round 112)
+  const angryV = new Set(B.morphs.sparse.angry.map(e => e[0]));
+  ok([...bLV].some(v => angryV.has(v)) && [...bRV].some(v => angryV.has(v)),
+    'angry morph affects both eye regions (narrowed eyes for expressiveness)');
+
+  // fun: affects both mouth and eyes
+  const funV = new Set(B.morphs.sparse.fun.map(e => e[0]));
+  ok([...vowelV].some(v => funV.has(v)),
+    'fun morph includes mouth vertices (wide smile)');
+  ok([...bLV].some(v => funV.has(v)) && [...bRV].some(v => funV.has(v)),
+    'fun morph affects both eye regions (squinted eyes for delight)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
