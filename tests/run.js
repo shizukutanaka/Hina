@@ -2182,6 +2182,51 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 135: GLB morph sparse accessor index ordering (glTF spec §5.15.5) ---- */
+{
+  // glTF spec requires sparse indices to be strictly increasing
+  // The writer sorts them before encoding — verify the GLB output is sorted
+  const ex2 = H.exportVRM(B, H.defaults(), {}, new Uint8Array([]));
+  const G2 = parseGLB(ex2.bytes);
+  const j2 = G2.json;
+  const prim = j2.meshes[0].primitives[0];
+
+  let allSorted = true;
+  const morphNames = prim.extras.targetNames;
+  for(let mi=0; mi<morphNames.length; mi++){
+    const accIdx = prim.targets[mi].POSITION;
+    const acc = j2.accessors[accIdx];
+    if(!acc.sparse || acc.sparse.count === 0) continue;
+    // Read sparse index buffer directly from bufferView
+    const sv = j2.bufferViews[acc.sparse.indices.bufferView];
+    const off = G2.bin.byteOffset + (sv.byteOffset || 0);
+    const idxData = new Uint16Array(G2.bin.buffer, off, acc.sparse.count);
+    // Verify strictly increasing
+    for(let k=1; k<idxData.length; k++){
+      if(idxData[k] <= idxData[k-1]) allSorted=false;
+    }
+  }
+  ok(allSorted, 'all morph sparse accessor indices are strictly increasing in exported GLB');
+
+  // The in-memory sparse data may be unsorted (brow entries after mouth entries
+  // for joy/angry/sorrow/fun), but the writer sorts before encoding
+  const joyEntries = B.morphs.sparse.joy;
+  const joyUnsorted = joyEntries.some((e,i) => i>0 && e[0] < joyEntries[i-1][0]);
+  ok(joyUnsorted, 'joy in-memory sparse may be unsorted (brow after mouth by tag order) — writer sorts it');
+
+  // min/max of every sparse morph accessor must include [0,0,0] (implicit zeros for non-sparse verts)
+  let minMaxBad = 0;
+  for(let mi=0; mi<morphNames.length; mi++){
+    const accIdx = prim.targets[mi].POSITION;
+    const acc = j2.accessors[accIdx];
+    if(!acc.min || !acc.max) continue;
+    // min must be ≤ [0,0,0] and max must be ≥ [0,0,0]
+    if(acc.min[0]>0 || acc.min[1]>0 || acc.min[2]>0) minMaxBad++;
+    if(acc.max[0]<0 || acc.max[1]<0 || acc.max[2]<0) minMaxBad++;
+  }
+  ok(minMaxBad === 0, 'all morph sparse accessors: min ≤ [0,0,0] and max ≥ [0,0,0] (implicit zero included)');
+}
+
 /* ---- Round 134: i + e vowel corner lift for accurate lip-sync shapes ---- */
 {
   const [ms, me] = B.geom.tags.mouth;
