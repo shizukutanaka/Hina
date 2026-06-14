@@ -2182,6 +2182,36 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 178: neck tube ring Y positions — segs=10, 11 verts per ring ---- */
+{
+  // Neck tube: tube(segs=10) → 11 verts per ring.
+  //   ring[0] bottom: [0, neckY, 0]
+  //   ring[1] top:    [0, headCY - headR×0.55, 0]
+  // Both Y values are unique in the default build (onepiece, no sailor collar).
+  // Head sphere latitude rings at cos(k×π/12): nearest k=8 (-0.5) and k=9 (-0.707) —
+  // neither equals -0.55, so no sphere-ring collision with neck tube top ring.
+  const d = B.dims;
+  function countAtY(geom, y0){
+    let n=0; for(let vi=0;vi<geom.pos.length/3;vi++) if(Math.abs(geom.pos[vi*3+1]-y0)<1e-6) n++; return n;
+  }
+  const neckTopY = d.headCY - d.headR * 0.55;
+
+  ok(countAtY(B.geom, d.neckY) === 11,
+    `neck tube bottom ring Y=neckY=${d.neckY.toFixed(5)}: 11 verts (got ${countAtY(B.geom,d.neckY)})`);
+  ok(countAtY(B.geom, neckTopY) === 11,
+    `neck tube top ring Y=headCY-headR×0.55=${neckTopY.toFixed(5)}: 11 verts (got ${countAtY(B.geom,neckTopY)})`);
+  ok(neckTopY > d.neckY,
+    `neck tube rings ascend: neckY=${d.neckY.toFixed(5)} < neckTopY=${neckTopY.toFixed(5)}`);
+
+  // All 6 presets: neck tube top ring Y > neck tube bottom ring Y
+  let presFail=0;
+  for(const pre of H.PRESETS){
+    const C=H.buildAvatar(H.presetParams(pre)), cd=C.dims;
+    if((cd.headCY-cd.headR*0.55) <= cd.neckY) presFail++;
+  }
+  ok(presFail===0, 'neck tube rings ascend across all 6 presets');
+}
+
 /* ---- Round 176: torso lathe ring Y positions — segs=12, 13 verts per ring ---- */
 {
   // Torso latheY(segs=12) → 13 verts per ring. Ring Y values (from core-b.js):
