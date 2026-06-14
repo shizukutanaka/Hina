@@ -225,6 +225,22 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   ok(H.sanitize({height: 'NaN'}).height === d.height, 'sanitize ignores non-finite num');
 }
 
+/* ---- color utilities ---- */
+{
+  const rgb = H.hex2rgb('#ff8040');
+  ok(rgb[0] === 255 && rgb[1] === 128 && rgb[2] === 64, 'hex2rgb parses #rrggbb correctly');
+  ok(H.hex2rgb('#000000').every(v => v === 0), 'hex2rgb black → [0,0,0]');
+  ok(H.hex2rgb('#ffffff').every(v => v === 255), 'hex2rgb white → [255,255,255]');
+  ok(H.shade('#808080', 2.0) === '#ffffff', 'shade clamps at 255 (white)');
+  ok(H.shade('#808080', 0.0) === '#000000', 'shade clamps at 0 (black)');
+  ok(H.shade('#808080', 1.0) === '#808080', 'shade ×1.0 is identity');
+  ok(H.shade('#400000', 2.0) === '#800000', 'shade ×2.0 doubles channel');
+  ok(/^#[0-9a-f]{6}$/.test(H.shade('#3a5a80', 0.7)), 'shade always returns valid lowercase hex');
+  const png = H.b64ToBytes(H.PNG1);
+  ok(png.length > 0 && png[0] === 137 && png[1] === 80, 'b64ToBytes decodes base64 to PNG bytes');
+  ok(H.b64ToBytes('AQID').length === 3 && H.b64ToBytes('AQID')[0] === 1 && H.b64ToBytes('AQID')[2] === 3, 'b64ToBytes: AQID → [1,2,3]');
+}
+
 /* ---- rng / randomParams ---- */
 {
   const a = H.rng(42), b = H.rng(42);
