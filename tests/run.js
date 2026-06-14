@@ -516,6 +516,9 @@ function accData(j, bin, ai){
   const dm = dirty.json.extensions.VRM.meta;
   ok(!/[\u0000-\u001f]/.test(dm.title) && dm.title.length <= 256, 'meta title stripped + clipped');
   ok(dm.allowedUserName === 'OnlyAuthor' && dm.licenseName === 'Redistribution_Prohibited', 'meta bad enums fall back');
+  // str() must use the default when the cleaned result is empty (all-control-char input)
+  const ctrlOnly = H.exportVRM(B, P, { author: '\x01\x02\x03' }, png);
+  ok(ctrlOnly.json.extensions.VRM.meta.author === 'unknown', 'meta author defaults when input is all control chars');
 
   // springOff export
   const off = H.exportVRM(B, Object.assign({}, P, { springOff: true }), {}, png);

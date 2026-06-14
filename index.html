@@ -1128,7 +1128,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
   nodes.push({name:'Body', mesh:0, skin:0});
 
   /* VRM meta (sanitized) */
-  const str=(v,d)=>(typeof v==='string' && v.trim()) ? v.replace(/[\u0000-\u001f]/g,'').slice(0,256) : d;
+  const str=(v,d)=>{ const s=typeof v==='string'?v.replace(/[\u0000-\u001f]/g,'').slice(0,256):''; return s.trim()?s:d; };
   const pick=(v,arr,d)=>arr.includes(v)?v:d;
   const vrmMeta={
     title: str(meta.title,'Hina Avatar'),
