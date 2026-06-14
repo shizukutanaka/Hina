@@ -2182,6 +2182,41 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 175: leg tube ring Y positions — all 5 rings at exact formula values ---- */
+{
+  // Leg tube rings (segs=8, so 9 verts per ring × 2 legs = 18 verts per Y):
+  //   ring[0]: hipsY × 0.99
+  //   ring[1]: hipsY × 0.78
+  //   ring[2]: kneeY
+  //   ring[3]: kneeY×0.55 + ankleY×0.45
+  //   ring[4]: ankleY
+  const d = B.dims;
+  const legRingYs = [
+    d.hipsY * 0.99,
+    d.hipsY * 0.78,
+    d.kneeY,
+    d.kneeY * 0.55 + d.ankleY * 0.45,
+    d.ankleY,
+  ];
+  // Use socks=false build to avoid socks-ring count interference at kneeY region
+  const noSocks = H.buildAvatar(Object.assign(H.defaults(), {socks: false}));
+  function countAtY(geom, y0){
+    let n=0; for(let vi=0;vi<geom.pos.length/3;vi++) if(Math.abs(geom.pos[vi*3+1]-y0)<1e-6) n++; return n;
+  }
+  let ringFail = 0;
+  for(const ry of legRingYs){
+    const n = countAtY(noSocks.geom, ry);
+    if(n !== 18) ringFail++;
+  }
+  ok(ringFail === 0,
+    `all 5 leg tube rings have exactly 18 verts (2 legs×9): ` +
+    legRingYs.map((y,i)=>`ring${i}=${y.toFixed(4)}(${countAtY(noSocks.geom,y)})`).join(' '));
+
+  // rings are strictly descending in Y (anatomically correct top→bottom)
+  ok(legRingYs.every((y,i)=>i===0||y<legRingYs[i-1]),
+    `leg tube rings strictly descend: ${legRingYs.map(y=>y.toFixed(4)).join(' > ')}`);
+}
+
 /* ---- Round 174: ankleY both-branch formula + socks tube ring Y positions ---- */
 {
   // ankleY = max(0.035×H, hipsY×0.085) — two branches
