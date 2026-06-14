@@ -666,6 +666,17 @@ function accData(j, bin, ai){
   ok(['neutral','a','i','u','e','o','blink','blink_l','blink_r','joy','angry','sorrow','fun',
       'lookup','lookdown','lookleft','lookright'].every(p2 => bsg.some(g2 => g2.presetName === p2)),
     'all VRM0 presets covered');
+  // SPEC §5.3: look系は空バインド（視線はBone方式のため）; neutral も空
+  const emptyBindPresets = ['neutral','lookup','lookdown','lookleft','lookright'];
+  ok(emptyBindPresets.every(pn => {
+    const g2 = bsg.find(g3 => g3.presetName === pn);
+    return g2 && g2.binds.length === 0;
+  }), 'neutral + look groups have empty binds (gaze is Bone-based, SPEC §5.3)');
+  // every blendShapeGroup has isBinary:false (binary blending not needed)
+  ok(bsg.every(g2 => g2.isBinary === false), 'all blendShapeGroups isBinary=false');
+  // every blendShapeGroup has empty materialValues (no material switching)
+  ok(bsg.every(g2 => Array.isArray(g2.materialValues) && g2.materialValues.length === 0),
+    'all blendShapeGroups have empty materialValues');
   const sa = V.secondaryAnimation;
   ok(sa.boneGroups.length === 1 && typeof sa.boneGroups[0].stiffiness === 'number', 'boneGroup with stiffiness (VRM0 typo)');
   ok(sa.boneGroups[0].stiffiness === Math.round(P.hairStiff * 4 * 100) / 100,
