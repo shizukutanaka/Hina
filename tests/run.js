@@ -605,6 +605,12 @@ function accData(j, bin, ai){
   ok(mp.shader === 'VRM/MToon' && mp.keywordMap._ALPHATEST_ON === true &&
      mp.tagMap.RenderType === 'TransparentCutout' && mp.floatProperties._BlendMode === 1 &&
      mp.textureProperties._MainTex === 0, 'MToon cutout material properties');
+  // SPEC §5.5: _Cutoff=0.5, _CullMode=0(両面), _ShadeToony=0.9, _ShadeShift=0
+  ok(mp.floatProperties._Cutoff === 0.5, 'MToon _Cutoff = 0.5 (SPEC §5.5)');
+  ok(mp.floatProperties._CullMode === 0, 'MToon _CullMode = 0 (double-sided, SPEC §5.5)');
+  ok(mp.floatProperties._ShadeToony === 0.9, 'MToon _ShadeToony = 0.9 (SPEC §5.5)');
+  ok(mp.floatProperties._ShadeShift === 0, 'MToon _ShadeShift = 0 (SPEC §5.5)');
+  ok(mp.floatProperties._OutlineWidthMode === 0, 'MToon outline off by default (_OutlineWidthMode=0)');
   ok(mp.name === j.materials[0].name, 'MToon name matches glTF material');
 
   // node graph: everything reachable from scene
