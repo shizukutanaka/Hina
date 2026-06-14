@@ -676,7 +676,7 @@ function renderOut(bd){
   bd.append(licUrlRow);
 
   bd.append(el('div',{class:'sect'}, t('out.stats')));
-  const tbl=el('table',{class:'statTable'}); statEls={};
+  const tbl=el('table',{class:'statTable','aria-label':t('out.stats')}); statEls={};
   const row=(key,id)=>{ const td=el('td',{}); statEls[id]=td;
     tbl.append(el('tr',{}, el('th',{scope:'row'},t(key)), td)); };
   row('st.tris','tris'); row('st.bones','bones'); row('st.mat','mat');

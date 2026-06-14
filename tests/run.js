@@ -40,6 +40,7 @@ ok(html.includes("el('th',{scope:'row'}"), 'stat table uses th[scope=row] for la
 ok(html.includes("'aria-pressed':String(activePresetId===pre.id)"), 'preset cards have aria-pressed for screen reader active-state');
 // WCAG 4.1.3 — status messages: a polite live region announces rank/export changes
 ok(/id="srStatus"[^>]*aria-live=/.test(html), 'live status region present with aria-live');
+ok(html.includes("'aria-label':t('out.stats')"), 'stat table has aria-label for screen reader identification (WCAG 1.3.1)');
 ok(/announceRank\s*\(/.test(html), 'rank-change announcer wired');
 ok(/err\.loadFailed/.test(html), 'JSON load-failure uses err.loadFailed i18n key');
 ok(/err\.buildFailed/.test(html), 'buildAvatar failure uses err.buildFailed i18n key');
