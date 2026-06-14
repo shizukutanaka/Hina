@@ -2182,6 +2182,44 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 150: mouthW mesh X-extent + pathological combo finite-geometry ---- */
+{
+  // mouthW scales mrx = headR*0.14*mouthW → mouth tag X-span is proportional to mouthW
+  const mouthXSpan = A => {
+    const [s,e] = A.geom.tags.mouth;
+    let mx = 0;
+    for(let i=s; i<e; i++) mx = Math.max(mx, Math.abs(A.geom.pos[i*3]));
+    return mx;
+  };
+  const narrow = H.buildAvatar(Object.assign(H.defaults(), {mouthW: H.PARAMS.mouthW.min}));
+  const wide   = H.buildAvatar(Object.assign(H.defaults(), {mouthW: H.PARAMS.mouthW.max}));
+  ok(mouthXSpan(wide) > mouthXSpan(narrow), 'mouthW=max mouth X-span > mouthW=min');
+  const ratio = mouthXSpan(wide) / mouthXSpan(narrow);
+  const expectedRatio = H.PARAMS.mouthW.max / H.PARAMS.mouthW.min;
+  ok(Math.abs(ratio - expectedRatio) < 1e-6,
+    `mouthW X-span scales linearly with mouthW (ratio=${ratio.toFixed(6)}, expected=${expectedRatio})`);
+
+  // pathological parameter combos must yield finite, index-valid geometry
+  const combos = [
+    {height: H.PARAMS.height.min, headRatio: H.PARAMS.headRatio.max,
+     armLen: H.PARAMS.armLen.min, legLen: H.PARAMS.legLen.min},
+    {height: H.PARAMS.height.max, headRatio: H.PARAMS.headRatio.min,
+     armLen: H.PARAMS.armLen.max, legLen: H.PARAMS.legLen.max},
+    {bust: H.PARAMS.bust.max, shoulderW: H.PARAMS.shoulderW.min,
+     mouthW: H.PARAMS.mouthW.min, eyeSize: H.PARAMS.eyeSize.max},
+  ];
+  let finiteFail = 0;
+  for(const ovr of combos){
+    const C = H.buildAvatar(Object.assign(H.defaults(), ovr));
+    const nV = C.geom.pos.length / 3;
+    if(!C.geom.pos.every(Number.isFinite)) finiteFail++;
+    else if(!C.geom.nrm.every(Number.isFinite)) finiteFail++;
+    else if(!C.geom.idx.every(i => i >= 0 && i < nV)) finiteFail++;
+  }
+  ok(finiteFail === 0,
+    'pathological param combos (3): finite pos/nrm and valid index range');
+}
+
 /* ---- Round 149: browTilt zero-dy guard + sparse non-zero invariant + eyeL/eyeR symmetry sweep ---- */
 {
   // browTilt now filters zero-dy entries (matches scaleTag behaviour).
