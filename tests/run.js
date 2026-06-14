@@ -2182,6 +2182,51 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 163: skirtLen ring position formula + no-skirt invariance ---- */
+{
+  // skirtLen PARAMS range: [0.6, 1.6], default 1.0.
+  // Formula: skirtLenW = (0.10 + 0.10×skirtLen)×H
+  //          ring2 Y = skirtTop - skirtLenW×0.5,  ring3 Y = skirtTop - skirtLenW
+  //          skirtTop = hipsY + 0.035×H
+  // buildAvatar sanitizes params, so below-min values are clamped to 0.6.
+
+  const useHair = 'short'; // isolate skirt geometry from hair changes
+  const bMin = H.buildAvatar(Object.assign({}, P, { skirtLen:0.6, outfit:'sailor', hairStyle:useHair }));
+  const bMax = H.buildAvatar(Object.assign({}, P, { skirtLen:1.6, outfit:'sailor', hairStyle:useHair }));
+  const d = bMin.dims;
+  const skirtTop = d.hipsY + 0.035 * d.H;
+
+  // ring2 Y for min/max skirtLen
+  const ring2min = skirtTop - (0.10+0.10*0.6) * d.H * 0.5;  // 0.65975 @ H=1.45
+  const ring3min = skirtTop - (0.10+0.10*0.6) * d.H;         // 0.54375 @ H=1.45
+  const ring2max = skirtTop - (0.10+0.10*1.6) * d.H * 0.5;  // 0.58725 @ H=1.45
+  const ring3max = skirtTop - (0.10+0.10*1.6) * d.H;         // 0.39875 @ H=1.45
+
+  // Count verts matching ring2/ring3 for min
+  const nRing2min = Array.from(bMin.geom.pos).filter((_,i)=>i%3===1).filter(y=>Math.abs(y-ring2min)<1e-5).length;
+  const nRing3min = Array.from(bMin.geom.pos).filter((_,i)=>i%3===1).filter(y=>Math.abs(y-ring3min)<1e-5).length;
+  ok(nRing2min === 15 && nRing3min === 15,
+    `skirtLen=0.6: ring2 (15 verts at Y=${ring2min.toFixed(4)}) and ring3 (15 verts at Y=${ring3min.toFixed(4)}) match formula`);
+
+  const nRing2max = Array.from(bMax.geom.pos).filter((_,i)=>i%3===1).filter(y=>Math.abs(y-ring2max)<1e-5).length;
+  const nRing3max = Array.from(bMax.geom.pos).filter((_,i)=>i%3===1).filter(y=>Math.abs(y-ring3max)<1e-5).length;
+  ok(nRing2max === 15 && nRing3max === 15,
+    `skirtLen=1.6: ring2 (15 verts at Y=${ring2max.toFixed(4)}) and ring3 (15 verts at Y=${ring3max.toFixed(4)}) match formula`);
+
+  // Monotone: longer skirt → lower ring Y (more hang)
+  ok(ring2max < ring2min && ring3max < ring3min,
+    `skirtLen monotone: longer skirt lower rings (ring2: ${ring2min.toFixed(4)}→${ring2max.toFixed(4)}, ring3: ${ring3min.toFixed(4)}→${ring3max.toFixed(4)})`);
+
+  // shirts/hoodie (no-skirt outfits) are invariant to skirtLen
+  const shirtsLo = H.buildAvatar(Object.assign({}, P, { skirtLen:0.6, outfit:'shirts', hairStyle:useHair }));
+  const shirtsHi = H.buildAvatar(Object.assign({}, P, { skirtLen:1.6, outfit:'shirts', hairStyle:useHair }));
+  let shirtsInvariant = true;
+  for(let i = 0; i < shirtsLo.geom.pos.length; i++){
+    if(shirtsLo.geom.pos[i] !== shirtsHi.geom.pos[i]){ shirtsInvariant = false; break; }
+  }
+  ok(shirtsInvariant, 'shirts outfit geometry is invariant to skirtLen (no skirt mesh)');
+}
+
 /* ---- Round 162: eyeWY and eyeX formula verification ---- */
 {
   // eyeWY = headCY + headR×(-0.05 + (eyeY-0.5)×0.4)
