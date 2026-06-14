@@ -525,6 +525,22 @@ function accData(j, bin, ai){
     ok(sparseBytes < fullBytes * 0.5,
       `sparse morph data ${sparseBytes}B < 50% of full-array equivalent ${fullBytes}B`);
   }
+  // glTF 2.0 §5.26: sparse indices MUST be in ascending order
+  {
+    let ascOK = true;
+    for (const tgt of prim.targets){
+      const acc = j.accessors[tgt.POSITION];
+      if (!acc.sparse || !acc.sparse.count) continue;
+      const iv = j.bufferViews[acc.sparse.indices.bufferView];
+      const off = G.bin.byteOffset + (iv.byteOffset || 0);
+      const idxArr = new Uint16Array(G.bin.buffer, off, acc.sparse.count);
+      for (let k = 1; k < idxArr.length; k++){
+        if (idxArr[k] <= idxArr[k-1]){ ascOK = false; break; }
+      }
+      if (!ascOK) break;
+    }
+    ok(ascOK, 'sparse morph indices are in strictly ascending order (glTF 2.0 §5.26)');
+  }
   ok(j.bufferViews.every(v => (v.byteOffset || 0) % 4 === 0), 'bufferViews 4-byte aligned');
   // material
   ok(j.materials[0].alphaMode === 'MASK' && j.materials[0].alphaCutoff === 0.5 && j.materials[0].doubleSided === true,
