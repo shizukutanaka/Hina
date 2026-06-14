@@ -1949,6 +1949,34 @@ function accData(j, bin, ai){
     'all ATLAS face rects end at y≤512, well separated from solid color blocks at y=768');
 }
 
+/* ---- Round 120: morph sparse-count regression guards + angry mouth downward pull ---- */
+{
+  // Expected sparse counts (topology-determined, body-shape-invariant)
+  // vowels: center vertex filtered when dx=dy=dz=0 at mc; u/o have dz≠0 so count 9
+  // blink: 4(eyeL)+4(eyeR)+4(browL)+4(browR)=16; blink_l/r: 4+4=8
+  // joy: 4(eyeL)+4(eyeR)+8(mouth ring, center px=py=0 filtered)+4(browL)+4(browR)=24
+  // angry: 8(brow)+8(eye)+9(mouth, center gets dy≠0 now)=25
+  // sorrow: 4(browL)+4(browR)+9(mouth, center gets dy≠0)+4(eyeL)+4(eyeR)=25
+  // fun: 4(eyeL)+4(eyeR)+8(mouth ring)+4(browL)+4(browR)=24
+  const EXPECTED = {a:8,i:8,u:9,e:8,o:9, blink:16,blink_l:8,blink_r:8,
+                    joy:24,angry:25,sorrow:25,fun:24};
+  ok(B.morphs.names.every(n => B.morphs.sparse[n].length === EXPECTED[n]),
+    'morph sparse counts match expected topology-based values (a=8,i=8,u=9,e=8,o=9,blink=16,blink_l/r=8,joy=24,angry=25,sorrow=25,fun=24)');
+
+  // verify these counts are body-shape-invariant
+  const tall2 = H.buildAvatar(Object.assign(H.defaults(), { height: 2.0, headRatio: 0.18 }));
+  const chibi2 = H.buildAvatar(Object.assign(H.defaults(), { height: 0.8, headRatio: 0.36 }));
+  ok(B.morphs.names.every(n => tall2.morphs.sparse[n].length === EXPECTED[n]),
+    'morph sparse counts body-shape-invariant: tall(2.0m) matches expected counts');
+  ok(B.morphs.names.every(n => chibi2.morphs.sparse[n].length === EXPECTED[n]),
+    'morph sparse counts body-shape-invariant: chibi(0.8m) matches expected counts');
+
+  // angry mouth downward pull: center vertex now has dy=-headR*0.01 so it's in the sparse list
+  const angryMouthCenter = B.morphs.sparse.angry.filter(e =>
+    e[1]===0 && e[3]===0 && Math.abs(e[2] + B.dims.headR*0.01) < 1e-9);
+  ok(angryMouthCenter.length >= 1, 'angry morph includes mouth center vertex with dy=-headR×0.01 (downward pull)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
