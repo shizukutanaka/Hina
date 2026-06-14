@@ -284,6 +284,13 @@ const B = H.buildAvatar(P);
   ok(B.morphs.sparse.a.every(e => e.length === 4 && e[0] < nV), 'morph entries [vi,dx,dy,dz]');
   ok(B.springs.length === 2, 'twin: 2 spring chains');
   ok(B.collider && B.collider.bone === B.idx.head && B.collider.radius > 0, 'head collider present');
+  // hairHi UV: center of the [448,768] atlas block = (480/1024, 800/1024)
+  const hiU = 480/1024, hiV = 800/1024;
+  let hasHairHi = false;
+  for (let i = 0; i < g.uv.length; i += 2){
+    if (Math.abs(g.uv[i] - hiU) < 1e-5 && Math.abs(g.uv[i+1] - hiV) < 1e-5){ hasHairHi = true; break; }
+  }
+  ok(hasHairHi, 'hairHi atlas UV used in geometry (crown highlight active)');
 }
 
 /* ---- spring chains per hairstyle ---- */

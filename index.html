@@ -654,7 +654,7 @@ function buildAvatar(p){
          shX, elbowX, wristX, legX, eyeWY, eyeX} = dims;
   const g = geoNew();
   const hipR = p.hipW*H*0.5*0.92;
-  const uS=uvBlock('skin'), uH=uvBlock('hair'), uC=uvBlock('clothMain'),
+  const uS=uvBlock('skin'), uH=uvBlock('hair'), uHi=uvBlock('hairHi'), uC=uvBlock('clothMain'),
         uC2=uvBlock('clothSub'), uA=uvBlock('accent'), uSh=uvBlock('shoe'), uW=uvBlock('white');
 
   /* torso */
@@ -806,7 +806,8 @@ function buildAvatar(p){
 
   /* hair: scalp + style */
   const hr = headR*1.085*p.hairVol, hc=[0,headCY+headR*0.02, headR*0.02];
-  sphereBand(g, hc, hr, 0, 0.56*Math.PI, 7, 16, uH, ()=>[[idx.head,1]], null);
+  sphereBand(g, hc, hr, 0,         0.18*Math.PI, 3, 16, uHi, ()=>[[idx.head,1]], null);
+  sphereBand(g, hc, hr, 0.18*Math.PI, 0.56*Math.PI, 5, 16, uH,  ()=>[[idx.head,1]], null);
   if (p.hairStyle==='bob'){
     sphereBand(g, hc, hr, 0.5*Math.PI, 0.92*Math.PI, 5, 12, uH, ()=>[[idx.head,1]],
       (pos,d,phi,th)=>{ const f=1+0.14*M.smooth(0.5*Math.PI,0.92*Math.PI,phi);
