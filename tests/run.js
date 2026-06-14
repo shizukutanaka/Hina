@@ -2182,6 +2182,46 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 160: spine bone interpolation formula verification ---- */
+{
+  // Verify exact proportional formulas for each spine bone position.
+  // These catch regressions if someone changes the interpolation constants.
+  const d = B.dims;
+
+  // chestY = hipsY + (neckY - hipsY) × 0.62
+  ok(Math.abs(d.chestY - (d.hipsY + (d.neckY - d.hipsY) * 0.62)) < 1e-9,
+    `chestY = hipsY + (neckY-hipsY)×0.62 (chestY=${d.chestY.toFixed(6)})`);
+
+  // spineY = hipsY + (neckY - hipsY) × 0.30
+  ok(Math.abs(d.spineY - (d.hipsY + (d.neckY - d.hipsY) * 0.30)) < 1e-9,
+    `spineY = hipsY + (neckY-hipsY)×0.30 (spineY=${d.spineY.toFixed(6)})`);
+
+  // shoulderY = chestY + (neckY - chestY) × 0.62
+  ok(Math.abs(d.shoulderY - (d.chestY + (d.neckY - d.chestY) * 0.62)) < 1e-9,
+    `shoulderY = chestY + (neckY-chestY)×0.62 (shoulderY=${d.shoulderY.toFixed(6)})`);
+
+  // kneeY = hipsY × 0.52
+  ok(Math.abs(d.kneeY - d.hipsY * 0.52) < 1e-9,
+    `kneeY = hipsY×0.52 (kneeY=${d.kneeY.toFixed(6)})`);
+
+  // ankleY = max(0.035×H, hipsY×0.085)
+  const expectedAnkleY = Math.max(0.035 * d.H, d.hipsY * 0.085);
+  ok(Math.abs(d.ankleY - expectedAnkleY) < 1e-9,
+    `ankleY = max(0.035×H, hipsY×0.085) = ${expectedAnkleY.toFixed(6)}`);
+
+  // All formulas hold across all 6 presets
+  let formulaFail = 0;
+  for(const pre of H.PRESETS){
+    const C = H.buildAvatar(H.presetParams(pre));
+    const pd = C.dims;
+    if(Math.abs(pd.chestY - (pd.hipsY + (pd.neckY - pd.hipsY)*0.62)) > 1e-6) formulaFail++;
+    if(Math.abs(pd.spineY - (pd.hipsY + (pd.neckY - pd.hipsY)*0.30)) > 1e-6) formulaFail++;
+    if(Math.abs(pd.shoulderY - (pd.chestY + (pd.neckY - pd.chestY)*0.62)) > 1e-6) formulaFail++;
+    if(Math.abs(pd.kneeY - pd.hipsY * 0.52) > 1e-6) formulaFail++;
+  }
+  ok(formulaFail === 0, 'spine interpolation formulas hold across all 6 presets');
+}
+
 /* ---- Round 159: head collider offset formula + proportionality with height ---- */
 {
   // collider offset = [0, 0, 0.01*H] (slight forward Z offset to center sphere in head)
