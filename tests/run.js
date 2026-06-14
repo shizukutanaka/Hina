@@ -865,6 +865,17 @@ function accData(j, bin, ai){
     'meta.contact control chars stripped');
   ok(!/[\u0000-\u001f]/.test(ctrlMeta.json.extensions.VRM.meta.reference),
     'meta.reference control chars stripped');
+  // otherLicenseUrl control char stripping (same str() helper applies)
+  const licCtrl = H.exportVRM(B, P,
+    { license: 'Other', licenseUrl: 'ok\u0000bad' }, png);
+  ok(!/[\u0000-\u001f]/.test(licCtrl.json.extensions.VRM.meta.otherLicenseUrl),
+    'meta.otherLicenseUrl control chars stripped');
+  // all 9 valid license options pass through as-is
+  const validLicenses = ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'];
+  ok(validLicenses.every(lic => {
+    const ex3 = H.exportVRM(B, P, { license: lic }, png);
+    return ex3.json.extensions.VRM.meta.licenseName === lic;
+  }), 'all 9 valid license enum values pass through to VRM meta licenseName');
 
   // springOff export
   const off = H.exportVRM(B, Object.assign({}, P, { springOff: true }), {}, png);
