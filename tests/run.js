@@ -2182,6 +2182,31 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 147: shoulderW and hipW proportional effects on body geometry ---- */
+{
+  // shoulderW: wider shoulders → leftUpperArm X more negative (further left)
+  const narrowSh = H.buildAvatar(Object.assign(H.defaults(), {shoulderW: 0.14}));
+  const wideSh   = H.buildAvatar(Object.assign(H.defaults(), {shoulderW: 0.34}));
+
+  ok(narrowSh.bones[narrowSh.idx.lUA].w[0] > wideSh.bones[wideSh.idx.lUA].w[0],
+    'leftUpperArm X more negative with wider shoulders (shoulderW=0.34 < 0.14)');
+  ok(narrowSh.bones[narrowSh.idx.rUA].w[0] < wideSh.bones[wideSh.idx.rUA].w[0],
+    'rightUpperArm X more positive with wider shoulders (symmetric)');
+
+  // shoulderW scales dims.shX proportionally
+  ok(wideSh.dims.shX > narrowSh.dims.shX,
+    'dims.shX increases with shoulderW');
+
+  // hipW: wider hips → leftUpperLeg X more negative (further left)
+  const narrowHip = H.buildAvatar(Object.assign(H.defaults(), {hipW: 0.14}));
+  const wideHip   = H.buildAvatar(Object.assign(H.defaults(), {hipW: 0.34}));
+
+  ok(narrowHip.bones[narrowHip.idx.lUL].w[0] > wideHip.bones[wideHip.idx.lUL].w[0],
+    'leftUpperLeg X more negative with wider hips (hipW=0.34 < 0.14)');
+  ok(narrowHip.dims.legX < wideHip.dims.legX,
+    'dims.legX increases with hipW');
+}
+
 /* ---- Round 146: legLen/armLen proportional effects on bone positions ---- */
 {
   // legLen: higher legLen → higher hips bone Y (longer legs = hips set higher)
