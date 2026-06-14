@@ -2182,6 +2182,43 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 145: POSITION accessor min/max bounds (glTF spec compliance) ---- */
+{
+  const ex2 = H.exportVRM(B, H.defaults(), {}, new Uint8Array([]));
+  const G2 = parseGLB(ex2.bytes);
+  const j2 = G2.json;
+  const posAccIdx = j2.meshes[0].primitives[0].attributes.POSITION;
+  const posAcc = j2.accessors[posAccIdx];
+
+  // glTF spec: POSITION accessor MUST have min and max (required for bounding sphere)
+  ok(Array.isArray(posAcc.min) && posAcc.min.length === 3, 'POSITION accessor has min[3]');
+  ok(Array.isArray(posAcc.max) && posAcc.max.length === 3, 'POSITION accessor has max[3]');
+
+  // min/max must correctly bound all vertex positions
+  const posData = accData(j2, G2.bin, posAccIdx);
+  const nVP = posAcc.count;
+  let minOK=true, maxOK=true;
+  for(let i=0;i<nVP;i++){
+    for(let k=0;k<3;k++){
+      const v=posData[i*3+k];
+      if(v < posAcc.min[k]-1e-6) minOK=false;
+      if(v > posAcc.max[k]+1e-6) maxOK=false;
+    }
+  }
+  ok(minOK, `all ${nVP} vertex positions ≥ accessor.min (${posAcc.min.map(v=>v.toFixed(3)).join(',')})`);
+  ok(maxOK, `all ${nVP} vertex positions ≤ accessor.max (${posAcc.max.map(v=>v.toFixed(3)).join(',')})`);
+
+  // min/max must be tight: at least one vertex at each min/max component
+  let minTight=true, maxTight=true;
+  for(let k=0;k<3;k++){
+    const atMin = Array.from({length:nVP}, (_,i)=>posData[i*3+k]).some(v=>Math.abs(v-posAcc.min[k])<1e-4);
+    const atMax = Array.from({length:nVP}, (_,i)=>posData[i*3+k]).some(v=>Math.abs(v-posAcc.max[k])<1e-4);
+    if(!atMin) minTight=false;
+    if(!atMax) maxTight=false;
+  }
+  ok(minTight && maxTight, 'POSITION min/max are tight (at least one vertex at each bound per axis)');
+}
+
 /* ---- Round 144: hairLen monotonically increases spring chain end-bone distance ---- */
 {
   // For twin hair style, measure the end-bone Y of the spring chain
