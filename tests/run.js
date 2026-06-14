@@ -2182,6 +2182,55 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 170: leg bone world position formulas ---- */
+{
+  // Left/right leg bone world positions:
+  //   lUL.x = -legX,  lUL.y = hipsY×0.98   (slightly below hips to clear hip bone)
+  //   lLL.x = -legX,  lLL.y = kneeY
+  //   lF.x  = -legX,  lF.y  = ankleY
+  // Right side mirrors: rUL/rLL/rF.x = +legX, same Y values
+  const d = B.dims;
+  const lUL = B.bones[B.idx.lUL].w, rUL = B.bones[B.idx.rUL].w;
+  const lLL = B.bones[B.idx.lLL].w, rLL = B.bones[B.idx.rLL].w;
+  const lF  = B.bones[B.idx.lF].w,  rF  = B.bones[B.idx.rF].w;
+
+  // X positions: ±legX
+  ok(Math.abs(lUL[0] + d.legX) < 1e-9, `lUL.x = -legX = ${(-d.legX).toFixed(6)}`);
+  ok(Math.abs(rUL[0] - d.legX) < 1e-9, `rUL.x = +legX = ${d.legX.toFixed(6)}`);
+  ok(Math.abs(lLL[0] + d.legX) < 1e-9, `lLL.x = -legX`);
+  ok(Math.abs(lF[0]  + d.legX) < 1e-9, `lF.x  = -legX`);
+
+  // Y positions
+  ok(Math.abs(lUL[1] - d.hipsY * 0.98) < 1e-9,
+    `lUL.y = hipsY×0.98 = ${(d.hipsY*0.98).toFixed(6)} (slightly below hips)`);
+  ok(Math.abs(lLL[1] - d.kneeY) < 1e-9,
+    `lLL.y = kneeY = ${d.kneeY.toFixed(6)}`);
+  ok(Math.abs(lF[1] - d.ankleY) < 1e-9,
+    `lF.y = ankleY = ${d.ankleY.toFixed(6)}`);
+
+  // Right side Y must equal left side Y (bilateral symmetry)
+  ok(Math.abs(rUL[1] - lUL[1]) < 1e-9, 'rUL.y = lUL.y (bilateral Y symmetry)');
+  ok(Math.abs(rLL[1] - lLL[1]) < 1e-9, 'rLL.y = lLL.y (bilateral Y symmetry)');
+  ok(Math.abs(rF[1]  - lF[1])  < 1e-9, 'rF.y  = lF.y  (bilateral Y symmetry)');
+
+  // Strictly descending: hip > knee > ankle (gravitational ordering)
+  ok(lUL[1] > lLL[1] && lLL[1] > lF[1],
+    `leg bones strictly descend: lUL.y=${lUL[1].toFixed(4)} > lLL.y=${lLL[1].toFixed(4)} > lF.y=${lF[1].toFixed(4)}`);
+
+  // All 6 presets satisfy these formulas
+  let fail = 0;
+  for(const pre of H.PRESETS){
+    const C = H.buildAvatar(H.presetParams(pre));
+    const cd = C.dims;
+    const lul = C.bones[C.idx.lUL].w, lll = C.bones[C.idx.lLL].w, lf = C.bones[C.idx.lF].w;
+    if(Math.abs(lul[0] + cd.legX) > 1e-6) fail++;
+    if(Math.abs(lul[1] - cd.hipsY * 0.98) > 1e-6) fail++;
+    if(Math.abs(lll[1] - cd.kneeY) > 1e-6) fail++;
+    if(Math.abs(lf[1]  - cd.ankleY) > 1e-6) fail++;
+  }
+  ok(fail === 0, 'leg bone position formulas hold across all 6 presets');
+}
+
 /* ---- Round 169: ahoge geometry — triangle delta, tip Y, head bone skinning ---- */
 {
   // ahoge=true adds exactly 1 triangle (3 vertices) across ALL hairStyles.
