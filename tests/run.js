@@ -2182,6 +2182,40 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 129: joy + fun mouth corner lift (smile corners turn up) ---- */
+{
+  // Find the right-corner mouth vertex (maximum x in mouth tag range)
+  const [ms, me] = B.geom.tags.mouth;
+  let cornerVIdx = ms+1; // start after center
+  for(let i=ms+1;i<me;i++){
+    if(B.geom.pos[i*3] > B.geom.pos[cornerVIdx*3]) cornerVIdx = i;
+  }
+  // The corner vertex should have a joy morph entry with positive dy from cornerLift
+  const joyCorner = B.morphs.sparse.joy.find(e => e[0]===cornerVIdx);
+  ok(joyCorner !== undefined && joyCorner[2] > 0,
+    'joy mouth: right corner vertex has positive dy (smile corner lift)');
+
+  // fun corner lift should be larger than joy corner lift
+  const funCorner = B.morphs.sparse.fun.find(e => e[0]===cornerVIdx);
+  ok(funCorner !== undefined && funCorner[2] > 0,
+    'fun mouth: right corner vertex has positive dy (smile corner lift)');
+  ok(funCorner[2] > joyCorner[2],
+    `fun corner lift (${funCorner[2].toExponential(3)}) > joy corner lift (${joyCorner[2].toExponential(3)})`);
+
+  // Corner lift is proportional to headR (scale-independent)
+  const bigHead = H.buildAvatar(Object.assign(H.defaults(), { headRatio: 0.36 }));
+  const smallHead = H.buildAvatar(Object.assign(H.defaults(), { headRatio: 0.18 }));
+  const [bms, bme] = bigHead.geom.tags.mouth;
+  const [sms, sme] = smallHead.geom.tags.mouth;
+  let bCorner=bms+1, sCorner=sms+1;
+  for(let i=bms+1;i<bme;i++) if(bigHead.geom.pos[i*3]>bigHead.geom.pos[bCorner*3]) bCorner=i;
+  for(let i=sms+1;i<sme;i++) if(smallHead.geom.pos[i*3]>smallHead.geom.pos[sCorner*3]) sCorner=i;
+  const bJoy = bigHead.morphs.sparse.joy.find(e=>e[0]===bCorner);
+  const sJoy = smallHead.morphs.sparse.joy.find(e=>e[0]===sCorner);
+  ok(bJoy && sJoy && bJoy[2] > sJoy[2],
+    'joy corner lift scales with headR: bigHead lift > smallHead lift');
+}
+
 /* ---- Round 128: vertex position finiteness + VRM0 orientation invariants ---- */
 {
   // All vertex positions must be finite (catches NaN/Infinity from geometry math errors)

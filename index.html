@@ -958,11 +958,14 @@ function buildAvatar(p){
   const morphNames=['a','i','u','e','o','blink','blink_l','blink_r','joy','angry','sorrow','fun'];
   const sparse={}; morphNames.forEach(n=>sparse[n]=[]);
   const range=n=>g.tags[n];
-  const scaleTag=(t,tag,c,sx,sy,dz=0,dy=0)=>{
+  const scaleTag=(t,tag,c,sx,sy,dz=0,dy=0,cornerLift=0)=>{
     const [s,e]=range(tag);
+    let maxAbsPx=0;
+    if(cornerLift) for(let i=s;i<e;i++) maxAbsPx=Math.max(maxAbsPx,Math.abs(g.pos[i*3]-c[0]));
     for(let i=s;i<e;i++){
       const px=g.pos[i*3]-c[0], py=g.pos[i*3+1]-c[1];
-      const d=[px*(sx-1), py*(sy-1)+dy, dz];
+      const cl=(cornerLift&&maxAbsPx>0)?cornerLift*Math.abs(px)/maxAbsPx:0;
+      const d=[px*(sx-1), py*(sy-1)+dy+cl, dz];
       if (d[0]||d[1]||d[2]) sparse[t].push([i,d[0],d[1],d[2]]);
     }
   };
@@ -990,7 +993,7 @@ function buildAvatar(p){
   scaleTag('blink_r','eyeR',eC_R,1,0.06); browTilt('blink_r','browR',-headR*0.035,-headR*0.035);
   // emotions
   scaleTag('joy','eyeL',eC_L,1,0.12,0,headR*0.02); scaleTag('joy','eyeR',eC_R,1,0.12,0,headR*0.02);
-  scaleTag('joy','mouth',mc,1.25,1.9);
+  scaleTag('joy','mouth',mc,1.25,1.9,0,0,headR*0.022);
   browTilt('joy','browL', headR*0.04, headR*0.03); browTilt('joy','browR', headR*0.04, headR*0.03);
   browTilt('angry','browL',-headR*0.085, headR*0.025); browTilt('angry','browR',-headR*0.085, headR*0.025);
   scaleTag('angry','eyeL',eC_L,1,0.62); scaleTag('angry','eyeR',eC_R,1,0.62);
@@ -998,7 +1001,7 @@ function buildAvatar(p){
   browTilt('sorrow','browL', headR*0.07,-headR*0.02); browTilt('sorrow','browR', headR*0.07,-headR*0.02);
   scaleTag('sorrow','mouth',mc,0.9,0.5,0,-headR*0.015);
   scaleTag('sorrow','eyeL',eC_L,1,0.62,0,-headR*0.012); scaleTag('sorrow','eyeR',eC_R,1,0.62,0,-headR*0.012);
-  scaleTag('fun','mouth',mc,1.45,1.35);
+  scaleTag('fun','mouth',mc,1.45,1.35,0,0,headR*0.03);
   scaleTag('fun','eyeL',eC_L,1,0.55); scaleTag('fun','eyeR',eC_R,1,0.55);
   browTilt('fun','browL', headR*0.06, headR*0.05); browTilt('fun','browR', headR*0.06, headR*0.05);
 
