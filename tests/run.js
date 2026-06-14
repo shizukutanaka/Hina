@@ -2042,6 +2042,34 @@ function accData(j, bin, ai){
   ok(angryMouthCenter.length >= 1, 'angry morph includes mouth center vertex with dy=-headR×0.01 (downward pull)');
 }
 
+/* ---- Round 124: vowel mouth puckering (dz) properties + socks gacha randomization ---- */
+{
+  // u and o morphs have dz≠0 (lip puckering/forward movement for lip-sync realism)
+  ok(B.morphs.sparse.u.some(e => e[3] < 0),
+    'u morph has entries with dz<0 (lips pucker forward, scaleTag dz=-headR×0.05)');
+  ok(B.morphs.sparse.o.some(e => e[3] < 0),
+    'o morph has entries with dz<0 (lips pucker forward, scaleTag dz=-headR×0.035)');
+
+  // u puckers more than o (u = -0.05headR, o = -0.035headR)
+  const uMinDz = Math.min(...B.morphs.sparse.u.map(e => e[3]));
+  const oMinDz = Math.min(...B.morphs.sparse.o.map(e => e[3]));
+  ok(uMinDz < oMinDz, 'u morph puckers more than o morph (u dz more negative than o dz)');
+
+  // a, i, e morphs have NO puckering (pure horizontal/vertical scaling only)
+  ok(B.morphs.sparse.a.every(e => e[3] === 0), 'a morph has no dz (no puckering, pure vertical open)');
+  ok(B.morphs.sparse.i.every(e => e[3] === 0), 'i morph has no dz (no puckering, horizontal stretch only)');
+  ok(B.morphs.sparse.e.every(e => e[3] === 0), 'e morph has no dz (no puckering, horizontal stretch only)');
+
+  // socks bool is randomized in gacha
+  let socksT=false, socksF=false;
+  for(let s=0; s<60; s++){
+    const p2 = H.randomParams(s);
+    if(p2.socks === true) socksT = true;
+    if(p2.socks === false) socksF = true;
+  }
+  ok(socksT && socksF, 'randomParams socks is randomly true or false across 60 seeds');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
