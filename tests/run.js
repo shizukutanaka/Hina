@@ -1577,6 +1577,45 @@ function accData(j, bin, ai){
     'copy-seed button guards against null seed (no-op when no gacha run yet)');
 }
 
+/* ---- Round 109: VRM asset/exporter metadata + humanoid twist + collider formula + ? shortcut hint ---- */
+{
+  const png = H.b64ToBytes(H.PNG1);
+  const ex = H.exportVRM(B, P, {title:'テスト', author:'t'}, png);
+  const j = ex.json;
+  const V = j.extensions.VRM;
+
+  // glTF asset block
+  ok(j.asset.generator && j.asset.generator.startsWith('Hina '), 'glTF asset.generator starts with "Hina "');
+  ok(j.asset.generator.includes(H.VERSION), 'glTF asset.generator contains current VERSION');
+
+  // VRM exporterVersion
+  ok(V.exporterVersion && V.exporterVersion.startsWith('Hina-'), 'VRM exporterVersion starts with "Hina-"');
+  ok(V.exporterVersion.includes(H.VERSION), 'VRM exporterVersion contains current VERSION');
+
+  // humanoid twist and spacing (VRM0 standard values)
+  const h = V.humanoid;
+  ok(h.upperArmTwist === 0.5 && h.lowerArmTwist === 0.5 && h.upperLegTwist === 0.5 && h.lowerLegTwist === 0.5,
+    'humanoid twist factors = 0.5 (upperArm/lowerArm/upperLeg/lowerLeg)');
+  ok(h.feetSpacing === 0, 'humanoid feetSpacing = 0 (T-pose, feet at hip-width)');
+
+  // collider radius matches rig formula: headR * 0.88
+  const bDef = H.buildAvatar(H.defaults());
+  ok(Math.abs(bDef.collider.radius - bDef.dims.headR * 0.88) < 1e-6,
+    'head collider radius = dims.headR × 0.88 (matches rig formula)');
+  // collider radius scales with avatar height (chibi smaller than default)
+  const bChibi = H.buildAvatar(H.presetParams(H.PRESETS.find(p => p.id === 'chibi')));
+  ok(bChibi.collider.radius < bDef.collider.radius,
+    'chibi head collider radius < default (proportional to headR)');
+
+  // ? key shortcut opens aboutDlg (source code pattern)
+  ok(/e\.key==='[?]'[\s\S]{0,120}showModal/.test(html),
+    '? key shortcut calls showModal() on aboutDlg (keyboard discoverability)');
+
+  // hint.ctrlS updated to mention ? shortcut in both languages
+  ok(H.I18N.ja['hint.ctrlS'].includes('?') && H.I18N.en['hint.ctrlS'].includes('?'),
+    'hint.ctrlS i18n includes ? shortcut in both languages (discoverability)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
