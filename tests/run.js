@@ -530,6 +530,24 @@ function accData(j, bin, ai){
     if (Math.abs(s - 1) > 1e-3) wOK = false;
   }
   ok(wOK, 'exported weights sum to 1');
+  // glTF 2.0 accessor type + componentType for every vertex attribute
+  ok(j.accessors[prim.attributes.POSITION].type === 'VEC3', 'POSITION accessor type = VEC3');
+  ok(j.accessors[prim.attributes.POSITION].componentType === 5126, 'POSITION componentType = FLOAT(5126)');
+  ok(j.accessors[prim.attributes.NORMAL].type === 'VEC3', 'NORMAL accessor type = VEC3');
+  ok(j.accessors[prim.attributes.NORMAL].componentType === 5126, 'NORMAL componentType = FLOAT(5126)');
+  ok(j.accessors[prim.attributes.TEXCOORD_0].type === 'VEC2', 'TEXCOORD_0 accessor type = VEC2');
+  ok(j.accessors[prim.attributes.TEXCOORD_0].componentType === 5126, 'TEXCOORD_0 componentType = FLOAT(5126)');
+  ok(j.accessors[prim.attributes.JOINTS_0].type === 'VEC4', 'JOINTS_0 accessor type = VEC4');
+  ok([5121,5123].includes(j.accessors[prim.attributes.JOINTS_0].componentType),
+    'JOINTS_0 componentType = UNSIGNED_BYTE(5121) or UNSIGNED_SHORT(5123)');
+  ok(j.accessors[prim.attributes.WEIGHTS_0].type === 'VEC4', 'WEIGHTS_0 accessor type = VEC4');
+  ok(j.accessors[prim.attributes.WEIGHTS_0].componentType === 5126, 'WEIGHTS_0 componentType = FLOAT(5126)');
+  ok(j.accessors[prim.indices].type === 'SCALAR', 'indices accessor type = SCALAR');
+  // all UVs must be in [0,1] (single-atlas, CLAMP_TO_EDGE texture)
+  {
+    const uvData = accData(j, G.bin, prim.attributes.TEXCOORD_0);
+    ok(uvData.every(v => v >= 0 && v <= 1), 'all UV coordinates are in [0,1] (single-atlas layout)');
+  }
   // accessors bounded
   const SZ = { 5126: 4, 5123: 2, 5121: 1 };
   const NC = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 };
