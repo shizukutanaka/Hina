@@ -4054,6 +4054,32 @@ function accData(j, bin, ai){
     'rank badges get role=button for keyboard activation');
 }
 
+/* ---- Round 189: auto-save badge — signals localStorage save to reduce user anxiety ---- */
+{
+  // hint.saved key must exist in both languages
+  ok(H.I18N.ja['hint.saved'] && H.I18N.ja['hint.saved'].includes('✓'),
+    'ja hint.saved key present with ✓ checkmark');
+  ok(H.I18N.en['hint.saved'] && H.I18N.en['hint.saved'].includes('✓'),
+    'en hint.saved key present with ✓ checkmark');
+
+  // autoSaveBadge element must be in markup
+  ok(html.includes('id="autoSaveBadge"'), 'autoSaveBadge element in markup');
+
+  // saveState() must reference hint.saved and autoSaveBadge
+  const saveStateSrc = html.slice(html.indexOf('function saveState'), html.indexOf('function saveState') + 600);
+  ok(saveStateSrc.includes("'hint.saved'") || saveStateSrc.includes('"hint.saved"'),
+    'saveState() references hint.saved i18n key for badge text');
+  ok(saveStateSrc.includes('autoSaveBadge'),
+    'saveState() updates autoSaveBadge after successful localStorage write');
+
+  // Badge has aria-live so screen readers announce the save (WCAG 4.1.3)
+  ok(/id="autoSaveBadge"[^>]*aria-live/.test(html),
+    'autoSaveBadge has aria-live for screen reader announcements (WCAG 4.1.3)');
+
+  // reduceMotion guard: badge only shown when animations are OK
+  ok(saveStateSrc.includes('reduceMotion'), 'auto-save badge respects prefers-reduced-motion');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

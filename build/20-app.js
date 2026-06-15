@@ -52,11 +52,19 @@ function doUndo(){
   rebuild(); renderBody(); saveState();
 }
 
-let _saveTimer = null;
+let _saveTimer = null, _saveBadgeTimer = null;
 function saveState(){
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(()=>{
-    try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activePresetId, lastGachaSeed})); }catch(e){}
+    try{
+      localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activePresetId, lastGachaSeed}));
+      const b=$('autoSaveBadge');
+      if (b && !reduceMotion){
+        b.textContent=t('hint.saved'); b.style.opacity='1';
+        clearTimeout(_saveBadgeTimer);
+        _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2) b2.style.opacity='0'; },2000);
+      }
+    }catch(e){}
   }, 500);
 }
 
