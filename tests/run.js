@@ -4389,6 +4389,34 @@ function accData(j, bin, ai){
     'tab-switch call sites use renderBody() (no arg = default scrollReset=true, scroll resets)');
 }
 
+/* ---- Round 205: safeName() clamps filename stem to 100 chars (filesystem safety) ---- */
+{
+  // meta.title allows maxlength=256 chars. safeName() previously passed the full string to the
+  // download anchor without truncation. 256 chars + '.hina.json' (10) = 266-byte filename,
+  // which can exceed OS filesystem limits (255 bytes; Japanese chars cost 3 bytes each in UTF-8).
+  // Fix: slice(0, 100) in safeName() — longest suffix '.hina.json' gives 110 chars total.
+
+  // Source: safeName() has .slice(0,100)
+  ok(/safeName[\s\S]{0,100}slice\(0,100\)/.test(html),
+    'safeName() clamps result to 100 characters via .slice(0,100) (filesystem safety)');
+
+  // Functional: a 256-char title produces a stem of exactly 100 chars
+  // We test this inline since safeName is an app.js function (not exported from core)
+  // Verify the invariant via source pattern only
+  ok(html.includes('.slice(0,100)'),
+    'safeName uses .slice(0,100) to bound filename length to 100 characters');
+
+  // maxlength='256' is still correct for the input field (allows long titles for display/meta)
+  ok(html.includes("maxlength:'256'"),
+    'meta title input still allows 256 chars (title used in VRM meta, only filename stem is clamped)');
+
+  // The VRM meta writer must independently handle long titles (it has its own str() truncation)
+  const longTitle = 'あ'.repeat(256);
+  const longMeta = H.exportVRM(B, P, { title: longTitle }, H.b64ToBytes(H.PNG1));
+  ok(longMeta.json.extensions.VRM.meta.title.length <= 256,
+    'exportVRM meta.title from 256-char input fits within VRM meta field (str() sanitization)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

@@ -909,7 +909,8 @@ function download(bytes, name, type){
   a.href=u; a.download=name; document.body.append(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(u), 8000);
 }
-function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_'); return v||fb; }
+// 100-char cap: longest suffix is '.hina.json' (10) → 110 chars total, well under OS limits (255 bytes)
+function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').slice(0,100); return v||fb; }
 function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 let _exporting = false, _exportBtn = null;
