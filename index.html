@@ -2330,7 +2330,11 @@ function updateStats(){
   const set=(elm,r)=>{ const lim=limitText(r);
     elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx];
     const tip=t('rank.tip.'+r.rank)+(lim?' — '+lim:'');
-    elm.title=tip; elm.parentElement.title=tip; };
+    elm.title=tip; elm.parentElement.title=tip;
+    // Keep aria-label on rankBadge button in sync with current rank so SR reads "PC: Excellent — click…"
+    const lbl=elm.parentElement.querySelector('.lbl');
+    if(lbl) elm.parentElement.setAttribute('aria-label',
+      (lbl.textContent+': '+t('rank.'+r.rank)+(lim?' ('+lim+')':'')+' — '+t('a11y.rankBadge'))); };
   set($('rankPC'),pc); set($('rankQ'),q);
   const qlim=$('rankQLim');
   if(qlim) qlim.textContent = (q.worst&&q.worst.length&&q.idx>0) ? '('+t('cat.'+q.worst[0])+')' : '';

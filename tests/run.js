@@ -4552,6 +4552,16 @@ function accData(j, bin, ai){
     'hint.sliderReset present in en locale');
 }
 
+/* ---- Round 213: rankBadge aria-label includes current rank (not just static label) ---- */
+{
+  // set() function must update aria-label on the rankBadge parent element
+  ok(/elm\.parentElement\.setAttribute\('aria-label'/.test(html),
+    'set() in updateStats updates aria-label on rankBadge parent');
+  // aria-label must include the rank text and the badge hint
+  ok(/t\('rank\.'\+r\.rank\)[\s\S]{0,200}a11y\.rankBadge/.test(html),
+    'aria-label includes rank text and a11y.rankBadge navigation hint');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
