@@ -2114,8 +2114,8 @@ function onParam(k){
   if (k==='outfit' || k==='springOff') renderBody();
 }
 
-function renderBody(){
-  const bd=$('tabBody'); bd.scrollTop=0; bd.textContent='';
+function renderBody(scrollReset=true){
+  const bd=$('tabBody'); if (scrollReset) bd.scrollTop=0; bd.textContent='';
   if (activeTab==='preset'){
     const grid=el('div',{class:'presetGrid'});
     const _sCur = JSON.stringify(HINA.sanitize(params));
@@ -2428,7 +2428,8 @@ function applyLang(){
   const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.style.display=GLOK?'':'none'; }
   const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
   document.documentElement.lang = lang;
-  renderTabs(); renderBody(); buildExprBar(); updateStats();
+  // scrollReset=false: user stays on the same tab — preserve their scroll position across lang/mode changes
+  renderTabs(); renderBody(false); buildExprBar(); updateStats();
 }
 $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); });
 $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); });

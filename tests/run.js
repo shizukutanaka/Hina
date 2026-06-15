@@ -4366,6 +4366,29 @@ function accData(j, bin, ai){
     'PRESETS[0] achieves Quest Excellent with springOff (first-time users see an upload-ready avatar)');
 }
 
+/* ---- Round 204: renderBody(scrollReset=false) preserves scroll on lang/mode switch (applyLang) ---- */
+{
+  // When the user switches language or Easy/Detail mode while scrolled partway down a tab,
+  // applyLang() called renderBody() which reset scrollTop=0 — jumping the panel to the top.
+  // Fix: renderBody(scrollReset=true) is the default; applyLang() passes false to preserve scroll.
+
+  // renderBody has a scrollReset parameter (default true)
+  ok(/function renderBody\(scrollReset=true\)/.test(html),
+    'renderBody() accepts scrollReset=true default parameter');
+
+  // The scrollTop reset is conditional on scrollReset
+  ok(/if \(scrollReset\) bd\.scrollTop=0/.test(html),
+    'renderBody() only resets scrollTop when scrollReset is truthy');
+
+  // applyLang() calls renderBody(false) to preserve scroll position
+  ok(/function applyLang\(\)[\s\S]{0,2000}renderBody\(false\)/.test(html),
+    'applyLang() calls renderBody(false) to preserve panel scroll on language/mode switch');
+
+  // Tab switches still call renderBody() (default true → scroll resets to 0)
+  ok(/renderTabs\(\);[\s\S]{0,30}renderBody\(\)/.test(html),
+    'tab-switch call sites use renderBody() (no arg = default scrollReset=true, scroll resets)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
