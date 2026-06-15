@@ -875,10 +875,11 @@ async function doExport(){
     download(bytes, fname, 'application/octet-stream');
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
+    if (_exportBtn){ _exportBtn.textContent=t('btn.exported'); setTimeout(()=>{ if(_exportBtn) _exportBtn.textContent=t('btn.export'); },2000); }
   }catch(e){ alert(t('err.exportFailed')+': '+e.message); }
   finally{
     _exporting = false;
-    if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.textContent = t('btn.export'); }
+    if (_exportBtn){ _exportBtn.disabled = false; }
   }
 }
 function saveJson(){
