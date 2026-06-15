@@ -2182,6 +2182,50 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 185: skirt bottom ring skin weighting — angular leg blend formula ---- */
+{
+  // Skirt (onepiece/sailor): latheY segs=14 → 15 verts/ring × 3 rings = 45 total.
+  // After lathe, the last 45 verts are patched:
+  //   ring=0 (top, t=0): all hips (wl=wr=0)
+  //   ring=2 (bot, t=1): hips + lUL + rUL angular blend based on X position
+  // Bottom ring Y = hipsY + 0.035×H - skirtLenW   (skirtLenW = (0.10+0.10×skirtLen)×H)
+  const d = B.dims, H_ = d.H;
+  const skirtLenW = (0.10 + 0.10 * P.skirtLen) * H_;
+  const skirtBotY = d.hipsY + 0.035*H_ - skirtLenW;
+  const skirtTopY = d.hipsY + 0.035*H_;
+
+  function vertsAtY(geom, y0){
+    const r=[]; for(let vi=0;vi<geom.pos.length/3;vi++) if(Math.abs(geom.pos[vi*3+1]-y0)<1e-6) r.push(vi); return r;
+  }
+  const botVerts = vertsAtY(B.geom, skirtBotY);
+  ok(botVerts.length === 15,
+    `skirt bottom ring: 15 verts at Y=${skirtBotY.toFixed(5)} (got ${botVerts.length})`);
+
+  // All weight sums = 1.0
+  const wgtOK = botVerts.every(vi=>{
+    const w = B.geom.wgt.slice(vi*4, vi*4+4);
+    return Math.abs(w[0]+w[1]+w[2]+w[3]-1.0) < 1e-5;
+  });
+  ok(wgtOK, 'skirt bottom ring: all weight sums = 1.0');
+
+  // Only hips/lUL/rUL indices used (angular blend)
+  const {hips:hi, lUL:luL, rUL:ruL} = B.idx;
+  const bonesOK = botVerts.every(vi=>{
+    for(let s=0;s<4;s++){
+      if(B.geom.wgt[vi*4+s] > 1e-6 && ![hi,luL,ruL].includes(B.geom.jnt[vi*4+s])) return false;
+    }
+    return true;
+  });
+  ok(bonesOK, `skirt bottom ring: only hips(${hi})/lUL(${luL})/rUL(${ruL}) bone slots`);
+
+  // At least some verts have non-zero lUL or rUL weight (blend actually happens)
+  const blendHappens = botVerts.some(vi=>{
+    for(let s=0;s<4;s++) if([luL,ruL].includes(B.geom.jnt[vi*4+s]) && B.geom.wgt[vi*4+s]>1e-4) return true;
+    return false;
+  });
+  ok(blendHappens, 'skirt bottom ring: angular leg blend assigns non-zero lUL/rUL weight to edge verts');
+}
+
 /* ---- Round 184: outfit top-shell unique ring Y positions — segs=12, 13 verts ---- */
 {
   // Outfit top-shell latheY(segs=12) → 13 verts per ring. 4 rings:
