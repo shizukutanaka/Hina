@@ -816,7 +816,8 @@ function updateStats(){
   const pc=HINA.rank(est,'pc'), q=HINA.rank(est,'quest');
   const set=(elm,r)=>{ const lim=limitText(r);
     elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx];
-    elm.title=lim; elm.parentElement.title=lim; };
+    const tip=t('rank.tip.'+r.rank)+(lim?' — '+lim:'');
+    elm.title=tip; elm.parentElement.title=tip; };
   set($('rankPC'),pc); set($('rankQ'),q);
   const hv=$('heightVal'); if (hv) hv.textContent=params.height.toFixed(2)+' m';
   announceRank(pc, q);
