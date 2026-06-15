@@ -2183,6 +2183,11 @@ function renderBody(){
 
 let statEls={};
 function renderOut(bd){
+  // Primary action at top — the export button is why the user opened this tab
+  _exportBtn = el('button',{class:'btn primary wide', onclick:doExport}, t('btn.export'));
+  bd.append(_exportBtn);
+  bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:10px'}, t('hint.ctrlS')));
+
   bd.append(el('div',{class:'sect'}, t('out.meta')));
   const txt=(key,mk,ph)=>{ const id='meta-'+mk; bd.append(el('div',{class:'row'},
     el('label',{'for':id},t(key)),
@@ -2233,10 +2238,6 @@ function renderOut(bd){
   tbl.append(el('tr',{}, el('th',{scope:'row'},'PC'), rkPC));
   tbl.append(el('tr',{}, el('th',{scope:'row'},'Quest'), rkQ));
   bd.append(tbl);
-
-  _exportBtn = el('button',{class:'btn primary wide', onclick:doExport}, t('btn.export'));
-  bd.append(_exportBtn);
-  bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:10px'}, t('hint.ctrlS')));
   bd.append(el('button',{class:'btn wide', onclick:saveJson}, t('btn.saveJson')));
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;

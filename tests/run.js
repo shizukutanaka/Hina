@@ -4250,6 +4250,21 @@ function accData(j, bin, ai){
     'applyLang populates aboutKeysSumm with about.keys i18n text');
 }
 
+/* ---- Round 199: Export VRM button moved to top of Export tab (primary action first) ---- */
+{
+  // The export button must appear BEFORE the out.meta section in renderOut()
+  const renderOutSrc = html.slice(html.indexOf('function renderOut'), html.indexOf('function renderOut') + 3000);
+  const exportBtnPos = renderOutSrc.indexOf("'btn.export'");
+  const metaSectPos = renderOutSrc.indexOf("'out.meta'");
+  ok(exportBtnPos > 0 && metaSectPos > 0 && exportBtnPos < metaSectPos,
+    'Export VRM button (btn.export) appears before out.meta section in renderOut() — primary action first');
+
+  // hint.ctrlS also appears before meta section (moved with the button)
+  const hintPos = renderOutSrc.indexOf("'hint.ctrlS'");
+  ok(hintPos > 0 && hintPos < metaSectPos,
+    'hint.ctrlS shortcut hint appears before out.meta section (moved up with export button)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
