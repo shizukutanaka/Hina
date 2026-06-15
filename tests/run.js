@@ -4156,6 +4156,19 @@ function accData(j, bin, ai){
   ok(H.I18N.en['hint.ctrlS'].includes('Ctrl+P'), 'en hint.ctrlS includes Ctrl+P hint');
 }
 
+/* ---- Round 193: document drag-and-drop JSON loading in Export tab ---- */
+{
+  // hint.dropJson key must exist in both languages and mention drag
+  ok(H.I18N.ja['hint.dropJson'] && (H.I18N.ja['hint.dropJson'].includes('ドラッグ') || H.I18N.ja['hint.dropJson'].includes('drag')),
+    'ja hint.dropJson key mentions drag-and-drop');
+  ok(H.I18N.en['hint.dropJson'] && H.I18N.en['hint.dropJson'].includes('drag'),
+    'en hint.dropJson key mentions drag and drop');
+
+  // hint.dropJson must appear in the Export tab UI (renderOut section)
+  ok(html.includes("'hint.dropJson'") || html.includes('"hint.dropJson"'),
+    'Export tab UI renders hint.dropJson discovery text');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

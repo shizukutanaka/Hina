@@ -813,6 +813,7 @@ function renderOut(bd){
       rd.readAsText(f); e.target.value=''; }});
   bd.append(file);
   bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
+  bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:8px'}, t('hint.dropJson')));
   bd.append(el('button',{class:'btn wide', onclick:()=>{
     if (!confirm(t('btn.reset.confirm'))) return;
     params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }}, t('btn.reset')));
