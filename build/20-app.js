@@ -706,7 +706,9 @@ function renderBody(){
       }, '●'));
       grid.append(el('button',{class:'preCard'+(isSelected?' selected':''),
         'aria-pressed':String(isSelected), onclick:()=>{
-        captureUndo(); params=pp; activePresetId=pre.id; rebuild(); renderBody(); }},
+        captureUndo(); params=pp; activePresetId=pre.id; rebuild(); renderBody();
+        // Restore focus to the now-selected card (WCAG 2.4.3: focus must not be lost when DOM rebuilds)
+        const sel=$('tabBody').querySelector('.preCard.selected'); if(sel) sel.focus(); }},
         nmDiv, cols));
     }
     // Show revert button when the active preset has been modified
@@ -714,15 +716,18 @@ function renderBody(){
     if (activePre && JSON.stringify(HINA.presetParams(activePre)) !== _sCur){
       const preLabel = lang==='ja' ? activePre.ja : activePre.en;
       bd.append(el('button',{class:'btn wide',style:'margin-top:10px',
-        onclick:()=>{ captureUndo(); params=HINA.presetParams(activePre); rebuild(); renderBody(); }},
+        onclick:()=>{ captureUndo(); params=HINA.presetParams(activePre); rebuild(); renderBody();
+          const sel=$('tabBody').querySelector('.preCard.selected'); if(sel) sel.focus(); }},
         t('btn.revert').replace('{p}',preLabel)));
     }
     const gDiv=el('div',{style:'margin-top:14px'});
     const runGacha=seed=>{
       captureUndo(); lastGachaSeed=seed; params=HINA.randomParams(seed);
       activePresetId=null; rebuild(); renderBody();
+      // Return focus to gacha button so keyboard users can run it again or Tab onwards
+      const gb=$('gachaBtn'); if(gb) gb.focus();
     };
-    gDiv.append(el('button',{class:'btn wide', onclick:()=>runGacha((Math.random()*1e9|0))}, t('btn.gacha')));
+    gDiv.append(el('button',{id:'gachaBtn', class:'btn wide', onclick:()=>runGacha((Math.random()*1e9|0))}, t('btn.gacha')));
     const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'),

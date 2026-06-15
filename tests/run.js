@@ -4317,6 +4317,28 @@ function accData(j, bin, ai){
     'onParam() calls rebuild() for all geometry params after the phys short-circuit guard');
 }
 
+/* ---- Round 202: preset/gacha focus restoration after renderBody() DOM rebuild (WCAG 2.4.3) ---- */
+{
+  // When a preset card is activated (Enter/click), renderBody() destroys the DOM and rebuilds it.
+  // Focus falls to document.body unless we explicitly re-focus the newly-rendered card.
+  // Fix: after preset selection, query .preCard.selected and focus it.
+  ok(/preCard.*selected[\s\S]{0,60}sel\.focus\(\)/.test(html.replace(/\s+/g,' ')),
+    'preset card click restores focus to .preCard.selected after renderBody() (WCAG 2.4.3 Focus Order)');
+
+  // Revert button also calls renderBody(); focus must return to selected card
+  // In source order: presetParams(activePre) → renderBody() → sel.focus() → then t('btn.revert')
+  ok(/HINA\.presetParams\(activePre\)[\s\S]{0,200}sel\.focus/.test(html.replace(/\s+/g,' ')),
+    'revert-to-preset button restores focus to .preCard.selected after renderBody()');
+
+  // Gacha button: needs a stable id so focus can be restored to it after DOM rebuild
+  ok(html.includes("id:'gachaBtn'") || html.includes('id:"gachaBtn"'),
+    'gacha button has id="gachaBtn" for stable post-rebuild focus restoration');
+
+  // runGacha() restores focus to #gachaBtn after renderBody()
+  ok(/gachaBtn[\s\S]{0,60}gb\.focus\(\)/.test(html.replace(/\s+/g,' ')),
+    'runGacha() calls $("gachaBtn").focus() after renderBody() (keyboard users can re-run gacha immediately)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
