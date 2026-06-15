@@ -2268,8 +2268,11 @@ function updateStats(){
   const hv=$('heightVal'); if (hv) hv.textContent=params.height.toFixed(2)+' m';
   announceRank(pc, q);
   if (statEls.tris){
-    statEls.tris.textContent=est.tris;
-    statEls.bones.textContent=est.bones;
+    // Annotate tris and bones with Quest Excellent threshold so users can see headroom at a glance
+    const QE=HINA.RANKS.quest;
+    const ann=(val,lim)=>val+(val>lim?' / '+lim+' ⚠':' / '+lim);
+    statEls.tris.textContent=ann(est.tris,QE.tris[0]);
+    statEls.bones.textContent=ann(est.bones,QE.bones[0]);
     statEls.mat.textContent=est.mat;
     statEls.skinned.textContent=est.skinned;
     statEls.pbComp.textContent=params.springOff?0:est.pbComp;

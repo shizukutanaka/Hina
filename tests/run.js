@@ -4080,6 +4080,30 @@ function accData(j, bin, ai){
   ok(saveStateSrc.includes('reduceMotion'), 'auto-save badge respects prefers-reduced-motion');
 }
 
+/* ---- Round 190: tris/bones stat cells show Quest Excellent threshold annotation ---- */
+{
+  // updateStats() should annotate tris and bones with Quest Excellent limit (RANKS.quest.*[0])
+  ok(html.includes('HINA.RANKS.quest') || html.includes("RANKS.quest"),
+    'updateStats() reads HINA.RANKS.quest for Quest Excellent thresholds');
+
+  // Annotation helper must reference tris[0] and bones[0] specifically
+  ok(/QE\.tris\[0\]/.test(html) || /quest.*tris.*\[0\]/.test(html),
+    'tris annotation uses Quest Excellent threshold (tris[0]=7500)');
+  ok(/QE\.bones\[0\]/.test(html) || /quest.*bones.*\[0\]/.test(html),
+    'bones annotation uses Quest Excellent threshold (bones[0]=75)');
+
+  // Verify the thresholds from RANKS match known SPEC values
+  ok(H.RANKS.quest.tris[0] === 7500, 'Quest Excellent tris limit is 7500 (SPEC)');
+  ok(H.RANKS.quest.bones[0] === 75, 'Quest Excellent bones limit is 75 (SPEC)');
+
+  // Sanity check: default build tris and bones are below Quest Excellent
+  const est = H.estimate(B, P);
+  ok(est.tris <= H.RANKS.quest.tris[0],
+    `default build tris (${est.tris}) are within Quest Excellent limit (${H.RANKS.quest.tris[0]})`);
+  ok(est.bones <= H.RANKS.quest.bones[0],
+    `default build bones (${est.bones}) are within Quest Excellent limit (${H.RANKS.quest.bones[0]})`);
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
