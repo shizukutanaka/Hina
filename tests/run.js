@@ -4181,6 +4181,25 @@ function accData(j, bin, ai){
     'ja btn.reset.confirm still present after captureUndo fix');
 }
 
+/* ---- Round 195: copy seed button shows '✓ Copied' feedback after clipboard write ---- */
+{
+  // btn.copied key must exist in both languages
+  ok(H.I18N.ja['btn.copied'] && H.I18N.ja['btn.copied'].includes('✓'),
+    'ja btn.copied key present with ✓ checkmark');
+  ok(H.I18N.en['btn.copied'] && H.I18N.en['btn.copied'].includes('✓'),
+    'en btn.copied key present with ✓ checkmark');
+
+  // a11y.seedCopied must exist with {n} placeholder
+  ok(H.I18N.ja['a11y.seedCopied'] && H.I18N.ja['a11y.seedCopied'].includes('{n}'),
+    'ja a11y.seedCopied key has {n} placeholder for seed number');
+  ok(H.I18N.en['a11y.seedCopied'] && H.I18N.en['a11y.seedCopied'].includes('{n}'),
+    'en a11y.seedCopied key has {n} placeholder for seed number');
+
+  // The copy button handler uses .then() for success feedback
+  ok(/writeText[\s\S]{0,200}btn\.copied/.test(html),
+    'copy seed button uses .then() to show btn.copied on successful clipboard write');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

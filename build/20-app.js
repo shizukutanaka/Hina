@@ -726,7 +726,14 @@ function renderBody(){
       onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>=0) runGacha(n); }});
     const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
-      onclick:()=>{ if(lastGachaSeed===null) return; navigator.clipboard?.writeText(String(lastGachaSeed)).catch(()=>{}); }
+      onclick:()=>{
+        if(lastGachaSeed===null) return;
+        navigator.clipboard?.writeText(String(lastGachaSeed)).then(()=>{
+          const orig=cpBtn.textContent; cpBtn.textContent=t('btn.copied');
+          setTimeout(()=>{ cpBtn.textContent=orig; },1500);
+          const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.seedCopied').replace('{n}',lastGachaSeed);
+        }).catch(()=>{ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); });
+      }
     }, t('btn.copySeed'));
     seedRow.append(el('span',{class:'limit'},t('gacha.seed')), seedIn, cpBtn);
     gDiv.append(seedRow);
