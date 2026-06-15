@@ -209,6 +209,23 @@ const PAL = {
   cloth: ['#2f3a52','#5d4a7a','#3f6f5f','#8a3b4a','#27496d','#7a5230','#384048','#7d3c5e','#9a8c5a','#46627a'],
   accent:['#f2f2f2','#e8c84a','#d9534f','#00c4cc','#f0a0b8','#ffffff'],
 };
+// Human-readable color names keyed by hex (for aria-label in swatches)
+const PAL_NAMES = {
+  '#ffe3d0':{ja:'乳白',en:'Porcelain'},'#ffd6bd':{ja:'クリーム',en:'Cream'},'#f7c5a8':{ja:'ピーチ',en:'Peach'},
+  '#eab28e':{ja:'ウォームベージュ',en:'Warm Beige'},'#d49a72':{ja:'カラメル',en:'Caramel'},'#b97f59':{ja:'テラコッタ',en:'Terracotta'},
+  '#96603e':{ja:'アンバー',en:'Amber'},'#6f4528':{ja:'エボニー',en:'Ebony'},
+  '#3a3a45':{ja:'オフブラック',en:'Off-black'},'#5a4632':{ja:'ダークブラウン',en:'Dark Brown'},'#8a5a2b':{ja:'チョコレート',en:'Chocolate'},
+  '#b98a4a':{ja:'キャラメル',en:'Caramel'},'#d9c08a':{ja:'ゴールデン',en:'Golden'},'#e8e0d8':{ja:'プラチナ',en:'Platinum'},
+  '#7a3b3b':{ja:'バーガンディ',en:'Burgundy'},'#a64d6d':{ja:'ローズ',en:'Rose'},'#5d4a7a':{ja:'パープル',en:'Purple'},
+  '#3d5a80':{ja:'ミッドナイトブルー',en:'Midnight Blue'},'#3f6f5f':{ja:'フォレスト',en:'Forest'},'#c9577a':{ja:'マゼンタ',en:'Magenta'},
+  '#5a3825':{ja:'ダークブラウン',en:'Dark Brown'},'#7a4a2a':{ja:'アンバー',en:'Amber'},
+  '#7a4a8a':{ja:'バイオレット',en:'Violet'},'#a64d4d':{ja:'レッド',en:'Red'},'#caa84a':{ja:'ゴールド',en:'Gold'},'#4a4a55':{ja:'グレー',en:'Gray'},
+  '#2f3a52':{ja:'ネイビー',en:'Navy'},'#8a3b4a':{ja:'バーガンディ',en:'Burgundy'},'#27496d':{ja:'スチールブルー',en:'Steel Blue'},
+  '#7a5230':{ja:'ブラウン',en:'Brown'},'#384048':{ja:'チャコール',en:'Charcoal'},'#7d3c5e':{ja:'プラム',en:'Plum'},
+  '#9a8c5a':{ja:'カーキ',en:'Khaki'},'#46627a':{ja:'スレート',en:'Slate'},
+  '#f2f2f2':{ja:'オフホワイト',en:'Off-white'},'#e8c84a':{ja:'ゴールド',en:'Gold'},'#d9534f':{ja:'レッド',en:'Red'},
+  '#00c4cc':{ja:'ティール',en:'Teal'},'#f0a0b8':{ja:'ピンク',en:'Pink'},'#ffffff':{ja:'ホワイト',en:'White'},
+};
 
 /* ---------- parameter schema (single source of truth) ----------
    kinds: num {min,max,def,step}, enum {opts,def}, bool {def}, color {def,pal} */
@@ -1414,7 +1431,7 @@ function selfTest(){
 }
 
 return {
-  VERSION, M, hex2rgb, shade, HEXRE, PAL,
+  VERSION, M, hex2rgb, shade, HEXRE, PAL, PAL_NAMES,
   PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams,
   I18N, TEX, ATLAS, uvBlock, uvRect,
   RANKS, RANK_NAMES, estimate, rank,
@@ -2123,10 +2140,11 @@ function paramRow(k){
     swBtns.forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.c===params[k]))); };
   for(const c of HINA.PAL[s.pal]){
     const isActive=params[k]===c;
+    const cname=(HINA.PAL_NAMES[c]||{})[lang]||c;
     const btn=el('button',{type:'button', class:'sw', style:'background:'+c,
-      'aria-label':label+' '+c, 'aria-pressed':String(isActive),
+      'aria-label':label+' — '+cname, 'aria-pressed':String(isActive),
       tabindex:isActive?'0':'-1',
-      title:c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);
+      title:cname+' '+c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);
         setSwTab(swBtns.indexOf(btn)); updateSwPressedState();}});
     btn.dataset.c=c;
     swBtns.push(btn); sw.append(btn);

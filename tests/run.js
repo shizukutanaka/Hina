@@ -4689,6 +4689,26 @@ function accData(j, bin, ai){
     'selftest box renders pass/total count via selftest.count key');
 }
 
+/* ---- Round 224: PAL_NAMES provides human-readable color names for swatches ---- */
+{
+  // PAL_NAMES exported from HINA core
+  ok(typeof H.PAL_NAMES === 'object' && H.PAL_NAMES !== null,
+    'HINA.PAL_NAMES is exported and is an object');
+  // All PAL colors should have a name in both ja and en
+  let allHaveNames = true;
+  for(const key in H.PAL){
+    for(const hex of H.PAL[key]){
+      const n=H.PAL_NAMES[hex];
+      if(!n || !n.ja || !n.en){ allHaveNames=false; break; }
+    }
+    if(!allHaveNames) break;
+  }
+  ok(allHaveNames, 'all PAL colors have both ja and en names in PAL_NAMES');
+  // Swatch aria-label must use PAL_NAMES via HINA.PAL_NAMES
+  ok(/HINA\.PAL_NAMES\[c\]/.test(html),
+    'swatch aria-label uses HINA.PAL_NAMES for human-readable color name');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

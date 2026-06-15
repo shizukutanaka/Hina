@@ -696,10 +696,11 @@ function paramRow(k){
     swBtns.forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.c===params[k]))); };
   for(const c of HINA.PAL[s.pal]){
     const isActive=params[k]===c;
+    const cname=(HINA.PAL_NAMES[c]||{})[lang]||c;
     const btn=el('button',{type:'button', class:'sw', style:'background:'+c,
-      'aria-label':label+' '+c, 'aria-pressed':String(isActive),
+      'aria-label':label+' — '+cname, 'aria-pressed':String(isActive),
       tabindex:isActive?'0':'-1',
-      title:c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);
+      title:cname+' '+c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);
         setSwTab(swBtns.indexOf(btn)); updateSwPressedState();}});
     btn.dataset.c=c;
     swBtns.push(btn); sw.append(btn);
