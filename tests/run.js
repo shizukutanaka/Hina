@@ -4537,6 +4537,21 @@ function accData(j, bin, ai){
     'beforeunload handler saves activeTab');
 }
 
+/* ---- Round 212: double-click slider resets to schema default ---- */
+{
+  // range slider must have ondblclick that resets to s.def
+  ok(/ondblclick[\s\S]{0,100}s\.def/.test(html),
+    'range slider has ondblclick handler that resets to schema default (s.def)');
+  // title tooltip should reference the slider reset hint key
+  ok(/hint\.sliderReset/.test(html),
+    'slider title references hint.sliderReset key');
+  // Both locales must have hint.sliderReset
+  ok(/'hint\.sliderReset':'ダブルクリックでデフォルト値に戻す'/.test(html),
+    'hint.sliderReset present in ja locale');
+  ok(/'hint\.sliderReset':'Double-click to reset to default'/.test(html),
+    'hint.sliderReset present in en locale');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

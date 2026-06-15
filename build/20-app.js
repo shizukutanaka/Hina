@@ -646,8 +646,11 @@ function paramRow(k){
     // detail mode exposes a direct numeric entry (SPEC §2); easy mode shows a read-only value
     let valEl;
     const r=el('input',{id:pid, type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
-      'aria-label':label,
+      'aria-label':label, title:t('hint.sliderReset'),
       onpointerdown:()=>captureUndo(),
+      ondblclick:()=>{ captureUndo(); params[k]=s.def; r.value=String(s.def);
+        if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
+        onParam(k); },
       oninput:e=>{ params[k]=parseFloat(e.target.value);
         if (valEl.tagName==='INPUT') valEl.value=String(params[k]); else valEl.textContent=String(params[k]);
         onParam(k); }});
