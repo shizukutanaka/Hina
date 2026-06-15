@@ -4626,6 +4626,16 @@ function accData(j, bin, ai){
     'saveJson() announces a11y.savedJson to SR live region');
 }
 
+/* ---- Round 219: note.springOff shown when springOff=true and has springs ---- */
+{
+  ok(/'note\.springOff':'揺れ物オフ中/.test(html),
+    'note.springOff key present in ja locale');
+  ok(/'note\.springOff':'Springs are OFF/.test(html),
+    'note.springOff key present in en locale');
+  ok(/params\.springOff && hasS[\s\S]{0,200}note\.springOff/.test(html),
+    'phys tab shows note.springOff when springOff active and has spring bones');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

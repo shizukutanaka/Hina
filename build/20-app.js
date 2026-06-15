@@ -802,6 +802,8 @@ function renderBody(scrollReset=true){
   }
   if (activeTab==='phys'){
     const hasS = build && build.springs && build.springs.length > 0;
+    if (params.springOff && hasS)
+      bd.append(el('div',{class:'note'}, t('note.springOff')));
     bd.append(el('div',{class:'note'}, t(hasS ? 'note.quest' : 'note.quest.nospring')));
   }
 }
