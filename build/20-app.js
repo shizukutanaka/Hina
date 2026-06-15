@@ -981,6 +981,8 @@ function applyLang(){
   $('panel').setAttribute('aria-label', t('a11y.panel'));
   $('btnAbout').setAttribute('aria-label', t('a11y.about.btn'));
   $('aboutTxt').textContent = t('about');
+  if ($('aboutKeysSumm')) $('aboutKeysSumm').textContent = t('about.keys');
+  if ($('aboutKeys')) $('aboutKeys').textContent = t('about.keyList');
   $('aboutClose').textContent = t('about.close');
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   document.querySelectorAll('.rankBadge').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));

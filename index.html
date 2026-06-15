@@ -128,6 +128,8 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
 <dialog id="aboutDlg" aria-labelledby="aboutH2">
   <h2 id="aboutH2">雛 (Hina) <span id="aboutVer"></span></h2>
   <p id="aboutTxt"></p>
+  <details style="margin-bottom:12px"><summary id="aboutKeysSumm" style="font-size:12px;color:var(--text-dim);cursor:pointer"></summary>
+  <pre id="aboutKeys" style="font-size:11px;color:var(--text-faint);line-height:1.8;margin-top:6px;white-space:pre-wrap"></pre></details>
   <p style="font-size:11px;color:var(--text-faint)">MIT License · © 2026 shizukutanaka<br>VRM is a registered trademark of the VRM Consortium.</p>
   <button class="btn" id="aboutClose"></button>
 </dialog>
@@ -328,6 +330,7 @@ const I18N = {
     'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
+    'about.keys':'キーボードショートカット','about.keyList':'Ctrl+S         → VRM書き出し\nCtrl+Shift+S   → JSON保存\nCtrl+Z         → 元に戻す\nCtrl+Shift+P   → スクリーンショット\n?              → このダイアログ\n1〜8           → タブ切替\n↑↓←→        → 3D回転（プレビュー選択時）\n+/−           → ズーム\nHome           → 視点リセット',
     'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
     'usage.Disallow':'不可','usage.Allow':'可',
     'license.Redistribution_Prohibited':'再配布禁止','license.CC0':'CC0（パブリックドメイン）',
@@ -375,6 +378,7 @@ const I18N = {
     'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.seedCopied':'Seed {n} copied to clipboard',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
+    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl+S           → Export VRM\nCtrl+Shift+S     → Save JSON\nCtrl+Z           → Undo\nCtrl+Shift+P     → Screenshot\n?                → This dialog\n1–8              → Switch tabs\nArrow keys       → Rotate preview (when canvas focused)\n+/−              → Zoom\nHome             → Reset view',
     'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
     'usage.Disallow':'Disallow','usage.Allow':'Allow',
     'license.Redistribution_Prohibited':'No redistribution','license.CC0':'CC0 (Public domain)',
@@ -2403,6 +2407,8 @@ function applyLang(){
   $('panel').setAttribute('aria-label', t('a11y.panel'));
   $('btnAbout').setAttribute('aria-label', t('a11y.about.btn'));
   $('aboutTxt').textContent = t('about');
+  if ($('aboutKeysSumm')) $('aboutKeysSumm').textContent = t('about.keys');
+  if ($('aboutKeys')) $('aboutKeys').textContent = t('about.keyList');
   $('aboutClose').textContent = t('about.close');
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   document.querySelectorAll('.rankBadge').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));

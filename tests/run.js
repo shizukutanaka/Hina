@@ -1456,7 +1456,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 1100)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 1400)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -4225,6 +4225,29 @@ function accData(j, bin, ai){
   ok(/hairGrav.*springOff|springOff.*hairGrav/.test(html) ||
      /\['hairStiff','hairGrav','hairDrag'\].*springOff/.test(html),
     'renderBody skips hairGrav/hairDrag when springOff is true (array check)');
+}
+
+/* ---- Round 198: keyboard shortcut list in About dialog ---- */
+{
+  // about.keys (summary label) and about.keyList (content) must exist in both languages
+  ok(H.I18N.ja['about.keys'] && H.I18N.ja['about.keys'].length > 0,
+    'ja about.keys (shortcut section label) present');
+  ok(H.I18N.en['about.keys'] && H.I18N.en['about.keys'].length > 0,
+    'en about.keys (shortcut section label) present');
+  ok(H.I18N.ja['about.keyList'] && H.I18N.ja['about.keyList'].includes('Ctrl+S'),
+    'ja about.keyList contains Ctrl+S shortcut reference');
+  ok(H.I18N.en['about.keyList'] && H.I18N.en['about.keyList'].includes('Ctrl+S'),
+    'en about.keyList contains Ctrl+S shortcut reference');
+  ok(H.I18N.en['about.keyList'].includes('Ctrl+Shift+P'),
+    'en about.keyList includes Ctrl+Shift+P screenshot shortcut');
+
+  // aboutKeys element in dialog markup
+  ok(html.includes('id="aboutKeys"'), 'aboutKeys pre element in About dialog markup');
+  ok(html.includes('id="aboutKeysSumm"'), 'aboutKeysSumm summary element in About dialog markup');
+
+  // applyLang must populate both elements
+  ok(html.includes("'aboutKeysSumm'") || html.includes('"aboutKeysSumm"'),
+    'applyLang populates aboutKeysSumm with about.keys i18n text');
 }
 
 /* ---- selfTest ---- */
