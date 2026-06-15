@@ -4129,10 +4129,10 @@ function accData(j, bin, ai){
   // i18n keys for screenshot button
   ok(H.I18N.ja['btn.screenshot'] === 'PNG', 'ja btn.screenshot key is PNG');
   ok(H.I18N.en['btn.screenshot'] === 'PNG', 'en btn.screenshot key is PNG');
-  ok(H.I18N.ja['btn.screenshot.tip'] && H.I18N.ja['btn.screenshot.tip'].includes('Ctrl+P'),
-    'ja btn.screenshot.tip mentions Ctrl+P shortcut');
-  ok(H.I18N.en['btn.screenshot.tip'] && H.I18N.en['btn.screenshot.tip'].includes('Ctrl+P'),
-    'en btn.screenshot.tip mentions Ctrl+P shortcut');
+  ok(H.I18N.ja['btn.screenshot.tip'] && H.I18N.ja['btn.screenshot.tip'].includes('Ctrl+Shift+P'),
+    'ja btn.screenshot.tip mentions Ctrl+Shift+P shortcut (avoids Print conflict)');
+  ok(H.I18N.en['btn.screenshot.tip'] && H.I18N.en['btn.screenshot.tip'].includes('Ctrl+Shift+P'),
+    'en btn.screenshot.tip mentions Ctrl+Shift+P shortcut');
 
   // screenshotDone a11y keys
   ok(H.I18N.ja['a11y.screenshotDone'] && H.I18N.ja['a11y.screenshotDone'].length > 0,
@@ -4147,13 +4147,13 @@ function accData(j, bin, ai){
   ok(/function doScreenshot/.test(html), 'doScreenshot function present');
   ok(/cv\.toBlob/.test(html), 'doScreenshot uses canvas.toBlob() for PNG capture');
 
-  // Ctrl+P keyboard shortcut wired
-  ok(/ctrlKey.*&&.*key.*===.*'p'/.test(html) || /key.*===.*'p'.*&&.*ctrlKey/.test(html),
-    'Ctrl+P keyboard shortcut triggers doScreenshot');
+  // Ctrl+Shift+P keyboard shortcut wired (not Ctrl+P which conflicts with Print)
+  ok(/ctrlKey.*&&.*key.*===.*'P'.*&&.*shiftKey/.test(html) || /shiftKey.*&&.*key.*===.*'P'.*&&.*ctrlKey/.test(html),
+    'Ctrl+Shift+P keyboard shortcut triggers doScreenshot (avoids browser Print conflict)');
 
-  // hint.ctrlS updated to include Ctrl+P
-  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl+P'), 'ja hint.ctrlS includes Ctrl+P hint');
-  ok(H.I18N.en['hint.ctrlS'].includes('Ctrl+P'), 'en hint.ctrlS includes Ctrl+P hint');
+  // hint.ctrlS updated to include Ctrl+Shift+P
+  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl+Shift+P'), 'ja hint.ctrlS includes Ctrl+Shift+P hint');
+  ok(H.I18N.en['hint.ctrlS'].includes('Ctrl+Shift+P'), 'en hint.ctrlS includes Ctrl+Shift+P hint');
 }
 
 /* ---- Round 193: document drag-and-drop JSON loading in Export tab ---- */
@@ -4167,6 +4167,18 @@ function accData(j, bin, ai){
   // hint.dropJson must appear in the Export tab UI (renderOut section)
   ok(html.includes("'hint.dropJson'") || html.includes('"hint.dropJson"'),
     'Export tab UI renders hint.dropJson discovery text');
+}
+
+/* ---- Round 194: captureUndo() before Reset + Ctrl+Shift+P instead of Ctrl+P ---- */
+{
+  // Reset button must call captureUndo() so the user can undo a reset
+  ok(/captureUndo\(\).*params=HINA\.defaults\(\)/.test(html) ||
+     /captureUndo\(\)[^\n]*\n[^\n]*params=HINA\.defaults\(\)/.test(html),
+    'Reset button calls captureUndo() before resetting params (undo-able reset)');
+
+  // btn.reset.confirm text unchanged (we only added captureUndo, not changed UX flow)
+  ok(H.I18N.ja['btn.reset.confirm'] && H.I18N.ja['btn.reset.confirm'].includes('初期化'),
+    'ja btn.reset.confirm still present after captureUndo fix');
 }
 
 /* ---- selfTest ---- */

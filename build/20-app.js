@@ -816,7 +816,7 @@ function renderOut(bd){
   bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:8px'}, t('hint.dropJson')));
   bd.append(el('button',{class:'btn wide', onclick:()=>{
     if (!confirm(t('btn.reset.confirm'))) return;
-    params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }}, t('btn.reset')));
+    captureUndo(); params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }}, t('btn.reset')));
   bd.append(el('div',{class:'note'}, t('note.upload')));
   const gd=el('div',{class:'note'}, el('b',{}, t('guide.t')));
   for(const k of ['guide.s1','guide.s2','guide.s3','guide.s4','guide.s5'])
@@ -1010,7 +1010,7 @@ document.addEventListener('keydown',e=>{
     e.preventDefault(); doExport();
   } else if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey && notField){
     e.preventDefault(); doUndo();
-  } else if ((e.ctrlKey||e.metaKey) && e.key==='p' && !e.shiftKey && notField){
+  } else if ((e.ctrlKey||e.metaKey) && e.key==='P' && e.shiftKey && notField){
     e.preventDefault(); doScreenshot();
   }
   if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){
