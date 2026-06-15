@@ -4524,6 +4524,19 @@ function accData(j, bin, ai){
     'first card gets tabindex="0" as roving fallback when no preset selected');
 }
 
+/* ---- Round 211: activeTab persisted to localStorage ---- */
+{
+  // saveState must include activeTab in the stored object
+  ok(/localStorage\.setItem[\s\S]{0,100}activeTab/.test(html),
+    'saveState() saves activeTab to localStorage');
+  // loadState must restore activeTab from stored object, validated against TABS
+  ok(/j\.activeTab[\s\S]{0,80}TABS\.includes/.test(html),
+    'loadState() restores activeTab only if it is a valid TABS entry');
+  // beforeunload also saves activeTab
+  ok(/beforeunload[\s\S]{0,200}activeTab/.test(html),
+    'beforeunload handler saves activeTab');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

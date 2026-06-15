@@ -1454,6 +1454,7 @@ function loadState(){
     if (j.meta && typeof j.meta==='object') Object.assign(meta, j.meta);
     if (j.lang==='en' || j.lang==='ja') lang = j.lang;
     if (j.mode==='detail') mode = 'detail';
+    if (j.activeTab && TABS.includes(j.activeTab)) activeTab = j.activeTab;
     if (j.activePresetId && HINA.PRESETS.some(p=>p.id===j.activePresetId)) activePresetId = j.activePresetId;
     if (Number.isFinite(j.lastGachaSeed)) lastGachaSeed = j.lastGachaSeed;
   }catch(e){}
@@ -1488,7 +1489,7 @@ function saveState(){
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(()=>{
     try{
-      localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activePresetId, lastGachaSeed}));
+      localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed}));
       const b=$('autoSaveBadge');
       if (b){
         b.textContent=t('hint.saved'); b.style.color='var(--ok)';
@@ -2515,7 +2516,7 @@ document.addEventListener('keydown',e=>{
 });
 window.addEventListener('beforeunload',()=>{
   clearTimeout(_saveTimer);
-  try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activePresetId, lastGachaSeed})); }catch(e){}
+  try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed})); }catch(e){}
 });
 // Drag-and-drop JSON loading — complement the file button; 'Files' check avoids conflicts with 3D canvas drag
 document.body.addEventListener('dragover',e=>{ if (e.dataTransfer.types.includes('Files')) e.preventDefault(); });
