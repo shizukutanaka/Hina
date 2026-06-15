@@ -681,6 +681,14 @@ function renderBody(){
         captureUndo(); params=pp; activePresetId=pre.id; rebuild(); renderBody(); }},
         nmDiv, cols));
     }
+    // Show revert button when the active preset has been modified
+    const activePre = activePresetId ? HINA.PRESETS.find(p=>p.id===activePresetId) : null;
+    if (activePre && JSON.stringify(HINA.presetParams(activePre)) !== _sCur){
+      const preLabel = lang==='ja' ? activePre.ja : activePre.en;
+      bd.append(el('button',{class:'btn wide',style:'margin-top:10px',
+        onclick:()=>{ captureUndo(); params=HINA.presetParams(activePre); rebuild(); renderBody(); }},
+        t('btn.revert').replace('{p}',preLabel)));
+    }
     const gDiv=el('div',{style:'margin-top:14px'});
     const runGacha=seed=>{
       captureUndo(); lastGachaSeed=seed; params=HINA.randomParams(seed);
