@@ -4216,6 +4216,17 @@ function accData(j, bin, ai){
     'noGlOverlay is aria-hidden (hint bar aria-live already covers it)');
 }
 
+/* ---- Round 197: hide spring physics sliders when springOff=true ---- */
+{
+  // When springOff is true, hairStiff/hairGrav/hairDrag have no effect.
+  // renderBody() must skip them to avoid showing useless controls.
+  ok(/hairStiff.*springOff|springOff.*hairStiff/.test(html),
+    'renderBody skips hairStiff when springOff is true');
+  ok(/hairGrav.*springOff|springOff.*hairGrav/.test(html) ||
+     /\['hairStiff','hairGrav','hairDrag'\].*springOff/.test(html),
+    'renderBody skips hairGrav/hairDrag when springOff is true (array check)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

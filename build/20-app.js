@@ -746,6 +746,7 @@ function renderBody(){
     if (s.tab!==activeTab) continue;
     if (mode==='easy' && s.adv) continue;
     if (k==='skirtLen' && !['onepiece','sailor'].includes(params.outfit)) continue;
+    if (['hairStiff','hairGrav','hairDrag'].includes(k) && params.springOff) continue;
     bd.append(paramRow(k));
   }
   if (activeTab==='phys'){
