@@ -101,6 +101,7 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
   <div class="logo"><b>雛</b><span>Hina · VRM Avatar Maker</span></div>
   <div class="hdr-actions">
     <span id="autoSaveBadge" aria-live="polite" aria-atomic="true" style="font-size:11px;color:var(--ok);opacity:0;transition:opacity .3s;pointer-events:none"></span>
+    <button class="hbtn" id="btnScreenshot" title=""></button>
     <button class="hbtn" id="btnMode" aria-pressed="false"></button>
     <button class="hbtn" id="btnLang">EN</button>
     <button class="hbtn" id="btnAbout">?</button>
@@ -307,7 +308,7 @@ function randomParams(seed){
 const I18N = {
   ja: {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
-    'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.exported':'✓ 書き出し完了','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','btn.revert':'↺ {p} に戻す','hint.ctrlS':'Ctrl+S → VRM書き出し / Ctrl+Shift+S → JSON保存 / Ctrl+Z → 元に戻す / ? → ヘルプ / 1〜8 → タブ切替',
+    'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.exported':'✓ 書き出し完了','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','btn.revert':'↺ {p} に戻す','btn.screenshot':'PNG','btn.screenshot.tip':'スクリーンショットを保存（Ctrl+P）','hint.ctrlS':'Ctrl+S → VRM書き出し / Ctrl+Shift+S → JSON保存 / Ctrl+Z → 元に戻す / Ctrl+P → PNG / ? → ヘルプ / 1〜8 → タブ切替',
     'mode.easy':'かんたん','mode.detail':'詳細',
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.version':'バージョン','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.filename':'ファイル名','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'out.version.ph':'例: 1.0','out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
@@ -324,7 +325,7 @@ const I18N = {
     'a11y.exprActive':'表情: {expr}','a11y.exprNeutral':'ニュートラルに戻りました',
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
     'a11y.rankBadge':'ランクバッジ — クリックで統計タブへ',
-    'a11y.exported':'{name} を書き出しました（約{size}）',
+    'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
     'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
@@ -354,7 +355,7 @@ const I18N = {
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.exported':'✓ Exported','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','btn.revert':'↺ Revert to {p}','hint.ctrlS':'Ctrl+S → Export VRM / Ctrl+Shift+S → Save JSON / Ctrl+Z → Undo / ? → Help / 1-8 → Switch tab',
+    'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.exported':'✓ Exported','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','btn.revert':'↺ Revert to {p}','btn.screenshot':'PNG','btn.screenshot.tip':'Save screenshot (Ctrl+P)','hint.ctrlS':'Ctrl+S → Export VRM / Ctrl+Shift+S → Save JSON / Ctrl+Z → Undo / Ctrl+P → PNG / ? → Help / 1-8 → Switch tab',
     'mode.easy':'Easy','mode.detail':'Detail',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.version':'Version','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.filename':'File name','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'out.version.ph':'e.g. 1.0','out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
@@ -371,7 +372,7 @@ const I18N = {
     'a11y.exprActive':'Expression: {expr}','a11y.exprNeutral':'Returned to neutral',
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
     'a11y.rankBadge':'Rank badge — click to open Stats tab',
-    'a11y.exported':'Exported {name} (~{size})',
+    'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
     'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
@@ -2344,6 +2345,24 @@ function saveJson(){
   download(new TextEncoder().encode(HINA.serialize(params, meta)),
     fnameStem()+'.hina.json', 'application/json');
 }
+function doScreenshot(){
+  if (!GLOK) return;
+  const btn=$('btnScreenshot');
+  if (btn){ btn.disabled=true; }
+  try{
+    renderFrame(performance.now()); // render into buffer before browser flushes it
+    cv.toBlob(blob=>{
+      if (!blob) return;
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=fnameStem()+'.png'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
+    },'image/png');
+  } finally {
+    if (btn){ btn.disabled=false; }
+  }
+}
 
 /* ---------- rebuild ---------- */
 function rebuild(){
@@ -2378,11 +2397,13 @@ function applyLang(){
   $('aboutClose').textContent = t('about.close');
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   document.querySelectorAll('.rankBadge').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
+  const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.style.display=GLOK?'':'none'; }
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); buildExprBar(); updateStats();
 }
 $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); });
 $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); });
+$('btnScreenshot').addEventListener('click', doScreenshot);
 $('btnAbout').addEventListener('click',()=>$('aboutDlg').showModal());
 $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 // close dialog on backdrop click (click on the dialog element itself = outside the content box)
@@ -2410,6 +2431,8 @@ document.addEventListener('keydown',e=>{
     e.preventDefault(); doExport();
   } else if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey && notField){
     e.preventDefault(); doUndo();
+  } else if ((e.ctrlKey||e.metaKey) && e.key==='p' && !e.shiftKey && notField){
+    e.preventDefault(); doScreenshot();
   }
   if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){
     e.preventDefault(); $('aboutDlg').showModal();

@@ -923,6 +923,24 @@ function saveJson(){
   download(new TextEncoder().encode(HINA.serialize(params, meta)),
     fnameStem()+'.hina.json', 'application/json');
 }
+function doScreenshot(){
+  if (!GLOK) return;
+  const btn=$('btnScreenshot');
+  if (btn){ btn.disabled=true; }
+  try{
+    renderFrame(performance.now()); // render into buffer before browser flushes it
+    cv.toBlob(blob=>{
+      if (!blob) return;
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=fnameStem()+'.png'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
+    },'image/png');
+  } finally {
+    if (btn){ btn.disabled=false; }
+  }
+}
 
 /* ---------- rebuild ---------- */
 function rebuild(){
@@ -957,11 +975,13 @@ function applyLang(){
   $('aboutClose').textContent = t('about.close');
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   document.querySelectorAll('.rankBadge').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
+  const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.style.display=GLOK?'':'none'; }
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); buildExprBar(); updateStats();
 }
 $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); });
 $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); });
+$('btnScreenshot').addEventListener('click', doScreenshot);
 $('btnAbout').addEventListener('click',()=>$('aboutDlg').showModal());
 $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 // close dialog on backdrop click (click on the dialog element itself = outside the content box)
@@ -989,6 +1009,8 @@ document.addEventListener('keydown',e=>{
     e.preventDefault(); doExport();
   } else if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey && notField){
     e.preventDefault(); doUndo();
+  } else if ((e.ctrlKey||e.metaKey) && e.key==='p' && !e.shiftKey && notField){
+    e.preventDefault(); doScreenshot();
   }
   if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){
     e.preventDefault(); $('aboutDlg').showModal();

@@ -4124,6 +4124,38 @@ function accData(j, bin, ai){
     'save failure badge uses --warn CSS variable (yellow, distinct from success green)');
 }
 
+/* ---- Round 192: PNG screenshot button in header ---- */
+{
+  // i18n keys for screenshot button
+  ok(H.I18N.ja['btn.screenshot'] === 'PNG', 'ja btn.screenshot key is PNG');
+  ok(H.I18N.en['btn.screenshot'] === 'PNG', 'en btn.screenshot key is PNG');
+  ok(H.I18N.ja['btn.screenshot.tip'] && H.I18N.ja['btn.screenshot.tip'].includes('Ctrl+P'),
+    'ja btn.screenshot.tip mentions Ctrl+P shortcut');
+  ok(H.I18N.en['btn.screenshot.tip'] && H.I18N.en['btn.screenshot.tip'].includes('Ctrl+P'),
+    'en btn.screenshot.tip mentions Ctrl+P shortcut');
+
+  // screenshotDone a11y keys
+  ok(H.I18N.ja['a11y.screenshotDone'] && H.I18N.ja['a11y.screenshotDone'].length > 0,
+    'ja a11y.screenshotDone key present');
+  ok(H.I18N.en['a11y.screenshotDone'] && H.I18N.en['a11y.screenshotDone'].length > 0,
+    'en a11y.screenshotDone key present');
+
+  // btnScreenshot element in markup
+  ok(html.includes('id="btnScreenshot"'), 'btnScreenshot element present in markup');
+
+  // doScreenshot function must use cv.toBlob (reads WebGL buffer as PNG)
+  ok(/function doScreenshot/.test(html), 'doScreenshot function present');
+  ok(/cv\.toBlob/.test(html), 'doScreenshot uses canvas.toBlob() for PNG capture');
+
+  // Ctrl+P keyboard shortcut wired
+  ok(/ctrlKey.*&&.*key.*===.*'p'/.test(html) || /key.*===.*'p'.*&&.*ctrlKey/.test(html),
+    'Ctrl+P keyboard shortcut triggers doScreenshot');
+
+  // hint.ctrlS updated to include Ctrl+P
+  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl+P'), 'ja hint.ctrlS includes Ctrl+P hint');
+  ok(H.I18N.en['hint.ctrlS'].includes('Ctrl+P'), 'en hint.ctrlS includes Ctrl+P hint');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
