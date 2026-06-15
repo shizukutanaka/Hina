@@ -819,6 +819,8 @@ function updateStats(){
     const tip=t('rank.tip.'+r.rank)+(lim?' — '+lim:'');
     elm.title=tip; elm.parentElement.title=tip; };
   set($('rankPC'),pc); set($('rankQ'),q);
+  const qlim=$('rankQLim');
+  if(qlim) qlim.textContent = (q.worst&&q.worst.length&&q.idx>0) ? '('+t('cat.'+q.worst[0])+')' : '';
   const hv=$('heightVal'); if (hv) hv.textContent=params.height.toFixed(2)+' m';
   announceRank(pc, q);
   if (statEls.tris){
