@@ -4021,6 +4021,22 @@ function accData(j, bin, ai){
   ok(presetNanBad === 0, 'all 6 preset avatars have fully-finite vertex positions');
 }
 
+/* ---- Round 187: hint.undoReady i18n key + undo hint flash logic in captureUndo ---- */
+{
+  // hint.undoReady must exist in both ja and en so the flash works in both languages
+  ok(H.I18N.ja['hint.undoReady'] && H.I18N.ja['hint.undoReady'].includes('Z'),
+    'ja hint.undoReady key present and mentions Z (undo shortcut)');
+  ok(H.I18N.en['hint.undoReady'] && H.I18N.en['hint.undoReady'].includes('Z'),
+    'en hint.undoReady key present and mentions Z (undo shortcut)');
+
+  // The captureUndo() implementation must reference hint.undoReady
+  ok(html.includes("'hint.undoReady'") || html.includes('"hint.undoReady"'),
+    'captureUndo() references hint.undoReady i18n key to flash undo hint in canvas bar');
+
+  // The timer variable _undoHintTimer must be present (debounce prevents hint flicker on rapid slider drags)
+  ok(html.includes('_undoHintTimer'), '_undoHintTimer debounce variable present in captureUndo');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

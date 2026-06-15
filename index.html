@@ -314,7 +314,7 @@ const I18N = {
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物ボーン','st.chains':'揺れ物チェーン','st.tex':'テクスチャ推定',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'rank.tip.Excellent':'全ユーザーにデフォルト表示','rank.tip.Good':'Good以上を許可したユーザーに表示','rank.tip.Medium':'Medium以上を許可したユーザーのみ表示','rank.tip.Poor':'Poor以上を許可したユーザーのみ表示','rank.tip.VeryPoor':'ほぼ全ユーザーに非表示',
-    'hint.exprOff':'クリックで解除','hint.drag':'ドラッグ/矢印キー: 回転 / ホイール・+−: ズーム / ダブルクリック・Home: リセット',
+    'hint.exprOff':'クリックで解除','hint.drag':'ドラッグ/矢印キー: 回転 / ホイール・+−: ズーム / ダブルクリック・Home: リセット','hint.undoReady':'Ctrl+Z → 元に戻す',
     'hint.noGL':'WebGL が使えません — プレビュー無効（書き出しは動作します）',
     'hint.glLost':'WebGL コンテキストが失われました — ページを再読み込みしてください',
     'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、＋／−でズーム、Homeで初期位置に戻ります。',
@@ -359,7 +359,7 @@ const I18N = {
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring bones','st.chains':'Spring chains','st.tex':'Texture est.',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'rank.tip.Excellent':'Visible to all users by default','rank.tip.Good':'Visible to users allowing Good+','rank.tip.Medium':'Visible only to users allowing Medium+','rank.tip.Poor':'Visible only to users allowing Poor+','rank.tip.VeryPoor':'Hidden for most users',
-    'hint.exprOff':'click to deactivate','hint.drag':'Drag/Arrows: rotate / Wheel · +−: zoom / Double-click · Home: reset',
+    'hint.exprOff':'click to deactivate','hint.drag':'Drag/Arrows: rotate / Wheel · +−: zoom / Double-click · Home: reset','hint.undoReady':'Ctrl+Z → Undo',
     'hint.noGL':'WebGL unavailable — preview disabled (export still works)',
     'hint.glLost':'WebGL context lost — reload to restore preview',
     'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, +/− zoom, Home resets the view.',
@@ -1446,12 +1446,19 @@ function loadState(){
   }catch(e){}
 }
 // Single-level undo (Ctrl+Z) — captures state before user-initiated changes
-let _undoSnap = null, _undoAt = 0;
+let _undoSnap = null, _undoAt = 0, _undoHintTimer = null;
 function captureUndo(){
   const now = Date.now();
   if (!_undoSnap || now - _undoAt > 1500){
     _undoSnap = { p: JSON.parse(JSON.stringify(params)), m: JSON.parse(JSON.stringify(meta)), aid: activePresetId, seed: lastGachaSeed };
     _undoAt = now;
+    // Flash hint bar to tell users undo is available (3 s then restore)
+    const h = $('hint');
+    if (h && !activeExpr){
+      clearTimeout(_undoHintTimer);
+      h.textContent = t('hint.undoReady');
+      _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=GLOK?t('hint.drag'):t('hint.noGL'); }, 3000);
+    }
   }
 }
 function doUndo(){

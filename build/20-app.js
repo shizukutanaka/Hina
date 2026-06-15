@@ -30,12 +30,19 @@ function loadState(){
   }catch(e){}
 }
 // Single-level undo (Ctrl+Z) — captures state before user-initiated changes
-let _undoSnap = null, _undoAt = 0;
+let _undoSnap = null, _undoAt = 0, _undoHintTimer = null;
 function captureUndo(){
   const now = Date.now();
   if (!_undoSnap || now - _undoAt > 1500){
     _undoSnap = { p: JSON.parse(JSON.stringify(params)), m: JSON.parse(JSON.stringify(meta)), aid: activePresetId, seed: lastGachaSeed };
     _undoAt = now;
+    // Flash hint bar to tell users undo is available (3 s then restore)
+    const h = $('hint');
+    if (h && !activeExpr){
+      clearTimeout(_undoHintTimer);
+      h.textContent = t('hint.undoReady');
+      _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=GLOK?t('hint.drag'):t('hint.noGL'); }, 3000);
+    }
   }
 }
 function doUndo(){
