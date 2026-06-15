@@ -864,6 +864,17 @@ function renderOut(bd){
   tbl.append(el('tr',{}, el('th',{scope:'row'},'Quest'), rkQ));
   bd.append(tbl);
   bd.append(el('button',{class:'btn wide', onclick:saveJson}, t('btn.saveJson')));
+  {
+    const cpj=el('button',{class:'btn wide', onclick:()=>{
+      const json=HINA.serialize(params,meta);
+      navigator.clipboard?.writeText(json).then(()=>{
+        const orig=cpj.textContent; cpj.textContent=t('btn.copyJsonDone');
+        setTimeout(()=>{ cpj.textContent=orig; },1800);
+        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copyJsonDone');
+      }).catch(()=>{ cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500); });
+    }}, t('btn.copyJson'));
+    bd.append(cpj);
+  }
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
       const rd=new FileReader();

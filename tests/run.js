@@ -4597,6 +4597,25 @@ function accData(j, bin, ai){
     'a11y.canvas (en) mentions double-click reset');
 }
 
+/* ---- Round 217: Copy params JSON to clipboard button ---- */
+{
+  // btn.copyJson key in both locales
+  ok(/'btn\.copyJson':'クリップボードにコピー'/.test(html),
+    'btn.copyJson present in ja locale');
+  ok(/'btn\.copyJson':'Copy to clipboard'/.test(html),
+    'btn.copyJson present in en locale');
+  // btn.copyJsonDone key in both locales
+  ok(/'btn\.copyJsonDone':'✓ コピー済'/.test(html),
+    'btn.copyJsonDone present in ja locale');
+  ok(/'btn\.copyJsonDone':'✓ Copied'/.test(html),
+    'btn.copyJsonDone present in en locale');
+  // Button uses HINA.serialize and navigator.clipboard
+  ok(/btn\.copyJson[\s\S]{0,400}HINA\.serialize[\s\S]{0,200}navigator\.clipboard/.test(html) ||
+     /HINA\.serialize[\s\S]{0,200}navigator\.clipboard[\s\S]{0,200}btn\.copyJson/.test(html) ||
+     /btn\.copyJson[\s\S]{1,600}navigator\.clipboard/.test(html),
+    'copyJson button uses HINA.serialize and navigator.clipboard');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
