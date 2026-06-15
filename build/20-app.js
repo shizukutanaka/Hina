@@ -931,7 +931,9 @@ function updateStats(){
   set($('rankPC'),pc); set($('rankQ'),q);
   const qlim=$('rankQLim');
   if(qlim) qlim.textContent = (q.worst&&q.worst.length&&q.idx>0) ? '('+t('cat.'+q.worst[0])+')' : '';
-  const hv=$('heightVal'); if (hv) hv.textContent=params.height.toFixed(2)+' m';
+  const hv=$('heightVal'); if (hv){ hv.textContent=params.height.toFixed(2)+' m';
+    const hb=$('heightBadge');
+    if(hb) hb.setAttribute('aria-label', t('lbl.height')+': '+params.height.toFixed(2)+' m — '+t('a11y.rankBadge')); }
   announceRank(pc, q);
   if (statEls.tris){
     // Annotate tris and bones with Quest Excellent threshold so users can see headroom at a glance
@@ -1058,7 +1060,8 @@ function applyLang(){
   if ($('aboutKeys')) $('aboutKeys').textContent = t('about.keyList');
   $('aboutClose').textContent = t('about.close');
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
-  document.querySelectorAll('.rankBadge').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
+  // rankBadge static reset (heightBadge is excluded — it gets a dynamic label in updateStats)
+  document.querySelectorAll('.rankBadge:not(#heightBadge)').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
   const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.style.display=GLOK?'':'none'; }
   const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
   document.documentElement.lang = lang;

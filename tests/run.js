@@ -1456,7 +1456,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 1400)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 1600)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -4634,6 +4634,17 @@ function accData(j, bin, ai){
     'note.springOff key present in en locale');
   ok(/params\.springOff && hasS[\s\S]{0,200}note\.springOff/.test(html),
     'phys tab shows note.springOff when springOff active and has spring bones');
+}
+
+/* ---- Round 220: heightBadge gets dynamic aria-label with current height ---- */
+{
+  // heightBadge excluded from the static rankBadge aria-label reset
+  ok(/rankBadge:not\(#heightBadge\)/.test(html),
+    'applyLang() excludes heightBadge from static aria-label reset');
+  // updateStats sets aria-label on heightBadge with current height value
+  ok(/heightBadge[\s\S]{0,200}lbl\.height[\s\S]{0,100}toFixed/.test(html) ||
+     /heightBadge[\s\S]{0,200}aria-label[\s\S]{0,200}toFixed/.test(html),
+    'updateStats() sets dynamic aria-label on heightBadge including height value');
 }
 
 /* ---- selfTest ---- */
