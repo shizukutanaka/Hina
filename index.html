@@ -306,7 +306,7 @@ function randomParams(seed){
 const I18N = {
   ja: {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
-    'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','hint.ctrlS':'Ctrl+S → VRM書き出し / Ctrl+Shift+S → JSON保存 / Ctrl+Z → 元に戻す / ? → ヘルプ',
+    'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.saveJson':'パラメータ保存 (.json)','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','hint.ctrlS':'Ctrl+S → VRM書き出し / Ctrl+Shift+S → JSON保存 / Ctrl+Z → 元に戻す / ? → ヘルプ / 1〜8 → タブ切替',
     'mode.easy':'かんたん','mode.detail':'詳細',
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.version':'バージョン','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.filename':'ファイル名','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'out.version.ph':'例: 1.0','out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
@@ -350,7 +350,7 @@ const I18N = {
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','hint.ctrlS':'Ctrl+S → Export VRM / Ctrl+Shift+S → Save JSON / Ctrl+Z → Undo / ? → Help',
+    'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.saveJson':'Save params (.json)','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','hint.ctrlS':'Ctrl+S → Export VRM / Ctrl+Shift+S → Save JSON / Ctrl+Z → Undo / ? → Help / 1-8 → Switch tab',
     'mode.easy':'Easy','mode.detail':'Detail',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.version':'Version','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.filename':'File name','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'out.version.ph':'e.g. 1.0','out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
@@ -2344,7 +2344,7 @@ $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('abo
 loadState();
 rebuild();
 applyLang();
-// Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about
+// Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about, 1-8=tabs
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;
   const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag);
@@ -2357,6 +2357,10 @@ document.addEventListener('keydown',e=>{
   }
   if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){
     e.preventDefault(); $('aboutDlg').showModal();
+  }
+  if (notField && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)){
+    const ti=parseInt(e.key)-1;
+    if (ti<TABS.length){ e.preventDefault(); activeTab=TABS[ti]; renderTabs(); renderBody(); $('tab-'+TABS[ti]).focus(); }
   }
 });
 window.addEventListener('beforeunload',()=>{

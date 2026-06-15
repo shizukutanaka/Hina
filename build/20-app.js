@@ -930,7 +930,7 @@ $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('abo
 loadState();
 rebuild();
 applyLang();
-// Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about
+// Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about, 1-8=tabs
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;
   const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag);
@@ -943,6 +943,10 @@ document.addEventListener('keydown',e=>{
   }
   if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){
     e.preventDefault(); $('aboutDlg').showModal();
+  }
+  if (notField && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)){
+    const ti=parseInt(e.key)-1;
+    if (ti<TABS.length){ e.preventDefault(); activeTab=TABS[ti]; renderTabs(); renderBody(); $('tab-'+TABS[ti]).focus(); }
   }
 });
 window.addEventListener('beforeunload',()=>{
