@@ -4572,6 +4572,19 @@ function accData(j, bin, ai){
     'two-finger handler calculates vertical midpoint for pan');
 }
 
+/* ---- Round 215: about.keyList includes double-click shortcuts ---- */
+{
+  // keyList in both locales must mention double-click for both preview reset and slider reset
+  ok(/about\.keyList.*ダブルクリック.*視点リセット/.test(html),
+    'about.keyList (ja) mentions double-click for preview reset');
+  ok(/about\.keyList.*ダブルクリック.*デフォルト値/.test(html),
+    'about.keyList (ja) mentions double-click for slider default reset');
+  ok(/about\.keyList.*Double-click.*reset view/.test(html),
+    'about.keyList (en) mentions double-click for preview reset');
+  ok(/about\.keyList.*Double-click.*reset to default/.test(html),
+    'about.keyList (en) mentions double-click for slider default reset');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
