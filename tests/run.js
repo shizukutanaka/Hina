@@ -4339,6 +4339,33 @@ function accData(j, bin, ai){
     'runGacha() calls $("gachaBtn").focus() after renderBody() (keyboard users can re-run gacha immediately)');
 }
 
+/* ---- Round 203: first-time load selects preset[0] so new users have a named starting avatar ---- */
+{
+  // When localStorage is empty (first-time visit), loadState() previously returned immediately,
+  // leaving activePresetId=null and showing an unnamed default avatar with no highlighted preset card.
+  // Fix: on first load, set activePresetId=PRESETS[0].id and params=presetParams(PRESETS[0]).
+
+  // Source pattern: the !j branch sets PRESETS[0].id before returning
+  ok(/if \(!j\)[\s\S]{0,400}PRESETS\[0\]\.id/.test(html.replace(/\s+/g,' ')),
+    'loadState() selects PRESETS[0] as the default on first-time load (no localStorage data)');
+
+  // The first preset must be a valid, buildable preset
+  const first = H.PRESETS[0];
+  ok(first && first.id && first.ja && first.en,
+    'PRESETS[0] has id, ja, en labels (safe as first-load default)');
+
+  // presetParams(PRESETS[0]) must be sanitize-stable (no clamping on first load)
+  const firstP = H.presetParams(first);
+  ok(JSON.stringify(firstP) === JSON.stringify(H.sanitize(firstP)),
+    'PRESETS[0] params are sanitize-stable (no out-of-range values on first-time start)');
+
+  // First preset must achieve Quest Excellent with springOff (onboarding avatar must be uploadable)
+  const firstB = H.buildAvatar(firstP);
+  const firstEst = H.estimate(firstB, Object.assign({}, firstP, { springOff: true }));
+  ok(H.rank(firstEst, 'quest').rank === 'Excellent',
+    'PRESETS[0] achieves Quest Excellent with springOff (first-time users see an upload-ready avatar)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
