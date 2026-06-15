@@ -4491,6 +4491,22 @@ function accData(j, bin, ai){
     'hint.drag (en) mentions Shift+↑↓ pan shortcut');
 }
 
+/* ---- Round 209: SR announcement for undo success and no-op ---- */
+{
+  // doUndo must announce 'a11y.undone' on success and 'a11y.noUndo' when stack empty
+  ok(/a11y\.undone/.test(html), 'a11y.undone key exists in build');
+  ok(/a11y\.noUndo/.test(html),  'a11y.noUndo key exists in build');
+  ok(/doUndo[\s\S]{0,300}a11y\.undone/.test(html),
+    'doUndo() announces a11y.undone to SR on success');
+  ok(/doUndo[\s\S]{0,200}a11y\.noUndo/.test(html),
+    'doUndo() announces a11y.noUndo to SR when nothing to undo');
+  // Both keys present in both locales
+  ok(/'a11y\.undone':'元に戻しました'/.test(html), 'a11y.undone key present in ja locale');
+  ok(/'a11y\.undone':'Undone'/.test(html), 'a11y.undone key present in en locale');
+  ok(/'a11y\.noUndo':'元に戻す履歴がありません'/.test(html), 'a11y.noUndo key present in ja locale');
+  ok(/'a11y\.noUndo':'Nothing to undo'/.test(html), 'a11y.noUndo key present in en locale');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

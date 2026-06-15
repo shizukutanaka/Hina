@@ -327,7 +327,7 @@ const I18N = {
     'a11y.exprActive':'表情: {expr}','a11y.exprNeutral':'ニュートラルに戻りました',
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
     'a11y.rankBadge':'ランクバッジ — クリックで統計タブへ',
-    'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました',
+    'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました','a11y.undone':'元に戻しました','a11y.noUndo':'元に戻す履歴がありません',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
     'about.keys':'キーボードショートカット','about.keyList':'Ctrl+S         → VRM書き出し\nCtrl+Shift+S   → JSON保存\nCtrl+Z         → 元に戻す\nCtrl+Shift+P   → スクリーンショット\n?              → このダイアログ\n1〜8           → タブ切替\n↑↓←→        → 3D回転（プレビュー選択時）\nShift+↑↓     → 上下パン（顔・足を確認）\n+/−           → ズーム\nHome           → 視点リセット',
@@ -375,7 +375,7 @@ const I18N = {
     'a11y.exprActive':'Expression: {expr}','a11y.exprNeutral':'Returned to neutral',
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
     'a11y.rankBadge':'Rank badge — click to open Stats tab',
-    'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.seedCopied':'Seed {n} copied to clipboard',
+    'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.seedCopied':'Seed {n} copied to clipboard','a11y.undone':'Undone','a11y.noUndo':'Nothing to undo',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
     'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl+S           → Export VRM\nCtrl+Shift+S     → Save JSON\nCtrl+Z           → Undo\nCtrl+Shift+P     → Screenshot\n?                → This dialog\n1–8              → Switch tabs\nArrow keys       → Rotate preview (when canvas focused)\nShift+↑/↓       → Pan up/down (inspect face or feet)\n+/−              → Zoom\nHome             → Reset view',
@@ -1475,10 +1475,12 @@ function captureUndo(){
   }
 }
 function doUndo(){
-  if (!_undoSnap) return;
+  const sr=$('srStatus');
+  if (!_undoSnap){ if(sr) sr.textContent=t('a11y.noUndo'); return; }
   const s = _undoSnap; _undoSnap = null;
   params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed;
   rebuild(); renderBody(); saveState();
+  if(sr) sr.textContent=t('a11y.undone');
 }
 
 let _saveTimer = null, _saveBadgeTimer = null;

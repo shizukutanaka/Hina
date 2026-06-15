@@ -49,10 +49,12 @@ function captureUndo(){
   }
 }
 function doUndo(){
-  if (!_undoSnap) return;
+  const sr=$('srStatus');
+  if (!_undoSnap){ if(sr) sr.textContent=t('a11y.noUndo'); return; }
   const s = _undoSnap; _undoSnap = null;
   params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed;
   rebuild(); renderBody(); saveState();
+  if(sr) sr.textContent=t('a11y.undone');
 }
 
 let _saveTimer = null, _saveBadgeTimer = null;
