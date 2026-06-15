@@ -2320,7 +2320,9 @@ function updateStats(){
     statEls.skinned.textContent=est.skinned;
     statEls.pbComp.textContent=params.springOff?0:est.pbComp;
     statEls.pbTrans.textContent=params.springOff?0:est.pbTrans;
-    statEls.texMB.textContent='~'+est.texMB+' MB';
+    // texMB: annotate with QE threshold (10 MB) so users see headroom — pbComp/pbTrans not annotated
+    // because their QE threshold is 0 (springs off), making "/ 0 ⚠" misleading
+    statEls.texMB.textContent='~'+est.texMB+(est.texMB>QE.texMB[0]?' / '+QE.texMB[0]+' ⚠':' / '+QE.texMB[0])+' MB';
     statEls.approxBytes.textContent='~'+Math.round(est.approxBytes/1024)+' KB';
     statEls.rkPC.innerHTML=''; statEls.rkQ.innerHTML='';
     const badge=r=>{ const lim=limitText(r);

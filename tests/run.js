@@ -4445,6 +4445,40 @@ function accData(j, bin, ai){
     'camTarget[1] pan is clamped to [0, H0*1.1] preventing camera from going below floor or too far above head');
 }
 
+/* ---- Round 207: pbComp/pbTrans/texMB annotated with Quest Excellent thresholds in stats table ---- */
+{
+  // Round 190 added tris and bones annotations (val / QE_threshold). The same headroom context
+  // was missing for PhysBone components, PhysBone transforms, and texture MB.
+  // All three are now annotated with QE.XXX[0] so users see: e.g. "2 / 8" for pbComp.
+
+  // texMB annotation: shows ~ + val + / threshold + MB
+  ok(/texMB.*QE\.texMB\[0\]/.test(html),
+    'updateStats() annotates texMB with Quest Excellent threshold (10 MB headroom indicator)');
+
+  // pbComp/pbTrans are NOT annotated because their QE threshold is 0 (spring-off only).
+  // Showing "2 / 0 ⚠" would be misleading; raw counts are more useful here.
+  ok(!/ann\(est\.pbComp,QE\.pbComp\[0\]\)/.test(html),
+    'pbComp not annotated with QE[0]=0 threshold (would display misleading "/ 0 ⚠")');
+  ok(!/ann\(est\.pbTrans,QE\.pbTrans\[0\]\)/.test(html),
+    'pbTrans not annotated with QE[0]=0 threshold (would display misleading "/ 0 ⚠")');
+
+  // QE.texMB[0] = 10 MB is a meaningful positive threshold
+  const QE = H.RANKS.quest;
+  ok(typeof QE.texMB[0] === 'number' && QE.texMB[0] > 0,
+    'RANKS.quest.texMB[0] is a positive number (Quest Excellent texture MB threshold)');
+
+  // Verify pbComp/pbTrans QE thresholds are 0 (confirms the annotation decision above)
+  ok(QE.pbComp[0] === 0, 'RANKS.quest.pbComp[0] === 0 (Excellent requires spring-off)');
+  ok(QE.pbTrans[0] === 0, 'RANKS.quest.pbTrans[0] === 0 (Excellent requires spring-off)');
+
+  // All 6 default preset texMB estimates should be under the QE threshold (10 MB)
+  ok(H.PRESETS.every(pre => {
+    const b = H.buildAvatar(H.presetParams(pre));
+    const est = H.estimate(b, H.presetParams(pre));
+    return est.texMB <= QE.texMB[0];
+  }), 'all 6 presets have texMB at or below Quest Excellent threshold (no texture budget warnings)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
