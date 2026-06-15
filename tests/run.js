@@ -1531,9 +1531,9 @@ function accData(j, bin, ai){
       'GLB JSON chunk padding bytes are 0x20 (space) per glTF 2.0 §4.4');
   }
 
-  // onParam calls renderBody after rebuild (ensures conditional rows like skirtLen update)
-  ok(/function onParam[\s\S]{0,320}rebuild\(\);[\s\S]{0,50}renderBody/.test(html),
-    'onParam() calls renderBody() after rebuild so outfit-conditional params (skirtLen) update immediately');
+  // onParam calls renderBody only for structural params (outfit→skirtLen, springOff→spring sliders)
+  ok(/k==='outfit'\s*\|\|\s*k==='springOff'[\s\S]{0,60}renderBody/.test(html),
+    'onParam() guards renderBody() behind outfit/springOff so only structural changes re-render the panel');
 }
 
 /* ---- Round 106: height badge in preview overlay + GLB binary chunk padding ---- */
@@ -4281,6 +4281,40 @@ function accData(j, bin, ai){
   const heights = H.PRESETS.map(p=>H.presetParams(p).height);
   ok(new Set(heights).size >= 2, 'at least 2 distinct preset heights (Chibi differs from others)');
   ok(heights.some(h=>h < 1.1), 'at least one preset below 1.1m (Chibi) for visible height contrast');
+}
+
+/* ---- Round 201: onParam skips renderBody for non-structural params (no scroll-jump on slider drag) ---- */
+{
+  // Every slider oninput fires onParam(k) → rebuild() → (old) renderBody() → scrollTop=0.
+  // Dragging any slider reset the panel scroll position on every tick — a significant UX regression.
+  // Fix: only call renderBody() when the param changes the panel's row structure.
+  // Structural params: outfit (skirtLen row appears/disappears), springOff (spring sliders hide/show).
+  // All other params leave layout unchanged → skip renderBody() → no scroll jump.
+
+  // Conditional guard: renderBody is behind outfit/springOff check
+  ok(/k==='outfit'\s*\|\|\s*k==='springOff'[\s\S]{0,60}renderBody/.test(html),
+    'onParam() guards renderBody() behind outfit/springOff conditional (WCAG: no panel jump on slider drag)');
+
+  // Negative: within onParam itself, rebuild() must NOT be immediately followed by renderBody()
+  // Scope to onParam body to avoid false-positives from preset/gacha call sites.
+  const _onParamStart = html.indexOf("function onParam(");
+  const _onParamEnd   = html.indexOf("\nfunction ", _onParamStart + 1);
+  const _onParamBody  = html.slice(_onParamStart, _onParamEnd);
+  ok(!/rebuild\(\);\s*renderBody\(\)/.test(_onParamBody),
+    'renderBody() is not called unconditionally after rebuild() in onParam — prevents scroll-jump on every slider tick');
+
+  // Positive: outfit param IS a structural param in PARAMS schema (tab='outfit')
+  ok(H.PARAMS.outfit && H.PARAMS.outfit.k === 'enum',
+    'outfit is an enum param in PARAMS schema (structural panel param)');
+
+  // Positive: springOff IS a param in PARAMS schema (it's a bool)
+  ok(H.PARAMS.springOff && H.PARAMS.springOff.k === 'bool',
+    'springOff is a bool param in PARAMS schema (structural panel param)');
+
+  // Verify: non-structural slider param (e.g. height) still leads to rebuild() in onParam
+  // (rebuild is always called for non-color, non-phys params)
+  ok(/if \(s\.tab==='phys'[\s\S]{0,40}return\s*;[\s\S]{0,60}rebuild\(\)/.test(html.replace(/\n/g,' ')),
+    'onParam() calls rebuild() for all geometry params after the phys short-circuit guard');
 }
 
 /* ---- selfTest ---- */

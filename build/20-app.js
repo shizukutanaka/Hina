@@ -679,7 +679,10 @@ function onParam(k){
   if (s.k==='color'){ drawAtlas(params); uploadTexture(); saveState(); return; }
   if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
   rebuild();
-  renderBody(); // refresh panel so conditional rows (e.g. skirtLen) reflect updated params
+  // Only re-render panel when the param changes row structure (skirtLen↔outfit, spring sliders↔springOff).
+  // All other params leave the panel layout unchanged — skipping renderBody() prevents the
+  // panel from jumping back to scrollTop=0 on every slider tick.
+  if (k==='outfit' || k==='springOff') renderBody();
 }
 
 function renderBody(){
