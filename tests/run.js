@@ -1456,7 +1456,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 800)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 1100)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -4035,6 +4035,23 @@ function accData(j, bin, ai){
 
   // The timer variable _undoHintTimer must be present (debounce prevents hint flicker on rapid slider drags)
   ok(html.includes('_undoHintTimer'), '_undoHintTimer debounce variable present in captureUndo');
+}
+
+/* ---- Round 188: rank badges clickable → Stats tab navigation ---- */
+{
+  // a11y.rankBadge key must exist in both languages
+  ok(H.I18N.ja['a11y.rankBadge'] && H.I18N.ja['a11y.rankBadge'].length > 0,
+    'ja a11y.rankBadge i18n key present');
+  ok(H.I18N.en['a11y.rankBadge'] && H.I18N.en['a11y.rankBadge'].length > 0,
+    'en a11y.rankBadge i18n key present');
+
+  // The rank badge click handler must reference 'out' tab (the Stats/Export tab)
+  ok(/rankBadge[\s\S]{0,300}activeTab\s*=\s*['"]out['"]/.test(html),
+    "rank badge click handler switches to 'out' (Stats/Export) tab");
+
+  // Role=button on badges for keyboard/assistive tech
+  ok(/rankBadge[\s\S]{0,300}role.*button/.test(html),
+    'rank badges get role=button for keyboard activation');
 }
 
 /* ---- selfTest ---- */

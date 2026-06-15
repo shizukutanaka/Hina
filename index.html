@@ -321,6 +321,7 @@ const I18N = {
     'a11y.stage':'3Dプレビューエリア','a11y.panel':'アバター設定パネル','a11y.about.btn':'雛について',
     'a11y.exprActive':'表情: {expr}','a11y.exprNeutral':'ニュートラルに戻りました',
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
+    'a11y.rankBadge':'ランクバッジ — クリックで統計タブへ',
     'a11y.exported':'{name} を書き出しました（約{size}）',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
@@ -366,6 +367,7 @@ const I18N = {
     'a11y.stage':'3D preview area','a11y.panel':'Avatar settings panel','a11y.about.btn':'About Hina',
     'a11y.exprActive':'Expression: {expr}','a11y.exprNeutral':'Returned to neutral',
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
+    'a11y.rankBadge':'Rank badge — click to open Stats tab',
     'a11y.exported':'Exported {name} (~{size})',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
@@ -2354,6 +2356,7 @@ function applyLang(){
   $('aboutTxt').textContent = t('about');
   $('aboutClose').textContent = t('about.close');
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
+  document.querySelectorAll('.rankBadge').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); buildExprBar(); updateStats();
 }
@@ -2367,6 +2370,15 @@ $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('abo
 loadState();
 rebuild();
 applyLang();
+// Rank badges are clickable shortcuts to the Stats/Export tab
+document.querySelectorAll('.rankBadge').forEach(b=>{
+  b.style.cursor='pointer';
+  b.setAttribute('role','button');
+  b.setAttribute('tabindex','0');
+  const goStats=()=>{ activeTab='out'; renderTabs(); renderBody(); $('tab-out').focus(); };
+  b.addEventListener('click', goStats);
+  b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); goStats(); }});
+});
 // Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about, 1-8=tabs
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;

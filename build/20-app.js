@@ -938,6 +938,7 @@ function applyLang(){
   $('aboutTxt').textContent = t('about');
   $('aboutClose').textContent = t('about.close');
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
+  document.querySelectorAll('.rankBadge').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); buildExprBar(); updateStats();
 }
@@ -951,6 +952,15 @@ $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('abo
 loadState();
 rebuild();
 applyLang();
+// Rank badges are clickable shortcuts to the Stats/Export tab
+document.querySelectorAll('.rankBadge').forEach(b=>{
+  b.style.cursor='pointer';
+  b.setAttribute('role','button');
+  b.setAttribute('tabindex','0');
+  const goStats=()=>{ activeTab='out'; renderTabs(); renderBody(); $('tab-out').focus(); };
+  b.addEventListener('click', goStats);
+  b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); goStats(); }});
+});
 // Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about, 1-8=tabs
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;
