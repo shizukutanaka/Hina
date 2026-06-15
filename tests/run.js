@@ -4417,6 +4417,34 @@ function accData(j, bin, ai){
     'exportVRM meta.title from 256-char input fits within VRM meta field (str() sanitization)');
 }
 
+/* ---- Round 206: Shift+↑↓ keyboard pan + Home resets camTarget ---- */
+{
+  // Users on touchpad/laptop without a right mouse button had no keyboard way to pan the camera
+  // vertically (inspect avatar's feet vs face). Shift+↑/↓ now pans camTarget[1] up/down.
+
+  // Shift+ArrowUp pans camera up (shiftKey branch with camTarget)
+  ok(/e\.shiftKey[\s\S]{0,100}camTarget\[1\][\s\S]{0,60}ArrowUp|ArrowUp[\s\S]{0,200}shiftKey[\s\S]{0,100}camTarget\[1\]/.test(html),
+    'canvas keydown: Shift+ArrowUp pans camTarget[1] (keyboard vertical pan)');
+
+  // Shift+ArrowDown pans camera down
+  ok(/ArrowDown[\s\S]{0,200}shiftKey[\s\S]{0,100}camTarget\[1\]/.test(html),
+    'canvas keydown: Shift+ArrowDown pans camTarget[1] (keyboard vertical pan)');
+
+  // Home key now also resets camTarget alongside camYaw/camPitch/camDist
+  ok(/Home[\s\S]{0,100}camTarget/.test(html),
+    'Home key resets camTarget to default (clears any panning applied with Shift+↑↓)');
+
+  // about.keyList i18n updated to mention Shift+↑↓ in both languages
+  ok(H.I18N.ja['about.keyList'].includes('Shift') && H.I18N.ja['about.keyList'].includes('↑'),
+    'about.keyList JA updated to mention Shift+↑↓ pan shortcut');
+  ok(H.I18N.en['about.keyList'].includes('Shift') && H.I18N.en['about.keyList'].includes('Pan'),
+    'about.keyList EN updated to mention Shift pan shortcut');
+
+  // Pan clamp: camTarget[1] bounded above by H0*1.1
+  ok(/M\.clamp\(camTarget\[1\][\s\S]{0,30}H0\*1\.1\)/.test(html),
+    'camTarget[1] pan is clamped to [0, H0*1.1] preventing camera from going below floor or too far above head');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

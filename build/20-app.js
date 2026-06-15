@@ -586,14 +586,21 @@ function renderFrame(time){
   // keyboard camera control (WCAG 2.1.1 — preview must be operable without a pointer)
   cv.addEventListener('keydown',e=>{
     const rot=0.18, zoom=0.12; let used=true;
+    const H0=build?build.dims.H:1.45;
     switch(e.key){
       case 'ArrowLeft':  camYaw += rot; break;
       case 'ArrowRight': camYaw -= rot; break;
-      case 'ArrowUp':    camPitch=M.clamp(camPitch+rot, -0.5, 1.25); break;
-      case 'ArrowDown':  camPitch=M.clamp(camPitch-rot, -0.5, 1.25); break;
+      case 'ArrowUp':
+        // Shift+↑ pans the camera target up (inspect face); plain ↑ orbits upward
+        if (e.shiftKey) camTarget[1]=M.clamp(camTarget[1]+0.08*H0, 0, H0*1.1);
+        else camPitch=M.clamp(camPitch+rot, -0.5, 1.25); break;
+      case 'ArrowDown':
+        if (e.shiftKey) camTarget[1]=M.clamp(camTarget[1]-0.08*H0, 0, H0*1.1);
+        else camPitch=M.clamp(camPitch-rot, -0.5, 1.25); break;
       case '+': case '=': camDist=M.clamp(camDist*(1-zoom), 0.6, 8); break;
       case '-': case '_': camDist=M.clamp(camDist*(1+zoom), 0.6, 8); break;
-      case 'Home': case '0': camYaw=Math.PI; camPitch=0.10; camDist=(build?build.dims.H:1.45)*1.85; break;
+      // Home resets all camera state including the pan target
+      case 'Home': case '0': camYaw=Math.PI; camPitch=0.10; camDist=H0*1.85; camTarget=[0,H0*0.55,0]; break;
       default: used=false;
     }
     if (used) e.preventDefault();

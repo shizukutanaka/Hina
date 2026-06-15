@@ -330,7 +330,7 @@ const I18N = {
     'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
-    'about.keys':'キーボードショートカット','about.keyList':'Ctrl+S         → VRM書き出し\nCtrl+Shift+S   → JSON保存\nCtrl+Z         → 元に戻す\nCtrl+Shift+P   → スクリーンショット\n?              → このダイアログ\n1〜8           → タブ切替\n↑↓←→        → 3D回転（プレビュー選択時）\n+/−           → ズーム\nHome           → 視点リセット',
+    'about.keys':'キーボードショートカット','about.keyList':'Ctrl+S         → VRM書き出し\nCtrl+Shift+S   → JSON保存\nCtrl+Z         → 元に戻す\nCtrl+Shift+P   → スクリーンショット\n?              → このダイアログ\n1〜8           → タブ切替\n↑↓←→        → 3D回転（プレビュー選択時）\nShift+↑↓     → 上下パン（顔・足を確認）\n+/−           → ズーム\nHome           → 視点リセット',
     'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
     'usage.Disallow':'不可','usage.Allow':'可',
     'license.Redistribution_Prohibited':'再配布禁止','license.CC0':'CC0（パブリックドメイン）',
@@ -378,7 +378,7 @@ const I18N = {
     'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.seedCopied':'Seed {n} copied to clipboard',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
-    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl+S           → Export VRM\nCtrl+Shift+S     → Save JSON\nCtrl+Z           → Undo\nCtrl+Shift+P     → Screenshot\n?                → This dialog\n1–8              → Switch tabs\nArrow keys       → Rotate preview (when canvas focused)\n+/−              → Zoom\nHome             → Reset view',
+    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl+S           → Export VRM\nCtrl+Shift+S     → Save JSON\nCtrl+Z           → Undo\nCtrl+Shift+P     → Screenshot\n?                → This dialog\n1–8              → Switch tabs\nArrow keys       → Rotate preview (when canvas focused)\nShift+↑/↓       → Pan up/down (inspect face or feet)\n+/−              → Zoom\nHome             → Reset view',
     'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
     'usage.Disallow':'Disallow','usage.Allow':'Allow',
     'license.Redistribution_Prohibited':'No redistribution','license.CC0':'CC0 (Public domain)',
@@ -2012,14 +2012,21 @@ function renderFrame(time){
   // keyboard camera control (WCAG 2.1.1 — preview must be operable without a pointer)
   cv.addEventListener('keydown',e=>{
     const rot=0.18, zoom=0.12; let used=true;
+    const H0=build?build.dims.H:1.45;
     switch(e.key){
       case 'ArrowLeft':  camYaw += rot; break;
       case 'ArrowRight': camYaw -= rot; break;
-      case 'ArrowUp':    camPitch=M.clamp(camPitch+rot, -0.5, 1.25); break;
-      case 'ArrowDown':  camPitch=M.clamp(camPitch-rot, -0.5, 1.25); break;
+      case 'ArrowUp':
+        // Shift+↑ pans the camera target up (inspect face); plain ↑ orbits upward
+        if (e.shiftKey) camTarget[1]=M.clamp(camTarget[1]+0.08*H0, 0, H0*1.1);
+        else camPitch=M.clamp(camPitch+rot, -0.5, 1.25); break;
+      case 'ArrowDown':
+        if (e.shiftKey) camTarget[1]=M.clamp(camTarget[1]-0.08*H0, 0, H0*1.1);
+        else camPitch=M.clamp(camPitch-rot, -0.5, 1.25); break;
       case '+': case '=': camDist=M.clamp(camDist*(1-zoom), 0.6, 8); break;
       case '-': case '_': camDist=M.clamp(camDist*(1+zoom), 0.6, 8); break;
-      case 'Home': case '0': camYaw=Math.PI; camPitch=0.10; camDist=(build?build.dims.H:1.45)*1.85; break;
+      // Home resets all camera state including the pan target
+      case 'Home': case '0': camYaw=Math.PI; camPitch=0.10; camDist=H0*1.85; camTarget=[0,H0*0.55,0]; break;
       default: used=false;
     }
     if (used) e.preventDefault();
