@@ -2182,6 +2182,34 @@ function accData(j, bin, ai){
     `humanoid index → bone.hb roundtrip consistent (mismatch: ${mismatch.join(', ')||'none'})`);
 }
 
+/* ---- Round 184: outfit top-shell unique ring Y positions — segs=12, 13 verts ---- */
+{
+  // Outfit top-shell latheY(segs=12) → 13 verts per ring. 4 rings:
+  //   [0] spineY - 0.03×H  — unique to outfit (torso has spineY, not spineY-0.03H)
+  //   [1] chestY            — shared with torso ring[4] → 26 total (verified Round 176)
+  //   [2] shoulderY+0.012×H — unique (arm/sleeve rings are at shoulderY, not +0.012H)
+  //   [3] neckY+0.012×H     — unique (torso has neckY+0.01H, outfit has +0.012H)
+  // Using default build B (onepiece, twin).
+  const d = B.dims, H_ = d.H;
+  function countAtY(geom, y0){
+    let n=0; for(let vi=0;vi<geom.pos.length/3;vi++) if(Math.abs(geom.pos[vi*3+1]-y0)<1e-6) n++; return n;
+  }
+  const outfitUniq = [
+    [d.spineY - 0.03*H_,    'spineY-0.03H'],
+    [d.shoulderY + 0.012*H_, 'shoulderY+0.012H'],
+    [d.neckY + 0.012*H_,     'neckY+0.012H'],
+  ];
+  let fail=0;
+  for(const [y,lbl] of outfitUniq) if(countAtY(B.geom,y)!==13) fail++;
+  ok(fail===0, `outfit top-shell unique rings (13v each): `+
+    outfitUniq.map(([y,l])=>`${l}=${y.toFixed(4)}(${countAtY(B.geom,y)})`).join(' '));
+
+  // all 4 outfit rings strictly ascending
+  const allYs = [d.spineY-0.03*H_, d.chestY, d.shoulderY+0.012*H_, d.neckY+0.012*H_];
+  ok(allYs.every((y,i)=>i===0||y>allYs[i-1]),
+    `outfit top-shell rings ascending: ${allYs.map(y=>y.toFixed(3)).join('<')}`);
+}
+
 /* ---- Round 178: neck tube ring Y positions — segs=10, 11 verts per ring ---- */
 {
   // Neck tube: tube(segs=10) → 11 verts per ring.
