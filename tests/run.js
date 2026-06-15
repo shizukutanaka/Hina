@@ -4585,6 +4585,18 @@ function accData(j, bin, ai){
     'about.keyList (en) mentions double-click for slider default reset');
 }
 
+/* ---- Round 216: a11y.canvas includes Shift+↑↓ pan and double-click reset ---- */
+{
+  ok(/'a11y\.canvas'.*Shift.*↑.*↓.*パン/.test(html),
+    'a11y.canvas (ja) mentions Shift+↑↓ pan');
+  ok(/'a11y\.canvas'.*ダブルクリック/.test(html),
+    'a11y.canvas (ja) mentions double-click reset');
+  ok(/'a11y\.canvas'.*Shift.*↑.*↓.*pan/.test(html),
+    'a11y.canvas (en) mentions Shift+↑/↓ pan');
+  ok(/'a11y\.canvas'.*double-click/.test(html),
+    'a11y.canvas (en) mentions double-click reset');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
