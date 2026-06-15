@@ -999,8 +999,9 @@ async function doExport(){
   }
 }
 function saveJson(){
-  download(new TextEncoder().encode(HINA.serialize(params, meta)),
-    fnameStem()+'.hina.json', 'application/json');
+  const fname=fnameStem()+'.hina.json';
+  download(new TextEncoder().encode(HINA.serialize(params, meta)), fname, 'application/json');
+  const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',fname);
 }
 function doScreenshot(){
   if (!GLOK) return;

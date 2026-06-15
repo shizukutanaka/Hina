@@ -4616,6 +4616,16 @@ function accData(j, bin, ai){
     'copyJson button uses HINA.serialize and navigator.clipboard');
 }
 
+/* ---- Round 218: saveJson() announces to SR ---- */
+{
+  ok(/'a11y\.savedJson':'.*{name}.*を保存しました'/.test(html),
+    'a11y.savedJson key present in ja locale with {name} placeholder');
+  ok(/'a11y\.savedJson':'Saved \{name\}'/.test(html),
+    'a11y.savedJson key present in en locale');
+  ok(/function saveJson[\s\S]{0,200}a11y\.savedJson/.test(html),
+    'saveJson() announces a11y.savedJson to SR live region');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
