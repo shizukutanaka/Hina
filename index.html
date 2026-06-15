@@ -2406,6 +2406,7 @@ function applyLang(){
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   document.querySelectorAll('.rankBadge').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
   const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.style.display=GLOK?'':'none'; }
+  const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
   document.documentElement.lang = lang;
   renderTabs(); renderBody(); buildExprBar(); updateStats();
 }
@@ -2417,6 +2418,15 @@ $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 // close dialog on backdrop click (click on the dialog element itself = outside the content box)
 $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('aboutDlg').close(); });
 
+// When WebGL is unavailable, create a centered overlay on the canvas so the
+// black rectangle doesn't look like a crash — hint bar text alone is easy to miss
+if (!GLOK){
+  const ov=document.createElement('div');
+  ov.setAttribute('aria-hidden','true');
+  ov.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:var(--text-faint);font-size:13px;text-align:center;padding:24px';
+  ov.id='noGlOverlay';
+  $('stage').appendChild(ov);
+}
 loadState();
 rebuild();
 applyLang();

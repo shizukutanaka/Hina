@@ -4200,6 +4200,22 @@ function accData(j, bin, ai){
     'copy seed button uses .then() to show btn.copied on successful clipboard write');
 }
 
+/* ---- Round 196: noGlOverlay centered fallback message in stage when WebGL unavailable ---- */
+{
+  // noGlOverlay element is created when !GLOK and populated with hint.noGL text
+  ok(html.includes("id='noGlOverlay'") || html.includes('id="noGlOverlay"') || html.includes("'noGlOverlay'"),
+    'noGlOverlay element created for no-WebGL fallback');
+
+  // applyLang() must update noGlOverlay text (so it works in both languages)
+  ok(/nov.*noGlOverlay[\s\S]{0,100}textContent.*hint\.noGL/.test(html) ||
+     /noGlOverlay[\s\S]{0,200}hint\.noGL/.test(html),
+    'applyLang() updates noGlOverlay text with hint.noGL i18n key');
+
+  // The overlay is aria-hidden (it duplicates the hint bar text; only one should be announced)
+  ok(/noGlOverlay[\s\S]{0,400}aria-hidden/.test(html) || /aria-hidden[\s\S]{0,400}noGlOverlay/.test(html),
+    'noGlOverlay is aria-hidden (hint bar aria-live already covers it)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
