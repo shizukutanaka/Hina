@@ -581,8 +581,8 @@ function renderFrame(time){
   cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
   cv.addEventListener('wheel',e=>{ e.preventDefault();
     camDist=M.clamp(camDist*(1+e.deltaY*0.0012), 0.6, 8); },{passive:false});
-  cv.addEventListener('dblclick',()=>{ camYaw=Math.PI; camPitch=0.10;
-    camDist=(build?build.dims.H:1.45)*1.85; });
+  cv.addEventListener('dblclick',()=>{ const H0=build?build.dims.H:1.45;
+    camYaw=Math.PI; camPitch=0.10; camDist=H0*1.85; camTarget=[0,H0*0.55,0]; });
   // keyboard camera control (WCAG 2.1.1 — preview must be operable without a pointer)
   cv.addEventListener('keydown',e=>{
     const rot=0.18, zoom=0.12; let used=true;

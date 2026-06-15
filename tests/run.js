@@ -4479,6 +4479,18 @@ function accData(j, bin, ai){
   }), 'all 6 presets have texMB at or below Quest Excellent threshold (no texture budget warnings)');
 }
 
+/* ---- Round 208: dblclick resets camTarget (consistent with Home key) ---- */
+{
+  // dblclick handler must reset camTarget alongside yaw/pitch/dist
+  ok(/addEventListener\('dblclick'[\s\S]{0,200}camTarget=\[/.test(html),
+    'dblclick handler resets camTarget (not just yaw/pitch/dist)');
+  // hint.drag must mention Shift+↑↓ pan in both locales
+  ok(/hint\.drag.*Shift\+↑↓.*パン/.test(html),
+    'hint.drag (ja) mentions Shift+↑↓ pan shortcut');
+  ok(/hint\.drag.*Shift\+↑↓.*pan/.test(html),
+    'hint.drag (en) mentions Shift+↑↓ pan shortcut');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
