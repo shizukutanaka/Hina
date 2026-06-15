@@ -4562,6 +4562,16 @@ function accData(j, bin, ai){
     'aria-label includes rank text and a11y.rankBadge navigation hint');
 }
 
+/* ---- Round 214: two-finger vertical drag pans camTarget (mobile) ---- */
+{
+  // Two-finger pointermove handler must update camTarget[1] based on midpoint vertical movement
+  ok(/ptrs\.size===2[\s\S]{0,700}camTarget\[1\]/.test(html),
+    'two-finger pointermove handler updates camTarget[1] (vertical pan)');
+  // midpoint calculation: (old[0][1]+old[1][1])/2 pattern
+  ok(/oldMidY|newMidY/.test(html),
+    'two-finger handler calculates vertical midpoint for pan');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

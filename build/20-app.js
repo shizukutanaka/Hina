@@ -568,11 +568,17 @@ function renderFrame(time){
     }
     if (ptrs.size===2){
       const old=[...ptrs.values()];
+      const oldMidY=(old[0][1]+old[1][1])/2;
       const d0=Math.hypot(old[0][0]-old[1][0], old[0][1]-old[1][1]);
       ptrs.set(e.pointerId,[e.clientX,e.clientY]);
       const cur=[...ptrs.values()];
+      const newMidY=(cur[0][1]+cur[1][1])/2;
       const d1=Math.hypot(cur[0][0]-cur[1][0], cur[0][1]-cur[1][1]);
       if (d0>0) camDist=M.clamp(camDist*d0/d1, 0.6, 8);
+      // Two-finger vertical drag pans camTarget (same as Shift+↑↓ on desktop)
+      const H0=build?build.dims.H:1.45;
+      const dy=(newMidY-oldMidY)/cv.getBoundingClientRect().height;
+      camTarget[1]=M.clamp(camTarget[1]-dy*H0*1.5, 0, H0*1.1);
       return;
     }
     ptrs.set(e.pointerId,[e.clientX,e.clientY]);
