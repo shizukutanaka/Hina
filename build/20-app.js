@@ -1178,8 +1178,10 @@ cv.addEventListener('webglcontextrestored', ()=>{ location.reload(); });
 if (location.search.indexOf('selftest')>=0){
   const st=HINA.selfTest();
   const box=$('selftestBox'); box.style.display='block';
+  const pass=st.results.filter(r=>r.ok).length, total=st.results.length;
+  const countStr=t('selftest.count').replace('{pass}',pass).replace('{total}',total);
   box.append(el('div',{style:'font-weight:700;margin-bottom:6px;color:'+(st.ok?'var(--ok)':'var(--err)')},
-    st.ok?t('selftest.ok'):t('selftest.ng')));
+    (st.ok?t('selftest.ok'):t('selftest.ng'))+' — '+countStr));
   for(const r of st.results)
     box.append(el('div',{style:'color:'+(r.ok?'var(--text-dim)':'var(--err)')},
       (r.ok?'✓ ':'✗ ')+r.name+(r.msg?' — '+r.msg:'')));

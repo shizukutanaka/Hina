@@ -338,7 +338,7 @@ const I18N = {
     'license.CC_BY':'CC BY','license.CC_BY_NC':'CC BY-NC','license.CC_BY_SA':'CC BY-SA',
     'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND','license.Other':'その他',
     'out.title.ph':'例: 雛アバター','out.author.ph':'例: あなたの名前',
-    'selftest.ok':'自己診断: 全て正常','selftest.ng':'自己診断: 異常あり',
+    'selftest.ok':'自己診断: 全て正常','selftest.ng':'自己診断: 異常あり','selftest.count':'{pass}/{total} 項目',
     'err.loadFailed':'JSONファイルを読み込めませんでした（形式が不正か、雛のJSONではありません）',
     'err.buildFailed':'アバター生成に失敗しました',
     'err.exportFailed':'VRM書き出しに失敗しました',
@@ -386,7 +386,7 @@ const I18N = {
     'license.CC_BY':'CC BY','license.CC_BY_NC':'CC BY-NC','license.CC_BY_SA':'CC BY-SA',
     'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND','license.Other':'Other',
     'out.title.ph':'e.g. my-avatar','out.author.ph':'e.g. Your Name',
-    'selftest.ok':'Self-test: all OK','selftest.ng':'Self-test: FAILED',
+    'selftest.ok':'Self-test: all OK','selftest.ng':'Self-test: FAILED','selftest.count':'{pass}/{total} checks',
     'err.loadFailed':'Could not load JSON (invalid format or not a Hina file)',
     'err.buildFailed':'Avatar build failed',
     'err.exportFailed':'VRM export failed',
@@ -2605,8 +2605,10 @@ cv.addEventListener('webglcontextrestored', ()=>{ location.reload(); });
 if (location.search.indexOf('selftest')>=0){
   const st=HINA.selfTest();
   const box=$('selftestBox'); box.style.display='block';
+  const pass=st.results.filter(r=>r.ok).length, total=st.results.length;
+  const countStr=t('selftest.count').replace('{pass}',pass).replace('{total}',total);
   box.append(el('div',{style:'font-weight:700;margin-bottom:6px;color:'+(st.ok?'var(--ok)':'var(--err)')},
-    st.ok?t('selftest.ok'):t('selftest.ng')));
+    (st.ok?t('selftest.ok'):t('selftest.ng'))+' — '+countStr));
   for(const r of st.results)
     box.append(el('div',{style:'color:'+(r.ok?'var(--text-dim)':'var(--err)')},
       (r.ok?'✓ ':'✗ ')+r.name+(r.msg?' — '+r.msg:'')));

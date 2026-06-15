@@ -4678,6 +4678,17 @@ function accData(j, bin, ai){
   ok(/setSwTab/.test(html), 'setSwTab() function manages roving tabindex on swatches');
 }
 
+/* ---- Round 223: selftest box shows pass/total count ---- */
+{
+  ok(/'selftest\.count':'\{pass\}\/\{total\} 項目'/.test(html),
+    'selftest.count key present in ja locale with {pass}/{total}');
+  ok(/'selftest\.count':'\{pass\}\/\{total\} checks'/.test(html),
+    'selftest.count key present in en locale');
+  // selftest box must show count alongside pass/fail header
+  ok(/selftest\.count[\s\S]{0,200}replace.*\{pass\}/.test(html),
+    'selftest box renders pass/total count via selftest.count key');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
