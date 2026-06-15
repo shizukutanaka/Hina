@@ -1735,6 +1735,7 @@ function buildExprBar(){
   nb.dataset.expr = '';
   nb.textContent = 'N';
   nb.title = t('expr.neutral');
+  nb.setAttribute('aria-label', t('expr.neutral'));
   nb.setAttribute('aria-pressed', String(activeExpr === null));
   nb.addEventListener('click', () => setExpr(null));
   bar.append(nb);
@@ -1745,6 +1746,7 @@ function buildExprBar(){
     b.dataset.expr = name;
     b.textContent = EXPR_LABELS[name] || name.slice(0,3);
     b.title = t('expr.'+name) || name;
+    b.setAttribute('aria-label', t('expr.'+name) || name);
     b.setAttribute('aria-pressed', String(activeExpr === name));
     b.addEventListener('click', () => setExpr(activeExpr === name ? null : name));
     bar.append(b);
