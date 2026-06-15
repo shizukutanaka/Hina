@@ -4265,6 +4265,24 @@ function accData(j, bin, ai){
     'hint.ctrlS shortcut hint appears before out.meta section (moved up with export button)');
 }
 
+/* ---- Round 200 (milestone): preset cards show avatar height for body-proportion hint ---- */
+{
+  // Each preset card now shows the height in meters (e.g., '1.00m' for Chibi)
+  // Verify the chibi preset has height 1.0 so the indicator is meaningful
+  const chibi = H.PRESETS.find(p=>p.id==='chibi');
+  ok(chibi && H.presetParams(chibi).height === 1.0,
+    "chibi preset height is 1.0m — distinct from other presets' ~1.45m default");
+
+  // The grid rendering must include pp.height.toFixed(2)+'m' text for each card
+  ok(/pp\.height\.toFixed\(2\)\+'m'/.test(html),
+    'preset card renders pp.height.toFixed(2)+"m" as a body-proportion indicator');
+
+  // Verify all 6 presets have distinct height rendering possibilities (Chibi=1.0, rest ~1.45)
+  const heights = H.PRESETS.map(p=>H.presetParams(p).height);
+  ok(new Set(heights).size >= 2, 'at least 2 distinct preset heights (Chibi differs from others)');
+  ok(heights.some(h=>h < 1.1), 'at least one preset below 1.1m (Chibi) for visible height contrast');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

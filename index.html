@@ -2117,10 +2117,11 @@ function renderBody(){
       const pp=HINA.presetParams(pre);
       const isSelected = activePresetId===pre.id;
       const isModified = isSelected && JSON.stringify(pp) !== _sCur;
-      const cols=el('div',{class:'cols'},
+      const cols=el('div',{class:'cols',style:'align-items:center'},
         el('span',{class:'c',style:'background:'+pp.hairColor}),
         el('span',{class:'c',style:'background:'+pp.eyeColor}),
-        el('span',{class:'c',style:'background:'+pp.clothMain}));
+        el('span',{class:'c',style:'background:'+pp.clothMain}),
+        el('span',{style:'font-size:9px;color:var(--text-faint);margin-left:auto'}, pp.height.toFixed(2)+'m'));
       const nmDiv=el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en);
       if (isModified) nmDiv.append(el('span',{
         style:'color:var(--accent);font-size:9px;vertical-align:super;margin-left:3px',
