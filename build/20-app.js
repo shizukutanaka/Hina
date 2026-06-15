@@ -59,12 +59,19 @@ function saveState(){
     try{
       localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activePresetId, lastGachaSeed}));
       const b=$('autoSaveBadge');
-      if (b && !reduceMotion){
-        b.textContent=t('hint.saved'); b.style.opacity='1';
-        clearTimeout(_saveBadgeTimer);
-        _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2) b2.style.opacity='0'; },2000);
+      if (b){
+        b.textContent=t('hint.saved'); b.style.color='var(--ok)';
+        if (!reduceMotion){
+          b.style.opacity='1';
+          clearTimeout(_saveBadgeTimer);
+          _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2) b2.style.opacity='0'; },2000);
+        }
       }
-    }catch(e){}
+    }catch(e){
+      // localStorage full or unavailable (private browsing) — show persistent warning
+      const b=$('autoSaveBadge');
+      if (b){ b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
+    }
   }, 500);
 }
 

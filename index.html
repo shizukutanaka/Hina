@@ -316,6 +316,7 @@ const I18N = {
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'rank.tip.Excellent':'全ユーザーにデフォルト表示','rank.tip.Good':'Good以上を許可したユーザーに表示','rank.tip.Medium':'Medium以上を許可したユーザーのみ表示','rank.tip.Poor':'Poor以上を許可したユーザーのみ表示','rank.tip.VeryPoor':'ほぼ全ユーザーに非表示',
     'hint.exprOff':'クリックで解除','hint.drag':'ドラッグ/矢印キー: 回転 / ホイール・+−: ズーム / ダブルクリック・Home: リセット','hint.undoReady':'Ctrl+Z → 元に戻す','hint.saved':'✓ 自動保存',
+    'hint.saveFail':'⚠ 保存失敗 — JSONを手動で保存してください',
     'hint.noGL':'WebGL が使えません — プレビュー無効（書き出しは動作します）',
     'hint.glLost':'WebGL コンテキストが失われました — ページを再読み込みしてください',
     'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、＋／−でズーム、Homeで初期位置に戻ります。',
@@ -362,6 +363,7 @@ const I18N = {
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'rank.tip.Excellent':'Visible to all users by default','rank.tip.Good':'Visible to users allowing Good+','rank.tip.Medium':'Visible only to users allowing Medium+','rank.tip.Poor':'Visible only to users allowing Poor+','rank.tip.VeryPoor':'Hidden for most users',
     'hint.exprOff':'click to deactivate','hint.drag':'Drag/Arrows: rotate / Wheel · +−: zoom / Double-click · Home: reset','hint.undoReady':'Ctrl+Z → Undo','hint.saved':'✓ Auto-saved',
+    'hint.saveFail':'⚠ Save failed — export JSON manually to keep your work',
     'hint.noGL':'WebGL unavailable — preview disabled (export still works)',
     'hint.glLost':'WebGL context lost — reload to restore preview',
     'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, +/− zoom, Home resets the view.',
@@ -1478,12 +1480,19 @@ function saveState(){
     try{
       localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activePresetId, lastGachaSeed}));
       const b=$('autoSaveBadge');
-      if (b && !reduceMotion){
-        b.textContent=t('hint.saved'); b.style.opacity='1';
-        clearTimeout(_saveBadgeTimer);
-        _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2) b2.style.opacity='0'; },2000);
+      if (b){
+        b.textContent=t('hint.saved'); b.style.color='var(--ok)';
+        if (!reduceMotion){
+          b.style.opacity='1';
+          clearTimeout(_saveBadgeTimer);
+          _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2) b2.style.opacity='0'; },2000);
+        }
       }
-    }catch(e){}
+    }catch(e){
+      // localStorage full or unavailable (private browsing) — show persistent warning
+      const b=$('autoSaveBadge');
+      if (b){ b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
+    }
   }, 500);
 }
 

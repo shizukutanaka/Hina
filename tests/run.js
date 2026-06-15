@@ -4104,6 +4104,26 @@ function accData(j, bin, ai){
     `default build bones (${est.bones}) are within Quest Excellent limit (${H.RANKS.quest.bones[0]})`);
 }
 
+/* ---- Round 191: auto-save failure shows warning badge ---- */
+{
+  // hint.saveFail key must exist in both languages
+  ok(H.I18N.ja['hint.saveFail'] && H.I18N.ja['hint.saveFail'].includes('⚠'),
+    'ja hint.saveFail key present with ⚠ warning symbol');
+  ok(H.I18N.en['hint.saveFail'] && H.I18N.en['hint.saveFail'].includes('⚠'),
+    'en hint.saveFail key present with ⚠ warning symbol');
+
+  // saveState catch block must reference hint.saveFail and show the badge
+  const saveStateSrc = html.slice(html.indexOf('function saveState'), html.indexOf('function saveState') + 900);
+  ok(saveStateSrc.includes("'hint.saveFail'") || saveStateSrc.includes('"hint.saveFail"'),
+    'saveState catch block references hint.saveFail i18n key');
+  ok(/catch\s*\(e\)\s*\{[\s\S]{0,200}hint\.saveFail/.test(saveStateSrc),
+    'saveState catch branch sets hint.saveFail on autoSaveBadge');
+
+  // Warning uses --warn color to visually distinguish from success
+  ok(saveStateSrc.includes("var(--warn)"),
+    'save failure badge uses --warn CSS variable (yellow, distinct from success green)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
