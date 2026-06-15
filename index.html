@@ -2126,8 +2126,11 @@ function onParam(k){
 function renderBody(scrollReset=true){
   const bd=$('tabBody'); if (scrollReset) bd.scrollTop=0; bd.textContent='';
   if (activeTab==='preset'){
-    const grid=el('div',{class:'presetGrid'});
+    // role="group": preset cards use roving tabindex (ARIA: only one card in tab order at a time)
+    const grid=el('div',{class:'presetGrid', role:'group', 'aria-label':t('tab.preset')});
     const _sCur = JSON.stringify(HINA.sanitize(params));
+    const hasSelected = HINA.PRESETS.some(p=>p.id===activePresetId);
+    let _firstCard = true;
     for(const pre of HINA.PRESETS){
       const pp=HINA.presetParams(pre);
       const isSelected = activePresetId===pre.id;
@@ -2143,12 +2146,29 @@ function renderBody(scrollReset=true){
         title:lang==='ja'?'プリセットから変更中':'Modified from preset'
       }, '●'));
       grid.append(el('button',{class:'preCard'+(isSelected?' selected':''),
-        'aria-pressed':String(isSelected), onclick:()=>{
+        'aria-pressed':String(isSelected),
+        tabindex: (isSelected || (!hasSelected && _firstCard)) ? '0' : '-1',
+        onclick:()=>{
         captureUndo(); params=pp; activePresetId=pre.id; rebuild(); renderBody();
         // Restore focus to the now-selected card (WCAG 2.4.3: focus must not be lost when DOM rebuilds)
         const sel=$('tabBody').querySelector('.preCard.selected'); if(sel) sel.focus(); }},
         nmDiv, cols));
+      _firstCard=false;
     }
+    // Roving tabindex: arrow keys navigate among preset cards without multiple Tab stops
+    grid.addEventListener('keydown',e=>{
+      const cards=[...grid.querySelectorAll('.preCard')];
+      const ci=cards.indexOf(document.activeElement); if(ci<0) return;
+      let ni=-1;
+      if (e.key==='ArrowRight'||e.key==='ArrowDown') ni=(ci+1)%cards.length;
+      else if (e.key==='ArrowLeft'||e.key==='ArrowUp') ni=(ci-1+cards.length)%cards.length;
+      else if (e.key==='Home') ni=0;
+      else if (e.key==='End') ni=cards.length-1;
+      if (ni<0) return;
+      e.preventDefault();
+      cards.forEach((c,i)=>c.setAttribute('tabindex', i===ni?'0':'-1'));
+      cards[ni].focus();
+    });
     // Show revert button when the active preset has been modified
     const activePre = activePresetId ? HINA.PRESETS.find(p=>p.id===activePresetId) : null;
     if (activePre && JSON.stringify(HINA.presetParams(activePre)) !== _sCur){

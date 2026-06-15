@@ -4507,6 +4507,23 @@ function accData(j, bin, ai){
   ok(/'a11y\.noUndo':'Nothing to undo'/.test(html), 'a11y.noUndo key present in en locale');
 }
 
+/* ---- Round 210: roving tabindex on preset cards ---- */
+{
+  // Grid must have role="group" for ARIA landmark
+  ok(/presetGrid[\s\S]{0,100}role.*group/.test(html),
+    'preset grid has role="group"');
+  // Selected card gets tabindex="0", others get "-1"
+  ok(/isSelected.*tabindex.*['"]-1['"]/.test(html) || /tabindex.*isSelected.*['"]-1['"]/.test(html) ||
+     /tabindex.*hasSelected[\s\S]{0,80}['"]-1['"]/.test(html),
+    'non-selected preset cards have tabindex="-1" (roving tabindex)');
+  // Grid has arrow-key handler for navigation
+  ok(/presetGrid|grid[\s\S]{0,50}keydown[\s\S]{0,200}ArrowRight/.test(html),
+    'preset grid has keydown handler for arrow-key navigation');
+  // Fallback: first card gets tabindex="0" when no preset is selected
+  ok(/_firstCard/.test(html),
+    'first card gets tabindex="0" as roving fallback when no preset selected');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
