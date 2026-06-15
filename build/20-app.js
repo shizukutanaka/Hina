@@ -688,16 +688,35 @@ function paramRow(k){
   const inp=el('input',{id:pid, type:'color', value:params[k], 'aria-label':label,
     onpointerdown:()=>captureUndo(),
     oninput:e=>{params[k]=e.target.value; onParam(k);}});
-  const sw=el('div',{class:'swatches'});
+  // Roving tabindex on swatches: only one in tab order at a time (avoids N stops for N colors)
+  const sw=el('div',{class:'swatches', role:'group', 'aria-label':label});
+  const swBtns=[];
+  const setSwTab=ni=>swBtns.forEach((b,i)=>b.setAttribute('tabindex', i===ni?'0':'-1'));
   const updateSwPressedState=()=>{
-    sw.querySelectorAll('.sw').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.c===params[k]))); };
+    swBtns.forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.c===params[k]))); };
   for(const c of HINA.PAL[s.pal]){
+    const isActive=params[k]===c;
     const btn=el('button',{type:'button', class:'sw', style:'background:'+c,
-      'aria-label':label+' '+c, 'aria-pressed':String(params[k]===c),
-      title:c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k); updateSwPressedState();}});
+      'aria-label':label+' '+c, 'aria-pressed':String(isActive),
+      tabindex:isActive?'0':'-1',
+      title:c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);
+        setSwTab(swBtns.indexOf(btn)); updateSwPressedState();}});
     btn.dataset.c=c;
-    sw.append(btn);
+    swBtns.push(btn); sw.append(btn);
   }
+  // If no swatch matches current color, first swatch is the roving entry point
+  if (!swBtns.some(b=>b.getAttribute('tabindex')==='0') && swBtns.length) swBtns[0].setAttribute('tabindex','0');
+  sw.addEventListener('keydown',e=>{
+    const ci=swBtns.indexOf(document.activeElement); if(ci<0) return;
+    let ni=-1;
+    if (e.key==='ArrowRight'||e.key==='ArrowDown') ni=(ci+1)%swBtns.length;
+    else if (e.key==='ArrowLeft'||e.key==='ArrowUp') ni=(ci-1+swBtns.length)%swBtns.length;
+    else if (e.key==='Home') ni=0;
+    else if (e.key==='End') ni=swBtns.length-1;
+    if (ni<0) return;
+    e.preventDefault();
+    setSwTab(ni); swBtns[ni].focus();
+  });
   return el('div',{class:'row'}, el('label',{'for':pid},label), inp, sw);
 }
 

@@ -4650,7 +4650,8 @@ function accData(j, bin, ai){
 /* ---- Round 221: color swatches have aria-pressed (active indicator) ---- */
 {
   // Swatch buttons must have aria-pressed set initially based on current param value
-  ok(/class:'sw'[\s\S]{0,200}'aria-pressed':String\(params\[k\]===c\)/.test(html),
+  ok(/class:'sw'[\s\S]{0,400}'aria-pressed':String\(isActive\)/.test(html) ||
+     /class:'sw'[\s\S]{0,400}'aria-pressed':String\(params\[k\]===c\)/.test(html),
     'color swatch buttons initialized with aria-pressed matching current param value');
   // CSS must visually highlight the pressed swatch
   ok(/\.sw\[aria-pressed=true\]/.test(html),
@@ -4658,6 +4659,23 @@ function accData(j, bin, ai){
   // updateSwPressedState keeps aria-pressed in sync after click
   ok(/updateSwPressedState/.test(html),
     'updateSwPressedState() function updates aria-pressed after swatch click');
+}
+
+/* ---- Round 222: roving tabindex on color swatches ---- */
+{
+  // .swatches container has role="group" and aria-label for accessibility
+  ok(/class:'swatches'[\s\S]{0,100}role:'group'/.test(html) ||
+     /role:'group'[\s\S]{0,100}class:'swatches'/.test(html),
+    'color swatch container has role="group"');
+  // Active swatch gets tabindex="0", others "-1"
+  ok(/isActive.*tabindex.*['"]-1['"]/.test(html) || /tabindex.*isActive/.test(html),
+    'non-active color swatches have tabindex="-1" (roving tabindex)');
+  // swatches keydown handler for arrow-key navigation
+  ok(/swatches[\s\S]{0,100}keydown[\s\S]{0,200}ArrowRight/.test(html) ||
+     /sw\.addEventListener.*keydown[\s\S]{0,200}ArrowRight/.test(html),
+    'color swatch group has keydown handler for arrow-key navigation');
+  // setSwTab helper manages roving tabindex
+  ok(/setSwTab/.test(html), 'setSwTab() function manages roving tabindex on swatches');
 }
 
 /* ---- selfTest ---- */
