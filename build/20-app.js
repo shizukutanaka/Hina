@@ -689,9 +689,15 @@ function paramRow(k){
     onpointerdown:()=>captureUndo(),
     oninput:e=>{params[k]=e.target.value; onParam(k);}});
   const sw=el('div',{class:'swatches'});
-  for(const c of HINA.PAL[s.pal])
-    sw.append(el('button',{type:'button', class:'sw', style:'background:'+c, 'aria-label':label+' '+c,
-      title:c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);}}));
+  const updateSwPressedState=()=>{
+    sw.querySelectorAll('.sw').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.c===params[k]))); };
+  for(const c of HINA.PAL[s.pal]){
+    const btn=el('button',{type:'button', class:'sw', style:'background:'+c,
+      'aria-label':label+' '+c, 'aria-pressed':String(params[k]===c),
+      title:c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k); updateSwPressedState();}});
+    btn.dataset.c=c;
+    sw.append(btn);
+  }
   return el('div',{class:'row'}, el('label',{'for':pid},label), inp, sw);
 }
 

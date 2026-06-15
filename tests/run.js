@@ -1628,7 +1628,7 @@ function accData(j, bin, ai){
   }), 'all ATLAS solid block center points (b[0]+32, b[1]+32) are within [0, TEX]');
 
   // Color swatch buttons have title attribute for hex tooltip
-  ok(/class:'sw'[\s\S]{0,80}title:c/.test(html.replace(/\s+/g,' ')),
+  ok(/class:'sw'[\s\S]{0,200}title:c/.test(html.replace(/\s+/g,' ')),
     'color swatch buttons have title:c attribute (hex color tooltip on hover)');
 
   // morph targetNames are unique (no duplicate expression names)
@@ -4645,6 +4645,19 @@ function accData(j, bin, ai){
   ok(/heightBadge[\s\S]{0,200}lbl\.height[\s\S]{0,100}toFixed/.test(html) ||
      /heightBadge[\s\S]{0,200}aria-label[\s\S]{0,200}toFixed/.test(html),
     'updateStats() sets dynamic aria-label on heightBadge including height value');
+}
+
+/* ---- Round 221: color swatches have aria-pressed (active indicator) ---- */
+{
+  // Swatch buttons must have aria-pressed set initially based on current param value
+  ok(/class:'sw'[\s\S]{0,200}'aria-pressed':String\(params\[k\]===c\)/.test(html),
+    'color swatch buttons initialized with aria-pressed matching current param value');
+  // CSS must visually highlight the pressed swatch
+  ok(/\.sw\[aria-pressed=true\]/.test(html),
+    '.sw[aria-pressed=true] CSS rule exists for visual selected state');
+  // updateSwPressedState keeps aria-pressed in sync after click
+  ok(/updateSwPressedState/.test(html),
+    'updateSwPressedState() function updates aria-pressed after swatch click');
 }
 
 /* ---- selfTest ---- */
