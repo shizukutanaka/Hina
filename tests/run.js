@@ -4781,6 +4781,22 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 235: numIn clamp feedback via aria-invalid + SR announcement ---- */
+{
+  // a11y.clamped i18n keys in both locales
+  ok(H.I18N.ja['a11y.clamped'] && H.I18N.ja['a11y.clamped'].includes('制限'),
+    'ja a11y.clamped key present');
+  ok(H.I18N.en['a11y.clamped'] && H.I18N.en['a11y.clamped'].includes('clamped'),
+    'en a11y.clamped key present');
+  // numIn onchange sets aria-invalid when value is clamped
+  ok(/aria-invalid.*true[\s\S]{0,100}a11y\.clamped/.test(html) ||
+     /a11y\.clamped[\s\S]{0,100}aria-invalid/.test(html),
+    'numIn clamp feedback sets aria-invalid and announces via srStatus');
+  // aria-invalid is removed after 1500ms timeout
+  ok(/removeAttribute\('aria-invalid'\)[\s\S]{0,100}1500|1500[\s\S]{0,100}removeAttribute\('aria-invalid'\)/.test(html),
+    'aria-invalid cleared after 1500ms so field does not stay in error state');
+}
+
 /* ---- Round 234: dialog max-height + overflow-y so about dialog scrolls on small screens ---- */
 {
   ok(/dialog\{[^}]*max-height/.test(html) || /dialog[\s\S]{0,200}overflow-y:auto/.test(html),

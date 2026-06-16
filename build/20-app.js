@@ -667,8 +667,13 @@ function paramRow(k){
         'aria-label':label,
         onchange:e=>{ captureUndo(); let n=parseFloat(e.target.value);
           if (!Number.isFinite(n)) n=params[k];
-          n=M.clamp(n,s.min,s.max);
-          params[k]=n; e.target.value=String(n); r.value=String(n); onParam(k); }});
+          const clamped=M.clamp(n,s.min,s.max);
+          if (clamped!==n){
+            e.target.setAttribute('aria-invalid','true');
+            const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',clamped);
+            setTimeout(()=>e.target.removeAttribute('aria-invalid'),1500);
+          }
+          params[k]=clamped; e.target.value=String(clamped); r.value=String(clamped); onParam(k); }});
       // Prevent accidental value changes when wheel-scrolling the panel over a focused numIn
       valEl.addEventListener('wheel', e=>{ if(document.activeElement===valEl) e.preventDefault(); },{passive:false});
     } else {
