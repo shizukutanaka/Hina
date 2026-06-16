@@ -4727,6 +4727,14 @@ function accData(j, bin, ai){
     'paste button announces via srStatus live region');
 }
 
+/* ---- Round 230: color picker oninput calls updateSwPressedState() to sync aria-pressed ---- */
+{
+  // When user picks a custom color via the native color picker, aria-pressed on swatches
+  // must be updated. The oninput handler must call updateSwPressedState().
+  ok(/onpointerdown[\s\S]{0,200}oninput[\s\S]{0,100}updateSwPressedState\(\)/.test(html),
+    'color picker oninput calls updateSwPressedState() to sync swatch aria-pressed state');
+}
+
 /* ---- Round 229: stat table rank badges include rank.tip in title and aria-label ---- */
 {
   // badge() helper must reference rank.tip.* for tooltip/aria-label
