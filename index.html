@@ -2436,9 +2436,9 @@ function updateStats(){
     statEls.approxBytes.textContent='~'+Math.round(est.approxBytes/1024)+' KB';
     statEls.rkPC.innerHTML=''; statEls.rkQ.innerHTML='';
     const badge=r=>{ const lim=limitText(r);
-      const b=el('span',{class:'rk'}, t('rank.'+r.rank));
+      const tip=t('rank.tip.'+r.rank)+(lim?' — '+lim:'');
+      const b=el('span',{class:'rk', title:tip, 'aria-label':t('rank.'+r.rank)+' — '+t('rank.tip.'+r.rank)}, t('rank.'+r.rank));
       b.style.background=RANKCOLOR[r.idx]; b.style.color='#0c1014';
-      if (lim) b.title=lim;
       const wrap=el('span',{}, b);
       if (lim) wrap.append(el('span',{class:'limit'}, lim));
       return wrap; };

@@ -4727,6 +4727,18 @@ function accData(j, bin, ai){
     'paste button announces via srStatus live region');
 }
 
+/* ---- Round 229: stat table rank badges include rank.tip in title and aria-label ---- */
+{
+  // badge() helper must reference rank.tip.* for tooltip/aria-label
+  ok(/rank\.tip\.'?\+r\.rank/.test(html) || /rank\.tip\.\$\{/.test(html) ||
+     /rank\.tip\.'+r\.rank/.test(html) ||
+     /t\('rank\.tip\.'\+r\.rank\)/.test(html),
+    'stat table badge() uses rank.tip.* for tooltip text');
+  // badge span should have aria-label with rank name and tip
+  ok(/badge[\s\S]{0,300}aria-label[\s\S]{0,100}rank\.tip/.test(html),
+    'stat table badge span has aria-label including rank tip text');
+}
+
 /* ---- Round 228: preset modified indicator (●) has role=img + aria-label for SR ---- */
 {
   ok(/isModified[\s\S]{0,200}role:'img'/.test(html) || /isModified[\s\S]{0,200}role:"img"/.test(html),
