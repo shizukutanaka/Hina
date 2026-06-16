@@ -4709,6 +4709,24 @@ function accData(j, bin, ai){
     'swatch aria-label uses HINA.PAL_NAMES for human-readable color name');
 }
 
+/* ---- Round 225: paste-from-clipboard button in export tab ---- */
+{
+  // i18n keys exist in both locales
+  ok(H.I18N.ja['btn.pasteJson'] === 'クリップボードから貼り付け',
+    'ja locale has btn.pasteJson key');
+  ok(H.I18N.en['btn.pasteJson'] === 'Paste from clipboard',
+    'en locale has btn.pasteJson key');
+  // paste button uses navigator.clipboard.readText
+  ok(/readText\(\)/.test(html),
+    'paste button calls navigator.clipboard.readText()');
+  // paste button deserializes and calls rebuild
+  ok(/deserialize[\s\S]{0,200}rebuild\(\)/.test(html),
+    'paste button calls HINA.deserialize then rebuild()');
+  // paste button announces via srStatus
+  ok(/srStatus[\s\S]{0,100}btn\.pasteJson/.test(html),
+    'paste button announces via srStatus live region');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
