@@ -4781,6 +4781,14 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 233: mobile stage uses dvh for dynamic viewport height ---- */
+{
+  // The mobile media query should use dvh (with vh fallback) so the 3D stage
+  // height adapts to mobile browser toolbars (dynamic viewport unit)
+  ok(/44vh[\s\S]{0,10}44dvh/.test(html) || /dvh/.test(html),
+    'mobile stage uses dvh unit (with vh fallback) for dynamic viewport height');
+}
+
 /* ---- Round 232: numIn wheel listener prevents accidental value changes ---- */
 {
   // numIn inputs get a wheel listener with {passive:false} that calls preventDefault
