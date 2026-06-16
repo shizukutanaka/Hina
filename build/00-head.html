@@ -32,7 +32,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
 .hbtn:hover{border-color:var(--accent);color:var(--text)}
 main{flex:1;display:flex;min-height:0}
 #stage{flex:1;position:relative;min-width:0;background:radial-gradient(120% 90% at 50% 30%, #1a2027 0%, #0F1216 70%)}
-#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 #gl.drag{cursor:grabbing}
 #rankWrap{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
 .rankBadge{display:flex;align-items:center;gap:8px;background:rgba(15,18,22,.82);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;backdrop-filter:blur(4px)}
@@ -44,7 +44,7 @@ main{flex:1;display:flex;min-height:0}
 .tab{flex:1 0 auto;padding:9px 4px;font-size:12px;color:var(--text-dim);border-bottom:2px solid transparent;min-width:44px}
 .tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
 .tab:hover{color:var(--text)}
-#tabBody{flex:1;overflow-y:auto;padding:14px 16px 40px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+#tabBody{flex:1;overflow-y:auto;padding:14px 16px 40px;scrollbar-width:thin;scrollbar-color:var(--line) transparent;overscroll-behavior-y:contain}
 .row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
 .row label{flex:0 0 108px;font-size:12px;color:var(--text-dim)}
 .row input[type=range]{flex:1;accent-color:var(--accent);height:22px}

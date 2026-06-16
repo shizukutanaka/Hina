@@ -4781,6 +4781,16 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 241: user-select:none on canvas + overscroll-behavior on panel ---- */
+{
+  ok(/user-select\s*:\s*none/.test(html),
+    '#gl canvas has user-select:none to prevent text selection during drag');
+  ok(/-webkit-user-select\s*:\s*none/.test(html),
+    '#gl canvas has -webkit-user-select:none for Safari compatibility');
+  ok(/overscroll-behavior-y\s*:\s*contain/.test(html),
+    '#tabBody has overscroll-behavior-y:contain to prevent pull-to-refresh on mobile');
+}
+
 /* ---- Round 240: forced-colors:active media query preserves rank/swatch colors ---- */
 {
   ok(/forced-colors\s*:\s*active/.test(html),
