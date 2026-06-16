@@ -4923,6 +4923,14 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 249: aria-busy on export button signals loading state to screen readers ---- */
+{
+  ok(/exportBtn.*aria-busy.*true/.test(html) || /_exportBtn[\s\S]{0,60}setAttribute\('aria-busy','true'\)/.test(html),
+    'export button sets aria-busy=true while exporting (AT loading state)');
+  ok(/removeAttribute\('aria-busy'\)/.test(html),
+    'export button removes aria-busy after export completes or fails');
+}
+
 /* ---- Round 248: screenshot <a> appended to DOM before click() for cross-browser compat ---- */
 {
   ok(/fnameStem\(\)\+'.png'[\s\S]{0,50}document\.body\.append\(a\)[\s\S]{0,20}a\.click\(\)[\s\S]{0,20}a\.remove\(\)/.test(html),

@@ -2493,7 +2493,7 @@ let _exporting = false, _exportBtn = null;
 async function doExport(){
   if (!build || _exporting) return;
   _exporting = true;
-  if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.textContent = t('btn.exporting'); }
+  if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.setAttribute('aria-busy','true'); _exportBtn.textContent = t('btn.exporting'); }
   try{
     let thumbBytes = null;
     if (GLOK){
@@ -2515,7 +2515,7 @@ async function doExport(){
   }catch(e){ showErr(t('err.exportFailed')+': '+e.message); }
   finally{
     _exporting = false;
-    if (_exportBtn){ _exportBtn.disabled = false; }
+    if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.removeAttribute('aria-busy'); }
   }
 }
 function saveJson(){
