@@ -2527,7 +2527,7 @@ function doScreenshot(){
   try{
     renderFrame(performance.now()); // render into buffer before browser flushes it
     cv.toBlob(blob=>{
-      if (!blob) return;
+      if (!blob){ showErr(t('err.exportFailed')); return; }
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a');
       a.href=url; a.download=fnameStem()+'.png'; a.click();

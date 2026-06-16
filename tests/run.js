@@ -4781,6 +4781,12 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 243: doScreenshot() calls showErr when canvas toBlob returns null ---- */
+{
+  ok(/toBlob[\s\S]{0,80}!blob[\s\S]{0,30}showErr/.test(html),
+    'doScreenshot() calls showErr when toBlob returns null (GPU hung / no data)');
+}
+
 /* ---- Round 242: buildExprBar() preserves keyboard focus on expression buttons ---- */
 {
   ok(/prevExprFocus[\s\S]{0,50}bar\.contains\(document\.activeElement\)/.test(html),
