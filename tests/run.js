@@ -4923,6 +4923,18 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 258: pasteJson announces success/failure to srStatus ---- */
+{
+  ok(H.I18N.ja['btn.pasteJson.ok'] && H.I18N.en['btn.pasteJson.ok'],
+    'btn.pasteJson.ok i18n key exists in both locales');
+  ok(H.I18N.ja['btn.pasteJson.err'] && H.I18N.en['btn.pasteJson.err'],
+    'btn.pasteJson.err i18n key exists in both locales');
+  ok(/btn\.pasteJson\.ok/.test(html),
+    'pasteJson success path announces btn.pasteJson.ok to srStatus');
+  ok(/btn\.pasteJson\.err/.test(html),
+    'pasteJson failure paths announce btn.pasteJson.err to srStatus');
+}
+
 /* ---- Round 257: ? key guard prevents showModal() when dialog already open ---- */
 {
   ok(/key==='[?]'[\s\S]{0,60}aboutDlg[\s\S]{0,10}open/.test(html),

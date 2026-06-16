@@ -936,9 +936,11 @@ function renderOut(bd){
         const d=HINA.deserialize(text);
         if(d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null;
           rebuild(); renderBody(); saveState();
-          const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson'); }
-        else { pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500); }
-      }).catch(()=>{ pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500); });
+          const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.ok'); }
+        else { pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
+          const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); }
+      }).catch(()=>{ pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
+        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); });
     }}, t('btn.pasteJson'));
     bd.append(pstj);
   }
