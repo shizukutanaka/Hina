@@ -4923,6 +4923,12 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 257: ? key guard prevents showModal() when dialog already open ---- */
+{
+  ok(/key==='[?]'[\s\S]{0,60}aboutDlg[\s\S]{0,10}open/.test(html),
+    '? key shortcut guards against calling showModal() when dialog is already open');
+}
+
 /* ---- Round 256: outfit/springOff renderBody preserves scroll position ---- */
 {
   ok(/k==='outfit'.*\|\|.*k==='springOff'[\s\S]{0,30}renderBody\(false\)/.test(html) ||

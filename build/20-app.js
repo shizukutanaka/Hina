@@ -1183,7 +1183,7 @@ document.addEventListener('keydown',e=>{
   } else if ((e.ctrlKey||e.metaKey) && e.key==='P' && e.shiftKey && notField){
     e.preventDefault(); doScreenshot();
   }
-  if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){
+  if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField && !$('aboutDlg').open){
     e.preventDefault(); $('aboutDlg').showModal();
   }
   if ((e.key==='m'||e.key==='M') && !e.ctrlKey && !e.metaKey && !e.altKey && notField){
