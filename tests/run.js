@@ -4781,6 +4781,18 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 239: autocomplete=off on metadata text inputs to prevent browser autofill ---- */
+{
+  // Meta text inputs (title, author, etc.) should have autocomplete=off to prevent
+  // browser from injecting personal info into VRM avatar metadata fields
+  ok(/meta-title[\s\S]{0,60}autocomplete.*off/.test(html) ||
+     /autocomplete.*off[\s\S]{0,30}meta-title/.test(html) ||
+     /autocomplete:'off'/.test(html),
+    'metadata text inputs have autocomplete=off to prevent browser autofill');
+  ok(html.split("autocomplete:'off'").length - 1 >= 2,
+    'at least 2 metadata inputs have autocomplete=off (title + others)');
+}
+
 /* ---- Round 238: replace alert() with non-blocking showErr() for accessible error handling ---- */
 {
   // showErr() must exist and use srStatus + hint bar
