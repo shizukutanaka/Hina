@@ -4923,6 +4923,16 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 252: drag-over visual indicator for JSON drop zone ---- */
+{
+  ok(/drag-over/.test(html),
+    'body gets drag-over class during file drag for visual drop-zone feedback');
+  ok(/body\.drag-over::after/.test(html) || /body\.drag-over/.test(html),
+    'CSS body.drag-over pseudo-element provides dashed border drop-zone overlay');
+  ok(/dragleave[\s\S]{0,100}drag-over/.test(html),
+    'dragleave removes drag-over class so overlay disappears when user drags out');
+}
+
 /* ---- Round 251: hide number input spinners to reduce visual noise ---- */
 {
   ok(/numIn[\s\S]{0,200}appearance:textfield/.test(html),

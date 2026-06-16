@@ -1197,8 +1197,13 @@ window.addEventListener('beforeunload',()=>{
   try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed})); }catch(e){}
 });
 // Drag-and-drop JSON loading — complement the file button; 'Files' check avoids conflicts with 3D canvas drag
-document.body.addEventListener('dragover',e=>{ if (e.dataTransfer.types.includes('Files')) e.preventDefault(); });
+document.body.addEventListener('dragover',e=>{
+  if (!e.dataTransfer.types.includes('Files')) return;
+  e.preventDefault(); document.body.classList.add('drag-over');
+});
+document.body.addEventListener('dragleave',e=>{ if(!e.relatedTarget) document.body.classList.remove('drag-over'); });
 document.body.addEventListener('drop',e=>{
+  document.body.classList.remove('drag-over');
   if (!e.dataTransfer.files.length) return;
   e.preventDefault();
   const f=e.dataTransfer.files[0];
