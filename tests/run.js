@@ -4781,6 +4781,13 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 237: fnPreview only sets textContent when value changes to avoid SR re-announcement ---- */
+{
+  ok(/fnPrev\.textContent!==nxt[\s\S]{0,30}fnPrev\.textContent=nxt/.test(html) ||
+     /fnPrev\.textContent\s*!==/.test(html),
+    'fnPreview guarded: only sets textContent when filename actually changes');
+}
+
 /* ---- Round 236: color-scheme:dark so native form controls render in dark mode ---- */
 {
   ok(html.includes('<meta name="color-scheme" content="dark">'),
