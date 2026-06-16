@@ -4781,6 +4781,16 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 238: replace alert() with non-blocking showErr() for accessible error handling ---- */
+{
+  // showErr() must exist and use srStatus + hint bar
+  ok(/function showErr\(/.test(html), 'showErr() helper function defined');
+  ok(/showErr[\s\S]{0,200}srStatus/.test(html), 'showErr() announces via srStatus live region');
+  ok(/showErr[\s\S]{0,200}var\(--err\)/.test(html), 'showErr() marks hint bar in error color');
+  // No alert() calls should remain for user-facing errors
+  ok(!/alert\(t\('err\./.test(html), 'no alert() calls for i18n error keys (all replaced by showErr)');
+}
+
 /* ---- Round 237: fnPreview only sets textContent when value changes to avoid SR re-announcement ---- */
 {
   ok(/fnPrev\.textContent!==nxt[\s\S]{0,30}fnPrev\.textContent=nxt/.test(html) ||

@@ -1506,6 +1506,13 @@ function doUndo(){
   if(sr) sr.textContent=t('a11y.undone');
 }
 
+let _errTimer = null;
+function showErr(msg){
+  const sr=$('srStatus'); if(sr) sr.textContent=msg;
+  const h=$('hint'); if(h){ clearTimeout(_errTimer); h.textContent=msg; h.style.color='var(--err)';
+    _errTimer=setTimeout(()=>{ if($('hint')){ $('hint').style.color='';
+      if(!activeExpr) $('hint').textContent=GLOK?t('hint.drag'):t('hint.noGL'); }},4500); }
+}
 let _saveTimer = null, _saveBadgeTimer = null;
 function saveState(){
   clearTimeout(_saveTimer);
@@ -2377,7 +2384,7 @@ function renderOut(bd){
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
         if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }
-        else { alert(t('err.loadFailed')); } };
+        else { showErr(t('err.loadFailed')); } };
       rd.readAsText(f); e.target.value=''; }});
   bd.append(file);
   bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
@@ -2491,7 +2498,7 @@ async function doExport(){
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
     if (_exportBtn){ _exportBtn.textContent=t('btn.exported'); setTimeout(()=>{ if(_exportBtn) _exportBtn.textContent=t('btn.export'); },2000); }
-  }catch(e){ alert(t('err.exportFailed')+': '+e.message); }
+  }catch(e){ showErr(t('err.exportFailed')+': '+e.message); }
   finally{
     _exporting = false;
     if (_exportBtn){ _exportBtn.disabled = false; }
@@ -2525,7 +2532,7 @@ function doScreenshot(){
 function rebuild(){
   params=HINA.sanitize(params);
   try{ build=HINA.buildAvatar(params); }
-  catch(e){ alert(t('err.buildFailed')+': '+e.message); return; }
+  catch(e){ showErr(t('err.buildFailed')+': '+e.message); return; }
   drawAtlas(params);
   uploadTexture();
   uploadGeometry();
@@ -2629,11 +2636,11 @@ document.body.addEventListener('drop',e=>{
   if (!e.dataTransfer.files.length) return;
   e.preventDefault();
   const f=e.dataTransfer.files[0];
-  if (!f.name.endsWith('.json') && f.type!=='application/json') { alert(t('err.loadFailed')); return; }
+  if (!f.name.endsWith('.json') && f.type!=='application/json') { showErr(t('err.loadFailed')); return; }
   const rd=new FileReader();
   rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
     if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }
-    else { alert(t('err.loadFailed')); } };
+    else { showErr(t('err.loadFailed')); } };
   rd.readAsText(f);
 });
 // Roving tabindex: arrow keys navigate between tabs (ARIA tablist pattern)
