@@ -1456,7 +1456,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 1600)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 1900)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -4779,6 +4779,36 @@ function accData(j, bin, ai){
   ok(/hint\.drag[\s\S]{0,200}hint\.noGL[\s\S]{0,200}rebuild\(\)/.test(html) ||
      /clearTimeout\(_undoHintTimer\)[\s\S]{0,100}hint\.drag/.test(html),
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
+}
+
+/* ---- Round 231: btnMode tooltip + btnLang aria-label + M key shortcut ---- */
+{
+  // mode.easy.tip and mode.detail.tip i18n keys in both locales
+  ok(H.I18N.ja['mode.easy.tip'] && H.I18N.ja['mode.easy.tip'].includes('かんたん'),
+    'ja mode.easy.tip key present');
+  ok(H.I18N.en['mode.easy.tip'] && H.I18N.en['mode.easy.tip'].includes('Easy'),
+    'en mode.easy.tip key present');
+  ok(H.I18N.ja['mode.detail.tip'] && H.I18N.ja['mode.detail.tip'].includes('詳細'),
+    'ja mode.detail.tip key present');
+  ok(H.I18N.en['mode.detail.tip'] && H.I18N.en['mode.detail.tip'].includes('Detail'),
+    'en mode.detail.tip key present');
+  // btn.lang.tip in both locales
+  ok(H.I18N.ja['btn.lang.tip'] && H.I18N.ja['btn.lang.tip'].includes('言語'),
+    'ja btn.lang.tip key present');
+  ok(H.I18N.en['btn.lang.tip'] && H.I18N.en['btn.lang.tip'].includes('language'),
+    'en btn.lang.tip key present');
+  // applyLang sets title and aria-label on btnMode
+  ok(/bm\.title\s*=/.test(html) || /btnMode.*title|mode\.easy\.tip|mode\.detail\.tip/.test(html),
+    'applyLang sets title on btnMode from mode.*.tip i18n key');
+  // M key handler toggles mode
+  ok(/'m'\|\|e\.key==='M'/.test(html) || /key.*==='m'[\s\S]{0,80}mode.*easy.*detail/.test(html),
+    'M key shortcut toggles Easy/Detail mode');
+  // hint.ctrlS updated to include M key
+  ok(H.I18N.ja['hint.ctrlS'].includes('M') || H.I18N.en['hint.ctrlS'].includes('M'),
+    'hint.ctrlS includes M key shortcut');
+  // about.keyList updated to include M
+  ok(H.I18N.ja['about.keyList'].includes('M') && H.I18N.en['about.keyList'].includes('M'),
+    'about.keyList documents M key shortcut');
 }
 
 /* ---- selfTest ---- */

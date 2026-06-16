@@ -1088,9 +1088,12 @@ function rebuild(){
 // version from core — single source of truth (HINA.VERSION)
 if ($('aboutVer')) $('aboutVer').textContent = 'v' + HINA.VERSION;
 function applyLang(){
-  $('btnLang').textContent = lang==='ja'?'EN':'JA';
-  $('btnMode').textContent = mode==='easy'?t('mode.easy'):t('mode.detail');
-  $('btnMode').setAttribute('aria-pressed', String(mode==='detail'));
+  const bl=$('btnLang'); bl.textContent=lang==='ja'?'EN':'JA';
+  bl.title=t('btn.lang.tip'); bl.setAttribute('aria-label', t('btn.lang.tip'));
+  const bm=$('btnMode'); bm.textContent=mode==='easy'?t('mode.easy'):t('mode.detail');
+  bm.title=mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip');
+  bm.setAttribute('aria-label', (mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip')));
+  bm.setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = GLOK ? t('hint.drag') : t('hint.noGL');
   cv.setAttribute('aria-label', t('a11y.canvas'));
   $('stage').setAttribute('aria-label', t('a11y.stage'));
@@ -1153,6 +1156,9 @@ document.addEventListener('keydown',e=>{
   }
   if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){
     e.preventDefault(); $('aboutDlg').showModal();
+  }
+  if ((e.key==='m'||e.key==='M') && !e.ctrlKey && !e.metaKey && !e.altKey && notField){
+    e.preventDefault(); mode=mode==='easy'?'detail':'easy'; saveState(); applyLang();
   }
   if (notField && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)){
     const ti=parseInt(e.key)-1;
