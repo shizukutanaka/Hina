@@ -4923,6 +4923,15 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 253: localize exprBar aria-label via applyLang() ---- */
+{
+  ok(H.I18N.ja['a11y.exprBar'] && H.I18N.en['a11y.exprBar'],
+    'a11y.exprBar i18n key exists in both locales');
+  ok(/exprBar.*setAttribute\('aria-label',\s*t\('a11y\.exprBar'\)\)/.test(html) ||
+     /\$\('exprBar'\)[\s\S]{0,30}aria-label[\s\S]{0,30}a11y\.exprBar/.test(html),
+    'applyLang() updates exprBar aria-label from i18n key (was hardcoded English)');
+}
+
 /* ---- Round 252: drag-over visual indicator for JSON drop zone ---- */
 {
   ok(/drag-over/.test(html),
