@@ -4496,7 +4496,7 @@ function accData(j, bin, ai){
   // doUndo must announce 'a11y.undone' on success and 'a11y.noUndo' when stack empty
   ok(/a11y\.undone/.test(html), 'a11y.undone key exists in build');
   ok(/a11y\.noUndo/.test(html),  'a11y.noUndo key exists in build');
-  ok(/doUndo[\s\S]{0,300}a11y\.undone/.test(html),
+  ok(/doUndo[\s\S]{0,500}a11y\.undone/.test(html),
     'doUndo() announces a11y.undone to SR on success');
   ok(/doUndo[\s\S]{0,200}a11y\.noUndo/.test(html),
     'doUndo() announces a11y.noUndo to SR when nothing to undo');
@@ -4725,6 +4725,18 @@ function accData(j, bin, ai){
   // paste button announces via srStatus
   ok(/srStatus[\s\S]{0,100}btn\.pasteJson/.test(html),
     'paste button announces via srStatus live region');
+}
+
+/* ---- Round 226: doUndo() clears the undoReady hint timer immediately ---- */
+{
+  // doUndo must call clearTimeout(_undoHintTimer) so the "undo ready" hint
+  // doesn't outlive the actual undo operation
+  ok(/clearTimeout\(_undoHintTimer\)[\s\S]{0,200}rebuild\(\)/.test(html),
+    'doUndo() clears _undoHintTimer before rebuilding so stale hint is removed');
+  // doUndo must also reset the hint text to hint.drag (when not in expr mode)
+  ok(/hint\.drag[\s\S]{0,200}hint\.noGL[\s\S]{0,200}rebuild\(\)/.test(html) ||
+     /clearTimeout\(_undoHintTimer\)[\s\S]{0,100}hint\.drag/.test(html),
+    'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
 /* ---- selfTest ---- */

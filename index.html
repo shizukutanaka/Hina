@@ -1497,6 +1497,8 @@ function doUndo(){
   const sr=$('srStatus');
   if (!_undoSnap){ if(sr) sr.textContent=t('a11y.noUndo'); return; }
   const s = _undoSnap; _undoSnap = null;
+  clearTimeout(_undoHintTimer);
+  const h=$('hint'); if(h&&!activeExpr) h.textContent=GLOK?t('hint.drag'):t('hint.noGL');
   params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed;
   rebuild(); renderBody(); saveState();
   if(sr) sr.textContent=t('a11y.undone');
