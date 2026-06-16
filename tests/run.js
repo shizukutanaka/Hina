@@ -4923,6 +4923,13 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 247: aboutDlg restores focus to btnAbout on close ---- */
+{
+  ok(/aboutDlg.*addEventListener.*'close'[\s\S]{0,60}btnAbout.*focus/.test(html) ||
+     /aboutDlg[\s\S]{0,30}close[\s\S]{0,60}btnAbout\.focus/.test(html),
+    'aboutDlg close event restores focus to btnAbout so keyboard users keep their position');
+}
+
 /* ---- Round 246: runGacha() announces seed to screen reader via srStatus ---- */
 {
   ok(H.I18N.ja['a11y.gachaRan'] && H.I18N.en['a11y.gachaRan'],

@@ -2595,6 +2595,8 @@ $('btnAbout').addEventListener('click',()=>$('aboutDlg').showModal());
 $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 // close dialog on backdrop click (click on the dialog element itself = outside the content box)
 $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('aboutDlg').close(); });
+// Restore focus to the trigger button when dialog closes (keyboard/AT users lose position otherwise)
+$('aboutDlg').addEventListener('close',()=>{ $('btnAbout').focus(); });
 
 // When WebGL is unavailable, create a centered overlay on the canvas so the
 // black rectangle doesn't look like a crash — hint bar text alone is easy to miss
