@@ -4781,6 +4781,14 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 236: color-scheme:dark so native form controls render in dark mode ---- */
+{
+  ok(html.includes('<meta name="color-scheme" content="dark">'),
+    'head includes <meta name="color-scheme" content="dark">');
+  ok(/color-scheme\s*:\s*dark/.test(html),
+    'CSS :root has color-scheme:dark for dark-mode native controls');
+}
+
 /* ---- Round 235: numIn clamp feedback via aria-invalid + SR announcement ---- */
 {
   // a11y.clamped i18n keys in both locales
