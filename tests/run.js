@@ -4923,6 +4923,12 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 255: preset color dot row hidden from AT with aria-hidden ---- */
+{
+  ok(/'cols'[\s\S]{0,60}'aria-hidden'\s*:\s*'true'/.test(html),
+    'preset card color dot row has aria-hidden=true (decorative — AT would read "span span span")');
+}
+
 /* ---- Round 254: primary button focus ring uses dark color, not accent-on-accent ---- */
 {
   ok(/btn\.primary:focus-visible[\s\S]{0,40}outline-color/.test(html),

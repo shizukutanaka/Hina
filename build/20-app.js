@@ -768,7 +768,7 @@ function renderBody(scrollReset=true){
       const pp=HINA.presetParams(pre);
       const isSelected = activePresetId===pre.id;
       const isModified = isSelected && JSON.stringify(pp) !== _sCur;
-      const cols=el('div',{class:'cols',style:'align-items:center'},
+      const cols=el('div',{class:'cols',style:'align-items:center','aria-hidden':'true'},
         el('span',{class:'c',style:'background:'+pp.hairColor}),
         el('span',{class:'c',style:'background:'+pp.eyeColor}),
         el('span',{class:'c',style:'background:'+pp.clothMain}),
