@@ -4923,6 +4923,12 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 248: screenshot <a> appended to DOM before click() for cross-browser compat ---- */
+{
+  ok(/fnameStem\(\)\+'.png'[\s\S]{0,50}document\.body\.append\(a\)[\s\S]{0,20}a\.click\(\)[\s\S]{0,20}a\.remove\(\)/.test(html),
+    'doScreenshot appends <a> to DOM before click() and removes after (Firefox/Safari compat)');
+}
+
 /* ---- Round 247: aboutDlg restores focus to btnAbout on close ---- */
 {
   ok(/aboutDlg.*addEventListener.*'close'[\s\S]{0,60}btnAbout.*focus/.test(html) ||
