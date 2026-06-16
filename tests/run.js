@@ -4781,6 +4781,14 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 240: forced-colors:active media query preserves rank/swatch colors ---- */
+{
+  ok(/forced-colors\s*:\s*active/.test(html),
+    '@media (forced-colors:active) block present for Windows High Contrast mode');
+  ok(/forced-color-adjust\s*:\s*none/.test(html),
+    'rank badges and swatches use forced-color-adjust:none to preserve color coding in HC mode');
+}
+
 /* ---- Round 239: autocomplete=off on metadata text inputs to prevent browser autofill ---- */
 {
   // Meta text inputs (title, author, etc.) should have autocomplete=off to prevent
