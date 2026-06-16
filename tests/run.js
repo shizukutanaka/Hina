@@ -4727,6 +4727,16 @@ function accData(j, bin, ai){
     'paste button announces via srStatus live region');
 }
 
+/* ---- Round 227: filename preview div has aria-live so SR announces changes ---- */
+{
+  ok(/id:'fnPreview'[\s\S]{0,80}'aria-live':'polite'/.test(html) ||
+     /id:"fnPreview"[\s\S]{0,80}"aria-live":"polite"/.test(html) ||
+     /fnPreview[\s\S]{0,80}aria-live[\s\S]{0,20}polite/.test(html),
+    'fnPreview element has aria-live="polite" so SR announces filename changes');
+  ok(/aria-atomic.*true[\s\S]{0,200}fnPreview|fnPreview[\s\S]{0,200}aria-atomic.*true/.test(html),
+    'fnPreview has aria-atomic="true" for complete announcement');
+}
+
 /* ---- Round 226: doUndo() clears the undoReady hint timer immediately ---- */
 {
   // doUndo must call clearTimeout(_undoHintTimer) so the "undo ready" hint

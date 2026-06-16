@@ -847,7 +847,7 @@ function renderOut(bd){
   const txt=(key,mk,ph)=>{ const id='meta-'+mk; bd.append(el('div',{class:'row'},
     el('label',{'for':id},t(key)),
     el('input',{id, type:'text', maxlength:'256', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
-  const fnPrev=el('div',{class:'limit', id:'fnPreview'});
+  const fnPrev=el('div',{class:'limit', id:'fnPreview', 'aria-live':'polite', 'aria-atomic':'true'});
   const updateFnPrev=()=>{ const s=fnameStem(); fnPrev.textContent=t('out.filename')+': '+s+'.vrm'; document.title='雛 — '+s; };
   bd.append(el('div',{class:'row'},
     el('label',{'for':'meta-title'},t('out.title')),
