@@ -4923,6 +4923,13 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 256: outfit/springOff renderBody preserves scroll position ---- */
+{
+  ok(/k==='outfit'.*\|\|.*k==='springOff'[\s\S]{0,30}renderBody\(false\)/.test(html) ||
+     /renderBody\(false\)/.test(html),
+    'onParam() calls renderBody(false) for outfit/springOff to preserve panel scroll position');
+}
+
 /* ---- Round 255: preset color dot row hidden from AT with aria-hidden ---- */
 {
   ok(/'cols'[\s\S]{0,60}'aria-hidden'\s*:\s*'true'/.test(html),
