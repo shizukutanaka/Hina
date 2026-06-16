@@ -4923,6 +4923,12 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 250: captureUndo() announces undo-available to srStatus live region ---- */
+{
+  ok(/captureUndo[\s\S]{0,600}srStatus[\s\S]{0,60}hint\.undoReady/.test(html),
+    'captureUndo() announces hint.undoReady to srStatus so screen reader users know undo is available');
+}
+
 /* ---- Round 249: aria-busy on export button signals loading state to screen readers ---- */
 {
   ok(/exportBtn.*aria-busy.*true/.test(html) || /_exportBtn[\s\S]{0,60}setAttribute\('aria-busy','true'\)/.test(html),

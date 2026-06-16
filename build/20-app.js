@@ -47,6 +47,7 @@ function captureUndo(){
       h.textContent = t('hint.undoReady');
       _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=GLOK?t('hint.drag'):t('hint.noGL'); }, 3000);
     }
+    const sr=$('srStatus'); if(sr) sr.textContent=t('hint.undoReady');
   }
 }
 function doUndo(){
