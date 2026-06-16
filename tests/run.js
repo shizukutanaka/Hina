@@ -4781,6 +4781,17 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 232: numIn wheel listener prevents accidental value changes ---- */
+{
+  // numIn inputs get a wheel listener with {passive:false} that calls preventDefault
+  // only when focused, so the panel can still scroll when the input is not focused
+  ok(/valEl\.addEventListener\('wheel'[\s\S]{0,200}passive:false/.test(html),
+    'numIn wheel listener added with {passive:false} to prevent accidental increments');
+  ok(/activeElement===valEl[\s\S]{0,50}preventDefault/.test(html) ||
+     /activeElement.*valEl.*preventDefault/.test(html),
+    'wheel only prevents default when numIn is focused (not when scrolling past)');
+}
+
 /* ---- Round 231: btnMode tooltip + btnLang aria-label + M key shortcut ---- */
 {
   // mode.easy.tip and mode.detail.tip i18n keys in both locales

@@ -669,6 +669,8 @@ function paramRow(k){
           if (!Number.isFinite(n)) n=params[k];
           n=M.clamp(n,s.min,s.max);
           params[k]=n; e.target.value=String(n); r.value=String(n); onParam(k); }});
+      // Prevent accidental value changes when wheel-scrolling the panel over a focused numIn
+      valEl.addEventListener('wheel', e=>{ if(document.activeElement===valEl) e.preventDefault(); },{passive:false});
     } else {
       valEl=el('span',{class:'num'}, String(params[k]));
     }
