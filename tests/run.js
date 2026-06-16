@@ -4923,6 +4923,14 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 246: runGacha() announces seed to screen reader via srStatus ---- */
+{
+  ok(H.I18N.ja['a11y.gachaRan'] && H.I18N.en['a11y.gachaRan'],
+    'a11y.gachaRan i18n key exists in both locales for gacha screen reader announcement');
+  ok(/runGacha[\s\S]{0,200}a11y\.gachaRan/.test(html),
+    'runGacha() announces the seed to srStatus live region after generating a random avatar');
+}
+
 /* ---- Round 245: tablist aria-orientation + aria-label for screen reader navigation ---- */
 {
   ok(html.includes('aria-orientation="horizontal"'),

@@ -815,6 +815,7 @@ function renderBody(scrollReset=true){
     const runGacha=seed=>{
       captureUndo(); lastGachaSeed=seed; params=HINA.randomParams(seed);
       activePresetId=null; rebuild(); renderBody();
+      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.gachaRan').replace('{n}',seed);
       // Return focus to gacha button so keyboard users can run it again or Tab onwards
       const gb=$('gachaBtn'); if(gb) gb.focus();
     };
