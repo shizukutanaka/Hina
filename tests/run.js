@@ -4781,6 +4781,14 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 234: dialog max-height + overflow-y so about dialog scrolls on small screens ---- */
+{
+  ok(/dialog\{[^}]*max-height/.test(html) || /dialog[\s\S]{0,200}overflow-y:auto/.test(html),
+    'dialog has max-height so it does not overflow viewport on small screens');
+  ok(/overflow-y:auto/.test(html),
+    'dialog has overflow-y:auto to enable scrolling when content is tall');
+}
+
 /* ---- Round 233: mobile stage uses dvh for dynamic viewport height ---- */
 {
   // The mobile media query should use dvh (with vh fallback) so the 3D stage
