@@ -350,6 +350,7 @@ function setExpr(name){
 function buildExprBar(){
   const bar = $('exprBar');
   if (!bar || !build) return;
+  const prevExprFocus = bar.contains(document.activeElement) ? document.activeElement.dataset.expr : undefined;
   bar.innerHTML = '';
   const nb = document.createElement('button');
   nb.className = 'eBtn' + (activeExpr === null ? ' active' : '');
@@ -371,6 +372,11 @@ function buildExprBar(){
     b.setAttribute('aria-pressed', String(activeExpr === name));
     b.addEventListener('click', () => setExpr(activeExpr === name ? null : name));
     bar.append(b);
+  }
+  // Restore focus if it was on an expression button before the rebuild
+  if (prevExprFocus !== undefined){
+    const target=bar.querySelector(`[data-expr="${prevExprFocus}"]`)||bar.querySelector('.eBtn');
+    if(target) target.focus();
   }
 }
 

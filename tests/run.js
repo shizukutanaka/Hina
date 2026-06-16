@@ -4781,6 +4781,14 @@ function accData(j, bin, ai){
     'doUndo() restores hint bar to drag/noGL text after consuming undo');
 }
 
+/* ---- Round 242: buildExprBar() preserves keyboard focus on expression buttons ---- */
+{
+  ok(/prevExprFocus[\s\S]{0,50}bar\.contains\(document\.activeElement\)/.test(html),
+    'buildExprBar() captures focused expr button before clearing innerHTML');
+  ok(/prevExprFocus[\s\S]{0,200}target.*focus\(\)/.test(html),
+    'buildExprBar() restores focus to matching expr button after rebuild');
+}
+
 /* ---- Round 241: user-select:none on canvas + overscroll-behavior on panel ---- */
 {
   ok(/user-select\s*:\s*none/.test(html),
