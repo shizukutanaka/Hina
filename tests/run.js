@@ -4727,6 +4727,18 @@ function accData(j, bin, ai){
     'paste button announces via srStatus live region');
 }
 
+/* ---- Round 228: preset modified indicator (●) has role=img + aria-label for SR ---- */
+{
+  ok(/isModified[\s\S]{0,200}role:'img'/.test(html) || /isModified[\s\S]{0,200}role:"img"/.test(html),
+    'modified preset indicator span has role="img"');
+  ok(/isModified[\s\S]{0,200}aria-label/.test(html),
+    'modified preset indicator span has aria-label for screen readers');
+  ok(/Modified from preset/.test(html),
+    'modified preset indicator aria-label text present in en');
+  ok(/プリセットから変更中/.test(html),
+    'modified preset indicator title/aria-label text present in ja');
+}
+
 /* ---- Round 227: filename preview div has aria-live so SR announces changes ---- */
 {
   ok(/id:'fnPreview'[\s\S]{0,80}'aria-live':'polite'/.test(html) ||

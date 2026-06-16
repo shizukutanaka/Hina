@@ -755,7 +755,8 @@ function renderBody(scrollReset=true){
       const nmDiv=el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en);
       if (isModified) nmDiv.append(el('span',{
         style:'color:var(--accent);font-size:9px;vertical-align:super;margin-left:3px',
-        title:lang==='ja'?'プリセットから変更中':'Modified from preset'
+        title:lang==='ja'?'プリセットから変更中':'Modified from preset',
+        role:'img', 'aria-label':lang==='ja'?'プリセットから変更中':'Modified from preset'
       }, '●'));
       grid.append(el('button',{class:'preCard'+(isSelected?' selected':''),
         'aria-pressed':String(isSelected),
