@@ -4923,6 +4923,16 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 245: tablist aria-orientation + aria-label for screen reader navigation ---- */
+{
+  ok(html.includes('aria-orientation="horizontal"'),
+    '#tabs nav has aria-orientation="horizontal" (ARIA 4.1.2 tablist requirement)');
+  ok(H.I18N.ja['a11y.tabs'] && H.I18N.en['a11y.tabs'],
+    'a11y.tabs i18n key exists in both locales');
+  ok(/\$\('tabs'\)\.setAttribute\('aria-label',\s*t\('a11y\.tabs'\)\)/.test(html),
+    'applyLang() sets aria-label on #tabs from a11y.tabs key');
+}
+
 /* ---- Round 244: spellcheck=false on metadata text inputs prevents mobile autocorrect ---- */
 {
   ok(/spellcheck:\s*'false'/.test(html),

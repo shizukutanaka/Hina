@@ -129,7 +129,7 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px}
     <div id="srStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
   </section>
   <aside id="panel">
-    <nav id="tabs" role="tablist"></nav>
+    <nav id="tabs" role="tablist" aria-orientation="horizontal"></nav>
     <div id="tabBody" role="tabpanel" tabindex="0"></div>
   </aside>
 </main>
@@ -348,6 +348,7 @@ const I18N = {
     'hint.noGL':'WebGL が使えません — プレビュー無効（書き出しは動作します）',
     'hint.glLost':'WebGL コンテキストが失われました — ページを再読み込みしてください',
     'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、Shift+↑↓でパン、＋／−でズーム、Homeまたはダブルクリックで初期位置に戻ります。',
+    'a11y.tabs':'タブナビゲーション',
     'a11y.stage':'3Dプレビューエリア','a11y.panel':'アバター設定パネル','a11y.about.btn':'雛について',
     'a11y.exprActive':'表情: {expr}','a11y.exprNeutral':'ニュートラルに戻りました',
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
@@ -396,6 +397,7 @@ const I18N = {
     'hint.noGL':'WebGL unavailable — preview disabled (export still works)',
     'hint.glLost':'WebGL context lost — reload to restore preview',
     'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, Shift+↑/↓ pan, +/− zoom, Home or double-click reset the view.',
+    'a11y.tabs':'Tab navigation',
     'a11y.stage':'3D preview area','a11y.panel':'Avatar settings panel','a11y.about.btn':'About Hina',
     'a11y.exprActive':'Expression: {expr}','a11y.exprNeutral':'Returned to neutral',
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
@@ -2568,6 +2570,7 @@ function applyLang(){
   bm.setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = GLOK ? t('hint.drag') : t('hint.noGL');
   cv.setAttribute('aria-label', t('a11y.canvas'));
+  $('tabs').setAttribute('aria-label', t('a11y.tabs'));
   $('stage').setAttribute('aria-label', t('a11y.stage'));
   $('panel').setAttribute('aria-label', t('a11y.panel'));
   $('btnAbout').setAttribute('aria-label', t('a11y.about.btn'));

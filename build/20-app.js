@@ -1117,6 +1117,7 @@ function applyLang(){
   bm.setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = GLOK ? t('hint.drag') : t('hint.noGL');
   cv.setAttribute('aria-label', t('a11y.canvas'));
+  $('tabs').setAttribute('aria-label', t('a11y.tabs'));
   $('stage').setAttribute('aria-label', t('a11y.stage'));
   $('panel').setAttribute('aria-label', t('a11y.panel'));
   $('btnAbout').setAttribute('aria-label', t('a11y.about.btn'));
