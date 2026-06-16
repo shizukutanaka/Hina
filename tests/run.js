@@ -4923,6 +4923,14 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 244: spellcheck=false on metadata text inputs prevents mobile autocorrect ---- */
+{
+  ok(/spellcheck:\s*'false'/.test(html),
+    'metadata text inputs have spellcheck:false to prevent mobile autocorrect of avatar names');
+  ok(html.split("spellcheck:'false'").length - 1 >= 3,
+    'at least 3 metadata inputs have spellcheck:false (title, author, licenseUrl)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
