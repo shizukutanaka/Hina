@@ -4923,6 +4923,12 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 254: primary button focus ring uses dark color, not accent-on-accent ---- */
+{
+  ok(/btn\.primary:focus-visible[\s\S]{0,40}outline-color/.test(html),
+    '.btn.primary:focus-visible overrides outline-color to contrast against accent background');
+}
+
 /* ---- Round 253: localize exprBar aria-label via applyLang() ---- */
 {
   ok(H.I18N.ja['a11y.exprBar'] && H.I18N.en['a11y.exprBar'],
