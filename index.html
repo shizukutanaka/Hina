@@ -49,7 +49,8 @@ main{flex:1;display:flex;min-height:0}
 .row label{flex:0 0 108px;font-size:12px;color:var(--text-dim)}
 .row input[type=range]{flex:1;accent-color:var(--accent);height:22px}
 .row .num{flex:0 0 56px;font-size:11px;color:var(--text-faint);text-align:right;font-variant-numeric:tabular-nums}
-.row input.numIn{font-size:11px;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:3px 5px;height:24px;cursor:text}
+.row input.numIn{font-size:11px;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:3px 5px;height:24px;cursor:text;appearance:textfield;-moz-appearance:textfield}
+.row input.numIn::-webkit-inner-spin-button,.row input.numIn::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .row input.numIn:hover{border-color:var(--accent)}
 .limit{display:block;font-size:10px;color:var(--text-faint);margin-top:3px;line-height:1.4}
 .row select,.row input[type=text]{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font-size:12px}

@@ -4923,6 +4923,14 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 251: hide number input spinners to reduce visual noise ---- */
+{
+  ok(/numIn[\s\S]{0,200}appearance:textfield/.test(html),
+    'numIn inputs hide spinner arrows via appearance:textfield (Firefox)');
+  ok(/-webkit-inner-spin-button[\s\S]{0,60}-webkit-appearance\s*:\s*none/.test(html),
+    'numIn inputs hide spinner arrows via ::-webkit-inner-spin-button (Chrome/Safari)');
+}
+
 /* ---- Round 250: captureUndo() announces undo-available to srStatus live region ---- */
 {
   ok(/captureUndo[\s\S]{0,600}srStatus[\s\S]{0,60}hint\.undoReady/.test(html),
