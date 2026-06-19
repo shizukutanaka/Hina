@@ -4923,6 +4923,14 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 259: slider double-click reset announces new value to screen reader ---- */
+{
+  ok(H.I18N.ja['a11y.sliderReset'] && H.I18N.en['a11y.sliderReset'],
+    'a11y.sliderReset i18n key exists in both locales');
+  ok(/ondblclick[\s\S]{0,300}a11y\.sliderReset/.test(html),
+    'slider ondblclick announces reset to srStatus with label and default value');
+}
+
 /* ---- Round 258: pasteJson announces success/failure to srStatus ---- */
 {
   ok(H.I18N.ja['btn.pasteJson.ok'] && H.I18N.en['btn.pasteJson.ok'],

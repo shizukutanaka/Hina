@@ -672,7 +672,8 @@ function paramRow(k){
       onpointerdown:()=>captureUndo(),
       ondblclick:()=>{ captureUndo(); params[k]=s.def; r.value=String(s.def);
         if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
-        onParam(k); },
+        onParam(k);
+        const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.sliderReset').replace('{label}',label).replace('{v}',s.def); },
       oninput:e=>{ params[k]=parseFloat(e.target.value);
         if (valEl.tagName==='INPUT') valEl.value=String(params[k]); else valEl.textContent=String(params[k]);
         onParam(k); }});
