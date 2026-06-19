@@ -4923,6 +4923,14 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 265: file load (button + drop) announces loaded filename to srStatus ---- */
+{
+  // Both file input onchange and drag-drop handler should announce loaded filename
+  ok(html.split("f.name").filter(s=>s.slice(0,60).includes('srStatus')).length >= 2 ||
+     (html.split('a11y.savedJson').length - 1) >= 3,
+    'file load (button and drop paths) announces a11y.savedJson with filename to srStatus');
+}
+
 /* ---- Round 264: autoSaveBadge clears text after fade to prevent stale AT reads ---- */
 {
   ok(/_saveBadgeTimer[\s\S]{0,150}opacity.*0[\s\S]{0,80}textContent\s*=\s*''/.test(html),
