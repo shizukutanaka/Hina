@@ -4923,6 +4923,12 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 263: WebGL context-lost event announces to srStatus ---- */
+{
+  ok(/webglcontextlost[\s\S]{0,100}srStatus[\s\S]{0,30}hint\.glLost/.test(html),
+    'webglcontextlost event announces hint.glLost to srStatus live region');
+}
+
 /* ---- Round 262: revert-to-preset announces success and preserves scroll ---- */
 {
   ok(/btn\.revert[\s\S]{0,200}srStatus/.test(html) ||
