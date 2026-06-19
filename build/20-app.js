@@ -810,8 +810,9 @@ function renderBody(scrollReset=true){
     if (activePre && JSON.stringify(HINA.presetParams(activePre)) !== _sCur){
       const preLabel = lang==='ja' ? activePre.ja : activePre.en;
       bd.append(el('button',{class:'btn wide',style:'margin-top:10px',
-        onclick:()=>{ captureUndo(); params=HINA.presetParams(activePre); rebuild(); renderBody();
-          const sel=$('tabBody').querySelector('.preCard.selected'); if(sel) sel.focus(); }},
+        onclick:()=>{ captureUndo(); params=HINA.presetParams(activePre); rebuild(); renderBody(false);
+          const sel=$('tabBody').querySelector('.preCard.selected'); if(sel) sel.focus();
+          const sr=$('srStatus'); if(sr) sr.textContent=t('btn.revert').replace('{p}',preLabel); }},
         t('btn.revert').replace('{p}',preLabel)));
     }
     const gDiv=el('div',{style:'margin-top:14px'});

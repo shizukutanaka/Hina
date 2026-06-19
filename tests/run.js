@@ -4923,6 +4923,15 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 262: revert-to-preset announces success and preserves scroll ---- */
+{
+  ok(/btn\.revert[\s\S]{0,200}srStatus/.test(html) ||
+     /srStatus[\s\S]{0,50}btn\.revert/.test(html),
+    'revert-to-preset button announces revert action to srStatus');
+  ok(/presetParams\(activePre\)[\s\S]{0,100}renderBody\(false\)/.test(html),
+    'revert-to-preset calls renderBody(false) to preserve panel scroll position');
+}
+
 /* ---- Round 261: reset button uses two-click pattern instead of confirm() ---- */
 {
   ok(!/confirm\(/.test(html),
