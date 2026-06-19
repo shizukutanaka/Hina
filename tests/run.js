@@ -96,7 +96,7 @@ ok(html.includes('_exporting') && html.includes('_exporting = false'), 'doExport
 ok(H.I18N.ja['btn.exporting'] && H.I18N.en['btn.exporting'], 'btn.exporting loading label in both languages');
 ok(html.includes('_exportBtn') && html.includes("_exportBtn.disabled = true"), 'export button disabled during export to prevent double-clicks');
 ok(html.includes("_exportBtn.textContent = t('btn.exporting')"), 'export button text changes to loading label during export');
-ok(html.includes('META_DEFAULTS') && /reset\.confirm[\s\S]{0,200}META_DEFAULTS/.test(html), 'reset button restores meta to defaults via META_DEFAULTS');
+ok(html.includes('META_DEFAULTS') && html.includes('_resetPending'), 'reset button restores meta to defaults via META_DEFAULTS (two-click pattern)');
 ok(html.includes("dataTransfer.types.includes('Files')") && html.includes("dataTransfer.files"), 'drag-and-drop JSON loading wired with file-type guard');
 ok(/document\.title\s*=.*fnameStem/.test(html), 'document.title updated in rebuild() so browser tab reflects loaded title immediately');
 ok(html.includes('visibilitychange') && html.includes('_rafPaused'), 'rAF loop pauses on page visibility hidden (saves CPU/battery on mobile)');
@@ -4921,6 +4921,17 @@ function accData(j, bin, ai){
   // about.keyList updated to include M
   ok(H.I18N.ja['about.keyList'].includes('M') && H.I18N.en['about.keyList'].includes('M'),
     'about.keyList documents M key shortcut');
+}
+
+/* ---- Round 261: reset button uses two-click pattern instead of confirm() ---- */
+{
+  ok(!/confirm\(/.test(html),
+    'no window.confirm() calls remain — replaced by two-click inline confirmation');
+  ok(/_resetPending/.test(html),
+    'reset button uses _resetPending flag for two-click confirmation pattern');
+  ok(/btn\.reset\.confirm[\s\S]{0,100}srStatus/.test(html) ||
+     /srStatus[\s\S]{0,100}btn\.reset\.confirm/.test(html),
+    'reset first-click announces confirmation prompt to screen reader via srStatus');
 }
 
 /* ---- Round 260: VRChat upload guide steps use <ol> for semantic ordered list ---- */

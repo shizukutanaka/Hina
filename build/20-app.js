@@ -955,9 +955,21 @@ function renderOut(bd){
   bd.append(file);
   bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
   bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:8px'}, t('hint.dropJson')));
-  bd.append(el('button',{class:'btn wide', onclick:()=>{
-    if (!confirm(t('btn.reset.confirm'))) return;
-    captureUndo(); params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }}, t('btn.reset')));
+  {
+    let _resetPending=false, _resetTimer=null;
+    const resetBtn=el('button',{class:'btn wide', onclick:()=>{
+      if(_resetPending){
+        clearTimeout(_resetTimer); _resetPending=false; resetBtn.textContent=t('btn.reset');
+        captureUndo(); params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
+        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.reset');
+      } else {
+        _resetPending=true; resetBtn.textContent=t('btn.reset.confirm');
+        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.reset.confirm');
+        _resetTimer=setTimeout(()=>{ _resetPending=false; if(resetBtn.isConnected) resetBtn.textContent=t('btn.reset'); },3000);
+      }
+    }}, t('btn.reset'));
+    bd.append(resetBtn);
+  }
   bd.append(el('div',{class:'note'}, t('note.upload')));
   const gd=el('div',{class:'note'});
   gd.append(el('b',{}, t('guide.t')));
