@@ -2415,10 +2415,12 @@ function renderOut(bd){
     if (!confirm(t('btn.reset.confirm'))) return;
     captureUndo(); params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState(); }}, t('btn.reset')));
   bd.append(el('div',{class:'note'}, t('note.upload')));
-  const gd=el('div',{class:'note'}, el('b',{}, t('guide.t')));
+  const gd=el('div',{class:'note'});
+  gd.append(el('b',{}, t('guide.t')));
+  const ol=el('ol',{style:'margin:6px 0 0 16px;line-height:1.9'});
   for(const k of ['guide.s1','guide.s2','guide.s3','guide.s4','guide.s5'])
-    gd.append(el('div',{}, t(k)));
-  bd.append(gd);
+    ol.append(el('li',{}, t(k)));
+  gd.append(ol); bd.append(gd);
   updateStats();
 }
 
