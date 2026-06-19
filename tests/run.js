@@ -4923,6 +4923,12 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 264: autoSaveBadge clears text after fade to prevent stale AT reads ---- */
+{
+  ok(/_saveBadgeTimer[\s\S]{0,150}opacity.*0[\s\S]{0,80}textContent\s*=\s*''/.test(html),
+    'autoSaveBadge clears textContent after fade-out so stale "✓ saved" is not re-read by AT');
+}
+
 /* ---- Round 263: WebGL context-lost event announces to srStatus ---- */
 {
   ok(/webglcontextlost[\s\S]{0,100}srStatus[\s\S]{0,30}hint\.glLost/.test(html),

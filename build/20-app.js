@@ -80,7 +80,7 @@ function saveState(){
         if (!reduceMotion){
           b.style.opacity='1';
           clearTimeout(_saveBadgeTimer);
-          _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2) b2.style.opacity='0'; },2000);
+          _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2){ b2.style.opacity='0'; setTimeout(()=>{ if(b2&&b2.style.opacity==='0') b2.textContent=''; },400); } },2000);
         }
       }
     }catch(e){
