@@ -4923,6 +4923,12 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 266: canvas aria-keyshortcuts lists available keyboard shortcuts ---- */
+{
+  ok(/aria-keyshortcuts/.test(html),
+    '#gl canvas has aria-keyshortcuts listing Arrow/Home keys for AT that exposes available shortcuts');
+}
+
 /* ---- Round 265: file load (button + drop) announces loaded filename to srStatus ---- */
 {
   // Both file input onchange and drag-drop handler should announce loaded filename
