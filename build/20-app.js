@@ -81,10 +81,10 @@ function saveState(){
       localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed}));
       const b=$('autoSaveBadge');
       if (b){
-        b.textContent=t('hint.saved'); b.style.color='var(--ok)';
+        b.removeAttribute('aria-hidden'); b.textContent=t('hint.saved'); b.style.color='var(--ok)';
         b.style.opacity='1';
         clearTimeout(_saveBadgeTimer);
-        _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2){ b2.style.opacity='0'; setTimeout(()=>{ if(b2&&b2.style.opacity==='0') b2.textContent=''; },400); } },2000);
+        _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2){ b2.style.opacity='0'; setTimeout(()=>{ if(b2&&b2.style.opacity==='0'){ b2.setAttribute('aria-hidden','true'); b2.textContent=''; } },400); } },2000);
       }
     }catch(e){
       // localStorage full or unavailable (private browsing) — show persistent warning
@@ -1104,6 +1104,7 @@ async function doExport(){
   const exportBuild = build;
   const exportParams = JSON.parse(JSON.stringify(params));
   const exportMeta = JSON.parse(JSON.stringify(meta));
+  const _exportFocusWasBtn = document.activeElement === _exportBtn;
   if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.setAttribute('aria-busy','true'); _exportBtn.textContent = t('btn.exporting'); }
   { const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); }
   try{
@@ -1129,7 +1130,8 @@ async function doExport(){
     _exporting = false;
     if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.removeAttribute('aria-busy');
       // Ensure button text always resets — catch branch sets showErr but doesn't touch textContent
-      if (_exportBtn.textContent===t('btn.exporting')) _exportBtn.textContent=t('btn.export'); }
+      if (_exportBtn.textContent===t('btn.exporting')) _exportBtn.textContent=t('btn.export');
+      if (_exportFocusWasBtn) _exportBtn.focus(); }
   }
 }
 function saveJson(){
@@ -1140,11 +1142,11 @@ function saveJson(){
 function doScreenshot(){
   if (!GLOK) return;
   const btn=$('btnScreenshot');
-  if (btn){ btn.disabled=true; }
+  if (btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
   try{
     renderFrame(performance.now()); // render into buffer before browser flushes it
     cv.toBlob(blob=>{
-      if (btn) btn.disabled=false;
+      if (btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); }
       if (!blob){ showErr(t('err.exportFailed')); return; }
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a');
@@ -1153,7 +1155,7 @@ function doScreenshot(){
       setTimeout(()=>URL.revokeObjectURL(url),1000);
       const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
     },'image/png');
-  }catch(e){ if(btn) btn.disabled=false; showErr(t('err.exportFailed')); }
+  }catch(e){ if(btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); } showErr(t('err.exportFailed')); }
 }
 
 /* ---------- rebuild ---------- */
@@ -1220,7 +1222,7 @@ function applyLang(){
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   // rankBadge static reset (heightBadge is excluded — it gets a dynamic label in updateStats)
   document.querySelectorAll('.rankBadge:not(#heightBadge)').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
-  const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.style.display=GLOK?'':'none'; }
+  const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.setAttribute('aria-label',t('btn.screenshot.tip')); sc.style.display=GLOK?'':'none'; }
   const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
   const sd=$('sliderDesc'); if(sd) sd.textContent=t('hint.sliderReset');
   const sl=$('skipLink'); if(sl) sl.textContent=t('a11y.skip');

@@ -4384,7 +4384,7 @@ function accData(j, bin, ai){
     'renderBody() only resets scrollTop when scrollReset is truthy');
 
   // applyLang() calls renderBody(false) to preserve scroll position
-  ok(/function applyLang\(\)[\s\S]{0,2200}renderBody\(false\)/.test(html),
+  ok(/function applyLang\(\)[\s\S]{0,2300}renderBody\(false\)/.test(html),
     'applyLang() calls renderBody(false) to preserve panel scroll on language/mode switch');
 
   // Tab switches still call renderBody() (default true → scroll resets to 0)
@@ -4786,7 +4786,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 243: doScreenshot() calls showErr when canvas toBlob returns null ---- */
 {
-  ok(/toBlob[\s\S]{0,80}!blob[\s\S]{0,30}showErr/.test(html),
+  ok(/toBlob[\s\S]{0,120}!blob[\s\S]{0,30}showErr/.test(html),
     'doScreenshot() calls showErr when toBlob returns null (GPU hung / no data)');
 }
 
@@ -5237,7 +5237,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 320: doScreenshot wraps cv.toBlob() in try-catch so SecurityError doesn't leave btn disabled ---- */
 {
-  ok(/doScreenshot[\s\S]{0,700}catch\s*\(e\)[\s\S]{0,60}btn\.disabled=false/.test(html),
+  ok(/doScreenshot[\s\S]{0,800}catch\s*\(e\)[\s\S]{0,80}btn\.disabled=false/.test(html),
     'doScreenshot() has try-catch around cv.toBlob() to re-enable button if canvas throws (e.g. SecurityError)');
 }
 
@@ -5311,7 +5311,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 311: doScreenshot re-enables button inside toBlob callback, not in finally ---- */
 {
-  ok(html.includes("if (btn) btn.disabled=false") && /toBlob\s*\(blob=>\{\s*if \(btn\)/.test(html),
+  ok(/if \(btn\)\{?\s*btn\.disabled=false/.test(html) && /toBlob\s*\(blob=>\{[\s\S]{0,40}if \(btn\)/.test(html),
     'screenshot button is re-enabled inside toBlob callback (async), not prematurely in a finally block');
 }
 
@@ -5682,6 +5682,42 @@ function accData(j, bin, ai){
   // Must announce btn.exporting at start (before the try block / first await)
   ok(/btn\.exporting[\s\S]{0,200}try\{/.test(doExpBody),
     'doExport announces btn.exporting to srStatus at start (before async awaits)');
+}
+
+/* ---- Round 334: doScreenshot sets aria-busy on button during toBlob ---- */
+{
+  const scrIdx = html.indexOf('function doScreenshot()');
+  const scrEnd = html.indexOf('\n}', scrIdx + 1);
+  const scrBody = html.slice(scrIdx, scrEnd > scrIdx ? scrEnd : scrIdx + 600);
+  ok(/btn\.setAttribute\('aria-busy','true'\)/.test(scrBody),
+    'doScreenshot sets aria-busy=true on button before toBlob (mirrors doExport pattern)');
+  ok(/btn\.removeAttribute\('aria-busy'\)/.test(scrBody),
+    'doScreenshot removes aria-busy from button in toBlob callback');
+  // catch block also removes aria-busy
+  ok(/catch\(e\)[\s\S]{0,80}removeAttribute\('aria-busy'\)/.test(scrBody),
+    'doScreenshot removes aria-busy in catch block (SecurityError path re-enables button fully)');
+}
+
+/* ---- Round 335: autoSaveBadge sets aria-hidden before clearing textContent to silence AT empty-string announcement ---- */
+{
+  ok(/autoSaveBadge[\s\S]{0,300}aria-hidden.*true[\s\S]{0,30}textContent=''/.test(html),
+    'autoSaveBadge sets aria-hidden=true before clearing textContent (prevents NVDA/JAWS announcing empty string)');
+  ok(/removeAttribute\('aria-hidden'\)[\s\S]{0,20}b\.textContent=t\('hint\.saved'\)/.test(html),
+    'autoSaveBadge removes aria-hidden before setting saved text (ensures AT announces the message)');
+}
+
+/* ---- Round 336: btnScreenshot gets aria-label with descriptive tip (title alone is inaccessible to AT/keyboard) ---- */
+{
+  ok(/btnScreenshot[\s\S]{0,200}setAttribute\('aria-label',t\('btn\.screenshot\.tip'\)\)/.test(html),
+    'btnScreenshot gets aria-label set to btn.screenshot.tip (descriptive, not just "PNG")');
+}
+
+/* ---- Round 337: doExport restores focus to export button after async completion ---- */
+{
+  ok(/const _exportFocusWasBtn\s*=\s*document\.activeElement\s*===\s*_exportBtn/.test(html),
+    'doExport captures whether export button had focus before disabling it');
+  ok(/_exportFocusWasBtn[\s\S]{0,30}_exportBtn\.focus\(\)/.test(html),
+    'doExport restores focus to export button in finally block when it had focus before export');
 }
 
 /* ---- selfTest ---- */
