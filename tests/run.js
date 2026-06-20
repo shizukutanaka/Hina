@@ -5158,6 +5158,26 @@ function accData(j, bin, ai){
     'doExport finally block resets button text to btn.export if it shows "Exporting…" on error');
 }
 
+/* ---- Round 280: canvas aria-keyshortcuts includes Shift+ArrowUp and zoom shortcuts ---- */
+{
+  ok(html.includes('Shift+ArrowUp') && html.includes('aria-keyshortcuts'),
+    'canvas aria-keyshortcuts includes Shift+ArrowUp for pan shortcut');
+  ok(/about\.keyList.*Delete/.test(html),
+    'about.keyList documents Delete key for slider reset in at least one locale');
+}
+
+/* ---- Round 279: pasteJson guards against missing clipboard.readText ---- */
+{
+  ok(html.includes("typeof navigator.clipboard?.readText !== 'function'"),
+    'pasteJson explicitly guards clipboard.readText availability before calling .then()');
+}
+
+/* ---- Round 278: Delete key on range slider resets to default ---- */
+{
+  ok(/onkeydown[\s\S]{0,380}sliderReset/.test(html) && html.includes("e.key!=='Delete'"),
+    'range slider has Delete key handler that resets to default and announces via srStatus');
+}
+
 /* ---- Round 274: Escape cancels drag-over visual state ---- */
 {
   ok(/Escape[\s\S]{0,100}drag-over[\s\S]{0,100}classList\.remove/.test(html),

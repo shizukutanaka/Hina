@@ -674,6 +674,11 @@ function paramRow(k){
         if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
         onParam(k);
         const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.sliderReset').replace('{label}',label).replace('{v}',s.def); },
+      onkeydown:e=>{ if(e.key!=='Delete'&&e.key!=='Backspace') return; e.preventDefault();
+        captureUndo(); params[k]=s.def; r.value=String(s.def);
+        if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
+        onParam(k);
+        const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.sliderReset').replace('{label}',label).replace('{v}',s.def); },
       oninput:e=>{ params[k]=parseFloat(e.target.value);
         if (valEl.tagName==='INPUT') valEl.value=String(params[k]); else valEl.textContent=String(params[k]);
         onParam(k); }});
@@ -937,15 +942,16 @@ function renderOut(bd){
   }
   {
     const pstj=el('button',{class:'btn wide', onclick:()=>{
-      navigator.clipboard?.readText().then(text=>{
+      const _pfail=()=>{ pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
+        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); };
+      if (typeof navigator.clipboard?.readText !== 'function'){ _pfail(); return; }
+      navigator.clipboard.readText().then(text=>{
         const d=HINA.deserialize(text);
         if(d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null;
           rebuild(); renderBody(); saveState();
           const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.ok'); }
-        else { pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
-          const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); }
-      }).catch(()=>{ pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
-        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); });
+        else _pfail();
+      }).catch(_pfail);
     }}, t('btn.pasteJson'));
     bd.append(pstj);
   }
