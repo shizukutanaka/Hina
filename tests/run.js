@@ -4116,7 +4116,7 @@ function accData(j, bin, ai){
     'en hint.saveFail key present with ⚠ warning symbol');
 
   // saveState catch block must reference hint.saveFail and show the badge
-  const saveStateSrc = html.slice(html.indexOf('function saveState'), html.indexOf('function saveState') + 900);
+  const saveStateSrc = html.slice(html.indexOf('function saveState'), html.indexOf('function saveState') + 1000);
   ok(saveStateSrc.includes("'hint.saveFail'") || saveStateSrc.includes('"hint.saveFail"'),
     'saveState catch block references hint.saveFail i18n key');
   ok(/catch\s*\(e\)\s*\{[\s\S]{0,200}hint\.saveFail/.test(saveStateSrc),
@@ -5786,6 +5786,15 @@ function accData(j, bin, ai){
   const chunk = html.slice(si, si + 200);
   ok(/onfocus\s*:\s*\(\s*\)\s*=>\s*captureUndo\(\)/.test(chunk),
     'color input has onfocus:captureUndo for keyboard undo capture');
+}
+
+/* ---- Round 346: saveState catch removes aria-hidden from autoSaveBadge so screen readers hear the save-fail warning ---- */
+{
+  const si = html.indexOf('private browsing');
+  ok(si !== -1, 'saveState catch comment exists');
+  const chunk = html.slice(si, si + 300);
+  ok(/removeAttribute\('aria-hidden'\)[\s\S]{0,100}hint\.saveFail/.test(chunk),
+    'saveState catch block removes aria-hidden before setting saveFail text');
 }
 
 /* ---- selfTest ---- */
