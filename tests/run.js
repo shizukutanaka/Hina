@@ -5812,6 +5812,12 @@ function accData(j, bin, ai){
     'doExport focus restore checks isConnected before calling focus()');
 }
 
+/* ---- Round 349: aboutDlg close handler guards isConnected before restoring focus (detached trigger after DOM rebuild) ---- */
+{
+  ok(html.includes('_dlgReturnFocus && _dlgReturnFocus.isConnected'),
+    'aboutDlg close handler checks isConnected on _dlgReturnFocus before focus()');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

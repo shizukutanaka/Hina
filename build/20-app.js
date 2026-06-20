@@ -1255,7 +1255,7 @@ $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 // close dialog on backdrop click (click on the dialog element itself = outside the content box)
 $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('aboutDlg').close(); });
 // Restore focus to the trigger element (or btnAbout fallback) when dialog closes
-$('aboutDlg').addEventListener('close',()=>{ (_dlgReturnFocus && typeof _dlgReturnFocus.focus==='function' ? _dlgReturnFocus : $('btnAbout')).focus(); _dlgReturnFocus=null; });
+$('aboutDlg').addEventListener('close',()=>{ ((_dlgReturnFocus && _dlgReturnFocus.isConnected) ? _dlgReturnFocus : $('btnAbout')).focus(); _dlgReturnFocus=null; });
 
 // When WebGL is unavailable, create a centered overlay on the canvas so the
 // black rectangle doesn't look like a crash — hint bar text alone is easy to miss
