@@ -6098,6 +6098,12 @@ function accData(j, bin, ai){
     'numIn onchange calls _announce() when input is empty or non-numeric so screen readers hear the correction');
 }
 
+/* ---- Round 388: autoSaveBadge starts aria-hidden so SR virtual cursor skips the empty placeholder ---- */
+{
+  ok(/autoSaveBadge[\s\S]{0,60}aria-hidden="true"/.test(html),
+    'autoSaveBadge has aria-hidden="true" in initial HTML so screen readers skip the empty placeholder');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
