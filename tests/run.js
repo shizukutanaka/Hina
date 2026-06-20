@@ -6016,6 +6016,12 @@ function accData(j, bin, ai){
     'renderOut disables and marks aria-busy on _exportBtn if export is already in progress');
 }
 
+/* ---- Round 375: _resetTimer srStatus update is guarded by isConnected (avoids stale 'Reset' announcement after tab-switch) ---- */
+{
+  ok(/isConnected\)\{ resetBtn\.textContent[\s\S]{0,80}srStatus[\s\S]{0,40}btn\.reset[\s\S]{0,10}\}/.test(html),
+    '_resetTimer srStatus announcement is inside isConnected guard (no stale SR announcement after navigation)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
