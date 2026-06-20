@@ -2604,7 +2604,9 @@ async function doExport(){
       const tb = await canvasBlob(tc);
       if (tb) thumbBytes = new Uint8Array(await tb.arrayBuffer());
     }
-    const ab = await (await canvasBlob(atlas)).arrayBuffer();
+    const atlasBlob = await canvasBlob(atlas);
+    if (!atlasBlob) throw new Error('atlas toBlob returned null');
+    const ab = await atlasBlob.arrayBuffer();
     const {bytes} = HINA.exportVRM(exportBuild, exportParams, exportMeta, new Uint8Array(ab), thumbBytes);
     const fname = safeName(exportMeta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom'))+'.vrm';
     download(bytes, fname, 'application/octet-stream');

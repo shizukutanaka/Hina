@@ -6022,6 +6022,12 @@ function accData(j, bin, ai){
     '_resetTimer srStatus announcement is inside isConnected guard (no stale SR announcement after navigation)');
 }
 
+/* ---- Round 376: atlas toBlob null guard gives a clear error instead of a cryptic TypeError on canvas.toBlob failure ---- */
+{
+  ok(html.includes("if (!atlasBlob) throw new Error('atlas toBlob returned null');"),
+    'atlas canvasBlob null is caught before .arrayBuffer() to give a clear error message');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
