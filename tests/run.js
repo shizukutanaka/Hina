@@ -4982,7 +4982,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 263: WebGL context-lost event announces to srStatus ---- */
 {
-  ok(/webglcontextlost[\s\S]{0,100}srStatus[\s\S]{0,30}hint\.glLost/.test(html),
+  ok(/webglcontextlost[\s\S]{0,130}srStatus[\s\S]{0,30}hint\.glLost/.test(html),
     'webglcontextlost event announces hint.glLost to srStatus live region');
 }
 
@@ -5850,6 +5850,13 @@ function accData(j, bin, ai){
     'seed input sets aria-errormessage=srStatus alongside aria-invalid for AT error pointer');
   ok(/seedInvalid[\s\S]{0,100}removeAttribute\('aria-errormessage'\)/.test(chunk),
     'seed input clears aria-errormessage after timeout (same as aria-invalid cleanup)');
+}
+
+/* ---- Round 354: _glLost flag set in webglcontextlost guards doScreenshot from keyboard shortcut post-loss ---- */
+{
+  ok(html.includes('let _glLost = false;'), '_glLost flag declared');
+  ok(html.includes('_glLost = true;'), '_glLost set to true in webglcontextlost handler');
+  ok(html.includes('if (!GLOK || _glLost) return;'), 'doScreenshot guards against _glLost (keyboard shortcut bypass prevention)');
 }
 
 /* ---- selfTest ---- */

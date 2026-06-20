@@ -1111,6 +1111,7 @@ function download(bytes, name, type){
 function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').slice(0,100); return v||fb; }
 function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
+let _glLost = false;
 let _exporting = false, _exportBtn = null;
 async function doExport(){
   if (!build || _exporting) return;
@@ -1155,7 +1156,7 @@ function saveJson(){
   const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',fname);
 }
 function doScreenshot(){
-  if (!GLOK) return;
+  if (!GLOK || _glLost) return;
   const btn=$('btnScreenshot');
   const _scrFocusWasBtn = document.activeElement === btn;
   if (btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
@@ -1363,6 +1364,7 @@ $('tabs').addEventListener('keydown',e=>{
 });
 camDist=build.dims.H*1.85; camTarget=[0,build.dims.H*0.55,0];
 cv.addEventListener('webglcontextlost', e=>{ e.preventDefault();
+  _glLost = true;
   $('hint').textContent=t('hint.glLost');
   const sr=$('srStatus'); if(sr) sr.textContent=t('hint.glLost');
   const sc=$('btnScreenshot'); if(sc){ sc.disabled=true; sc.style.display='none'; } });
