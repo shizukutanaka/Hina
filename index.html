@@ -2327,6 +2327,7 @@ function renderBody(scrollReset=true){
         e.target.removeAttribute('aria-invalid');
         n=Math.min(n,4294967295); e.target.value=String(n); runGacha(n); }});
     const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
+      ...(lastGachaSeed===null?{disabled:''}:{}),
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
       onclick:()=>{
         if(lastGachaSeed===null) return;
@@ -2440,10 +2441,12 @@ function renderOut(bd){
   }
   {
     const pstj=el('button',{class:'btn wide', onclick:()=>{
-      const _pfail=()=>{ pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
+      const _pfail=()=>{ pstj.disabled=false; pstj.removeAttribute('aria-busy'); pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); };
       if (typeof navigator.clipboard?.readText !== 'function'){ _pfail(); return; }
+      pstj.disabled=true; pstj.setAttribute('aria-busy','true');
       navigator.clipboard.readText().then(text=>{
+        pstj.disabled=false; pstj.removeAttribute('aria-busy');
         const d=HINA.deserialize(text);
         if(d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null;
           rebuild(); renderBody(); saveState();

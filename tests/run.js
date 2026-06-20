@@ -5765,6 +5765,20 @@ function accData(j, bin, ai){
     'seed input clears aria-invalid after timeout');
 }
 
+/* ---- Round 343: cpBtn (copy seed) is disabled when lastGachaSeed is null ---- */
+{
+  ok(/lastGachaSeed===null\?\{disabled:''\}\:\{\}[\s\S]{0,60}aria-label.*btn\.copySeed/.test(html),
+    'copy seed button is disabled (not just silent) when no gacha seed exists yet');
+}
+
+/* ---- Round 344: pasteJson button sets aria-busy+disabled during clipboard.readText (permission prompt can take seconds) ---- */
+{
+  ok(/pstj\.disabled=true[\s\S]{0,40}aria-busy.*true[\s\S]{0,200}clipboard\.readText/.test(html),
+    'pasteJson sets disabled+aria-busy before clipboard.readText (user may see permission prompt)');
+  ok(/pstj\.disabled=false[\s\S]{0,40}removeAttribute\('aria-busy'\)[\s\S]{0,500}pstj\.disabled=false[\s\S]{0,40}removeAttribute\('aria-busy'\)/.test(html),
+    'pasteJson clears disabled+aria-busy in both success and _pfail paths');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
