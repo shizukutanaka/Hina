@@ -5214,6 +5214,21 @@ function accData(j, bin, ai){
     'rankBadge[role=button]:hover has border-color change for visual hover feedback');
 }
 
+/* ---- Round 297: VRChat guide title gets role=heading aria-level=4 ---- */
+{
+  ok(html.includes("role:'heading','aria-level':'4'") && html.includes("guide.t"),
+    'VRChat guide title <b> gets role=heading aria-level=4 for proper document outline');
+}
+
+/* ---- Round 296: exprBar implements roving tabindex for toolbar ARIA pattern ---- */
+{
+  ok(/exprBar[\s\S]{0,500}tabindex.*-1.*tabindex.*0/.test(html) ||
+     (html.includes("tabindex', activeKey === '' ? '0' : '-1'") || html.includes("tabindex', activeKey === name ? '0' : '-1'")),
+    'exprBar buttons use roving tabindex (initial tabindex based on active expression)');
+  ok(/bar\.addEventListener\('keydown'[\s\S]{0,200}ArrowRight/.test(html),
+    'exprBar has keydown handler for ArrowRight/Left navigation (ARIA toolbar pattern)');
+}
+
 /* ---- Round 287: btnAbout gets aria-haspopup=dialog ---- */
 {
   ok(html.includes("aria-haspopup', 'dialog'"),

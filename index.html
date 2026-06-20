@@ -1811,6 +1811,7 @@ function buildExprBar(){
   if (!bar || !build) return;
   const prevExprFocus = bar.contains(document.activeElement) ? document.activeElement.dataset.expr : undefined;
   bar.innerHTML = '';
+  const activeKey = activeExpr === null ? '' : activeExpr;
   const nb = document.createElement('button');
   nb.className = 'eBtn' + (activeExpr === null ? ' active' : '');
   nb.dataset.expr = '';
@@ -1818,6 +1819,7 @@ function buildExprBar(){
   nb.title = t('expr.neutral');
   nb.setAttribute('aria-label', t('expr.neutral'));
   nb.setAttribute('aria-pressed', String(activeExpr === null));
+  nb.setAttribute('tabindex', activeKey === '' ? '0' : '-1');
   nb.addEventListener('click', () => setExpr(null));
   bar.append(nb);
   for(const name of build.morphs.names){
@@ -1829,13 +1831,32 @@ function buildExprBar(){
     b.title = t('expr.'+name) || name;
     b.setAttribute('aria-label', t('expr.'+name) || name);
     b.setAttribute('aria-pressed', String(activeExpr === name));
+    b.setAttribute('tabindex', activeKey === name ? '0' : '-1');
     b.addEventListener('click', () => setExpr(activeExpr === name ? null : name));
     bar.append(b);
   }
+  // Roving tabindex: arrow keys navigate within the toolbar (ARIA toolbar pattern)
+  bar.addEventListener('keydown', e=>{
+    const btns=[...bar.querySelectorAll('.eBtn')];
+    const ci=btns.indexOf(document.activeElement); if(ci<0) return;
+    let ni=-1;
+    if (e.key==='ArrowRight'||e.key==='ArrowDown') ni=(ci+1)%btns.length;
+    else if (e.key==='ArrowLeft'||e.key==='ArrowUp') ni=(ci-1+btns.length)%btns.length;
+    else if (e.key==='Home') ni=0;
+    else if (e.key==='End') ni=btns.length-1;
+    if (ni<0) return;
+    e.preventDefault();
+    btns.forEach((b,i)=>b.setAttribute('tabindex', i===ni?'0':'-1'));
+    btns[ni].focus();
+  });
   // Restore focus if it was on an expression button before the rebuild
   if (prevExprFocus !== undefined){
     const target=bar.querySelector(`[data-expr="${prevExprFocus}"]`)||bar.querySelector('.eBtn');
-    if(target) target.focus();
+    if(target){
+      bar.querySelectorAll('.eBtn').forEach(b=>b.setAttribute('tabindex','-1'));
+      target.setAttribute('tabindex','0');
+      target.focus();
+    }
   }
 }
 
@@ -2448,7 +2469,7 @@ function renderOut(bd){
   }
   bd.append(el('div',{class:'note'}, t('note.upload')));
   const gd=el('div',{class:'note'});
-  gd.append(el('b',{}, t('guide.t')));
+  gd.append(el('b',{role:'heading','aria-level':'4'}, t('guide.t')));
   const ol=el('ol',{style:'margin:6px 0 0 16px;line-height:1.9'});
   for(const k of ['guide.s1','guide.s2','guide.s3','guide.s4','guide.s5'])
     ol.append(el('li',{}, t(k)));
