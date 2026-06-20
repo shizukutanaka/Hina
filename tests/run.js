@@ -4933,8 +4933,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 269: Escape key deactivates active expression preview ---- */
 {
-  ok(/Escape[\s\S]{0,60}activeExpr[\s\S]{0,20}null/.test(html) ||
-     /key.*Escape[\s\S]{0,80}setExpr\(null\)/.test(html),
+  ok(/Escape[\s\S]{0,450}setExpr\(null\)/.test(html),
     'Escape key calls setExpr(null) to deactivate expression when one is active');
   ok(H.I18N.ja['about.keyList'].includes('Esc') && H.I18N.en['about.keyList'].includes('Esc'),
     'about.keyList documents Esc key shortcut in both locales');
@@ -5134,6 +5133,43 @@ function accData(j, bin, ai){
     'metadata text inputs have spellcheck:false to prevent mobile autocorrect of avatar names');
   ok(html.split("spellcheck:'false'").length - 1 >= 3,
     'at least 3 metadata inputs have spellcheck:false (title, author, licenseUrl)');
+}
+
+/* ---- Round 274: Escape cancels drag-over visual state ---- */
+{
+  ok(/Escape[\s\S]{0,100}drag-over[\s\S]{0,100}classList\.remove/.test(html),
+    'Escape key removes drag-over class so the dashed border overlay is cancelled');
+}
+
+/* ---- Round 273: .preCard .nm has overflow:hidden + text-overflow:ellipsis ---- */
+{
+  ok(/\.preCard \.nm[\s\S]{0,80}overflow\s*:\s*hidden/.test(html),
+    '.preCard .nm has overflow:hidden to prevent long preset names from breaking card layout');
+  ok(/\.preCard \.nm[\s\S]{0,100}text-overflow\s*:\s*ellipsis/.test(html),
+    '.preCard .nm has text-overflow:ellipsis for graceful truncation');
+}
+
+/* ---- Round 272: .btn:disabled and .hbtn:disabled visual styles ---- */
+{
+  ok(/\.btn:disabled[\s\S]{0,60}opacity/.test(html),
+    '.btn:disabled has reduced opacity so disabled export button looks unclickable');
+  ok(/\.hbtn:disabled[\s\S]{0,60}opacity/.test(html),
+    '.hbtn:disabled has reduced opacity for header buttons (screenshot etc.)');
+  ok(/\.btn:disabled[\s\S]{0,80}cursor\s*:\s*not-allowed/.test(html),
+    '.btn:disabled uses cursor:not-allowed to signal non-interactivity');
+}
+
+/* ---- Round 271: FileReader onerror/onabort + 2 MB file size guard ---- */
+{
+  ok(/rd\.onerror\s*=\s*rd\.onabort/.test(html),
+    'FileReader has onerror/onabort handler to show error if file read fails');
+  ok(/f\.size\s*>\s*2\s*\*\s*1024\s*\*\s*1024/.test(html),
+    'File size guard rejects files over 2 MB before reading to prevent hangs');
+  ok(/showErr[\s\S]{0,200}rd\.onerror/.test(html) ||
+     /rd\.onerror[\s\S]{0,30}showErr/.test(html),
+    'FileReader onerror calls showErr to surface the failure to the user');
+  ok(/showErr.*err\.loadFailed[\s\S]{0,10}$|showErr[\s\S]{0,800}rd\.onerror/.test(html),
+    'showErr is called on FileReader error in at least one path');
 }
 
 /* ---- selfTest ---- */

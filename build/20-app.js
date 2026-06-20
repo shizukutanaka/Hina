@@ -66,7 +66,7 @@ function showErr(msg){
   const sr=$('srStatus'); if(sr) sr.textContent=msg;
   const h=$('hint'); if(h){ clearTimeout(_errTimer); h.textContent=msg; h.style.color='var(--err)';
     _errTimer=setTimeout(()=>{ if($('hint')){ $('hint').style.color='';
-      if(!activeExpr) $('hint').textContent=GLOK?t('hint.drag'):t('hint.noGL'); }},4500); }
+      $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):(GLOK?t('hint.drag'):t('hint.noGL')); }},4500); }
 }
 let _saveTimer = null, _saveBadgeTimer = null;
 function saveState(){
@@ -948,11 +948,13 @@ function renderOut(bd){
   }
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
+      if(f.size>2*1024*1024){ showErr(t('err.loadFailed')); e.target.value=''; return; }
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
         if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',f.name); }
         else { showErr(t('err.loadFailed')); } };
+      rd.onerror=rd.onabort=()=>showErr(t('err.loadFailed'));
       rd.readAsText(f); e.target.value=''; }});
   bd.append(file);
   bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
@@ -1212,8 +1214,13 @@ document.addEventListener('keydown',e=>{
     const ti=parseInt(e.key)-1;
     if (ti<TABS.length){ e.preventDefault(); activeTab=TABS[ti]; renderTabs(); renderBody(); $('tab-'+TABS[ti]).focus(); }
   }
-  if (e.key==='Escape' && activeExpr !== null && !$('aboutDlg').open){
-    e.preventDefault(); setExpr(null);
+  if (e.key==='Escape' && !$('aboutDlg').open){
+    if (document.body.classList.contains('drag-over')){
+      document.body.classList.remove('drag-over');
+      const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):(GLOK?t('hint.drag'):t('hint.noGL')); }
+    } else if (activeExpr !== null){
+      e.preventDefault(); setExpr(null);
+    }
   }
 });
 window.addEventListener('beforeunload',()=>{
@@ -1237,11 +1244,13 @@ document.body.addEventListener('drop',e=>{
   e.preventDefault();
   const f=e.dataTransfer.files[0];
   if (!f.name.endsWith('.json') && f.type!=='application/json') { showErr(t('err.loadFailed')); return; }
+  if (f.size>2*1024*1024) { showErr(t('err.loadFailed')); return; }
   const rd=new FileReader();
   rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
     if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
       const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',f.name); }
     else { showErr(t('err.loadFailed')); } };
+  rd.onerror=rd.onabort=()=>showErr(t('err.loadFailed'));
   rd.readAsText(f);
 });
 // Roving tabindex: arrow keys navigate between tabs (ARIA tablist pattern)
