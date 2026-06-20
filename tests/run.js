@@ -100,7 +100,8 @@ ok(html.includes('META_DEFAULTS') && html.includes('_resetPending'), 'reset butt
 ok(html.includes("dataTransfer.types.includes('Files')") && html.includes("dataTransfer.files"), 'drag-and-drop JSON loading wired with file-type guard');
 ok(/document\.title\s*=.*fnameStem/.test(html), 'document.title updated in rebuild() so browser tab reflects loaded title immediately');
 ok(html.includes('visibilitychange') && html.includes('_rafPaused'), 'rAF loop pauses on page visibility hidden (saves CPU/battery on mobile)');
-ok(/n>=0\)\s*runGacha/.test(html), 'gacha seed input accepts seed 0 (n>=0 guard in seed handler)');
+ok(html.includes('runGacha(n)') && (html.includes('n>=0') || html.includes('n<0')),
+  'gacha seed input accepts seed 0 and validates range before calling runGacha');
 ok(html.includes('webglcontextrestored') && html.includes('location.reload'), 'webglcontextrestored triggers reload to re-init GL resources');
 ok(html.includes('HINA.PRESETS.some') && html.includes("j.activePresetId"), 'activePresetId validated against PRESETS list on load to guard against stale IDs');
 ok(/camDist.*camDist.*H.*prevH/.test(html), 'camDist scales proportionally with avatar height in uploadGeometry()');
@@ -5225,6 +5226,18 @@ function accData(j, bin, ai){
 {
   ok(/id="selftestBox"[^>]*role="status"/.test(html),
     '#selftestBox gets role=status so AT users know the content is a live status message');
+}
+
+/* ---- Round 310: seed input has max=4294967295 to document rng(seed>>>0) range and prevent silent wraparound ---- */
+{
+  ok(html.includes("max:'4294967295'") && html.includes('Math.min(n,4294967295)'),
+    'seed input has max=4294967295 and clamps on change to match rng 32-bit unsigned integer range');
+}
+
+/* ---- Round 309: seed input prevents accidental wheel-scroll value changes ---- */
+{
+  ok(/seedIn\.addEventListener\('wheel'[\s\S]{0,80}e\.preventDefault\(\)/.test(html),
+    'seed input has wheel event listener that prevents accidental value changes when scrolling past');
 }
 
 /* ---- Round 308: all keyboard shortcuts are wrapped in !dlgOpen guard so modal dialog suppresses them ---- */

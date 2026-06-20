@@ -2316,10 +2316,11 @@ function renderBody(scrollReset=true){
     gDiv.append(el('button',{id:'gachaBtn', class:'btn wide', onclick:()=>runGacha((Math.random()*1e9|0))}, t('btn.gacha')));
     const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
-      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', step:'1', autocomplete:'off', inputmode:'numeric',
+      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', max:'4294967295', step:'1', autocomplete:'off', inputmode:'numeric',
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
       onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); },
-      onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>=0) runGacha(n); }});
+      onchange:e=>{ let n=Math.round(Number(e.target.value)); if (!Number.isFinite(n)||n<0) return;
+        n=Math.min(n,4294967295); e.target.value=String(n); runGacha(n); }});
     const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
       onclick:()=>{
@@ -2332,6 +2333,7 @@ function renderBody(scrollReset=true){
         }).catch(()=>{ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); });
       }
     }, t('btn.copySeed'));
+    seedIn.addEventListener('wheel',e=>{ if(document.activeElement===seedIn) e.preventDefault(); },{passive:false});
     seedRow.append(el('span',{class:'limit'},t('gacha.seed')), seedIn, cpBtn);
     gDiv.append(seedRow);
     bd.append(grid, gDiv);
