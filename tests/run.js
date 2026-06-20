@@ -5164,6 +5164,24 @@ function accData(j, bin, ai){
     'hint.sliderReset tooltip mentions Delete key in both locales');
 }
 
+/* ---- Round 284: seed copy button guards clipboard.writeText availability ---- */
+{
+  ok(html.includes("!navigator.clipboard?.writeText"),
+    'seed copy button guards clipboard.writeText before calling .then() to prevent silent TypeError');
+}
+
+/* ---- Round 285: seed input has min=0 autocomplete=off step=1 ---- */
+{
+  ok(html.includes("min:'0'") && html.includes("autocomplete:'off'") && html.includes("gacha.seed"),
+    'gacha seed input has min=0 and autocomplete=off for robustness');
+}
+
+/* ---- Round 286: preset card nmDiv has title attribute for ellipsis overflow ---- */
+{
+  ok(html.includes('title:preLabel2') && html.includes('preLabel2=lang'),
+    'preset card name div has title attribute so full name is visible on hover if truncated');
+}
+
 /* ---- Round 282: btnMode and btnAbout get aria-keyshortcuts ---- */
 {
   ok(/btnAbout[\s\S]{0,120}aria-keyshortcuts[\s\S]{0,20}'[?]'/.test(html),

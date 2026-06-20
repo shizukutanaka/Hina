@@ -2238,7 +2238,8 @@ function renderBody(scrollReset=true){
         el('span',{class:'c',style:'background:'+pp.eyeColor}),
         el('span',{class:'c',style:'background:'+pp.clothMain}),
         el('span',{style:'font-size:9px;color:var(--text-faint);margin-left:auto'}, pp.height.toFixed(2)+'m'));
-      const nmDiv=el('div',{class:'nm'}, lang==='ja'?pre.ja:pre.en);
+      const preLabel2=lang==='ja'?pre.ja:pre.en;
+      const nmDiv=el('div',{class:'nm', title:preLabel2}, preLabel2);
       if (isModified) nmDiv.append(el('span',{
         style:'color:var(--accent);font-size:9px;vertical-align:super;margin-left:3px',
         title:lang==='ja'?'プリセットから変更中':'Modified from preset',
@@ -2289,14 +2290,15 @@ function renderBody(scrollReset=true){
     gDiv.append(el('button',{id:'gachaBtn', class:'btn wide', onclick:()=>runGacha((Math.random()*1e9|0))}, t('btn.gacha')));
     const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
-      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'),
+      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', step:'1', autocomplete:'off',
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
       onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>=0) runGacha(n); }});
     const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
       onclick:()=>{
         if(lastGachaSeed===null) return;
-        navigator.clipboard?.writeText(String(lastGachaSeed)).then(()=>{
+        if (!navigator.clipboard?.writeText){ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); return; }
+        navigator.clipboard.writeText(String(lastGachaSeed)).then(()=>{
           const orig=cpBtn.textContent; cpBtn.textContent=t('btn.copied');
           setTimeout(()=>{ cpBtn.textContent=orig; },1500);
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.seedCopied').replace('{n}',lastGachaSeed);
