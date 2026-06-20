@@ -2567,7 +2567,7 @@ function download(bytes, name, type){
   const b=new Blob([bytes],{type});
   const u=URL.createObjectURL(b);
   const a=document.createElement('a');
-  a.href=u; a.download=name; document.body.append(a); a.click(); a.remove();
+  a.href=u; a.download=name; a.setAttribute('aria-hidden','true'); document.body.append(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(u), 8000);
 }
 // 100-char cap: longest suffix is '.hina.json' (10) → 110 chars total, well under OS limits (255 bytes)

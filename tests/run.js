@@ -5919,6 +5919,15 @@ function accData(j, bin, ai){
     'pagehide listener registered for mobile browser backgrounding/close (iOS Safari compat)');
 }
 
+/* ---- Round 362: download() helper sets aria-hidden on transient <a> to avoid brief AT exposure ---- */
+{
+  const si = html.indexOf('a.download=name;');
+  ok(si !== -1, 'download helper uses a.download=name');
+  const chunk = html.slice(si, si + 100);
+  ok(chunk.includes("setAttribute('aria-hidden','true')"),
+    'download() sets aria-hidden=true on transient anchor to prevent AT exposure during export/save');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
