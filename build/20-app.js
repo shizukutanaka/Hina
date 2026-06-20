@@ -249,7 +249,7 @@ if (GLOK){
 }
 
 function uploadTexture(){
-  if (!GLOK) return;
+  if (!GLOK || _glLost) return;
   gl.bindTexture(gl.TEXTURE_2D, tex);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE, atlas);
@@ -285,7 +285,7 @@ function uploadGeometry(){
   for(let i=0;i<idx.length;i+=3){
     if (idx[i]>=fs || idx[i+1]>=fs || idx[i+2]>=fs){ outlineCount=i; break; }
   }
-  if (!GLOK) return;
+  if (!GLOK || _glLost) return;
   gl.bindBuffer(gl.ARRAY_BUFFER, bufUv);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(g.uv), gl.STATIC_DRAW);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufIdx);

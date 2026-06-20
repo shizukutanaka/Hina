@@ -6040,6 +6040,14 @@ function accData(j, bin, ai){
     'applyLang screenshot button visibility checks both GLOK and _glLost');
 }
 
+/* ---- Round 379: uploadTexture() and uploadGeometry() skip GL calls when _glLost (avoids no-op calls after context loss) ---- */
+{
+  ok(html.includes("if (!GLOK || _glLost) return;\n  gl.bindTexture"),
+    'uploadTexture() guards with _glLost to skip no-op GL calls after context loss');
+  ok(html.includes("if (!GLOK || _glLost) return;\n  gl.bindBuffer(gl.ARRAY_BUFFER, bufUv)"),
+    'uploadGeometry() guards with _glLost to skip no-op GL calls after context loss');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
