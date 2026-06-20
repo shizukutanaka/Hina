@@ -5855,7 +5855,7 @@ function accData(j, bin, ai){
 {
   ok(html.includes('let _glLost = false;'), '_glLost flag declared');
   ok(html.includes('_glLost = true;'), '_glLost set to true in webglcontextlost handler');
-  ok(html.includes('if (!GLOK || _glLost || _screenshotting) return;'), 'doScreenshot guards against _glLost and re-entrancy (keyboard shortcut bypass prevention)');
+  ok(/if \(!GLOK \|\| _glLost\)[\s\S]{0,80}if \(_screenshotting\) return/.test(html), 'doScreenshot guards against _glLost (with SR announcement) and re-entrancy separately');
 }
 
 /* ---- Round 355: renderFrame and doExport thumbnail both guard _glLost to stop wasted work after context loss ---- */
@@ -5930,8 +5930,8 @@ function accData(j, bin, ai){
 /* ---- Round 363: doScreenshot has _screenshotting re-entrancy guard (like doExport has _exporting) ---- */
 {
   ok(html.includes('let _screenshotting = false;'), '_screenshotting flag declared');
-  ok(html.includes('if (!GLOK || _glLost || _screenshotting) return;'),
-    'doScreenshot guards _screenshotting to prevent double-invocation from keyboard shortcut');
+  ok(/if \(_screenshotting\) return/.test(html),
+    'doScreenshot guards _screenshotting separately to prevent double-invocation from keyboard shortcut');
 }
 
 /* ---- Round 364: copyJson clipboard guard uses ?.writeText (consistent with copySeed) ---- */
@@ -6102,6 +6102,14 @@ function accData(j, bin, ai){
 {
   ok(/autoSaveBadge[\s\S]{0,60}aria-hidden="true"/.test(html),
     'autoSaveBadge has aria-hidden="true" in initial HTML so screen readers skip the empty placeholder');
+}
+
+/* ---- Round 389: doScreenshot() announces GL-unavailable reason before returning early ---- */
+{
+  const scrFnIdx = html.indexOf('function doScreenshot()');
+  const scrBlock = scrFnIdx >= 0 ? html.slice(scrFnIdx, scrFnIdx + 200) : '';
+  ok(/!GLOK \|\| _glLost[\s\S]{0,120}srStatus[\s\S]{0,80}return/.test(scrBlock),
+    'doScreenshot() announces GL-unavailable error via srStatus before returning early when GL is missing or lost');
 }
 
 /* ---- selfTest ---- */
