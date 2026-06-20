@@ -499,7 +499,7 @@ function resize(){
 }
 
 function renderFrame(time){
-  if (!build || !GLOK) return;
+  if (!build || !GLOK || _glLost) return;
   resize();
   // blink — suppressed when an expression is locked via the preview bar
   if (!activeExpr && !reduceMotion){
@@ -1125,7 +1125,7 @@ async function doExport(){
   { const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); }
   try{
     let thumbBytes = null;
-    if (GLOK){
+    if (GLOK && !_glLost){
       renderFrame(performance.now());            // same task → buffer readable
       const sq = Math.min(cv.width, cv.height);
       const tc = document.createElement('canvas');

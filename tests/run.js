@@ -5859,6 +5859,14 @@ function accData(j, bin, ai){
   ok(html.includes('if (!GLOK || _glLost) return;'), 'doScreenshot guards against _glLost (keyboard shortcut bypass prevention)');
 }
 
+/* ---- Round 355: renderFrame and doExport thumbnail both guard _glLost to stop wasted work after context loss ---- */
+{
+  ok(html.includes('if (!build || !GLOK || _glLost) return;'),
+    'renderFrame guards _glLost so RAF loop stops doing work after context loss');
+  ok(html.includes('if (GLOK && !_glLost){'),
+    'doExport thumbnail branch guards _glLost to skip capture after context loss');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
