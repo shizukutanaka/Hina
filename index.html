@@ -2782,7 +2782,7 @@ document.addEventListener('keydown',e=>{
     }
     if (notField && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)){
       const ti=parseInt(e.key)-1;
-      if (ti<TABS.length){ e.preventDefault(); activeTab=TABS[ti]; renderTabs(); renderBody(); $('tab-'+TABS[ti]).focus(); }
+      if (ti<TABS.length){ e.preventDefault(); const chg=TABS[ti]!==activeTab; activeTab=TABS[ti]; renderTabs(); renderBody(chg); $('tab-'+TABS[ti]).focus(); }
     }
   }
   if (e.key==='Escape' && !$('aboutDlg').open){

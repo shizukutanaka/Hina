@@ -6060,6 +6060,12 @@ function accData(j, bin, ai){
     'tab onclick passes changed flag to renderBody() so re-clicking the active tab preserves scroll position');
 }
 
+/* ---- Round 382: 1–8 key shortcuts also preserve scroll when re-pressing the current tab's key ---- */
+{
+  ok(/TABS\[ti\]!==activeTab[\s\S]{0,40}renderBody\(chg\)/.test(html),
+    '1-8 key shortcut passes chg flag to renderBody() so re-pressing the active tab key preserves scroll');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
