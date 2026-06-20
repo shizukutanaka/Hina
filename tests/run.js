@@ -5226,6 +5226,12 @@ function accData(j, bin, ai){
     '#selftestBox gets role=status so AT users know the content is a live status message');
 }
 
+/* ---- Round 304: meta-title input gets aria-describedby=fnPreview so AT announces filename preview ---- */
+{
+  ok(html.includes("'aria-describedby':'fnPreview'") && html.includes("id:'meta-title'"),
+    'meta-title input has aria-describedby=fnPreview so AT announces filename preview on focus');
+}
+
 /* ---- Round 298: .sw:hover transform:none in prefers-reduced-motion CSS ---- */
 {
   ok(/prefers-reduced-motion[\s\S]{0,80}\.sw:hover\{transform:none\}/.test(html),

@@ -907,7 +907,7 @@ function renderOut(bd){
     if(fnPrev.textContent!==nxt) fnPrev.textContent=nxt; document.title='雛 — '+s; };
   bd.append(el('div',{class:'row'},
     el('label',{'for':'meta-title'},t('out.title')),
-    el('input',{id:'meta-title', type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', value:meta.title||'', placeholder:t('out.title.ph'),
+    el('input',{id:'meta-title', type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', 'aria-describedby':'fnPreview', value:meta.title||'', placeholder:t('out.title.ph'),
       oninput:e=>{ meta.title=e.target.value; saveState(); updateFnPrev(); }})));
   updateFnPrev();
   bd.append(fnPrev);
