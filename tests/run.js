@@ -5877,6 +5877,14 @@ function accData(j, bin, ai){
     'screenshot button aria-keyshortcuts includes Meta+Shift+P for macOS');
 }
 
+/* ---- Round 357: hint.undoReady includes ⌘+Z so Mac users see the correct modifier ---- */
+{
+  ok(H.I18N.ja['hint.undoReady'].includes('⌘+Z'),
+    'ja hint.undoReady includes ⌘+Z for macOS users');
+  ok(H.I18N.en['hint.undoReady'].includes('⌘+Z'),
+    'en hint.undoReady includes ⌘+Z for macOS users');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
