@@ -5512,12 +5512,12 @@ function accData(j, bin, ai){
     'en a11y.loadedJson key exists and contains {name} placeholder');
 
   // File-picker load path uses loadedJson, not savedJson
-  ok(/rd\.onload[\s\S]{0,300}a11y\.loadedJson/.test(html),
+  ok(/rd\.onload[\s\S]{0,380}a11y\.loadedJson/.test(html),
     'file-picker JSON load announces a11y.loadedJson (not savedJson) to srStatus');
 
   // Drag-and-drop load path uses loadedJson
   const dropIdx = html.lastIndexOf("addEventListener('drop'");
-  const dropBlock = html.slice(dropIdx, dropIdx + 800);
+  const dropBlock = html.slice(dropIdx, dropIdx + 900);
   ok(/a11y\.loadedJson/.test(dropBlock),
     'drag-and-drop JSON load announces a11y.loadedJson (not savedJson) to srStatus');
 
@@ -5645,6 +5645,33 @@ function accData(j, bin, ai){
        html.slice(html.indexOf("$('btnLang').addEventListener('click'"),
                   html.indexOf("$('btnLang').addEventListener('click'") + 200))),
     'btnLang click announces btn.lang.tip to srStatus after language switch');
+}
+
+/* ---- Round 331: springOff toggle announces quest note to srStatus ---- */
+{
+  // When k==='springOff', onParam announces the relevant note to srStatus
+  const onParamIdx = html.indexOf('function onParam(k)');
+  const onParamEnd = html.indexOf('\nfunction ', onParamIdx + 1);
+  const onParamBody = html.slice(onParamIdx, onParamEnd > onParamIdx ? onParamEnd : onParamIdx + 700);
+  ok(/springOff[\s\S]{0,120}note\.springOff/.test(onParamBody),
+    'onParam springOff branch announces note.springOff to srStatus when toggling springs off');
+  ok(/springOff[\s\S]{0,200}note\.quest/.test(onParamBody),
+    'onParam springOff branch announces note.quest (or quest.nospring) when toggling springs on');
+}
+
+/* ---- Round 332: file-picker and drag-and-drop JSON load refocus tabBody (WCAG 2.4.3) ---- */
+{
+  // file-picker load success: tabBody.focus() after renderBody
+  ok(/rd\.onload[\s\S]{0,200}tabBody[\s\S]{0,30}\.focus\(\)[\s\S]{0,200}a11y\.loadedJson/.test(html) ||
+     /rd\.onload[\s\S]{0,200}a11y\.loadedJson[\s\S]{0,200}tabBody[\s\S]{0,30}\.focus\(\)/.test(html) ||
+     /rd\.onload[\s\S]{0,500}tabBody[\s\S]{0,30}\.focus\(\)/.test(html),
+    'file-picker JSON load refocuses tabBody after renderBody (WCAG 2.4.3)');
+
+  // drag-and-drop load success: tabBody.focus() after renderBody
+  const dropIdx = html.lastIndexOf("addEventListener('drop'");
+  const dropBlock = html.slice(dropIdx, dropIdx + 900);
+  ok(/tabBody[\s\S]{0,30}\.focus\(\)/.test(dropBlock),
+    'drag-and-drop JSON load refocuses tabBody after renderBody (WCAG 2.4.3)');
 }
 
 /* ---- selfTest ---- */

@@ -2240,7 +2240,9 @@ function onParam(k){
   // All other params leave the panel layout unchanged — skipping renderBody() prevents the
   // panel from jumping back to scrollTop=0 on every slider tick.
   // scrollReset=false: preserve scroll position so toggling springOff doesn't snap the panel top.
-  if (k==='outfit' || k==='springOff'){ renderBody(false); const re=document.getElementById('pr-'+k); if(re) re.focus(); }
+  if (k==='outfit' || k==='springOff'){ renderBody(false); const re=document.getElementById('pr-'+k); if(re) re.focus();
+    if (k==='springOff'){ const hasS=build&&build.springs&&build.springs.length>0;
+      const sr=$('srStatus'); if(sr) sr.textContent=params.springOff?t('note.springOff'):(hasS?t('note.quest'):t('note.quest.nospring')); } }
 }
 
 function renderBody(scrollReset=true){
@@ -2448,6 +2450,7 @@ function renderOut(bd){
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
         if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
+          const tb=$('tabBody'); if(tb) tb.focus();
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.loadedJson').replace('{name}',f.name); }
         else { showErr(t('err.loadFailed')); } };
       rd.onerror=rd.onabort=()=>showErr(t('err.loadFailed'));
@@ -2784,6 +2787,7 @@ document.body.addEventListener('drop',e=>{
   const rd=new FileReader();
   rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
     if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
+      const tb=$('tabBody'); if(tb) tb.focus();
       const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.loadedJson').replace('{name}',f.name); }
     else { showErr(t('err.loadFailed')); } };
   rd.onerror=rd.onabort=()=>showErr(t('err.loadFailed'));
