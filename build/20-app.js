@@ -1020,12 +1020,12 @@ function renderOut(bd){
         clearTimeout(_resetTimer); _resetPending=false; resetBtn.textContent=t('btn.reset');
         captureUndo(); params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
         const tb=$('tabBody'); if(tb) tb.focus();
-        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.reset');
+        const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.resetDone');
       } else {
         _resetPending=true; resetBtn.textContent=t('btn.reset.confirm');
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.reset.confirm');
         _resetTimer=setTimeout(()=>{ _resetPending=false; if(resetBtn.isConnected){ resetBtn.textContent=t('btn.reset');
-          const sr=$('srStatus'); if(sr) sr.textContent=t('btn.reset'); } },3000);
+          const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.resetCancelled'); } },3000);
       }
     }}, t('btn.reset'));
     bd.append(resetBtn);

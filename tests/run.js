@@ -5801,8 +5801,8 @@ function accData(j, bin, ai){
   const si = html.indexOf('_resetTimer=setTimeout');
   ok(si !== -1, '_resetTimer setTimeout exists');
   const chunk = html.slice(si, si + 300);
-  ok(/srStatus.*textContent\s*=\s*t\('btn\.reset'\)/.test(chunk),
-    'reset-pending timeout announces btn.reset via srStatus on expiry');
+  ok(/srStatus.*textContent\s*=\s*t\('a11y\.resetCancelled'\)/.test(chunk),
+    'reset-pending timeout announces a11y.resetCancelled via srStatus on expiry');
 }
 
 /* ---- Round 348: doExport focus restore guards isConnected to avoid stranding focus when user navigates away during async export ---- */
@@ -6018,7 +6018,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 375: _resetTimer srStatus update is guarded by isConnected (avoids stale 'Reset' announcement after tab-switch) ---- */
 {
-  ok(/isConnected\)\{ resetBtn\.textContent[\s\S]{0,80}srStatus[\s\S]{0,40}btn\.reset[\s\S]{0,10}\}/.test(html),
+  ok(/isConnected\)\{ resetBtn\.textContent[\s\S]{0,80}srStatus[\s\S]{0,40}a11y\.resetCancelled[\s\S]{0,10}\}/.test(html),
     '_resetTimer srStatus announcement is inside isConnected guard (no stale SR announcement after navigation)');
 }
 
@@ -6118,6 +6118,12 @@ function accData(j, bin, ai){
   const expBlock = expFnIdx >= 0 ? html.slice(expFnIdx, expFnIdx + 200) : '';
   ok(/_exporting\)[\s\S]{0,80}btn\.exporting[\s\S]{0,20}return/.test(expBlock),
     'doExport() announces btn.exporting to srStatus when called while _exporting is already true');
+}
+
+/* ---- Round 391: reset confirmation announces done/cancelled, not generic button label ---- */
+{
+  ok(/a11y\.resetDone/.test(html) && /a11y\.resetCancelled/.test(html),
+    'reset button announces a11y.resetDone when confirmed and a11y.resetCancelled when timeout expires, not generic btn.reset');
 }
 
 /* ---- selfTest ---- */
