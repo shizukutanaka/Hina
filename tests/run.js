@@ -4923,6 +4923,14 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 270: logo div gets aria-label + role=img for cohesive SR reading ---- */
+{
+  ok(/class="logo"[\s\S]{0,30}aria-label/.test(html),
+    'logo div has aria-label so screen readers read it as one unit, not two fragments');
+  ok(/class="logo"[\s\S]{0,50}role="img"/.test(html),
+    'logo div has role=img so AT treats it as a decorative heading, not interactive content');
+}
+
 /* ---- Round 269: Escape key deactivates active expression preview ---- */
 {
   ok(/Escape[\s\S]{0,60}activeExpr[\s\S]{0,20}null/.test(html) ||
