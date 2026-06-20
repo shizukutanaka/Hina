@@ -5832,6 +5832,15 @@ function accData(j, bin, ai){
     'doUndo announces exporting state to srStatus instead of silently returning');
 }
 
+/* ---- Round 352: webglcontextlost hides screenshot button so it can't produce a blank image ---- */
+{
+  const si = html.indexOf('webglcontextlost');
+  ok(si !== -1, 'webglcontextlost listener exists');
+  const chunk = html.slice(si, si + 300);
+  ok(/btnScreenshot[\s\S]{0,60}disabled\s*=\s*true[\s\S]{0,60}display\s*=\s*'none'/.test(chunk),
+    'webglcontextlost hides screenshot button (disabled+display:none) to prevent blank screenshots');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
