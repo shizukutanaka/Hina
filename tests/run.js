@@ -6008,6 +6008,14 @@ function accData(j, bin, ai){
     'numIn onchange updates range aria-valuetext after accepting a typed value');
 }
 
+/* ---- Round 374: renderOut() applies _exporting state to new _exportBtn so tab-switch-and-back shows correct disabled/aria-busy ---- */
+{
+  ok(html.includes("_exporting?t('btn.exporting'):t('btn.export')"),
+    'renderOut creates _exportBtn with exporting label if _exporting is already true');
+  ok(/if \(_exporting\)\{ _exportBtn\.disabled=true; _exportBtn\.setAttribute\('aria-busy','true'\); \}/.test(html),
+    'renderOut disables and marks aria-busy on _exportBtn if export is already in progress');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

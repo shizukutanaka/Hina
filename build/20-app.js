@@ -907,7 +907,8 @@ function renderBody(scrollReset=true){
 let statEls={};
 function renderOut(bd){
   // Primary action at top — the export button is why the user opened this tab
-  _exportBtn = el('button',{class:'btn primary wide', 'aria-keyshortcuts':'Control+S Meta+S', onclick:doExport}, t('btn.export'));
+  _exportBtn = el('button',{class:'btn primary wide', 'aria-keyshortcuts':'Control+S Meta+S', onclick:doExport}, _exporting?t('btn.exporting'):t('btn.export'));
+  if (_exporting){ _exportBtn.disabled=true; _exportBtn.setAttribute('aria-busy','true'); }
   bd.append(_exportBtn);
   bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:10px'}, t('hint.ctrlS')));
 
