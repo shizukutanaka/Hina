@@ -5237,8 +5237,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 320: doScreenshot wraps cv.toBlob() in try-catch so SecurityError doesn't leave btn disabled ---- */
 {
-  ok(/doScreenshot[\s\S]{0,900}catch\s*\(e\)[\s\S]{0,100}btn\.disabled=false/.test(html),
-    'doScreenshot() has try-catch around cv.toBlob() to re-enable button if canvas throws (e.g. SecurityError)');
+  ok(/doScreenshot[\s\S]{0,1200}catch\s*\(e\)[\s\S]{0,20}_scrDone\(\)/.test(html),
+    'doScreenshot() has try-catch around cv.toBlob() to re-enable button via _scrDone if canvas throws (e.g. SecurityError)');
 }
 
 /* ---- Round 319: doExport snapshots params and meta too so live changes during awaits don't affect the export ---- */
@@ -5311,8 +5311,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 311: doScreenshot re-enables button inside toBlob callback, not in finally ---- */
 {
-  ok(/if \(btn\)\{?\s*btn\.disabled=false/.test(html) && /toBlob\s*\(blob=>\{[\s\S]{0,40}if \(btn\)/.test(html),
-    'screenshot button is re-enabled inside toBlob callback (async), not prematurely in a finally block');
+  ok(/toBlob\s*\(blob=>\{[\s\S]{0,20}_scrDone\(\)/.test(html),
+    'screenshot button is re-enabled via _scrDone() inside toBlob callback (async), not prematurely in a finally block');
 }
 
 /* ---- Round 310: seed input has max=4294967295 to document rng(seed>>>0) range and prevent silent wraparound ---- */
@@ -5693,9 +5693,9 @@ function accData(j, bin, ai){
     'doScreenshot sets aria-busy=true on button before toBlob (mirrors doExport pattern)');
   ok(/btn\.removeAttribute\('aria-busy'\)/.test(scrBody),
     'doScreenshot removes aria-busy from button in toBlob callback');
-  // catch block also removes aria-busy
-  ok(/catch\(e\)[\s\S]{0,80}removeAttribute\('aria-busy'\)/.test(scrBody),
-    'doScreenshot removes aria-busy in catch block (SecurityError path re-enables button fully)');
+  // catch block calls _scrDone() which removes aria-busy
+  ok(/catch\(e\)[\s\S]{0,20}_scrDone\(\)/.test(scrBody),
+    'doScreenshot calls _scrDone() in catch block to re-enable button fully (SecurityError path)');
 }
 
 /* ---- Round 335: autoSaveBadge sets aria-hidden before clearing textContent to silence AT empty-string announcement ---- */
@@ -5856,7 +5856,7 @@ function accData(j, bin, ai){
 {
   ok(html.includes('let _glLost = false;'), '_glLost flag declared');
   ok(html.includes('_glLost = true;'), '_glLost set to true in webglcontextlost handler');
-  ok(html.includes('if (!GLOK || _glLost) return;'), 'doScreenshot guards against _glLost (keyboard shortcut bypass prevention)');
+  ok(html.includes('if (!GLOK || _glLost || _screenshotting) return;'), 'doScreenshot guards against _glLost and re-entrancy (keyboard shortcut bypass prevention)');
 }
 
 /* ---- Round 355: renderFrame and doExport thumbnail both guard _glLost to stop wasted work after context loss ---- */
@@ -5926,6 +5926,13 @@ function accData(j, bin, ai){
   const chunk = html.slice(si, si + 100);
   ok(chunk.includes("setAttribute('aria-hidden','true')"),
     'download() sets aria-hidden=true on transient anchor to prevent AT exposure during export/save');
+}
+
+/* ---- Round 363: doScreenshot has _screenshotting re-entrancy guard (like doExport has _exporting) ---- */
+{
+  ok(html.includes('let _screenshotting = false;'), '_screenshotting flag declared');
+  ok(html.includes('if (!GLOK || _glLost || _screenshotting) return;'),
+    'doScreenshot guards _screenshotting to prevent double-invocation from keyboard shortcut');
 }
 
 /* ---- selfTest ---- */

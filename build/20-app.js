@@ -1112,6 +1112,7 @@ function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').sl
 function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 let _glLost = false;
+let _screenshotting = false;
 let _exporting = false, _exportBtn = null;
 async function doExport(){
   if (!build || _exporting) return;
@@ -1156,14 +1157,16 @@ function saveJson(){
   const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',fname);
 }
 function doScreenshot(){
-  if (!GLOK || _glLost) return;
+  if (!GLOK || _glLost || _screenshotting) return;
+  _screenshotting = true;
   const btn=$('btnScreenshot');
   const _scrFocusWasBtn = document.activeElement === btn;
   if (btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
+  const _scrDone=()=>{ _screenshotting=false; if (btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); if (_scrFocusWasBtn) btn.focus(); } };
   try{
     renderFrame(performance.now()); // render into buffer before browser flushes it
     cv.toBlob(blob=>{
-      if (btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); if (_scrFocusWasBtn) btn.focus(); }
+      _scrDone();
       if (!blob){ showErr(t('err.exportFailed')); return; }
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a');
@@ -1172,7 +1175,7 @@ function doScreenshot(){
       setTimeout(()=>URL.revokeObjectURL(url),1000);
       const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
     },'image/png');
-  }catch(e){ if(btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); if (_scrFocusWasBtn) btn.focus(); } showErr(t('err.exportFailed')); }
+  }catch(e){ _scrDone(); showErr(t('err.exportFailed')); }
 }
 
 /* ---------- rebuild ---------- */
