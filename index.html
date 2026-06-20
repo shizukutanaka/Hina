@@ -2607,17 +2607,19 @@ function doScreenshot(){
   if (!GLOK) return;
   const btn=$('btnScreenshot');
   if (btn){ btn.disabled=true; }
-  renderFrame(performance.now()); // render into buffer before browser flushes it
-  cv.toBlob(blob=>{
-    if (btn) btn.disabled=false;
-    if (!blob){ showErr(t('err.exportFailed')); return; }
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download=fnameStem()+'.png';
-    document.body.append(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
-  },'image/png');
+  try{
+    renderFrame(performance.now()); // render into buffer before browser flushes it
+    cv.toBlob(blob=>{
+      if (btn) btn.disabled=false;
+      if (!blob){ showErr(t('err.exportFailed')); return; }
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=fnameStem()+'.png';
+      document.body.append(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
+    },'image/png');
+  }catch(e){ if(btn) btn.disabled=false; showErr(t('err.exportFailed')); }
 }
 
 /* ---------- rebuild ---------- */

@@ -5228,6 +5228,12 @@ function accData(j, bin, ai){
     '#selftestBox gets role=status so AT users know the content is a live status message');
 }
 
+/* ---- Round 320: doScreenshot wraps cv.toBlob() in try-catch so SecurityError doesn't leave btn disabled ---- */
+{
+  ok(/doScreenshot[\s\S]{0,700}catch\s*\(e\)[\s\S]{0,60}btn\.disabled=false/.test(html),
+    'doScreenshot() has try-catch around cv.toBlob() to re-enable button if canvas throws (e.g. SecurityError)');
+}
+
 /* ---- Round 319: doExport snapshots params and meta too so live changes during awaits don't affect the export ---- */
 {
   ok(html.includes('const exportParams = JSON.parse(JSON.stringify(params))') &&
