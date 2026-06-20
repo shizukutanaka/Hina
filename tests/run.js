@@ -5821,8 +5821,8 @@ function accData(j, bin, ai){
 {
   ok(html.includes("if (!GLOK || _glLost){ const sr=$('srStatus'); if(sr) sr.textContent=_hintDefault(); }"),
     'no-WebGL/context-lost path in applyLang announces correct hint via srStatus');
-  ok(/cv\.setAttribute\('aria-label', GLOK \? t\('a11y\.canvas'\) : t\('hint\.noGL'\)\)/.test(html),
-    'canvas aria-label uses hint.noGL when WebGL unavailable');
+  ok(html.includes("cv.setAttribute('aria-label', GLOK && !_glLost ? t('a11y.canvas') : _hintDefault());"),
+    'canvas aria-label in applyLang uses _hintDefault() accounting for _glLost');
 }
 
 /* ---- Round 351: doUndo announces btn.exporting via srStatus when _exporting is true (not silent) ---- */
@@ -5835,8 +5835,8 @@ function accData(j, bin, ai){
 {
   const si = html.indexOf('webglcontextlost');
   ok(si !== -1, 'webglcontextlost listener exists');
-  const chunk = html.slice(si, si + 300);
-  ok(/btnScreenshot[\s\S]{0,60}disabled\s*=\s*true[\s\S]{0,60}display\s*=\s*'none'/.test(chunk),
+  const chunk = html.slice(si, si + 400);
+  ok(/btnScreenshot[\s\S]{0,80}disabled\s*=\s*true[\s\S]{0,80}display\s*=\s*'none'/.test(chunk),
     'webglcontextlost hides screenshot button (disabled+display:none) to prevent blank screenshots');
 }
 
@@ -5966,6 +5966,14 @@ function accData(j, bin, ai){
     '_hintDefault helper defined to return glLost/noGL/drag based on runtime state');
   ok(!html.includes('GLOK?t(\'hint.drag\'):t(\'hint.noGL\')') && !html.includes('GLOK ? t(\'hint.drag\') : t(\'hint.noGL\')'),
     'no bare GLOK?hint.drag:hint.noGL pattern remains — all replaced by _hintDefault()');
+}
+
+/* ---- Round 368: webglcontextlost updates canvas aria-label and applyLang checks _glLost for aria-label ---- */
+{
+  ok(/webglcontextlost[\s\S]{0,300}cv\.setAttribute\('aria-label', t\('hint\.glLost'\)\)/.test(html),
+    'webglcontextlost handler updates canvas aria-label to hint.glLost');
+  ok(html.includes("cv.setAttribute('aria-label', GLOK && !_glLost ? t('a11y.canvas') : _hintDefault());"),
+    'applyLang canvas aria-label accounts for _glLost using _hintDefault()');
 }
 
 /* ---- selfTest ---- */

@@ -1227,7 +1227,7 @@ function applyLang(){
   bm.setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = _hintDefault();
   if (!GLOK || _glLost){ const sr=$('srStatus'); if(sr) sr.textContent=_hintDefault(); }
-  cv.setAttribute('aria-label', GLOK ? t('a11y.canvas') : t('hint.noGL'));
+  cv.setAttribute('aria-label', GLOK && !_glLost ? t('a11y.canvas') : _hintDefault());
   cv.setAttribute('aria-roledescription', t('a11y.canvas.role'));
   $('tabs').setAttribute('aria-label', t('a11y.tabs'));
   $('exprBar').setAttribute('aria-label', t('a11y.exprBar'));
@@ -1370,6 +1370,7 @@ cv.addEventListener('webglcontextlost', e=>{ e.preventDefault();
   _glLost = true;
   $('hint').textContent=t('hint.glLost');
   const sr=$('srStatus'); if(sr) sr.textContent=t('hint.glLost');
+  cv.setAttribute('aria-label', t('hint.glLost'));
   const sc=$('btnScreenshot'); if(sc){ sc.disabled=true; sc.style.display='none'; } });
 cv.addEventListener('webglcontextrestored', ()=>{ location.reload(); });
 if (location.search.indexOf('selftest')>=0){
