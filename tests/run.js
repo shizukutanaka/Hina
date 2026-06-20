@@ -6002,6 +6002,12 @@ function accData(j, bin, ai){
     'seed input announces a11y.clamped via srStatus when value is clamped (consistent with numIn behavior)');
 }
 
+/* ---- Round 373: numIn onchange updates r.setAttribute('aria-valuetext') so range slider stays current after direct entry ---- */
+{
+  ok(html.includes("r.value=String(clamped); r.setAttribute('aria-valuetext',String(clamped)); onParam(k);"),
+    'numIn onchange updates range aria-valuetext after accepting a typed value');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

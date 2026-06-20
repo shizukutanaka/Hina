@@ -2175,7 +2175,7 @@ function paramRow(k){
             const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',clamped);
             setTimeout(()=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); },1500);
           }
-          params[k]=clamped; e.target.value=String(clamped); r.value=String(clamped); onParam(k); }});
+          params[k]=clamped; e.target.value=String(clamped); r.value=String(clamped); r.setAttribute('aria-valuetext',String(clamped)); onParam(k); }});
       // Prevent accidental value changes when wheel-scrolling the panel over a focused numIn
       valEl.addEventListener('wheel', e=>{ if(document.activeElement===valEl) e.preventDefault(); },{passive:false});
     } else {
