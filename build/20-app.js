@@ -732,7 +732,7 @@ function paramRow(k){
   }
   // color
   const inp=el('input',{id:pid, type:'color', value:params[k], 'aria-label':label,
-    onpointerdown:()=>captureUndo(),
+    onpointerdown:()=>captureUndo(), onfocus:()=>captureUndo(),
     oninput:e=>{params[k]=e.target.value; onParam(k); updateSwPressedState();}});
   // Roving tabindex on swatches: only one in tab order at a time (avoids N stops for N colors)
   const sw=el('div',{class:'swatches', role:'group', 'aria-label':label});

@@ -5779,6 +5779,15 @@ function accData(j, bin, ai){
     'pasteJson clears disabled+aria-busy in both success and _pfail paths');
 }
 
+/* ---- Round 345: color input onfocus captures undo so keyboard users (Tab+Enter) don't bypass undo capture ---- */
+{
+  const si = html.indexOf("type:'color'");
+  ok(si !== -1, 'color input exists');
+  const chunk = html.slice(si, si + 200);
+  ok(/onfocus\s*:\s*\(\s*\)\s*=>\s*captureUndo\(\)/.test(chunk),
+    'color input has onfocus:captureUndo for keyboard undo capture');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
