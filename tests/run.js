@@ -1457,7 +1457,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2300)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2400)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -4786,7 +4786,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 243: doScreenshot() calls showErr when canvas toBlob returns null ---- */
 {
-  ok(/toBlob[\s\S]{0,120}!blob[\s\S]{0,30}showErr/.test(html),
+  ok(/toBlob[\s\S]{0,160}!blob[\s\S]{0,30}showErr/.test(html),
     'doScreenshot() calls showErr when toBlob returns null (GPU hung / no data)');
 }
 
@@ -5237,7 +5237,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 320: doScreenshot wraps cv.toBlob() in try-catch so SecurityError doesn't leave btn disabled ---- */
 {
-  ok(/doScreenshot[\s\S]{0,800}catch\s*\(e\)[\s\S]{0,80}btn\.disabled=false/.test(html),
+  ok(/doScreenshot[\s\S]{0,900}catch\s*\(e\)[\s\S]{0,100}btn\.disabled=false/.test(html),
     'doScreenshot() has try-catch around cv.toBlob() to re-enable button if canvas throws (e.g. SecurityError)');
 }
 
@@ -5718,6 +5718,35 @@ function accData(j, bin, ai){
     'doExport captures whether export button had focus before disabling it');
   ok(/_exportFocusWasBtn[\s\S]{0,30}_exportBtn\.focus\(\)/.test(html),
     'doExport restores focus to export button in finally block when it had focus before export');
+}
+
+/* ---- Round 338: export/saveJson/screenshot buttons get aria-keyshortcuts ---- */
+{
+  ok(/btn primary wide[\s\S]{0,60}aria-keyshortcuts.*Control\+S/.test(html),
+    'export button has aria-keyshortcuts=Control+S (consistent with btnAbout/btnMode pattern)');
+  ok(/btn wide[\s\S]{0,60}aria-keyshortcuts.*Control\+Shift\+S/.test(html),
+    'saveJson button has aria-keyshortcuts=Control+Shift+S');
+  ok(/btnScreenshot[\s\S]{0,300}aria-keyshortcuts.*Control\+Shift\+P/.test(html),
+    'screenshot button has aria-keyshortcuts=Control+Shift+P');
+}
+
+/* ---- Round 339: doScreenshot restores focus to screenshot button after toBlob completes ---- */
+{
+  const scrIdx = html.indexOf('function doScreenshot()');
+  const scrEnd = html.indexOf('\n}', scrIdx + 1);
+  const scrBody = html.slice(scrIdx, scrEnd > scrIdx ? scrEnd : scrIdx + 700);
+  ok(/_scrFocusWasBtn\s*=\s*document\.activeElement\s*===\s*btn/.test(scrBody),
+    'doScreenshot captures whether screenshot button had focus before disabling it');
+  ok(/_scrFocusWasBtn[\s\S]{0,20}btn\.focus\(\)/.test(scrBody),
+    'doScreenshot restores focus to screenshot button in toBlob callback when it had focus');
+}
+
+/* ---- Round 340: licenseUrl row hides focus — returns focus to license select when URL field was focused ---- */
+{
+  ok(/focusWasInUrl\s*=\s*licUrlRow\.contains\(document\.activeElement\)/.test(html),
+    'license onChange captures whether focus was in URL field before hiding it');
+  ok(/focusWasInUrl[\s\S]{0,50}sel-license[\s\S]{0,30}focus\(\)/.test(html),
+    'license onChange returns focus to license select when URL field was focused and field hides');
 }
 
 /* ---- selfTest ---- */
