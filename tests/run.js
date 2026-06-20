@@ -5826,6 +5826,12 @@ function accData(j, bin, ai){
     'canvas aria-label uses hint.noGL when WebGL unavailable');
 }
 
+/* ---- Round 351: doUndo announces btn.exporting via srStatus when _exporting is true (not silent) ---- */
+{
+  ok(html.includes("if (_exporting){ if(sr) sr.textContent=t('btn.exporting'); return; }"),
+    'doUndo announces exporting state to srStatus instead of silently returning');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
