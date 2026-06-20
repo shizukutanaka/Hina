@@ -57,7 +57,7 @@ function doUndo(){
   clearTimeout(_undoHintTimer);
   const h=$('hint'); if(h&&!activeExpr) h.textContent=GLOK?t('hint.drag'):t('hint.noGL');
   params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed;
-  rebuild(); renderBody(); saveState();
+  rebuild(); renderBody(false); saveState();
   if(sr) sr.textContent=t('a11y.undone');
 }
 
@@ -855,6 +855,7 @@ function renderBody(scrollReset=true){
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', step:'1', autocomplete:'off',
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
+      onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); },
       onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>=0) runGacha(n); }});
     const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
@@ -1178,6 +1179,7 @@ function applyLang(){
   bm.setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = GLOK ? t('hint.drag') : t('hint.noGL');
   cv.setAttribute('aria-label', t('a11y.canvas'));
+  cv.setAttribute('aria-roledescription', t('a11y.canvas.role'));
   $('tabs').setAttribute('aria-label', t('a11y.tabs'));
   $('exprBar').setAttribute('aria-label', t('a11y.exprBar'));
   $('stage').setAttribute('aria-label', t('a11y.stage'));

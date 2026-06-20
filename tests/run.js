@@ -4382,7 +4382,7 @@ function accData(j, bin, ai){
     'renderBody() only resets scrollTop when scrollReset is truthy');
 
   // applyLang() calls renderBody(false) to preserve scroll position
-  ok(/function applyLang\(\)[\s\S]{0,2000}renderBody\(false\)/.test(html),
+  ok(/function applyLang\(\)[\s\S]{0,2200}renderBody\(false\)/.test(html),
     'applyLang() calls renderBody(false) to preserve panel scroll on language/mode switch');
 
   // Tab switches still call renderBody() (default true → scroll resets to 0)
@@ -5236,6 +5236,26 @@ function accData(j, bin, ai){
 {
   ok(html.includes("role:'heading','aria-level':'4'") && html.includes("guide.t"),
     'VRChat guide title <b> gets role=heading aria-level=4 for proper document outline');
+}
+
+/* ---- Round 303: seed input Enter key blurs field to reliably fire onchange ---- */
+{
+  ok(html.includes("onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); }"),
+    'seed input has Enter key handler that blurs to reliably trigger onchange across browsers');
+}
+
+/* ---- Round 302: doUndo uses renderBody(false) to preserve scroll position ---- */
+{
+  ok(/function doUndo[\s\S]{0,400}renderBody\(false\)/.test(html),
+    'doUndo() calls renderBody(false) to preserve scroll position after undo');
+}
+
+/* ---- Round 301: canvas gets aria-roledescription for accurate AT role description ---- */
+{
+  ok(H.I18N.ja['a11y.canvas.role'] && H.I18N.en['a11y.canvas.role'],
+    'a11y.canvas.role i18n key exists in both locales');
+  ok(html.includes("aria-roledescription', t('a11y.canvas.role')"),
+    'canvas gets aria-roledescription so AT announces 3D preview instead of generic image');
 }
 
 /* ---- Round 296: exprBar implements roving tabindex for toolbar ARIA pattern ---- */

@@ -356,7 +356,7 @@ const I18N = {
     'hint.glLost':'WebGL コンテキストが失われました — ページを再読み込みしてください',
     'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、Shift+↑↓でパン、＋／−でズーム、Homeまたはダブルクリックで初期位置に戻ります。',
     'a11y.tabs':'タブナビゲーション','a11y.exprBar':'表情プレビュー','a11y.sliderReset':'{label} をデフォルト値 {v} にリセットしました','a11y.numIn':'{label}（数値入力）',
-    'a11y.stage':'3Dプレビューエリア','a11y.panel':'アバター設定パネル','a11y.about.btn':'雛について',
+    'a11y.stage':'3Dプレビューエリア','a11y.panel':'アバター設定パネル','a11y.about.btn':'雛について','a11y.canvas.role':'3Dプレビュー',
     'a11y.exprActive':'表情: {expr}','a11y.exprNeutral':'ニュートラルに戻りました',
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
     'a11y.rankBadge':'ランクバッジ — クリックで統計タブへ',
@@ -405,7 +405,7 @@ const I18N = {
     'hint.glLost':'WebGL context lost — reload to restore preview',
     'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, Shift+↑/↓ pan, +/− zoom, Home or double-click reset the view.',
     'a11y.tabs':'Tab navigation','a11y.exprBar':'Expression preview','a11y.sliderReset':'{label} reset to default {v}','a11y.numIn':'{label} (numeric entry)',
-    'a11y.stage':'3D preview area','a11y.panel':'Avatar settings panel','a11y.about.btn':'About Hina',
+    'a11y.stage':'3D preview area','a11y.panel':'Avatar settings panel','a11y.about.btn':'About Hina','a11y.canvas.role':'3D preview',
     'a11y.exprActive':'Expression: {expr}','a11y.exprNeutral':'Returned to neutral',
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
     'a11y.rankBadge':'Rank badge — click to open Stats tab',
@@ -1517,7 +1517,7 @@ function doUndo(){
   clearTimeout(_undoHintTimer);
   const h=$('hint'); if(h&&!activeExpr) h.textContent=GLOK?t('hint.drag'):t('hint.noGL');
   params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed;
-  rebuild(); renderBody(); saveState();
+  rebuild(); renderBody(false); saveState();
   if(sr) sr.textContent=t('a11y.undone');
 }
 
@@ -2315,6 +2315,7 @@ function renderBody(scrollReset=true){
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', step:'1', autocomplete:'off',
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
+      onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); },
       onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>=0) runGacha(n); }});
     const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
@@ -2638,6 +2639,7 @@ function applyLang(){
   bm.setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = GLOK ? t('hint.drag') : t('hint.noGL');
   cv.setAttribute('aria-label', t('a11y.canvas'));
+  cv.setAttribute('aria-roledescription', t('a11y.canvas.role'));
   $('tabs').setAttribute('aria-label', t('a11y.tabs'));
   $('exprBar').setAttribute('aria-label', t('a11y.exprBar'));
   $('stage').setAttribute('aria-label', t('a11y.stage'));
