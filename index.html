@@ -2482,7 +2482,8 @@ function renderOut(bd){
       } else {
         _resetPending=true; resetBtn.textContent=t('btn.reset.confirm');
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.reset.confirm');
-        _resetTimer=setTimeout(()=>{ _resetPending=false; if(resetBtn.isConnected) resetBtn.textContent=t('btn.reset'); },3000);
+        _resetTimer=setTimeout(()=>{ _resetPending=false; if(resetBtn.isConnected) resetBtn.textContent=t('btn.reset');
+          const sr=$('srStatus'); if(sr) sr.textContent=t('btn.reset'); },3000);
       }
     }}, t('btn.reset'));
     bd.append(resetBtn);

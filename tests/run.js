@@ -5797,6 +5797,15 @@ function accData(j, bin, ai){
     'saveState catch block removes aria-hidden before setting saveFail text');
 }
 
+/* ---- Round 347: reset-pending timeout announces cancellation via srStatus so screen readers know the pending state expired ---- */
+{
+  const si = html.indexOf('_resetTimer=setTimeout');
+  ok(si !== -1, '_resetTimer setTimeout exists');
+  const chunk = html.slice(si, si + 300);
+  ok(/srStatus.*textContent\s*=\s*t\('btn\.reset'\)/.test(chunk),
+    'reset-pending timeout announces btn.reset via srStatus on expiry');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
