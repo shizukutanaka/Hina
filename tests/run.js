@@ -5759,7 +5759,7 @@ function accData(j, bin, ai){
 {
   ok(H.I18N.ja['a11y.seedInvalid'] && H.I18N.en['a11y.seedInvalid'],
     'a11y.seedInvalid key present in both locales');
-  ok((()=>{ const si=html.indexOf("placeholder:t('gacha.seed.ph')"); const chunk=html.slice(si, si+600); return /!Number\.isFinite\(n\)\|\|n<0[\s\S]{0,80}aria-invalid[\s\S]{0,80}seedInvalid/.test(chunk); })(),
+  ok((()=>{ const si=html.indexOf("placeholder:t('gacha.seed.ph')"); const chunk=html.slice(si, si+700); return /!Number\.isFinite\(n\)\|\|n<0[\s\S]{0,80}aria-invalid[\s\S]{0,200}seedInvalid/.test(chunk); })(),
     'seed input sets aria-invalid and announces a11y.seedInvalid on invalid value (NaN or negative)');
   ok(/seedInvalid[\s\S]{0,100}removeAttribute\('aria-invalid'\)/.test(html),
     'seed input clears aria-invalid after timeout');
@@ -5839,6 +5839,17 @@ function accData(j, bin, ai){
   const chunk = html.slice(si, si + 300);
   ok(/btnScreenshot[\s\S]{0,60}disabled\s*=\s*true[\s\S]{0,60}display\s*=\s*'none'/.test(chunk),
     'webglcontextlost hides screenshot button (disabled+display:none) to prevent blank screenshots');
+}
+
+/* ---- Round 353: seed input sets aria-errormessage='srStatus' (consistent with numIn) so AT users get error pointer ---- */
+{
+  const si = html.indexOf("placeholder:t('gacha.seed.ph')");
+  ok(si !== -1, 'gacha seed input exists');
+  const chunk = html.slice(si, si + 700);
+  ok(/aria-errormessage[\s\S]{0,30}srStatus[\s\S]{0,150}seedInvalid/.test(chunk),
+    'seed input sets aria-errormessage=srStatus alongside aria-invalid for AT error pointer');
+  ok(/seedInvalid[\s\S]{0,100}removeAttribute\('aria-errormessage'\)/.test(chunk),
+    'seed input clears aria-errormessage after timeout (same as aria-invalid cleanup)');
 }
 
 /* ---- selfTest ---- */

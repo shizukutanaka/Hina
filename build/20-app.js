@@ -857,11 +857,12 @@ function renderBody(scrollReset=true){
       onchange:e=>{ let n=Math.round(Number(e.target.value));
         if (!Number.isFinite(n)||n<0){
           e.target.setAttribute('aria-invalid','true');
+          e.target.setAttribute('aria-errormessage','srStatus');
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.seedInvalid');
-          setTimeout(()=>e.target.removeAttribute('aria-invalid'),1500);
+          setTimeout(()=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); },1500);
           return;
         }
-        e.target.removeAttribute('aria-invalid');
+        e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage');
         n=Math.min(n,4294967295); e.target.value=String(n); runGacha(n); }});
     const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       ...(lastGachaSeed===null?{disabled:''}:{}),
