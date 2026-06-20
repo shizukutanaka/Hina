@@ -2687,7 +2687,7 @@ function applyLang(){
   // scrollReset=false: user stays on the same tab — preserve their scroll position across lang/mode changes
   renderTabs(); renderBody(false); buildExprBar(); updateStats();
 }
-$('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); });
+$('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.lang.tip'); });
 $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); const sr=$('srStatus'); if(sr) sr.textContent=mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip'); });
 $('btnScreenshot').addEventListener('click', doScreenshot);
 let _dlgReturnFocus = null;

@@ -5636,6 +5636,17 @@ function accData(j, bin, ai){
     'arrow key captureUndo branch does NOT call preventDefault (native slider movement must work)');
 }
 
+/* ---- Round 330: language toggle announces new lang context to srStatus ---- */
+{
+  // btnLang click handler must announce to srStatus after applyLang
+  ok(/btnLang.*addEventListener.*'click'[\s\S]{0,120}btn\.lang\.tip/.test(html) ||
+     /btnLang[\s\S]{0,200}btn\.lang\.tip[\s\S]{0,20}sr\.textContent/.test(html) ||
+     (html.includes("$('btnLang').addEventListener('click'") && /btn\.lang\.tip/.test(
+       html.slice(html.indexOf("$('btnLang').addEventListener('click'"),
+                  html.indexOf("$('btnLang').addEventListener('click'") + 200))),
+    'btnLang click announces btn.lang.tip to srStatus after language switch');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
