@@ -5976,6 +5976,12 @@ function accData(j, bin, ai){
     'applyLang canvas aria-label accounts for _glLost using _hintDefault()');
 }
 
+/* ---- Round 369: screenshot download anchor also gets aria-hidden=true (same as download() helper) ---- */
+{
+  ok(/doScreenshot[\s\S]{0,800}a\.setAttribute\('aria-hidden','true'\)[\s\S]{0,60}document\.body\.append\(a\)/.test(html),
+    'doScreenshot anchor sets aria-hidden=true before appending (consistent with download() helper)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

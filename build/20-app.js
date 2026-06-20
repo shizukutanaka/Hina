@@ -1171,7 +1171,7 @@ function doScreenshot(){
       if (!blob){ showErr(t('err.exportFailed')); return; }
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a');
-      a.href=url; a.download=fnameStem()+'.png';
+      a.href=url; a.download=fnameStem()+'.png'; a.setAttribute('aria-hidden','true');
       document.body.append(a); a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(url),1000);
       const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
