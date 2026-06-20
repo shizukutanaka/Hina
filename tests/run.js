@@ -4119,7 +4119,7 @@ function accData(j, bin, ai){
   const saveStateSrc = html.slice(html.indexOf('function saveState'), html.indexOf('function saveState') + 1000);
   ok(saveStateSrc.includes("'hint.saveFail'") || saveStateSrc.includes('"hint.saveFail"'),
     'saveState catch block references hint.saveFail i18n key');
-  ok(/catch\s*\(e\)\s*\{[\s\S]{0,200}hint\.saveFail/.test(saveStateSrc),
+  ok(/catch\s*\(e\)\s*\{[\s\S]{0,350}hint\.saveFail/.test(saveStateSrc),
     'saveState catch branch sets hint.saveFail on autoSaveBadge');
 
   // Warning uses --warn color to visually distinguish from success
@@ -5980,6 +5980,12 @@ function accData(j, bin, ai){
 {
   ok(/doScreenshot[\s\S]{0,800}a\.setAttribute\('aria-hidden','true'\)[\s\S]{0,60}document\.body\.append\(a\)/.test(html),
     'doScreenshot anchor sets aria-hidden=true before appending (consistent with download() helper)');
+}
+
+/* ---- Round 370: saveState catch block clears _saveBadgeTimer so a pending success-hide can't dismiss the error badge ---- */
+{
+  ok(/catch\s*\(e\)\s*\{[\s\S]{0,200}clearTimeout\(_saveBadgeTimer\)[\s\S]{0,200}hint\.saveFail/.test(html),
+    'saveState catch block clears badge timer before showing saveFail (prevents prior success timer from hiding the error)');
 }
 
 /* ---- selfTest ---- */

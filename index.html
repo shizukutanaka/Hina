@@ -1551,6 +1551,7 @@ function saveState(){
       }
     }catch(e){
       // localStorage full or unavailable (private browsing) — show persistent warning
+      clearTimeout(_saveBadgeTimer);
       const b=$('autoSaveBadge');
       if (b){ b.removeAttribute('aria-hidden'); b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
     }
