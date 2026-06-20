@@ -2714,7 +2714,7 @@ function applyLang(){
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   // rankBadge static reset (heightBadge is excluded — it gets a dynamic label in updateStats)
   document.querySelectorAll('.rankBadge:not(#heightBadge)').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
-  const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.setAttribute('aria-label',t('btn.screenshot.tip')); sc.setAttribute('aria-keyshortcuts','Control+Shift+P Meta+Shift+P'); sc.style.display=GLOK?'':'none'; }
+  const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.setAttribute('aria-label',t('btn.screenshot.tip')); sc.setAttribute('aria-keyshortcuts','Control+Shift+P Meta+Shift+P'); sc.style.display=(GLOK&&!_glLost)?'':'none'; }
   const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
   const sd=$('sliderDesc'); if(sd) sd.textContent=t('hint.sliderReset');
   const sl=$('skipLink'); if(sl) sl.textContent=t('a11y.skip');

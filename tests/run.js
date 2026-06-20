@@ -6034,6 +6034,12 @@ function accData(j, bin, ai){
     'webglcontextrestored calls _emergencySave() before location.reload() to prevent data loss');
 }
 
+/* ---- Round 378: applyLang() checks _glLost when setting screenshot button visibility (prevents un-hiding after context loss) ---- */
+{
+  ok(html.includes("sc.style.display=(GLOK&&!_glLost)?'':'none';"),
+    'applyLang screenshot button visibility checks both GLOK and _glLost');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
