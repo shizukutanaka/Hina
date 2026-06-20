@@ -2431,7 +2431,7 @@ function renderOut(bd){
       const json=HINA.serialize(params,meta);
       const _fail=()=>{ cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copyJson.err'); };
-      if(!navigator.clipboard){ _fail(); return; }
+      if(!navigator.clipboard?.writeText){ _fail(); return; }
       navigator.clipboard.writeText(json).then(()=>{
         const orig=cpj.textContent; cpj.textContent=t('btn.copyJsonDone');
         setTimeout(()=>{ cpj.textContent=orig; },1800);

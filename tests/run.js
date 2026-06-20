@@ -5935,6 +5935,12 @@ function accData(j, bin, ai){
     'doScreenshot guards _screenshotting to prevent double-invocation from keyboard shortcut');
 }
 
+/* ---- Round 364: copyJson clipboard guard uses ?.writeText (consistent with copySeed) ---- */
+{
+  ok(html.includes("if(!navigator.clipboard?.writeText){ _fail(); return; }"),
+    'copyJson button checks navigator.clipboard?.writeText (consistent with copySeed guard pattern)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
