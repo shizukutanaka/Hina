@@ -5988,6 +5988,12 @@ function accData(j, bin, ai){
     'saveState catch block clears badge timer before showing saveFail (prevents prior success timer from hiding the error)');
 }
 
+/* ---- Round 371: saveState catch block announces hint.saveFail via srStatus (autoSaveBadge aria-hidden toggle risks missing live-region) ---- */
+{
+  ok(/catch\s*\(e\)\s*\{[\s\S]{0,400}srStatus[\s\S]{0,60}hint\.saveFail/.test(html),
+    'saveState catch block announces hint.saveFail via srStatus for guaranteed SR delivery');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

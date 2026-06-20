@@ -1554,6 +1554,7 @@ function saveState(){
       clearTimeout(_saveBadgeTimer);
       const b=$('autoSaveBadge');
       if (b){ b.removeAttribute('aria-hidden'); b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
+      const sr2=$('srStatus'); if(sr2) sr2.textContent=t('hint.saveFail');
     }
   }, 500);
 }
