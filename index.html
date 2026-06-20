@@ -2683,7 +2683,8 @@ function applyLang(){
   bm.setAttribute('aria-label', (mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip')));
   bm.setAttribute('aria-pressed', String(mode==='detail'));
   $('hint').textContent = GLOK ? t('hint.drag') : t('hint.noGL');
-  cv.setAttribute('aria-label', t('a11y.canvas'));
+  if (!GLOK){ const sr=$('srStatus'); if(sr) sr.textContent=t('hint.noGL'); }
+  cv.setAttribute('aria-label', GLOK ? t('a11y.canvas') : t('hint.noGL'));
   cv.setAttribute('aria-roledescription', t('a11y.canvas.role'));
   $('tabs').setAttribute('aria-label', t('a11y.tabs'));
   $('exprBar').setAttribute('aria-label', t('a11y.exprBar'));

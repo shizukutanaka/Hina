@@ -1457,7 +1457,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2400)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2500)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -4384,7 +4384,7 @@ function accData(j, bin, ai){
     'renderBody() only resets scrollTop when scrollReset is truthy');
 
   // applyLang() calls renderBody(false) to preserve scroll position
-  ok(/function applyLang\(\)[\s\S]{0,2300}renderBody\(false\)/.test(html),
+  ok(/function applyLang\(\)[\s\S]{0,2500}renderBody\(false\)/.test(html),
     'applyLang() calls renderBody(false) to preserve panel scroll on language/mode switch');
 
   // Tab switches still call renderBody() (default true → scroll resets to 0)
@@ -5816,6 +5816,14 @@ function accData(j, bin, ai){
 {
   ok(html.includes('_dlgReturnFocus && _dlgReturnFocus.isConnected'),
     'aboutDlg close handler checks isConnected on _dlgReturnFocus before focus()');
+}
+
+/* ---- Round 350: when WebGL unavailable, announce hint.noGL via srStatus and use it as canvas aria-label ---- */
+{
+  ok(html.includes("if (!GLOK){ const sr=$('srStatus'); if(sr) sr.textContent=t('hint.noGL'); }"),
+    'no-WebGL path in applyLang announces hint.noGL via srStatus');
+  ok(/cv\.setAttribute\('aria-label', GLOK \? t\('a11y\.canvas'\) : t\('hint\.noGL'\)\)/.test(html),
+    'canvas aria-label uses hint.noGL when WebGL unavailable');
 }
 
 /* ---- selfTest ---- */
