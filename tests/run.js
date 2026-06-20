@@ -5905,6 +5905,12 @@ function accData(j, bin, ai){
     'en btn.screenshot.tip shows Ctrl/⌘ notation');
 }
 
+/* ---- Round 360: aboutDlg has aria-modal=true for older AT/browser combinations (NVDA+Firefox<98) ---- */
+{
+  ok(html.includes('aria-modal="true"'),
+    'aboutDlg has aria-modal=true to support older AT/browser combos alongside native showModal()');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
