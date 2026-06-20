@@ -5214,6 +5214,24 @@ function accData(j, bin, ai){
     'rankBadge[role=button]:hover has border-color change for visual hover feedback');
 }
 
+/* ---- Round 300: #hint bar gets max-width to prevent overflow on small screens ---- */
+{
+  ok(html.includes('max-width:calc(100% - 24px)') && html.includes('text-overflow:ellipsis'),
+    '#hint bar has max-width and text-overflow:ellipsis to prevent overflow on narrow viewports');
+}
+
+/* ---- Round 299: #selftestBox gets role=status for AT discoverability ---- */
+{
+  ok(/id="selftestBox"[^>]*role="status"/.test(html),
+    '#selftestBox gets role=status so AT users know the content is a live status message');
+}
+
+/* ---- Round 298: .sw:hover transform:none in prefers-reduced-motion CSS ---- */
+{
+  ok(/prefers-reduced-motion[\s\S]{0,80}\.sw:hover\{transform:none\}/.test(html),
+    '.sw:hover has transform:none in prefers-reduced-motion so swatch hover does not move for motion-sensitive users');
+}
+
 /* ---- Round 297: VRChat guide title gets role=heading aria-level=4 ---- */
 {
   ok(html.includes("role:'heading','aria-level':'4'") && html.includes("guide.t"),
