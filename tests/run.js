@@ -6112,6 +6112,14 @@ function accData(j, bin, ai){
     'doScreenshot() announces GL-unavailable error via srStatus before returning early when GL is missing or lost');
 }
 
+/* ---- Round 390: doExport() re-announces btn.exporting when called while already exporting ---- */
+{
+  const expFnIdx = html.indexOf('async function doExport()');
+  const expBlock = expFnIdx >= 0 ? html.slice(expFnIdx, expFnIdx + 200) : '';
+  ok(/_exporting\)[\s\S]{0,80}btn\.exporting[\s\S]{0,20}return/.test(expBlock),
+    'doExport() announces btn.exporting to srStatus when called while _exporting is already true');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

@@ -2583,7 +2583,8 @@ const _hintDefault=()=>!GLOK?t('hint.noGL'):_glLost?t('hint.glLost'):t('hint.dra
 let _screenshotting = false;
 let _exporting = false, _exportBtn = null;
 async function doExport(){
-  if (!build || _exporting) return;
+  if (_exporting){ const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); return; }
+  if (!build) return;
   _exporting = true;
   // Snapshot all mutable state so slider/meta changes during async awaits don't affect the export
   const exportBuild = build;
