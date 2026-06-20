@@ -6048,6 +6048,12 @@ function accData(j, bin, ai){
     'uploadGeometry() guards with _glLost to skip no-op GL calls after context loss');
 }
 
+/* ---- Round 380: gaze eye animation respects reduceMotion (consistent with breath, head-sway, and spring physics) ---- */
+{
+  ok(html.includes("const gq = reduceMotion ? M.qid() : M.qMul(M.qAxis([0,1,0], gazeX*0.22)"),
+    'gaze eye animation is disabled when reduceMotion is true (consistent with other animations)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

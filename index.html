@@ -1870,7 +1870,7 @@ function poseAndSkin(time){
   localQ[idx.rLA] = M.qAxis([0,0,1], -0.10);
   localQ[idx.chest] = M.qAxis([1,0,0], breath*0.022);
   localQ[idx.head]  = M.qAxis([0,1,0], (reduceMotion?0:Math.sin(time*0.0006))*0.05);
-  const gq = M.qMul(M.qAxis([0,1,0], gazeX*0.22), M.qAxis([1,0,0], -gazeY*0.14));
+  const gq = reduceMotion ? M.qid() : M.qMul(M.qAxis([0,1,0], gazeX*0.22), M.qAxis([1,0,0], -gazeY*0.14));
   localQ[idx.lE]=gq; localQ[idx.rE]=gq;
   const bob = reduceMotion ? 0 : Math.sin(time*0.0014)*0.004*build.dims.H;
   for(let i=0;i<n;i++){
