@@ -5949,6 +5949,18 @@ function accData(j, bin, ai){
     'hint.drag mentions Home/0 as reset shortcut in both locales (consistent with about.keyList)');
 }
 
+/* ---- Round 366: Backspace documented alongside Delete in hint.sliderReset and about.keyList ---- */
+{
+  ok(H.I18N.ja['hint.sliderReset'].includes('Backspace'),
+    'ja hint.sliderReset mentions Backspace (functional alias for Delete on sliders)');
+  ok(H.I18N.en['hint.sliderReset'].includes('Backspace'),
+    'en hint.sliderReset mentions Backspace (functional alias for Delete on sliders)');
+  ok(H.I18N.ja['about.keyList'].includes('Delete / Backspace'),
+    'ja about.keyList lists Delete / Backspace for slider reset');
+  ok(H.I18N.en['about.keyList'].includes('Delete / Backspace'),
+    'en about.keyList lists Delete / Backspace for slider reset');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
