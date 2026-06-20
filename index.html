@@ -2327,7 +2327,7 @@ function renderOut(bd){
   bd.append(_exportBtn);
   bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:10px'}, t('hint.ctrlS')));
 
-  bd.append(el('div',{class:'sect'}, t('out.meta')));
+  bd.append(el('div',{class:'sect', role:'heading', 'aria-level':'3'}, t('out.meta')));
   const txt=(key,mk,ph)=>{ const id='meta-'+mk; bd.append(el('div',{class:'row'},
     el('label',{'for':id},t(key)),
     el('input',{id, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
@@ -2366,7 +2366,7 @@ function renderOut(bd){
     'license', v=>{licUrlRow.style.display=v==='Other'?'':'none';});
   bd.append(licUrlRow);
 
-  bd.append(el('div',{class:'sect'}, t('out.stats')));
+  bd.append(el('div',{class:'sect', role:'heading', 'aria-level':'3'}, t('out.stats')));
   const tbl=el('table',{class:'statTable','aria-label':t('out.stats')}); statEls={};
   const row=(key,id)=>{ const td=el('td',{}); statEls[id]=td;
     tbl.append(el('tr',{}, el('th',{scope:'row'},t(key)), td)); };
@@ -2382,11 +2382,14 @@ function renderOut(bd){
   {
     const cpj=el('button',{class:'btn wide', onclick:()=>{
       const json=HINA.serialize(params,meta);
-      navigator.clipboard?.writeText(json).then(()=>{
+      const _fail=()=>{ cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
+        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); };
+      if(!navigator.clipboard){ _fail(); return; }
+      navigator.clipboard.writeText(json).then(()=>{
         const orig=cpj.textContent; cpj.textContent=t('btn.copyJsonDone');
         setTimeout(()=>{ cpj.textContent=orig; },1800);
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copyJsonDone');
-      }).catch(()=>{ cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500); });
+      }).catch(_fail);
     }}, t('btn.copyJson'));
     bd.append(cpj);
   }
@@ -2543,7 +2546,9 @@ async function doExport(){
   }catch(e){ showErr(t('err.exportFailed')+': '+e.message); }
   finally{
     _exporting = false;
-    if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.removeAttribute('aria-busy'); }
+    if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.removeAttribute('aria-busy');
+      // Ensure button text always resets — catch branch sets showErr but doesn't touch textContent
+      if (_exportBtn.textContent===t('btn.exporting')) _exportBtn.textContent=t('btn.export'); }
   }
 }
 function saveJson(){

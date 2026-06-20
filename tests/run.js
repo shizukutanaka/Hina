@@ -5135,6 +5135,29 @@ function accData(j, bin, ai){
     'at least 3 metadata inputs have spellcheck:false (title, author, licenseUrl)');
 }
 
+/* ---- Round 277: sect dividers get role=heading aria-level=3 ---- */
+{
+  ok(/class:'sect'[\s\S]{0,30}role\s*:\s*'heading'/.test(html),
+    'sect dividers have role=heading so screen readers treat them as section headings');
+  ok(/aria-level':'3'/.test(html),
+    'sect headings use aria-level 3 (below tab heading level 2 implied by tabpanel)');
+}
+
+/* ---- Round 276: copyJson clipboard unavailable path announces error ---- */
+{
+  ok(/navigator\.clipboard[\s\S]{0,50}_fail\(\)/.test(html) ||
+     /!navigator\.clipboard[\s\S]{0,30}_fail/.test(html),
+    'copyJson handles missing navigator.clipboard (HTTP context) with visible error');
+  ok(/copyJson[\s\S]{0,200}pasteJson\.err|_fail[\s\S]{0,80}pasteJson\.err/.test(html),
+    'copyJson failure calls srStatus with btn.pasteJson.err to announce clipboard error');
+}
+
+/* ---- Round 275: doExport finally resets button text on error path ---- */
+{
+  ok(html.includes("_exportBtn.textContent===t('btn.exporting')") && html.includes("_exportBtn.textContent=t('btn.export')"),
+    'doExport finally block resets button text to btn.export if it shows "Exporting…" on error');
+}
+
 /* ---- Round 274: Escape cancels drag-over visual state ---- */
 {
   ok(/Escape[\s\S]{0,100}drag-over[\s\S]{0,100}classList\.remove/.test(html),
