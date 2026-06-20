@@ -1510,7 +1510,7 @@ function captureUndo(){
     if (h && !activeExpr){
       clearTimeout(_undoHintTimer);
       h.textContent = t('hint.undoReady');
-      _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=GLOK?t('hint.drag'):t('hint.noGL'); }, 3000);
+      _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
     }
     const sr=$('srStatus'); if(sr) sr.textContent=t('hint.undoReady');
   }
@@ -1521,7 +1521,7 @@ function doUndo(){
   if (!_undoSnap){ if(sr) sr.textContent=t('a11y.noUndo'); return; }
   const s = _undoSnap; _undoSnap = null;
   clearTimeout(_undoHintTimer);
-  const h=$('hint'); if(h&&!activeExpr) h.textContent=GLOK?t('hint.drag'):t('hint.noGL');
+  const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
   params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed;
   const _undoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
@@ -1534,7 +1534,7 @@ function showErr(msg){
   const sr=$('srStatus'); if(sr) sr.textContent=msg;
   const h=$('hint'); if(h){ clearTimeout(_errTimer); h.textContent=msg; h.style.color='var(--err)';
     _errTimer=setTimeout(()=>{ if($('hint')){ $('hint').style.color='';
-      $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):(GLOK?t('hint.drag'):t('hint.noGL')); }},4500); }
+      $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }},4500); }
 }
 let _saveTimer = null, _saveBadgeTimer = null;
 function saveState(){
@@ -1801,7 +1801,7 @@ function setExpr(name){
   const hintEl = $('hint');
   if (hintEl) hintEl.textContent = activeExpr
     ? t('expr.'+activeExpr) + ' — ' + t('hint.exprOff')
-    : (GLOK ? t('hint.drag') : t('hint.noGL'));
+    : _hintDefault();
   const srEl = $('srStatus');
   if (srEl) srEl.textContent = activeExpr
     ? t('a11y.exprActive').replace('{expr}', t('expr.'+activeExpr))
@@ -2575,6 +2575,7 @@ function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').sl
 function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 let _glLost = false;
+const _hintDefault=()=>!GLOK?t('hint.noGL'):_glLost?t('hint.glLost'):t('hint.drag');
 let _screenshotting = false;
 let _exporting = false, _exportBtn = null;
 async function doExport(){
@@ -2687,8 +2688,8 @@ function applyLang(){
   bm.title=mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip');
   bm.setAttribute('aria-label', (mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip')));
   bm.setAttribute('aria-pressed', String(mode==='detail'));
-  $('hint').textContent = GLOK ? t('hint.drag') : t('hint.noGL');
-  if (!GLOK){ const sr=$('srStatus'); if(sr) sr.textContent=t('hint.noGL'); }
+  $('hint').textContent = _hintDefault();
+  if (!GLOK || _glLost){ const sr=$('srStatus'); if(sr) sr.textContent=_hintDefault(); }
   cv.setAttribute('aria-label', GLOK ? t('a11y.canvas') : t('hint.noGL'));
   cv.setAttribute('aria-roledescription', t('a11y.canvas.role'));
   $('tabs').setAttribute('aria-label', t('a11y.tabs'));
@@ -2780,7 +2781,7 @@ document.addEventListener('keydown',e=>{
   if (e.key==='Escape' && !$('aboutDlg').open){
     if (document.body.classList.contains('drag-over')){
       document.body.classList.remove('drag-over');
-      const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):(GLOK?t('hint.drag'):t('hint.noGL')); }
+      const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }
     } else if (activeExpr !== null){
       e.preventDefault(); setExpr(null);
     }
@@ -2797,11 +2798,11 @@ document.body.addEventListener('dragover',e=>{
 });
 document.body.addEventListener('dragleave',e=>{
   if(!e.relatedTarget){ document.body.classList.remove('drag-over');
-    const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):(GLOK?t('hint.drag'):t('hint.noGL')); } }
+    const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); } }
 });
 document.body.addEventListener('drop',e=>{
   document.body.classList.remove('drag-over');
-  const h=$('hint'); if(h){ h.style.color=''; h.textContent=GLOK?t('hint.drag'):t('hint.noGL'); }
+  const h=$('hint'); if(h){ h.style.color=''; h.textContent=_hintDefault(); }
   if (!e.dataTransfer.files.length) return;
   e.preventDefault();
   const f=e.dataTransfer.files[0];

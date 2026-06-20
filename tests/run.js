@@ -79,7 +79,7 @@ ok(html.includes('runGacha'), 'gacha runs through shared runGacha() for seed reu
 ok(html.includes("maxlength:'256'"), 'VRM meta text inputs have maxlength=256 matching writer truncation');
 ok(H.I18N.ja['hint.noGL'] && H.I18N.en['hint.noGL'], 'WebGL unavailable hint i18n in both languages');
 ok(H.I18N.ja['hint.glLost'] && H.I18N.en['hint.glLost'], 'WebGL context-lost hint i18n in both languages');
-ok(html.includes("GLOK ? t('hint.drag') : t('hint.noGL')"), 'applyLang() uses localized hint conditionally');
+ok(html.includes("$('hint').textContent = _hintDefault();"), 'applyLang() uses _hintDefault() for hint (accounts for _glLost and !GLOK)');
 ok(html.includes('aria-labelledby="aboutH2"'), 'About dialog has aria-labelledby for accessible name');
 ok(html.includes('<noscript>'), 'noscript fallback message present for JS-disabled users');
 ok(H.I18N.ja['a11y.about.btn'] && H.I18N.en['a11y.about.btn'], 'About button aria-label i18n in both languages');
@@ -1790,8 +1790,8 @@ function accData(j, bin, ai){
   // setExpr() updates hint bar with expression name when active
   ok(/setExpr[\s\S]{0,200}hintEl.*textContent.*expr\..*exprOff/.test(html.replace(/\s+/g,' ')),
     'setExpr() updates hint bar with expression name and deactivation hint');
-  ok(/setExpr[\s\S]{0,320}hint\.drag/.test(html),
-    'setExpr() restores hint.drag text when returning to neutral');
+  ok(/setExpr[\s\S]{0,320}_hintDefault\(\)/.test(html),
+    'setExpr() restores hint via _hintDefault() when returning to neutral');
 
   // hint.exprOff i18n key in both languages
   ok(H.I18N.ja['hint.exprOff'] === 'クリックで解除', 'hint.exprOff JA = クリックで解除');
@@ -4779,9 +4779,8 @@ function accData(j, bin, ai){
   ok(/clearTimeout\(_undoHintTimer\)[\s\S]{0,300}rebuild\(\)/.test(html),
     'doUndo() clears _undoHintTimer before rebuilding so stale hint is removed');
   // doUndo must also reset the hint text to hint.drag (when not in expr mode)
-  ok(/hint\.drag[\s\S]{0,200}hint\.noGL[\s\S]{0,200}rebuild\(\)/.test(html) ||
-     /clearTimeout\(_undoHintTimer\)[\s\S]{0,100}hint\.drag/.test(html),
-    'doUndo() restores hint bar to drag/noGL text after consuming undo');
+  ok(/clearTimeout\(_undoHintTimer\)[\s\S]{0,100}_hintDefault\(\)/.test(html),
+    'doUndo() restores hint bar via _hintDefault() after consuming undo');
 }
 
 /* ---- Round 243: doScreenshot() calls showErr when canvas toBlob returns null ---- */
@@ -5820,8 +5819,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 350: when WebGL unavailable, announce hint.noGL via srStatus and use it as canvas aria-label ---- */
 {
-  ok(html.includes("if (!GLOK){ const sr=$('srStatus'); if(sr) sr.textContent=t('hint.noGL'); }"),
-    'no-WebGL path in applyLang announces hint.noGL via srStatus');
+  ok(html.includes("if (!GLOK || _glLost){ const sr=$('srStatus'); if(sr) sr.textContent=_hintDefault(); }"),
+    'no-WebGL/context-lost path in applyLang announces correct hint via srStatus');
   ok(/cv\.setAttribute\('aria-label', GLOK \? t\('a11y\.canvas'\) : t\('hint\.noGL'\)\)/.test(html),
     'canvas aria-label uses hint.noGL when WebGL unavailable');
 }
@@ -5959,6 +5958,14 @@ function accData(j, bin, ai){
     'ja about.keyList lists Delete / Backspace for slider reset');
   ok(H.I18N.en['about.keyList'].includes('Delete / Backspace'),
     'en about.keyList lists Delete / Backspace for slider reset');
+}
+
+/* ---- Round 367: _hintDefault() helper accounts for _glLost so hint is correct after context loss ---- */
+{
+  ok(html.includes('const _hintDefault=()=>!GLOK?t(\'hint.noGL\'):_glLost?t(\'hint.glLost\'):t(\'hint.drag\');'),
+    '_hintDefault helper defined to return glLost/noGL/drag based on runtime state');
+  ok(!html.includes('GLOK?t(\'hint.drag\'):t(\'hint.noGL\')') && !html.includes('GLOK ? t(\'hint.drag\') : t(\'hint.noGL\')'),
+    'no bare GLOK?hint.drag:hint.noGL pattern remains — all replaced by _hintDefault()');
 }
 
 /* ---- selfTest ---- */
