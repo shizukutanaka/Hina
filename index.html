@@ -2608,7 +2608,7 @@ async function doExport(){
     if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.removeAttribute('aria-busy');
       // Ensure button text always resets — catch branch sets showErr but doesn't touch textContent
       if (_exportBtn.textContent===t('btn.exporting')) _exportBtn.textContent=t('btn.export');
-      if (_exportFocusWasBtn) _exportBtn.focus(); }
+      if (_exportFocusWasBtn && _exportBtn.isConnected) _exportBtn.focus(); }
   }
 }
 function saveJson(){

@@ -5806,6 +5806,12 @@ function accData(j, bin, ai){
     'reset-pending timeout announces btn.reset via srStatus on expiry');
 }
 
+/* ---- Round 348: doExport focus restore guards isConnected to avoid stranding focus when user navigates away during async export ---- */
+{
+  ok(html.includes('_exportFocusWasBtn && _exportBtn.isConnected'),
+    'doExport focus restore checks isConnected before calling focus()');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
