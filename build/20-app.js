@@ -704,14 +704,12 @@ function paramRow(k){
       valEl=el('input',{type:'number',class:'num numIn',min:s.min,max:s.max,step:s.step,value:params[k],
         'aria-label':t('a11y.numIn').replace('{label}',label), inputmode:'decimal',
         onchange:e=>{ captureUndo(); let n=parseFloat(e.target.value);
-          if (!Number.isFinite(n)) n=params[k];
+          const _announce=(v)=>{ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srStatus');
+            const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',v);
+            setTimeout(()=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); },1500); };
+          if (!Number.isFinite(n)){ _announce(params[k]); n=params[k]; }
           const clamped=M.clamp(n,s.min,s.max);
-          if (clamped!==n){
-            e.target.setAttribute('aria-invalid','true');
-            e.target.setAttribute('aria-errormessage','srStatus');
-            const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',clamped);
-            setTimeout(()=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); },1500);
-          }
+          if (clamped!==n) _announce(clamped);
           params[k]=clamped; e.target.value=String(clamped); r.value=String(clamped); r.setAttribute('aria-valuetext',String(clamped)); onParam(k); }});
       // Prevent accidental value changes when wheel-scrolling the panel over a focused numIn
       valEl.addEventListener('wheel', e=>{ if(document.activeElement===valEl) e.preventDefault(); },{passive:false});

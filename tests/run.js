@@ -6092,6 +6092,12 @@ function accData(j, bin, ai){
     'color picker oninput calls setSwTab() when picker color matches a swatch, keeping roving entry point in sync');
 }
 
+/* ---- Round 387: numIn onchange announces aria-invalid when value is empty/non-numeric ---- */
+{
+  ok(/Number\.isFinite\(n\)[\s\S]{0,60}_announce\(params\[k\]\)/.test(html),
+    'numIn onchange calls _announce() when input is empty or non-numeric so screen readers hear the correction');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
