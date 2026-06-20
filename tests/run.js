@@ -6074,6 +6074,12 @@ function accData(j, bin, ai){
     'M key handler restores focus to the active tab button when a tab button had focus before mode toggle');
 }
 
+/* ---- Round 384: rank badge goStats() preserves scroll when already on the out tab ---- */
+{
+  ok(/const chg=activeTab!=='out';[\s\S]{0,60}renderBody\(chg\)/.test(html),
+    'rank badge goStats() passes chg flag so clicking a rank badge while already on out tab preserves scroll');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

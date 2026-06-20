@@ -2751,7 +2751,7 @@ document.querySelectorAll('.rankBadge').forEach(b=>{
   b.style.cursor='pointer';
   b.setAttribute('role','button');
   b.setAttribute('tabindex','0');
-  const goStats=()=>{ activeTab='out'; renderTabs(); renderBody(); $('tab-out').focus(); };
+  const goStats=()=>{ const chg=activeTab!=='out'; activeTab='out'; renderTabs(); renderBody(chg); $('tab-out').focus(); };
   b.addEventListener('click', goStats);
   b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); goStats(); }});
 });
