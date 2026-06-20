@@ -1523,7 +1523,9 @@ function doUndo(){
   clearTimeout(_undoHintTimer);
   const h=$('hint'); if(h&&!activeExpr) h.textContent=GLOK?t('hint.drag'):t('hint.noGL');
   params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed;
+  const _undoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
+  if (_undoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
   if(sr) sr.textContent=t('a11y.undone');
 }
 
@@ -1841,20 +1843,6 @@ function buildExprBar(){
     b.addEventListener('click', () => setExpr(activeExpr === name ? null : name));
     bar.append(b);
   }
-  // Roving tabindex: arrow keys navigate within the toolbar (ARIA toolbar pattern)
-  bar.addEventListener('keydown', e=>{
-    const btns=[...bar.querySelectorAll('.eBtn')];
-    const ci=btns.indexOf(document.activeElement); if(ci<0) return;
-    let ni=-1;
-    if (e.key==='ArrowRight'||e.key==='ArrowDown') ni=(ci+1)%btns.length;
-    else if (e.key==='ArrowLeft'||e.key==='ArrowUp') ni=(ci-1+btns.length)%btns.length;
-    else if (e.key==='Home') ni=0;
-    else if (e.key==='End') ni=btns.length-1;
-    if (ni<0) return;
-    e.preventDefault();
-    btns.forEach((b,i)=>b.setAttribute('tabindex', i===ni?'0':'-1'));
-    btns[ni].focus();
-  });
   // Restore focus if it was on an expression button before the rebuild
   if (prevExprFocus !== undefined){
     const target=bar.querySelector(`[data-expr="${prevExprFocus}"]`)||bar.querySelector('.eBtn');
@@ -2251,7 +2239,7 @@ function onParam(k){
   // All other params leave the panel layout unchanged — skipping renderBody() prevents the
   // panel from jumping back to scrollTop=0 on every slider tick.
   // scrollReset=false: preserve scroll position so toggling springOff doesn't snap the panel top.
-  if (k==='outfit' || k==='springOff') renderBody(false);
+  if (k==='outfit' || k==='springOff'){ renderBody(false); const re=document.getElementById('pr-'+k); if(re) re.focus(); }
 }
 
 function renderBody(scrollReset=true){
@@ -2636,6 +2624,24 @@ function rebuild(){
   morphW={}; morphDirty=true;
   activeExpr = null;
   buildExprBar();
+  // Roving tabindex for exprBar: registered once here (not inside buildExprBar) to avoid listener accumulation
+  const _bar=$('exprBar');
+  if (_bar && !_bar.dataset.kbBound){
+    _bar.dataset.kbBound='1';
+    _bar.addEventListener('keydown', e=>{
+      const btns=[..._bar.querySelectorAll('.eBtn')];
+      const ci=btns.indexOf(document.activeElement); if(ci<0) return;
+      let ni=-1;
+      if (e.key==='ArrowRight'||e.key==='ArrowDown') ni=(ci+1)%btns.length;
+      else if (e.key==='ArrowLeft'||e.key==='ArrowUp') ni=(ci-1+btns.length)%btns.length;
+      else if (e.key==='Home') ni=0;
+      else if (e.key==='End') ni=btns.length-1;
+      if (ni<0) return;
+      e.preventDefault();
+      btns.forEach((b,i)=>b.setAttribute('tabindex', i===ni?'0':'-1'));
+      btns[ni].focus();
+    });
+  }
   document.title='雛 — '+fnameStem();
   updateStats();
   saveState();

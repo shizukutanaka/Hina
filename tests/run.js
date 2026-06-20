@@ -4499,7 +4499,7 @@ function accData(j, bin, ai){
   // doUndo must announce 'a11y.undone' on success and 'a11y.noUndo' when stack empty
   ok(/a11y\.undone/.test(html), 'a11y.undone key exists in build');
   ok(/a11y\.noUndo/.test(html),  'a11y.noUndo key exists in build');
-  ok(/doUndo[\s\S]{0,500}a11y\.undone/.test(html),
+  ok(/doUndo[\s\S]{0,650}a11y\.undone/.test(html),
     'doUndo() announces a11y.undone to SR on success');
   ok(/doUndo[\s\S]{0,200}a11y\.noUndo/.test(html),
     'doUndo() announces a11y.noUndo to SR when nothing to undo');
@@ -4776,7 +4776,7 @@ function accData(j, bin, ai){
 {
   // doUndo must call clearTimeout(_undoHintTimer) so the "undo ready" hint
   // doesn't outlive the actual undo operation
-  ok(/clearTimeout\(_undoHintTimer\)[\s\S]{0,200}rebuild\(\)/.test(html),
+  ok(/clearTimeout\(_undoHintTimer\)[\s\S]{0,300}rebuild\(\)/.test(html),
     'doUndo() clears _undoHintTimer before rebuilding so stale hint is removed');
   // doUndo must also reset the hint text to hint.drag (when not in expr mode)
   ok(/hint\.drag[\s\S]{0,200}hint\.noGL[\s\S]{0,200}rebuild\(\)/.test(html) ||
@@ -5381,7 +5381,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 302: doUndo uses renderBody(false) to preserve scroll position ---- */
 {
-  ok(/function doUndo[\s\S]{0,400}renderBody\(false\)/.test(html),
+  ok(/function doUndo[\s\S]{0,520}renderBody\(false\)/.test(html),
     'doUndo() calls renderBody(false) to preserve scroll position after undo');
 }
 
@@ -5561,6 +5561,51 @@ function accData(j, bin, ai){
   const mKeyBlock = mKeyIdx >= 0 ? html.slice(mKeyIdx, mKeyIdx + 400) : '';
   ok(/mode\.easy\.tip|mode\.detail\.tip/.test(mKeyBlock),
     'M key handler announces mode tip to srStatus (covers case where focus is outside tabBody)');
+}
+
+/* ---- Round 325: exprBar keydown handler registered once (no listener leak) ---- */
+{
+  // buildExprBar() itself must NOT contain bar.addEventListener('keydown'
+  const barFnStart = html.indexOf('function buildExprBar()');
+  const barFnEnd = html.indexOf('\nfunction ', barFnStart + 1);
+  const barFnBody = html.slice(barFnStart, barFnEnd > barFnStart ? barFnEnd : barFnStart + 2000);
+  ok(!barFnBody.includes("bar.addEventListener('keydown'"),
+    'buildExprBar() does not register its own keydown listener (avoids accumulation on each rebuild)');
+
+  // The keydown handler must exist somewhere outside buildExprBar (via _bar or exprBar)
+  ok(/_bar\.addEventListener\('keydown'|exprBar[\s\S]{0,20}addEventListener\('keydown'/.test(html),
+    'exprBar keydown handler is registered outside buildExprBar (once only)');
+
+  // Guard against double-registration (dataset.kbBound or similar flag)
+  ok(/kbBound|_exprBarBound|_barKeyBound/.test(html),
+    'exprBar keydown registration is guarded to prevent duplicate listeners on hot reload');
+}
+
+/* ---- Round 326: focus restored to springOff/outfit after renderBody (WCAG 2.4.3) ---- */
+{
+  // onParam for springOff/outfit must restore focus to the newly created element after renderBody
+  ok(/k==='outfit'[\s\S]{0,60}renderBody[\s\S]{0,60}pr-.*focus\(\)|k==='springOff'[\s\S]{0,60}renderBody[\s\S]{0,60}pr-.*focus\(\)/.test(html) ||
+     /k==='outfit'.*k==='springOff'[\s\S]{0,120}renderBody[\s\S]{0,80}'pr-'\+k[\s\S]{0,30}\.focus\(\)/.test(html) ||
+     (html.includes("'pr-'+k") && /renderBody\(false\)[\s\S]{0,60}'pr-'\+k[\s\S]{0,30}\.focus\(\)/.test(html)),
+    'onParam restores focus to the rebuilt springOff/outfit element after renderBody (WCAG 2.4.3)');
+
+  // The fix must be inside onParam (near rebuild/renderBody) not somewhere unrelated
+  const onParamIdx = html.indexOf('function onParam(k)');
+  const onParamEnd = html.indexOf('\nfunction ', onParamIdx + 1);
+  const onParamBody = html.slice(onParamIdx, onParamEnd > onParamIdx ? onParamEnd : onParamIdx + 500);
+  ok(/focus\(\)/.test(onParamBody),
+    'focus() call is inside onParam() function body');
+}
+
+/* ---- Round 327: doUndo restores focus to tabBody when panel had focus (WCAG 2.4.3) ---- */
+{
+  const undoIdx = html.indexOf('function doUndo()');
+  const undoEnd = html.indexOf('\nfunction ', undoIdx + 1);
+  const undoBody = html.slice(undoIdx, undoEnd > undoIdx ? undoEnd : undoIdx + 500);
+  ok(/tabBody.*contains.*activeElement|_undoFocusInPanel/.test(undoBody),
+    'doUndo() checks whether focus was inside tabBody before rebuilding');
+  ok(/tabBody[\s\S]{0,30}\.focus\(\)/.test(undoBody),
+    'doUndo() refocuses tabBody after renderBody so keyboard users can Tab into the panel');
 }
 
 /* ---- selfTest ---- */
