@@ -5228,6 +5228,23 @@ function accData(j, bin, ai){
     '#selftestBox gets role=status so AT users know the content is a live status message');
 }
 
+/* ---- Round 312: copyJson error uses btn.copyJson.err not btn.pasteJson.err ---- */
+{
+  ok(H.I18N.ja['btn.copyJson.err'] && H.I18N.en['btn.copyJson.err'],
+    'btn.copyJson.err i18n key exists in both locales for clipboard write failure');
+  ok(html.includes("t('btn.copyJson.err')"),
+    'copyJson error path uses btn.copyJson.err not the paste error key');
+  ok(!html.includes("copyJson.err')") || !html.includes("pasteJson.err'") ||
+     /copyJson[\s\S]{0,800}copyJson\.err/.test(html),
+    'copyJson failure SR announcement uses correct copy-specific error key');
+}
+
+/* ---- Round 311: doScreenshot re-enables button inside toBlob callback, not in finally ---- */
+{
+  ok(html.includes("if (btn) btn.disabled=false") && /toBlob\s*\(blob=>\{\s*if \(btn\)/.test(html),
+    'screenshot button is re-enabled inside toBlob callback (async), not prematurely in a finally block');
+}
+
 /* ---- Round 310: seed input has max=4294967295 to document rng(seed>>>0) range and prevent silent wraparound ---- */
 {
   ok(html.includes("max:'4294967295'") && html.includes('Math.min(n,4294967295)'),

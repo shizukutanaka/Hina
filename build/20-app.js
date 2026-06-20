@@ -960,7 +960,7 @@ function renderOut(bd){
     const cpj=el('button',{class:'btn wide', onclick:()=>{
       const json=HINA.serialize(params,meta);
       const _fail=()=>{ cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
-        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); };
+        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copyJson.err'); };
       if(!navigator.clipboard){ _fail(); return; }
       navigator.clipboard.writeText(json).then(()=>{
         const orig=cpj.textContent; cpj.textContent=t('btn.copyJsonDone');
@@ -1138,20 +1138,17 @@ function doScreenshot(){
   if (!GLOK) return;
   const btn=$('btnScreenshot');
   if (btn){ btn.disabled=true; }
-  try{
-    renderFrame(performance.now()); // render into buffer before browser flushes it
-    cv.toBlob(blob=>{
-      if (!blob){ showErr(t('err.exportFailed')); return; }
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url; a.download=fnameStem()+'.png';
-      document.body.append(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),1000);
-      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
-    },'image/png');
-  } finally {
-    if (btn){ btn.disabled=false; }
-  }
+  renderFrame(performance.now()); // render into buffer before browser flushes it
+  cv.toBlob(blob=>{
+    if (btn) btn.disabled=false;
+    if (!blob){ showErr(t('err.exportFailed')); return; }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=fnameStem()+'.png';
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
+  },'image/png');
 }
 
 /* ---------- rebuild ---------- */
