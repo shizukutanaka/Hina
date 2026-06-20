@@ -869,12 +869,12 @@ function renderBody(scrollReset=true){
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
       onclick:()=>{
         if(lastGachaSeed===null) return;
-        if (!navigator.clipboard?.writeText){ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); return; }
+        if (!navigator.clipboard?.writeText){ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); return; }
         navigator.clipboard.writeText(String(lastGachaSeed)).then(()=>{
           const orig=cpBtn.textContent; cpBtn.textContent=t('btn.copied');
           setTimeout(()=>{ cpBtn.textContent=orig; },1500);
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.seedCopied').replace('{n}',lastGachaSeed);
-        }).catch(()=>{ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); });
+        }).catch(()=>{ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); });
       }
     }, t('btn.copySeed'));
     seedIn.addEventListener('wheel',e=>{ if(document.activeElement===seedIn) e.preventDefault(); },{passive:false});
@@ -995,7 +995,7 @@ function renderOut(bd){
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
         if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
-          const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',f.name); }
+          const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.loadedJson').replace('{name}',f.name); }
         else { showErr(t('err.loadFailed')); } };
       rd.onerror=rd.onabort=()=>showErr(t('err.loadFailed'));
       rd.readAsText(f); e.target.value=''; }});
@@ -1216,7 +1216,7 @@ function applyLang(){
   renderTabs(); renderBody(false); buildExprBar(); updateStats();
 }
 $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); });
-$('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); });
+$('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); const sr=$('srStatus'); if(sr) sr.textContent=mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip'); });
 $('btnScreenshot').addEventListener('click', doScreenshot);
 let _dlgReturnFocus = null;
 const openAbout=()=>{ _dlgReturnFocus=document.activeElement; $('aboutDlg').showModal(); };
@@ -1271,6 +1271,7 @@ document.addEventListener('keydown',e=>{
       const wasInTabBody = $('tabBody').contains(document.activeElement);
       mode=mode==='easy'?'detail':'easy'; saveState(); applyLang();
       if (wasInTabBody) $('btnMode').focus();
+      const sr=$('srStatus'); if(sr) sr.textContent=mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip');
     }
     if (notField && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)){
       const ti=parseInt(e.key)-1;
@@ -1311,7 +1312,7 @@ document.body.addEventListener('drop',e=>{
   const rd=new FileReader();
   rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
     if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
-      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',f.name); }
+      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.loadedJson').replace('{name}',f.name); }
     else { showErr(t('err.loadFailed')); } };
   rd.onerror=rd.onabort=()=>showErr(t('err.loadFailed'));
   rd.readAsText(f);

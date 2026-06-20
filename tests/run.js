@@ -5503,6 +5503,66 @@ function accData(j, bin, ai){
     'showErr is called on FileReader error in at least one path');
 }
 
+/* ---- Round 322: a11y.loadedJson for load paths, a11y.savedJson only for saves ---- */
+{
+  // Both locales have the new loadedJson key
+  ok(H.I18N.ja['a11y.loadedJson'] && H.I18N.ja['a11y.loadedJson'].includes('{name}'),
+    'ja a11y.loadedJson key exists and contains {name} placeholder');
+  ok(H.I18N.en['a11y.loadedJson'] && H.I18N.en['a11y.loadedJson'].includes('{name}'),
+    'en a11y.loadedJson key exists and contains {name} placeholder');
+
+  // File-picker load path uses loadedJson, not savedJson
+  ok(/rd\.onload[\s\S]{0,300}a11y\.loadedJson/.test(html),
+    'file-picker JSON load announces a11y.loadedJson (not savedJson) to srStatus');
+
+  // Drag-and-drop load path uses loadedJson
+  const dropIdx = html.lastIndexOf("addEventListener('drop'");
+  const dropBlock = html.slice(dropIdx, dropIdx + 800);
+  ok(/a11y\.loadedJson/.test(dropBlock),
+    'drag-and-drop JSON load announces a11y.loadedJson (not savedJson) to srStatus');
+
+  // saveJson() still uses savedJson
+  ok(/saveJson[\s\S]{0,200}a11y\.savedJson/.test(html),
+    'saveJson() still announces a11y.savedJson (not changed to loadedJson)');
+
+  // Loaded message differs from saved message in both locales
+  ok(H.I18N.ja['a11y.loadedJson'] !== H.I18N.ja['a11y.savedJson'],
+    'ja loadedJson and savedJson messages are distinct');
+  ok(H.I18N.en['a11y.loadedJson'] !== H.I18N.en['a11y.savedJson'],
+    'en loadedJson and savedJson messages are distinct');
+}
+
+/* ---- Round 323: copySeed error paths announce to srStatus ---- */
+{
+  // Both locales have btn.copySeed.err
+  ok(H.I18N.ja['btn.copySeed.err'] && H.I18N.ja['btn.copySeed.err'].length > 3,
+    'ja btn.copySeed.err i18n key exists');
+  ok(H.I18N.en['btn.copySeed.err'] && H.I18N.en['btn.copySeed.err'].length > 3,
+    'en btn.copySeed.err i18n key exists');
+
+  // Clipboard unavailable path announces error
+  ok(/!navigator\.clipboard[\s\S]{0,180}btn\.copySeed\.err/.test(html),
+    'copySeed clipboard-unavailable path announces btn.copySeed.err to srStatus');
+
+  // .catch() path announces error
+  ok(/\.catch\(\(\)=>\{[\s\S]{0,200}btn\.copySeed\.err/.test(html),
+    'copySeed .catch() path announces btn.copySeed.err to srStatus');
+}
+
+/* ---- Round 324: mode toggle announces new mode to srStatus ---- */
+{
+  // btnMode click handler announces mode tip after applyLang
+  ok(/btnMode.*addEventListener.*'click'[\s\S]{0,120}mode\.easy\.tip|mode\.detail\.tip/.test(html) ||
+     /btnMode[\s\S]{0,180}mode\.easy\.tip/.test(html),
+    'btnMode click handler announces mode tip to srStatus after toggle');
+
+  // M key handler announces mode tip (even when wasInTabBody is false)
+  const mKeyIdx = html.indexOf("e.key==='m'||e.key==='M'");
+  const mKeyBlock = mKeyIdx >= 0 ? html.slice(mKeyIdx, mKeyIdx + 400) : '';
+  ok(/mode\.easy\.tip|mode\.detail\.tip/.test(mKeyBlock),
+    'M key handler announces mode tip to srStatus (covers case where focus is outside tabBody)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
