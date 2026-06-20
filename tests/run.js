@@ -5034,7 +5034,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 257: ? key guard prevents showModal() when dialog already open ---- */
 {
-  ok(/key==='[?]'[\s\S]{0,60}aboutDlg[\s\S]{0,10}open/.test(html),
+  ok(html.includes('const dlgOpen') && html.includes('if (!dlgOpen)') ||
+     /key==='[?]'[\s\S]{0,60}aboutDlg[\s\S]{0,10}open/.test(html),
     '? key shortcut guards against calling showModal() when dialog is already open');
 }
 
@@ -5224,6 +5225,12 @@ function accData(j, bin, ai){
 {
   ok(/id="selftestBox"[^>]*role="status"/.test(html),
     '#selftestBox gets role=status so AT users know the content is a live status message');
+}
+
+/* ---- Round 308: all keyboard shortcuts are wrapped in !dlgOpen guard so modal dialog suppresses them ---- */
+{
+  ok(html.includes('const dlgOpen = $(\'aboutDlg\').open') && html.includes('if (!dlgOpen){'),
+    'keyboard shortcuts block (Ctrl+Z/S, M, 1-8) is wrapped in if(!dlgOpen) to prevent firing during modal dialog');
 }
 
 /* ---- Round 307: range slider has aria-valuetext to keep AT announcement in sync with displayed value ---- */

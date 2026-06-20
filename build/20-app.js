@@ -1241,27 +1241,30 @@ document.querySelectorAll('.rankBadge').forEach(b=>{
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;
   const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag);
-  if ((e.ctrlKey||e.metaKey) && e.key==='S' && e.shiftKey && notField){
-    e.preventDefault(); saveJson();
-  } else if ((e.ctrlKey||e.metaKey) && e.key==='s' && !e.shiftKey && notField){
-    e.preventDefault(); doExport();
-  } else if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey && notField){
-    e.preventDefault(); doUndo();
-  } else if ((e.ctrlKey||e.metaKey) && e.key==='P' && e.shiftKey && notField){
-    e.preventDefault(); doScreenshot();
-  }
-  if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField && !$('aboutDlg').open){
-    e.preventDefault(); openAbout();
-  }
-  if ((e.key==='m'||e.key==='M') && !e.ctrlKey && !e.metaKey && !e.altKey && notField){
-    e.preventDefault();
-    const wasInTabBody = $('tabBody').contains(document.activeElement);
-    mode=mode==='easy'?'detail':'easy'; saveState(); applyLang();
-    if (wasInTabBody) $('btnMode').focus();
-  }
-  if (notField && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)){
-    const ti=parseInt(e.key)-1;
-    if (ti<TABS.length){ e.preventDefault(); activeTab=TABS[ti]; renderTabs(); renderBody(); $('tab-'+TABS[ti]).focus(); }
+  const dlgOpen = $('aboutDlg').open;
+  if (!dlgOpen){
+    if ((e.ctrlKey||e.metaKey) && e.key==='S' && e.shiftKey && notField){
+      e.preventDefault(); saveJson();
+    } else if ((e.ctrlKey||e.metaKey) && e.key==='s' && !e.shiftKey && notField){
+      e.preventDefault(); doExport();
+    } else if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey && notField){
+      e.preventDefault(); doUndo();
+    } else if ((e.ctrlKey||e.metaKey) && e.key==='P' && e.shiftKey && notField){
+      e.preventDefault(); doScreenshot();
+    }
+    if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){
+      e.preventDefault(); openAbout();
+    }
+    if ((e.key==='m'||e.key==='M') && !e.ctrlKey && !e.metaKey && !e.altKey && notField){
+      e.preventDefault();
+      const wasInTabBody = $('tabBody').contains(document.activeElement);
+      mode=mode==='easy'?'detail':'easy'; saveState(); applyLang();
+      if (wasInTabBody) $('btnMode').focus();
+    }
+    if (notField && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)){
+      const ti=parseInt(e.key)-1;
+      if (ti<TABS.length){ e.preventDefault(); activeTab=TABS[ti]; renderTabs(); renderBody(); $('tab-'+TABS[ti]).focus(); }
+    }
   }
   if (e.key==='Escape' && !$('aboutDlg').open){
     if (document.body.classList.contains('drag-over')){
