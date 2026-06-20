@@ -2198,7 +2198,8 @@ function paramRow(k){
   // color
   const inp=el('input',{id:pid, type:'color', value:params[k], 'aria-label':label,
     onpointerdown:()=>captureUndo(), onfocus:()=>captureUndo(),
-    oninput:e=>{params[k]=e.target.value; onParam(k); updateSwPressedState();}});
+    oninput:e=>{params[k]=e.target.value; onParam(k); updateSwPressedState();
+      const ni=swBtns.findIndex(b=>b.dataset.c===e.target.value); if(ni>=0) setSwTab(ni);}});
   // Roving tabindex on swatches: only one in tab order at a time (avoids N stops for N colors)
   const sw=el('div',{class:'swatches', role:'group', 'aria-label':label});
   const swBtns=[];

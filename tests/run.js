@@ -6086,6 +6086,12 @@ function accData(j, bin, ai){
     'preset card onclick calls renderBody(false) so sel.focus() does the scroll, avoiding jarring double-scroll');
 }
 
+/* ---- Round 386: color picker oninput keeps swatch roving tabindex in sync ---- */
+{
+  ok(/updateSwPressedState\(\);[\s\S]{0,80}swBtns\.findIndex\(b=>b\.dataset\.c===e\.target\.value\)/.test(html),
+    'color picker oninput calls setSwTab() when picker color matches a swatch, keeping roving entry point in sync');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
