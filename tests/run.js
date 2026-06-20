@@ -4535,9 +4535,9 @@ function accData(j, bin, ai){
   // loadState must restore activeTab from stored object, validated against TABS
   ok(/j\.activeTab[\s\S]{0,80}TABS\.includes/.test(html),
     'loadState() restores activeTab only if it is a valid TABS entry');
-  // beforeunload also saves activeTab
-  ok(/beforeunload[\s\S]{0,200}activeTab/.test(html),
-    'beforeunload handler saves activeTab');
+  // beforeunload/pagehide also saves activeTab
+  ok(/_emergencySave[\s\S]{0,200}activeTab/.test(html),
+    'emergency save handler (beforeunload/pagehide) saves activeTab');
 }
 
 /* ---- Round 212: double-click slider resets to schema default ---- */
@@ -5909,6 +5909,14 @@ function accData(j, bin, ai){
 {
   ok(html.includes('aria-modal="true"'),
     'aboutDlg has aria-modal=true to support older AT/browser combos alongside native showModal()');
+}
+
+/* ---- Round 361: pagehide listener for emergency save on iOS Safari where beforeunload is unreliable ---- */
+{
+  ok(html.includes('_emergencySave'),
+    '_emergencySave helper extracted for both beforeunload and pagehide');
+  ok(html.includes("window.addEventListener('pagehide', _emergencySave)"),
+    'pagehide listener registered for mobile browser backgrounding/close (iOS Safari compat)');
 }
 
 /* ---- selfTest ---- */
