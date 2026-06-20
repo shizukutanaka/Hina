@@ -4923,6 +4923,16 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 268: dragover shows hint.dropJson in hint bar with accent color ---- */
+{
+  ok(/dragover[\s\S]{0,200}hint\.dropJson/.test(html),
+    'dragover event shows hint.dropJson message in the hint bar');
+  ok(/dragover[\s\S]{0,260}var\(--accent\)/.test(html),
+    'dragover tints hint bar in accent color to reinforce drop affordance');
+  ok(/dragleave[\s\S]{0,200}h\.style\.color\s*=\s*''/.test(html),
+    'dragleave restores hint bar color when drag exits the page');
+}
+
 /* ---- Round 267: numIn aria-label differentiates it from the slider for screen readers ---- */
 {
   ok(H.I18N.ja['a11y.numIn'] && H.I18N.en['a11y.numIn'],

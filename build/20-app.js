@@ -1221,10 +1221,15 @@ window.addEventListener('beforeunload',()=>{
 document.body.addEventListener('dragover',e=>{
   if (!e.dataTransfer.types.includes('Files')) return;
   e.preventDefault(); document.body.classList.add('drag-over');
+  const h=$('hint'); if(h){ h.textContent=t('hint.dropJson'); h.style.color='var(--accent)'; }
 });
-document.body.addEventListener('dragleave',e=>{ if(!e.relatedTarget) document.body.classList.remove('drag-over'); });
+document.body.addEventListener('dragleave',e=>{
+  if(!e.relatedTarget){ document.body.classList.remove('drag-over');
+    const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):(GLOK?t('hint.drag'):t('hint.noGL')); } }
+});
 document.body.addEventListener('drop',e=>{
   document.body.classList.remove('drag-over');
+  const h=$('hint'); if(h){ h.style.color=''; h.textContent=GLOK?t('hint.drag'):t('hint.noGL'); }
   if (!e.dataTransfer.files.length) return;
   e.preventDefault();
   const f=e.dataTransfer.files[0];
