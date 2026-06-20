@@ -668,7 +668,7 @@ function renderTabs(){
       'aria-selected':String(tb===activeTab),
       'aria-controls':'tabBody',
       tabindex: tb===activeTab?'0':'-1',
-      onclick:()=>{ activeTab=tb; renderTabs(); renderBody(); $('tab-'+tb).focus(); },
+      onclick:()=>{ const changed=tb!==activeTab; activeTab=tb; renderTabs(); renderBody(changed); $('tab-'+tb).focus(); },
     }, t('tab.'+tb)));
   }
   $('tabBody').setAttribute('aria-labelledby','tab-'+activeTab);

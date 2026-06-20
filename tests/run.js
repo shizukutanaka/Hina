@@ -6054,6 +6054,12 @@ function accData(j, bin, ai){
     'gaze eye animation is disabled when reduceMotion is true (consistent with other animations)');
 }
 
+/* ---- Round 381: tab re-click preserves scroll (renderBody(false)) — switching to a different tab still resets ---- */
+{
+  ok(/const changed=tb!==activeTab;[\s\S]{0,60}renderBody\(changed\)/.test(html),
+    'tab onclick passes changed flag to renderBody() so re-clicking the active tab preserves scroll position');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
