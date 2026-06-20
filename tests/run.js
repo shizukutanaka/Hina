@@ -6080,6 +6080,12 @@ function accData(j, bin, ai){
     'rank badge goStats() passes chg flag so clicking a rank badge while already on out tab preserves scroll');
 }
 
+/* ---- Round 385: preset card onclick passes false to renderBody so focus() handles scroll, not a double-jump ---- */
+{
+  ok(/activePresetId=pre\.id;[\s\S]{0,30}renderBody\(false\)/.test(html),
+    'preset card onclick calls renderBody(false) so sel.focus() does the scroll, avoiding jarring double-scroll');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

@@ -812,7 +812,7 @@ function renderBody(scrollReset=true){
         'aria-pressed':String(isSelected),
         tabindex: (isSelected || (!hasSelected && _firstCard)) ? '0' : '-1',
         onclick:()=>{
-        captureUndo(); params=pp; activePresetId=pre.id; rebuild(); renderBody();
+        captureUndo(); params=pp; activePresetId=pre.id; rebuild(); renderBody(false);
         // Restore focus to the now-selected card (WCAG 2.4.3: focus must not be lost when DOM rebuilds)
         const sel=$('tabBody').querySelector('.preCard.selected'); if(sel) sel.focus(); }},
         nmDiv, cols));
