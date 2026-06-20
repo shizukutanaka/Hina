@@ -2776,8 +2776,10 @@ document.addEventListener('keydown',e=>{
     if ((e.key==='m'||e.key==='M') && !e.ctrlKey && !e.metaKey && !e.altKey && notField){
       e.preventDefault();
       const wasInTabBody = $('tabBody').contains(document.activeElement);
+      const wasOnTabNav = $('tabs').contains(document.activeElement);
       mode=mode==='easy'?'detail':'easy'; saveState(); applyLang();
       if (wasInTabBody) $('btnMode').focus();
+      else if (wasOnTabNav){ const ft=$('tab-'+activeTab); if(ft) ft.focus(); }
       const sr=$('srStatus'); if(sr) sr.textContent=mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip');
     }
     if (notField && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)){

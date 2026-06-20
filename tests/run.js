@@ -5557,7 +5557,7 @@ function accData(j, bin, ai){
 
   // M key handler announces mode tip (even when wasInTabBody is false)
   const mKeyIdx = html.indexOf("e.key==='m'||e.key==='M'");
-  const mKeyBlock = mKeyIdx >= 0 ? html.slice(mKeyIdx, mKeyIdx + 400) : '';
+  const mKeyBlock = mKeyIdx >= 0 ? html.slice(mKeyIdx, mKeyIdx + 560) : '';
   ok(/mode\.easy\.tip|mode\.detail\.tip/.test(mKeyBlock),
     'M key handler announces mode tip to srStatus (covers case where focus is outside tabBody)');
 }
@@ -6064,6 +6064,14 @@ function accData(j, bin, ai){
 {
   ok(/TABS\[ti\]!==activeTab[\s\S]{0,40}renderBody\(chg\)/.test(html),
     '1-8 key shortcut passes chg flag to renderBody() so re-pressing the active tab key preserves scroll');
+}
+
+/* ---- Round 383: M key restores focus to the active tab button when a tab button had focus ---- */
+{
+  const mIdx = html.indexOf("e.key==='m'||e.key==='M'");
+  const mBlock = mIdx >= 0 ? html.slice(mIdx, mIdx + 560) : '';
+  ok(/wasOnTabNav[\s\S]{0,200}ft\.focus\(\)/.test(mBlock),
+    'M key handler restores focus to the active tab button when a tab button had focus before mode toggle');
 }
 
 /* ---- selfTest ---- */
