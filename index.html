@@ -100,7 +100,7 @@ body.drag-over::after{content:'';position:fixed;inset:0;border:3px dashed var(--
   #stage{flex:0 0 44vh;flex:0 0 44dvh}
   #panel{width:100%;flex:1;border-left:none;border-top:1px solid var(--line)}
 }
-@media (prefers-reduced-motion:reduce){.preCard,.sw{transition:none}}
+@media (prefers-reduced-motion:reduce){.preCard,.sw,#autoSaveBadge{transition:none}}
 @media (forced-colors:active){
   .rk{forced-color-adjust:none;outline:1px solid ButtonText}
   .sw{forced-color-adjust:none;outline:2px solid ButtonText}
@@ -361,7 +361,7 @@ const I18N = {
     'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました','a11y.gachaRan':'ガチャ — シード {n} で生成しました','a11y.undone':'元に戻しました','a11y.noUndo':'元に戻す履歴がありません','a11y.savedJson':'{name} を保存しました','a11y.clamped':'値を {v} に制限しました','a11y.viewReset':'プレビュー視点をリセットしました',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。','note.springOff':'揺れ物オフ中：スライダーは非表示。オンにすると表示されます。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
-    'about.keys':'キーボードショートカット','about.keyList':'Ctrl+S         → VRM書き出し\nCtrl+Shift+S   → JSON保存\nCtrl+Z         → 元に戻す\nCtrl+Shift+P   → スクリーンショット\n?              → このダイアログ\nM              → かんたん/詳細 切替\n1〜8           → タブ切替\nEsc            → 表情プレビューを解除\n↑↓←→        → 3D回転（プレビュー選択時）\nShift+↑↓     → 上下パン（顔・足を確認）\n+/−           → ズーム\nHome           → 視点リセット\nダブルクリック → プレビュー: 視点リセット / スライダー: デフォルト値\nDelete         → スライダー: デフォルト値にリセット',
+    'about.keys':'キーボードショートカット','about.keyList':'Ctrl+S         → VRM書き出し\nCtrl+Shift+S   → JSON保存\nCtrl+Z         → 元に戻す\nCtrl+Shift+P   → スクリーンショット\n?              → このダイアログ\nM              → かんたん/詳細 切替\n1〜8           → タブ切替\nEsc            → 表情プレビューを解除\n↑↓←→        → 3D回転（プレビュー選択時）\nShift+↑↓     → 上下パン（顔・足を確認）\n+/−           → ズーム\nHome / 0       → 視点リセット\nダブルクリック → プレビュー: 視点リセット / スライダー: デフォルト値\nDelete         → スライダー: デフォルト値にリセット',
     'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
     'usage.Disallow':'不可','usage.Allow':'可',
     'license.Redistribution_Prohibited':'再配布禁止','license.CC0':'CC0（パブリックドメイン）',
@@ -410,7 +410,7 @@ const I18N = {
     'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.seedCopied':'Seed {n} copied to clipboard','a11y.gachaRan':'Gacha — generated with seed {n}','a11y.undone':'Undone','a11y.noUndo':'Nothing to undo','a11y.savedJson':'Saved {name}','a11y.clamped':'Value clamped to {v}','a11y.viewReset':'Preview view reset',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).','note.springOff':'Springs are OFF — sliders hidden. Enable springs above to show them.',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
-    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl+S           → Export VRM\nCtrl+Shift+S     → Save JSON\nCtrl+Z           → Undo\nCtrl+Shift+P     → Screenshot\n?                → This dialog\nM                → Toggle Easy/Detail mode\n1–8              → Switch tabs\nEsc              → Deactivate expression preview\nArrow keys       → Rotate preview (when canvas focused)\nShift+↑/↓       → Pan up/down (inspect face or feet)\n+/−              → Zoom\nHome             → Reset view\nDouble-click     → Preview: reset view / Slider: reset to default\nDelete           → Slider: reset to default',
+    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl+S           → Export VRM\nCtrl+Shift+S     → Save JSON\nCtrl+Z           → Undo\nCtrl+Shift+P     → Screenshot\n?                → This dialog\nM                → Toggle Easy/Detail mode\n1–8              → Switch tabs\nEsc              → Deactivate expression preview\nArrow keys       → Rotate preview (when canvas focused)\nShift+↑/↓       → Pan up/down (inspect face or feet)\n+/−              → Zoom\nHome / 0         → Reset view\nDouble-click     → Preview: reset view / Slider: reset to default\nDelete           → Slider: reset to default',
     'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
     'usage.Disallow':'Disallow','usage.Allow':'Allow',
     'license.Redistribution_Prohibited':'No redistribution','license.CC0':'CC0 (Public domain)',
@@ -1535,11 +1535,9 @@ function saveState(){
       const b=$('autoSaveBadge');
       if (b){
         b.textContent=t('hint.saved'); b.style.color='var(--ok)';
-        if (!reduceMotion){
-          b.style.opacity='1';
-          clearTimeout(_saveBadgeTimer);
-          _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2){ b2.style.opacity='0'; setTimeout(()=>{ if(b2&&b2.style.opacity==='0') b2.textContent=''; },400); } },2000);
-        }
+        b.style.opacity='1';
+        clearTimeout(_saveBadgeTimer);
+        _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2){ b2.style.opacity='0'; setTimeout(()=>{ if(b2&&b2.style.opacity==='0') b2.textContent=''; },400); } },2000);
       }
     }catch(e){
       // localStorage full or unavailable (private browsing) — show persistent warning
@@ -2607,6 +2605,7 @@ function rebuild(){
 // version from core — single source of truth (HINA.VERSION)
 if ($('aboutVer')) $('aboutVer').textContent = 'v' + HINA.VERSION;
 function applyLang(){
+  document.documentElement.lang = lang;
   const bl=$('btnLang'); bl.textContent=lang==='ja'?'EN':'JA';
   bl.title=t('btn.lang.tip'); bl.setAttribute('aria-label', t('btn.lang.tip'));
   const bm=$('btnMode'); bm.textContent=mode==='easy'?t('mode.easy'):t('mode.detail');

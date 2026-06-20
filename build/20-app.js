@@ -77,11 +77,9 @@ function saveState(){
       const b=$('autoSaveBadge');
       if (b){
         b.textContent=t('hint.saved'); b.style.color='var(--ok)';
-        if (!reduceMotion){
-          b.style.opacity='1';
-          clearTimeout(_saveBadgeTimer);
-          _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2){ b2.style.opacity='0'; setTimeout(()=>{ if(b2&&b2.style.opacity==='0') b2.textContent=''; },400); } },2000);
-        }
+        b.style.opacity='1';
+        clearTimeout(_saveBadgeTimer);
+        _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2){ b2.style.opacity='0'; setTimeout(()=>{ if(b2&&b2.style.opacity==='0') b2.textContent=''; },400); } },2000);
       }
     }catch(e){
       // localStorage full or unavailable (private browsing) — show persistent warning
@@ -1149,6 +1147,7 @@ function rebuild(){
 // version from core — single source of truth (HINA.VERSION)
 if ($('aboutVer')) $('aboutVer').textContent = 'v' + HINA.VERSION;
 function applyLang(){
+  document.documentElement.lang = lang;
   const bl=$('btnLang'); bl.textContent=lang==='ja'?'EN':'JA';
   bl.title=t('btn.lang.tip'); bl.setAttribute('aria-label', t('btn.lang.tip'));
   const bm=$('btnMode'); bm.textContent=mode==='easy'?t('mode.easy'):t('mode.detail');

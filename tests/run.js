@@ -4076,8 +4076,9 @@ function accData(j, bin, ai){
   ok(/id="autoSaveBadge"[^>]*aria-live/.test(html),
     'autoSaveBadge has aria-live for screen reader announcements (WCAG 4.1.3)');
 
-  // reduceMotion guard: badge only shown when animations are OK
-  ok(saveStateSrc.includes('reduceMotion'), 'auto-save badge respects prefers-reduced-motion');
+  // reduceMotion handled via CSS @media rule rather than JS gate (Round 292)
+  ok(html.includes('prefers-reduced-motion') && html.includes('autoSaveBadge'),
+    'auto-save badge visible for prefers-reduced-motion users via CSS transition:none');
 }
 
 /* ---- Round 190: tris/bones stat cells show Quest Excellent threshold annotation ---- */
@@ -5171,6 +5172,26 @@ function accData(j, bin, ai){
   ok(html.includes("sr.textContent=t('a11y.viewReset')") &&
      /case 'Home'[\s\S]{0,160}a11y\.viewReset/.test(html),
     'canvas Home key announces a11y.viewReset to screen reader via srStatus');
+}
+
+/* ---- Round 292: autoSaveBadge visible for prefers-reduced-motion users ---- */
+{
+  ok(html.includes('#autoSaveBadge') && /prefers-reduced-motion[\s\S]{0,60}#autoSaveBadge/.test(html),
+    'autoSaveBadge included in prefers-reduced-motion CSS rule so sighted users see it without animation');
+  ok(!/if \(!reduceMotion\)[\s\S]{0,80}opacity.*1/.test(html),
+    'autoSaveBadge opacity=1 not gated on !reduceMotion — always shown for sighted users');
+}
+
+/* ---- Round 291: about.keyList documents 0 as alternative to Home ---- */
+{
+  ok(H.I18N.ja['about.keyList'].includes('Home / 0') && H.I18N.en['about.keyList'].includes('Home / 0'),
+    'about.keyList documents 0 key as alternative to Home for view reset in both locales');
+}
+
+/* ---- Round 290: applyLang updates document.documentElement.lang (WCAG 3.1.1) ---- */
+{
+  ok(html.includes('document.documentElement.lang = lang'),
+    'applyLang() updates <html lang> attribute to match current locale (WCAG 3.1.1)');
 }
 
 /* ---- Round 287: btnAbout gets aria-haspopup=dialog ---- */
