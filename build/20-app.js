@@ -689,7 +689,7 @@ function paramRow(k){
     // detail mode exposes a direct numeric entry (SPEC §2); easy mode shows a read-only value
     let valEl;
     const r=el('input',{id:pid, type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
-      'aria-label':label, 'aria-valuetext':String(params[k]), title:t('hint.sliderReset'),
+      'aria-label':label, 'aria-valuetext':String(params[k]), 'aria-describedby':'sliderDesc', title:t('hint.sliderReset'),
       onpointerdown:()=>captureUndo(),
       ondblclick:()=>{ captureUndo(); params[k]=s.def; r.value=String(s.def);
         r.setAttribute('aria-valuetext',String(s.def));
@@ -714,8 +714,9 @@ function paramRow(k){
           const clamped=M.clamp(n,s.min,s.max);
           if (clamped!==n){
             e.target.setAttribute('aria-invalid','true');
+            e.target.setAttribute('aria-errormessage','srStatus');
             const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',clamped);
-            setTimeout(()=>e.target.removeAttribute('aria-invalid'),1500);
+            setTimeout(()=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); },1500);
           }
           params[k]=clamped; e.target.value=String(clamped); r.value=String(clamped); onParam(k); }});
       // Prevent accidental value changes when wheel-scrolling the panel over a focused numIn
@@ -1199,6 +1200,7 @@ function applyLang(){
   document.querySelectorAll('.rankBadge:not(#heightBadge)').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
   const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.style.display=GLOK?'':'none'; }
   const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
+  const sd=$('sliderDesc'); if(sd) sd.textContent=t('hint.sliderReset');
   document.documentElement.lang = lang;
   // scrollReset=false: user stays on the same tab — preserve their scroll position across lang/mode changes
   renderTabs(); renderBody(false); buildExprBar(); updateStats();

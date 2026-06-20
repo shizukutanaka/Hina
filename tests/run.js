@@ -1457,7 +1457,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2100)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2300)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -5226,6 +5226,24 @@ function accData(j, bin, ai){
 {
   ok(/id="selftestBox"[^>]*role="status"/.test(html),
     '#selftestBox gets role=status so AT users know the content is a live status message');
+}
+
+/* ---- Round 314: range slider gets aria-describedby=sliderDesc; sliderDesc updated in applyLang ---- */
+{
+  ok(html.includes("'aria-describedby':'sliderDesc'"),
+    'range slider has aria-describedby=sliderDesc so AT reads the double-click/Delete reset hint');
+  ok(html.includes("id=\"sliderDesc\"") && html.includes("class=\"sr-only\""),
+    'sliderDesc sr-only span exists in DOM as a shared slider instruction element');
+  ok(html.includes("$('sliderDesc')") && html.includes("hint.sliderReset"),
+    'applyLang() updates sliderDesc text to the localized hint.sliderReset string');
+}
+
+/* ---- Round 313: numIn clamped path sets aria-errormessage=srStatus alongside aria-invalid ---- */
+{
+  ok(html.includes("setAttribute('aria-errormessage','srStatus')"),
+    'numIn onchange clamped path sets aria-errormessage=srStatus for WCAG 1.3.1 error association');
+  ok(html.includes("removeAttribute('aria-errormessage')"),
+    'numIn timeout removes aria-errormessage when aria-invalid is cleared');
 }
 
 /* ---- Round 312: copyJson error uses btn.copyJson.err not btn.pasteJson.err ---- */
