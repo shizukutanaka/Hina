@@ -903,7 +903,7 @@ function renderBody(scrollReset=true){
 let statEls={};
 function renderOut(bd){
   // Primary action at top — the export button is why the user opened this tab
-  _exportBtn = el('button',{class:'btn primary wide', 'aria-keyshortcuts':'Control+S', onclick:doExport}, t('btn.export'));
+  _exportBtn = el('button',{class:'btn primary wide', 'aria-keyshortcuts':'Control+S Meta+S', onclick:doExport}, t('btn.export'));
   bd.append(_exportBtn);
   bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:10px'}, t('hint.ctrlS')));
 
@@ -962,7 +962,7 @@ function renderOut(bd){
   tbl.append(el('tr',{}, el('th',{scope:'row'},'PC'), rkPC));
   tbl.append(el('tr',{}, el('th',{scope:'row'},'Quest'), rkQ));
   bd.append(tbl);
-  bd.append(el('button',{class:'btn wide', 'aria-keyshortcuts':'Control+Shift+S', onclick:saveJson}, t('btn.saveJson')));
+  bd.append(el('button',{class:'btn wide', 'aria-keyshortcuts':'Control+Shift+S Meta+Shift+S', onclick:saveJson}, t('btn.saveJson')));
   {
     const cpj=el('button',{class:'btn wide', onclick:()=>{
       const json=HINA.serialize(params,meta);
@@ -1240,7 +1240,7 @@ function applyLang(){
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
   // rankBadge static reset (heightBadge is excluded — it gets a dynamic label in updateStats)
   document.querySelectorAll('.rankBadge:not(#heightBadge)').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
-  const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.setAttribute('aria-label',t('btn.screenshot.tip')); sc.setAttribute('aria-keyshortcuts','Control+Shift+P'); sc.style.display=GLOK?'':'none'; }
+  const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.setAttribute('aria-label',t('btn.screenshot.tip')); sc.setAttribute('aria-keyshortcuts','Control+Shift+P Meta+Shift+P'); sc.style.display=GLOK?'':'none'; }
   const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
   const sd=$('sliderDesc'); if(sd) sd.textContent=t('hint.sliderReset');
   const sl=$('skipLink'); if(sl) sl.textContent=t('a11y.skip');

@@ -5867,6 +5867,16 @@ function accData(j, bin, ai){
     'doExport thumbnail branch guards _glLost to skip capture after context loss');
 }
 
+/* ---- Round 356: aria-keyshortcuts for Ctrl+S / Ctrl+Shift+S / Ctrl+Shift+P include Meta variants for macOS ---- */
+{
+  ok(html.includes("'aria-keyshortcuts':'Control+S Meta+S'"),
+    'export button aria-keyshortcuts includes Meta+S for macOS');
+  ok(html.includes("'aria-keyshortcuts':'Control+Shift+S Meta+Shift+S'"),
+    'saveJson button aria-keyshortcuts includes Meta+Shift+S for macOS');
+  ok(html.includes("'Control+Shift+P Meta+Shift+P'"),
+    'screenshot button aria-keyshortcuts includes Meta+Shift+P for macOS');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
