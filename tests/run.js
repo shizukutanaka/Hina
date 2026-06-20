@@ -1380,9 +1380,9 @@ function accData(j, bin, ai){
   ok(/e\.target===\$\('aboutDlg'\)[\s\S]{0,30}close\(\)/.test(html),
     'about dialog closes on backdrop click (e.target === dialog element)');
 
-  // i18n hint.ctrlS updated to mention Ctrl+Z in both languages
-  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl+Z') && H.I18N.en['hint.ctrlS'].includes('Ctrl+Z'),
-    'hint.ctrlS i18n includes Ctrl+Z undo mention in both languages');
+  // i18n hint.ctrlS updated to mention undo shortcut in both languages
+  ok(H.I18N.ja['hint.ctrlS'].includes('⌘+Z') && H.I18N.en['hint.ctrlS'].includes('⌘+Z'),
+    'hint.ctrlS i18n includes ⌘+Z undo mention in both languages (Ctrl/⌘ notation)');
 }
 
 /* ---- Round 102: Ctrl+Z undo + i18n hint update ---- */
@@ -1409,9 +1409,9 @@ function accData(j, bin, ai){
   ok(/captureUndo\(\).*randomParams|runGacha[\s\S]{0,40}captureUndo/.test(html),
     'gacha runGacha() calls captureUndo() before randomizing');
 
-  // hint.ctrlS updated to mention Ctrl+Z
-  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl+Z') && H.I18N.en['hint.ctrlS'].includes('Ctrl+Z'),
-    'hint.ctrlS i18n updated to mention Ctrl+Z undo in both languages');
+  // hint.ctrlS updated to mention undo shortcut
+  ok(H.I18N.ja['hint.ctrlS'].includes('⌘+Z') && H.I18N.en['hint.ctrlS'].includes('⌘+Z'),
+    'hint.ctrlS i18n updated to mention ⌘+Z undo in both languages (Ctrl/⌘ notation)');
 }
 
 /* ---- Round 101: mouth texture scales with mouthW + Ctrl+Shift+S shortcut ---- */
@@ -4132,10 +4132,10 @@ function accData(j, bin, ai){
   // i18n keys for screenshot button
   ok(H.I18N.ja['btn.screenshot'] === 'PNG', 'ja btn.screenshot key is PNG');
   ok(H.I18N.en['btn.screenshot'] === 'PNG', 'en btn.screenshot key is PNG');
-  ok(H.I18N.ja['btn.screenshot.tip'] && H.I18N.ja['btn.screenshot.tip'].includes('Ctrl+Shift+P'),
-    'ja btn.screenshot.tip mentions Ctrl+Shift+P shortcut (avoids Print conflict)');
-  ok(H.I18N.en['btn.screenshot.tip'] && H.I18N.en['btn.screenshot.tip'].includes('Ctrl+Shift+P'),
-    'en btn.screenshot.tip mentions Ctrl+Shift+P shortcut');
+  ok(H.I18N.ja['btn.screenshot.tip'] && H.I18N.ja['btn.screenshot.tip'].includes('⌘+Shift+P'),
+    'ja btn.screenshot.tip mentions ⌘+Shift+P shortcut (Ctrl/⌘ notation)');
+  ok(H.I18N.en['btn.screenshot.tip'] && H.I18N.en['btn.screenshot.tip'].includes('⌘+Shift+P'),
+    'en btn.screenshot.tip mentions ⌘+Shift+P shortcut (Ctrl/⌘ notation)');
 
   // screenshotDone a11y keys
   ok(H.I18N.ja['a11y.screenshotDone'] && H.I18N.ja['a11y.screenshotDone'].length > 0,
@@ -4154,9 +4154,9 @@ function accData(j, bin, ai){
   ok(/ctrlKey.*&&.*key.*===.*'P'.*&&.*shiftKey/.test(html) || /shiftKey.*&&.*key.*===.*'P'.*&&.*ctrlKey/.test(html),
     'Ctrl+Shift+P keyboard shortcut triggers doScreenshot (avoids browser Print conflict)');
 
-  // hint.ctrlS updated to include Ctrl+Shift+P
-  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl+Shift+P'), 'ja hint.ctrlS includes Ctrl+Shift+P hint');
-  ok(H.I18N.en['hint.ctrlS'].includes('Ctrl+Shift+P'), 'en hint.ctrlS includes Ctrl+Shift+P hint');
+  // hint.ctrlS updated to include screenshot shortcut
+  ok(H.I18N.ja['hint.ctrlS'].includes('⌘+Shift+P'), 'ja hint.ctrlS includes ⌘+Shift+P hint (Ctrl/⌘ notation)');
+  ok(H.I18N.en['hint.ctrlS'].includes('⌘+Shift+P'), 'en hint.ctrlS includes ⌘+Shift+P hint (Ctrl/⌘ notation)');
 }
 
 /* ---- Round 193: document drag-and-drop JSON loading in Export tab ---- */
@@ -5891,6 +5891,18 @@ function accData(j, bin, ai){
     'ja about.keyList shows Ctrl/⌘ notation for cross-platform keyboard shortcuts');
   ok(H.I18N.en['about.keyList'].includes('Ctrl/⌘'),
     'en about.keyList shows Ctrl/⌘ notation for cross-platform keyboard shortcuts');
+}
+
+/* ---- Round 359: hint.ctrlS and btn.screenshot.tip updated to Ctrl/⌘ notation for macOS users ---- */
+{
+  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl/⌘+S'),
+    'ja hint.ctrlS shows Ctrl/⌘ notation for export shortcut');
+  ok(H.I18N.en['hint.ctrlS'].includes('Ctrl/⌘+S'),
+    'en hint.ctrlS shows Ctrl/⌘ notation for export shortcut');
+  ok(H.I18N.ja['btn.screenshot.tip'].includes('Ctrl/⌘'),
+    'ja btn.screenshot.tip shows Ctrl/⌘ notation');
+  ok(H.I18N.en['btn.screenshot.tip'].includes('Ctrl/⌘'),
+    'en btn.screenshot.tip shows Ctrl/⌘ notation');
 }
 
 /* ---- selfTest ---- */
