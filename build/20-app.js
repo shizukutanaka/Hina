@@ -679,7 +679,7 @@ function paramRow(k){
         onParam(k); }});
     if (mode==='detail'){
       valEl=el('input',{type:'number',class:'num numIn',min:s.min,max:s.max,step:s.step,value:params[k],
-        'aria-label':label,
+        'aria-label':t('a11y.numIn').replace('{label}',label),
         onchange:e=>{ captureUndo(); let n=parseFloat(e.target.value);
           if (!Number.isFinite(n)) n=params[k];
           const clamped=M.clamp(n,s.min,s.max);

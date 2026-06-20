@@ -4923,6 +4923,14 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 267: numIn aria-label differentiates it from the slider for screen readers ---- */
+{
+  ok(H.I18N.ja['a11y.numIn'] && H.I18N.en['a11y.numIn'],
+    'a11y.numIn i18n key exists in both locales');
+  ok(/a11y\.numIn/.test(html),
+    'numIn uses a11y.numIn label to distinguish from the slider control with the same name');
+}
+
 /* ---- Round 266: canvas aria-keyshortcuts lists available keyboard shortcuts ---- */
 {
   ok(/aria-keyshortcuts/.test(html),
