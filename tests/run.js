@@ -5158,6 +5158,27 @@ function accData(j, bin, ai){
     'doExport finally block resets button text to btn.export if it shows "Exporting…" on error');
 }
 
+/* ---- Round 289: dblclick view reset announces to screen reader ---- */
+{
+  ok(/dblclick[\s\S]{0,220}a11y\.viewReset/.test(html),
+    'canvas dblclick view reset announces a11y.viewReset to screen reader via srStatus');
+}
+
+/* ---- Round 288: canvas Home key announces view reset to screen reader ---- */
+{
+  ok(H.I18N.ja['a11y.viewReset'] && H.I18N.en['a11y.viewReset'],
+    'a11y.viewReset i18n key exists in both locales');
+  ok(html.includes("sr.textContent=t('a11y.viewReset')") &&
+     /case 'Home'[\s\S]{0,160}a11y\.viewReset/.test(html),
+    'canvas Home key announces a11y.viewReset to screen reader via srStatus');
+}
+
+/* ---- Round 287: btnAbout gets aria-haspopup=dialog ---- */
+{
+  ok(html.includes("aria-haspopup', 'dialog'"),
+    'btnAbout gets aria-haspopup=dialog so AT announces it opens a dialog');
+}
+
 /* ---- Round 283: hint.sliderReset updated to mention Delete key ---- */
 {
   ok(H.I18N.ja['hint.sliderReset'].includes('Delete') && H.I18N.en['hint.sliderReset'].includes('Delete'),

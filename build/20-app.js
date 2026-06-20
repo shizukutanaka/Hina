@@ -607,7 +607,8 @@ function renderFrame(time){
   cv.addEventListener('wheel',e=>{ e.preventDefault();
     camDist=M.clamp(camDist*(1+e.deltaY*0.0012), 0.6, 8); },{passive:false});
   cv.addEventListener('dblclick',()=>{ const H0=build?build.dims.H:1.45;
-    camYaw=Math.PI; camPitch=0.10; camDist=H0*1.85; camTarget=[0,H0*0.55,0]; });
+    camYaw=Math.PI; camPitch=0.10; camDist=H0*1.85; camTarget=[0,H0*0.55,0];
+    const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.viewReset'); });
   // keyboard camera control (WCAG 2.1.1 — preview must be operable without a pointer)
   cv.addEventListener('keydown',e=>{
     const rot=0.18, zoom=0.12; let used=true;
@@ -625,7 +626,8 @@ function renderFrame(time){
       case '+': case '=': camDist=M.clamp(camDist*(1-zoom), 0.6, 8); break;
       case '-': case '_': camDist=M.clamp(camDist*(1+zoom), 0.6, 8); break;
       // Home resets all camera state including the pan target
-      case 'Home': case '0': camYaw=Math.PI; camPitch=0.10; camDist=H0*1.85; camTarget=[0,H0*0.55,0]; break;
+      case 'Home': case '0': camYaw=Math.PI; camPitch=0.10; camDist=H0*1.85; camTarget=[0,H0*0.55,0];
+        { const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.viewReset'); } break;
       default: used=false;
     }
     if (used) e.preventDefault();
@@ -1160,6 +1162,7 @@ function applyLang(){
   $('stage').setAttribute('aria-label', t('a11y.stage'));
   $('panel').setAttribute('aria-label', t('a11y.panel'));
   $('btnAbout').setAttribute('aria-label', t('a11y.about.btn'));
+  $('btnAbout').setAttribute('aria-haspopup', 'dialog');
   $('btnAbout').setAttribute('aria-keyshortcuts', '?');
   $('btnMode').setAttribute('aria-keyshortcuts', 'M');
   $('aboutTxt').textContent = t('about');
