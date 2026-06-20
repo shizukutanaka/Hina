@@ -854,7 +854,14 @@ function renderBody(scrollReset=true){
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', max:'4294967295', step:'1', autocomplete:'off', inputmode:'numeric',
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
       onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); },
-      onchange:e=>{ let n=Math.round(Number(e.target.value)); if (!Number.isFinite(n)||n<0) return;
+      onchange:e=>{ let n=Math.round(Number(e.target.value));
+        if (!Number.isFinite(n)||n<0){
+          e.target.setAttribute('aria-invalid','true');
+          const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.seedInvalid');
+          setTimeout(()=>e.target.removeAttribute('aria-invalid'),1500);
+          return;
+        }
+        e.target.removeAttribute('aria-invalid');
         n=Math.min(n,4294967295); e.target.value=String(n); runGacha(n); }});
     const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),

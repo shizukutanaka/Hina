@@ -5749,6 +5749,22 @@ function accData(j, bin, ai){
     'license onChange returns focus to license select when URL field was focused and field hides');
 }
 
+/* ---- Round 341: about dialog close button has autofocus so showModal() focuses it on open ---- */
+{
+  ok(/id="aboutClose"\s+autofocus|autofocus[^>]*id="aboutClose"/.test(html),
+    'aboutClose button has autofocus attribute so dialog focus lands on close button, not summary (ARIA dialog pattern)');
+}
+
+/* ---- Round 342: seed input sets aria-invalid and announces seedInvalid when value is NaN or negative ---- */
+{
+  ok(H.I18N.ja['a11y.seedInvalid'] && H.I18N.en['a11y.seedInvalid'],
+    'a11y.seedInvalid key present in both locales');
+  ok((()=>{ const si=html.indexOf("placeholder:t('gacha.seed.ph')"); const chunk=html.slice(si, si+600); return /!Number\.isFinite\(n\)\|\|n<0[\s\S]{0,80}aria-invalid[\s\S]{0,80}seedInvalid/.test(chunk); })(),
+    'seed input sets aria-invalid and announces a11y.seedInvalid on invalid value (NaN or negative)');
+  ok(/seedInvalid[\s\S]{0,100}removeAttribute\('aria-invalid'\)/.test(html),
+    'seed input clears aria-invalid after timeout');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
