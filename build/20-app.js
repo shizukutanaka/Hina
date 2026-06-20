@@ -1158,6 +1158,8 @@ function applyLang(){
   $('stage').setAttribute('aria-label', t('a11y.stage'));
   $('panel').setAttribute('aria-label', t('a11y.panel'));
   $('btnAbout').setAttribute('aria-label', t('a11y.about.btn'));
+  $('btnAbout').setAttribute('aria-keyshortcuts', '?');
+  $('btnMode').setAttribute('aria-keyshortcuts', 'M');
   $('aboutTxt').textContent = t('about');
   if ($('aboutKeysSumm')) $('aboutKeysSumm').textContent = t('about.keys');
   if ($('aboutKeys')) $('aboutKeys').textContent = t('about.keyList');
@@ -1219,7 +1221,10 @@ document.addEventListener('keydown',e=>{
     e.preventDefault(); $('aboutDlg').showModal();
   }
   if ((e.key==='m'||e.key==='M') && !e.ctrlKey && !e.metaKey && !e.altKey && notField){
-    e.preventDefault(); mode=mode==='easy'?'detail':'easy'; saveState(); applyLang();
+    e.preventDefault();
+    const wasInTabBody = $('tabBody').contains(document.activeElement);
+    mode=mode==='easy'?'detail':'easy'; saveState(); applyLang();
+    if (wasInTabBody) $('btnMode').focus();
   }
   if (notField && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)){
     const ti=parseInt(e.key)-1;

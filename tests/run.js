@@ -1456,7 +1456,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 1900)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2100)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -4546,9 +4546,9 @@ function accData(j, bin, ai){
   ok(/hint\.sliderReset/.test(html),
     'slider title references hint.sliderReset key');
   // Both locales must have hint.sliderReset
-  ok(/'hint\.sliderReset':'ダブルクリックでデフォルト値に戻す'/.test(html),
+  ok(H.I18N.ja['hint.sliderReset'] && H.I18N.ja['hint.sliderReset'].length > 5,
     'hint.sliderReset present in ja locale');
-  ok(/'hint\.sliderReset':'Double-click to reset to default'/.test(html),
+  ok(H.I18N.en['hint.sliderReset'] && H.I18N.en['hint.sliderReset'].length > 5,
     'hint.sliderReset present in en locale');
 }
 
@@ -5156,6 +5156,26 @@ function accData(j, bin, ai){
 {
   ok(html.includes("_exportBtn.textContent===t('btn.exporting')") && html.includes("_exportBtn.textContent=t('btn.export')"),
     'doExport finally block resets button text to btn.export if it shows "Exporting…" on error');
+}
+
+/* ---- Round 283: hint.sliderReset updated to mention Delete key ---- */
+{
+  ok(H.I18N.ja['hint.sliderReset'].includes('Delete') && H.I18N.en['hint.sliderReset'].includes('Delete'),
+    'hint.sliderReset tooltip mentions Delete key in both locales');
+}
+
+/* ---- Round 282: btnMode and btnAbout get aria-keyshortcuts ---- */
+{
+  ok(/btnAbout[\s\S]{0,120}aria-keyshortcuts[\s\S]{0,20}'[?]'/.test(html),
+    'btnAbout gets aria-keyshortcuts="?" so AT users discover the ? shortcut');
+  ok(/btnMode[\s\S]{0,120}aria-keyshortcuts[\s\S]{0,20}'M'/.test(html),
+    'btnMode gets aria-keyshortcuts="M" so AT users discover the M shortcut');
+}
+
+/* ---- Round 281: M-key mode toggle preserves focus via wasInTabBody check ---- */
+{
+  ok(html.includes('wasInTabBody') && html.includes("$('btnMode').focus()"),
+    'M-key handler saves wasInTabBody and restores focus to btnMode if panel had focus');
 }
 
 /* ---- Round 280: canvas aria-keyshortcuts includes Shift+ArrowUp and zoom shortcuts ---- */
