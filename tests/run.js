@@ -5941,6 +5941,14 @@ function accData(j, bin, ai){
     'copyJson button checks navigator.clipboard?.writeText (consistent with copySeed guard pattern)');
 }
 
+/* ---- Round 365: canvas aria-keyshortcuts and hint.drag include 0 key (alias for Home view reset) ---- */
+{
+  ok(html.includes('aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Shift+ArrowUp Shift+ArrowDown + - Home 0"'),
+    'canvas aria-keyshortcuts includes 0 key as view-reset alias (matches about.keyList documentation)');
+  ok(H.I18N.ja['hint.drag'].includes('Home/0') && H.I18N.en['hint.drag'].includes('Home/0'),
+    'hint.drag mentions Home/0 as reset shortcut in both locales (consistent with about.keyList)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
