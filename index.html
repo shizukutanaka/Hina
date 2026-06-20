@@ -2328,7 +2328,9 @@ function renderBody(scrollReset=true){
           return;
         }
         e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage');
-        n=Math.min(n,4294967295); e.target.value=String(n); runGacha(n); }});
+        const clamped=Math.min(n,4294967295);
+        if(clamped!==n){ e.target.value=String(clamped); const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',clamped); }
+        runGacha(clamped); }});
     const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       ...(lastGachaSeed===null?{disabled:''}:{}),
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),

@@ -100,7 +100,7 @@ ok(html.includes('META_DEFAULTS') && html.includes('_resetPending'), 'reset butt
 ok(html.includes("dataTransfer.types.includes('Files')") && html.includes("dataTransfer.files"), 'drag-and-drop JSON loading wired with file-type guard');
 ok(/document\.title\s*=.*fnameStem/.test(html), 'document.title updated in rebuild() so browser tab reflects loaded title immediately');
 ok(html.includes('visibilitychange') && html.includes('_rafPaused'), 'rAF loop pauses on page visibility hidden (saves CPU/battery on mobile)');
-ok(html.includes('runGacha(n)') && (html.includes('n>=0') || html.includes('n<0')),
+ok((html.includes('runGacha(n)') || html.includes('runGacha(clamped)')) && (html.includes('n>=0') || html.includes('n<0')),
   'gacha seed input accepts seed 0 and validates range before calling runGacha');
 ok(html.includes('webglcontextrestored') && html.includes('location.reload'), 'webglcontextrestored triggers reload to re-init GL resources');
 ok(html.includes('HINA.PRESETS.some') && html.includes("j.activePresetId"), 'activePresetId validated against PRESETS list on load to guard against stale IDs');
@@ -5992,6 +5992,14 @@ function accData(j, bin, ai){
 {
   ok(/catch\s*\(e\)\s*\{[\s\S]{0,400}srStatus[\s\S]{0,60}hint\.saveFail/.test(html),
     'saveState catch block announces hint.saveFail via srStatus for guaranteed SR delivery');
+}
+
+/* ---- Round 372: seed input announces a11y.clamped when value exceeds 4294967295 (consistent with numIn) ---- */
+{
+  ok(html.includes("const clamped=Math.min(n,4294967295);"),
+    'seed input stores clamped value in a variable for comparison');
+  ok(/clamped!==n[\s\S]{0,120}a11y\.clamped/.test(html),
+    'seed input announces a11y.clamped via srStatus when value is clamped (consistent with numIn behavior)');
 }
 
 /* ---- selfTest ---- */
