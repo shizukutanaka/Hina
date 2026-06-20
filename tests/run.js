@@ -4237,12 +4237,12 @@ function accData(j, bin, ai){
     'ja about.keys (shortcut section label) present');
   ok(H.I18N.en['about.keys'] && H.I18N.en['about.keys'].length > 0,
     'en about.keys (shortcut section label) present');
-  ok(H.I18N.ja['about.keyList'] && H.I18N.ja['about.keyList'].includes('Ctrl+S'),
-    'ja about.keyList contains Ctrl+S shortcut reference');
-  ok(H.I18N.en['about.keyList'] && H.I18N.en['about.keyList'].includes('Ctrl+S'),
-    'en about.keyList contains Ctrl+S shortcut reference');
-  ok(H.I18N.en['about.keyList'].includes('Ctrl+Shift+P'),
-    'en about.keyList includes Ctrl+Shift+P screenshot shortcut');
+  ok(H.I18N.ja['about.keyList'] && H.I18N.ja['about.keyList'].includes('Ctrl/⌘+S'),
+    'ja about.keyList contains Ctrl/⌘+S shortcut reference');
+  ok(H.I18N.en['about.keyList'] && H.I18N.en['about.keyList'].includes('Ctrl/⌘+S'),
+    'en about.keyList contains Ctrl/⌘+S shortcut reference');
+  ok(H.I18N.en['about.keyList'].includes('Ctrl/⌘+Shift+P'),
+    'en about.keyList includes Ctrl/⌘+Shift+P screenshot shortcut');
 
   // aboutKeys element in dialog markup
   ok(html.includes('id="aboutKeys"'), 'aboutKeys pre element in About dialog markup');
@@ -5883,6 +5883,14 @@ function accData(j, bin, ai){
     'ja hint.undoReady includes ⌘+Z for macOS users');
   ok(H.I18N.en['hint.undoReady'].includes('⌘+Z'),
     'en hint.undoReady includes ⌘+Z for macOS users');
+}
+
+/* ---- Round 358: about.keyList includes Ctrl/⌘ notation so Mac users see correct modifiers in help dialog ---- */
+{
+  ok(H.I18N.ja['about.keyList'].includes('Ctrl/⌘'),
+    'ja about.keyList shows Ctrl/⌘ notation for cross-platform keyboard shortcuts');
+  ok(H.I18N.en['about.keyList'].includes('Ctrl/⌘'),
+    'en about.keyList shows Ctrl/⌘ notation for cross-platform keyboard shortcuts');
 }
 
 /* ---- selfTest ---- */
