@@ -6028,6 +6028,12 @@ function accData(j, bin, ai){
     'atlas canvasBlob null is caught before .arrayBuffer() to give a clear error message');
 }
 
+/* ---- Round 377: webglcontextrestored calls _emergencySave() before reload to preserve changes within the 500ms debounce window ---- */
+{
+  ok(html.includes("webglcontextrestored', ()=>{ _emergencySave(); location.reload(); }"),
+    'webglcontextrestored calls _emergencySave() before location.reload() to prevent data loss');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

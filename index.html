@@ -2842,7 +2842,7 @@ cv.addEventListener('webglcontextlost', e=>{ e.preventDefault();
   const sr=$('srStatus'); if(sr) sr.textContent=t('hint.glLost');
   cv.setAttribute('aria-label', t('hint.glLost'));
   const sc=$('btnScreenshot'); if(sc){ sc.disabled=true; sc.style.display='none'; } });
-cv.addEventListener('webglcontextrestored', ()=>{ location.reload(); });
+cv.addEventListener('webglcontextrestored', ()=>{ _emergencySave(); location.reload(); });
 if (location.search.indexOf('selftest')>=0){
   const st=HINA.selfTest();
   const box=$('selftestBox'); box.style.display='block';
