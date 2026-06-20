@@ -1104,6 +1104,7 @@ let _exporting = false, _exportBtn = null;
 async function doExport(){
   if (!build || _exporting) return;
   _exporting = true;
+  const exportBuild = build; // capture snapshot — rebuild() may replace build during awaits
   if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.setAttribute('aria-busy','true'); _exportBtn.textContent = t('btn.exporting'); }
   try{
     let thumbBytes = null;
@@ -1117,7 +1118,7 @@ async function doExport(){
       if (tb) thumbBytes = new Uint8Array(await tb.arrayBuffer());
     }
     const ab = await (await canvasBlob(atlas)).arrayBuffer();
-    const {bytes} = HINA.exportVRM(build, params, meta, new Uint8Array(ab), thumbBytes);
+    const {bytes} = HINA.exportVRM(exportBuild, params, meta, new Uint8Array(ab), thumbBytes);
     const fname = fnameStem()+'.vrm';
     download(bytes, fname, 'application/octet-stream');
     const sr=$('srStatus');

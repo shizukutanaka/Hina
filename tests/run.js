@@ -5228,6 +5228,12 @@ function accData(j, bin, ai){
     '#selftestBox gets role=status so AT users know the content is a live status message');
 }
 
+/* ---- Round 318: doExport captures build snapshot before async awaits so slider changes can't corrupt export ---- */
+{
+  ok(html.includes('const exportBuild = build') && html.includes('HINA.exportVRM(exportBuild,'),
+    'doExport() captures build into exportBuild before any await so concurrent rebuild() cannot affect the export');
+}
+
 /* ---- Round 317: doUndo() guards against _exporting to prevent race with async VRM export ---- */
 {
   ok(/function doUndo[\s\S]{0,80}_exporting/.test(html),
