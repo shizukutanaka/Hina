@@ -1201,6 +1201,7 @@ function applyLang(){
   const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.style.display=GLOK?'':'none'; }
   const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
   const sd=$('sliderDesc'); if(sd) sd.textContent=t('hint.sliderReset');
+  const sl=$('skipLink'); if(sl) sl.textContent=t('a11y.skip');
   document.documentElement.lang = lang;
   // scrollReset=false: user stays on the same tab — preserve their scroll position across lang/mode changes
   renderTabs(); renderBody(false); buildExprBar(); updateStats();

@@ -5228,6 +5228,18 @@ function accData(j, bin, ai){
     '#selftestBox gets role=status so AT users know the content is a live status message');
 }
 
+/* ---- Round 315: skip link for WCAG 2.4.1 (bypass blocks) ---- */
+{
+  ok(html.includes('id="skipLink"') && html.includes('href="#tabBody"'),
+    'skip link targets #tabBody for WCAG 2.4.1 bypass blocks');
+  ok(/#skipLink:focus-visible\{top/.test(html),
+    'skip link appears on focus via CSS :focus-visible (hidden by default, shown when focused)');
+  ok(H.I18N.ja['a11y.skip'] && H.I18N.en['a11y.skip'],
+    'a11y.skip i18n key exists in both locales for skip link localization');
+  ok(html.includes("$('skipLink')") && html.includes("a11y.skip"),
+    'applyLang() localizes the skip link text');
+}
+
 /* ---- Round 314: range slider gets aria-describedby=sliderDesc; sliderDesc updated in applyLang ---- */
 {
   ok(html.includes("'aria-describedby':'sliderDesc'"),
