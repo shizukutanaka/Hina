@@ -2568,6 +2568,7 @@ async function doExport(){
   const exportParams = JSON.parse(JSON.stringify(params));
   const exportMeta = JSON.parse(JSON.stringify(meta));
   if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.setAttribute('aria-busy','true'); _exportBtn.textContent = t('btn.exporting'); }
+  { const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); }
   try{
     let thumbBytes = null;
     if (GLOK){

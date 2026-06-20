@@ -5674,6 +5674,16 @@ function accData(j, bin, ai){
     'drag-and-drop JSON load refocuses tabBody after renderBody (WCAG 2.4.3)');
 }
 
+/* ---- Round 333: doExport announces export start to srStatus ---- */
+{
+  const doExpIdx = html.indexOf('async function doExport()');
+  const doExpEnd = html.indexOf('\n}', doExpIdx + 1);
+  const doExpBody = html.slice(doExpIdx, doExpEnd > doExpIdx ? doExpEnd : doExpIdx + 1200);
+  // Must announce btn.exporting at start (before the try block / first await)
+  ok(/btn\.exporting[\s\S]{0,200}try\{/.test(doExpBody),
+    'doExport announces btn.exporting to srStatus at start (before async awaits)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
