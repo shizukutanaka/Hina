@@ -1104,7 +1104,10 @@ let _exporting = false, _exportBtn = null;
 async function doExport(){
   if (!build || _exporting) return;
   _exporting = true;
-  const exportBuild = build; // capture snapshot — rebuild() may replace build during awaits
+  // Snapshot all mutable state so slider/meta changes during async awaits don't affect the export
+  const exportBuild = build;
+  const exportParams = JSON.parse(JSON.stringify(params));
+  const exportMeta = JSON.parse(JSON.stringify(meta));
   if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.setAttribute('aria-busy','true'); _exportBtn.textContent = t('btn.exporting'); }
   try{
     let thumbBytes = null;
@@ -1118,8 +1121,8 @@ async function doExport(){
       if (tb) thumbBytes = new Uint8Array(await tb.arrayBuffer());
     }
     const ab = await (await canvasBlob(atlas)).arrayBuffer();
-    const {bytes} = HINA.exportVRM(exportBuild, params, meta, new Uint8Array(ab), thumbBytes);
-    const fname = fnameStem()+'.vrm';
+    const {bytes} = HINA.exportVRM(exportBuild, exportParams, exportMeta, new Uint8Array(ab), thumbBytes);
+    const fname = safeName(exportMeta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom'))+'.vrm';
     download(bytes, fname, 'application/octet-stream');
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');

@@ -5228,6 +5228,15 @@ function accData(j, bin, ai){
     '#selftestBox gets role=status so AT users know the content is a live status message');
 }
 
+/* ---- Round 319: doExport snapshots params and meta too so live changes during awaits don't affect the export ---- */
+{
+  ok(html.includes('const exportParams = JSON.parse(JSON.stringify(params))') &&
+     html.includes('const exportMeta = JSON.parse(JSON.stringify(meta))'),
+    'doExport() deep-clones params and meta at start to isolate export from concurrent slider changes');
+  ok(html.includes('HINA.exportVRM(exportBuild, exportParams, exportMeta,'),
+    'exportVRM() called with snapshotted exportParams and exportMeta');
+}
+
 /* ---- Round 318: doExport captures build snapshot before async awaits so slider changes can't corrupt export ---- */
 {
   ok(html.includes('const exportBuild = build') && html.includes('HINA.exportVRM(exportBuild,'),
