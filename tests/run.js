@@ -1704,8 +1704,9 @@ function accData(j, bin, ai){
     'chibi head collider radius < default (proportional to headR)');
 
   // ? key shortcut opens aboutDlg (source code pattern)
-  ok(/e\.key==='[?]'[\s\S]{0,120}showModal/.test(html),
-    '? key shortcut calls showModal() on aboutDlg (keyboard discoverability)');
+  ok((html.includes("e.key==='?'") && html.includes('openAbout()') && html.includes('showModal()')) ||
+     /e\.key==='[?]'[\s\S]{0,120}showModal/.test(html),
+    '? key shortcut opens aboutDlg (calls openAbout or showModal directly)');
 
   // hint.ctrlS updated to mention ? shortcut in both languages
   ok(H.I18N.ja['hint.ctrlS'].includes('?') && H.I18N.en['hint.ctrlS'].includes('?'),
@@ -5015,7 +5016,7 @@ function accData(j, bin, ai){
 {
   ok(H.I18N.ja['a11y.sliderReset'] && H.I18N.en['a11y.sliderReset'],
     'a11y.sliderReset i18n key exists in both locales');
-  ok(/ondblclick[\s\S]{0,300}a11y\.sliderReset/.test(html),
+  ok(/ondblclick[\s\S]{0,360}a11y\.sliderReset/.test(html),
     'slider ondblclick announces reset to srStatus with label and default value');
 }
 
@@ -5105,9 +5106,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 247: aboutDlg restores focus to btnAbout on close ---- */
 {
-  ok(/aboutDlg.*addEventListener.*'close'[\s\S]{0,60}btnAbout.*focus/.test(html) ||
-     /aboutDlg[\s\S]{0,30}close[\s\S]{0,60}btnAbout\.focus/.test(html),
-    'aboutDlg close event restores focus to btnAbout so keyboard users keep their position');
+  ok(html.includes("$('aboutDlg').addEventListener('close'") && html.includes('_dlgReturnFocus') && html.includes("$('btnAbout')"),
+    'aboutDlg close event restores focus to triggering element or btnAbout so keyboard users keep their position');
 }
 
 /* ---- Round 246: runGacha() announces seed to screen reader via srStatus ---- */
@@ -5226,6 +5226,28 @@ function accData(j, bin, ai){
     '#selftestBox gets role=status so AT users know the content is a live status message');
 }
 
+/* ---- Round 307: range slider has aria-valuetext to keep AT announcement in sync with displayed value ---- */
+{
+  ok(html.includes("'aria-valuetext':String(params[k])"),
+    'range slider initializes aria-valuetext to match displayed value');
+  ok(html.includes("r.setAttribute('aria-valuetext',String(params[k]))"),
+    'range slider oninput updates aria-valuetext to keep AT announcement in sync with display');
+}
+
+/* ---- Round 306: seed input gets inputmode=numeric; numIn inputs get inputmode=decimal for mobile keyboard ---- */
+{
+  ok(html.includes("inputmode:'numeric'") && html.includes("inputmode:'decimal'"),
+    'seed input has inputmode=numeric and numIn inputs have inputmode=decimal for correct mobile keyboard');
+}
+
+/* ---- Round 305: aboutDlg focus return uses _dlgReturnFocus to restore to triggering element ---- */
+{
+  ok(html.includes('_dlgReturnFocus=document.activeElement') && html.includes('_dlgReturnFocus=null'),
+    'openAbout() saves activeElement before showModal() so close event can restore focus to trigger');
+  ok(html.includes('openAbout()') && /e\.key==='[?]'[\s\S]{0,110}openAbout/.test(html),
+    '? key calls openAbout() which saves focus before opening dialog');
+}
+
 /* ---- Round 304: meta-title input gets aria-describedby=fnPreview so AT announces filename preview ---- */
 {
   ok(html.includes("'aria-describedby':'fnPreview'") && html.includes("id:'meta-title'"),
@@ -5333,7 +5355,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 278: Delete key on range slider resets to default ---- */
 {
-  ok(/onkeydown[\s\S]{0,380}sliderReset/.test(html) && html.includes("e.key!=='Delete'"),
+  ok(/onkeydown[\s\S]{0,420}sliderReset/.test(html) && html.includes("e.key!=='Delete'"),
     'range slider has Delete key handler that resets to default and announces via srStatus');
 }
 

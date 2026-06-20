@@ -2149,23 +2149,26 @@ function paramRow(k){
     // detail mode exposes a direct numeric entry (SPEC §2); easy mode shows a read-only value
     let valEl;
     const r=el('input',{id:pid, type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
-      'aria-label':label, title:t('hint.sliderReset'),
+      'aria-label':label, 'aria-valuetext':String(params[k]), title:t('hint.sliderReset'),
       onpointerdown:()=>captureUndo(),
       ondblclick:()=>{ captureUndo(); params[k]=s.def; r.value=String(s.def);
+        r.setAttribute('aria-valuetext',String(s.def));
         if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
         onParam(k);
         const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.sliderReset').replace('{label}',label).replace('{v}',s.def); },
       onkeydown:e=>{ if(e.key!=='Delete'&&e.key!=='Backspace') return; e.preventDefault();
         captureUndo(); params[k]=s.def; r.value=String(s.def);
+        r.setAttribute('aria-valuetext',String(s.def));
         if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
         onParam(k);
         const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.sliderReset').replace('{label}',label).replace('{v}',s.def); },
       oninput:e=>{ params[k]=parseFloat(e.target.value);
+        r.setAttribute('aria-valuetext',String(params[k]));
         if (valEl.tagName==='INPUT') valEl.value=String(params[k]); else valEl.textContent=String(params[k]);
         onParam(k); }});
     if (mode==='detail'){
       valEl=el('input',{type:'number',class:'num numIn',min:s.min,max:s.max,step:s.step,value:params[k],
-        'aria-label':t('a11y.numIn').replace('{label}',label),
+        'aria-label':t('a11y.numIn').replace('{label}',label), inputmode:'decimal',
         onchange:e=>{ captureUndo(); let n=parseFloat(e.target.value);
           if (!Number.isFinite(n)) n=params[k];
           const clamped=M.clamp(n,s.min,s.max);
@@ -2313,7 +2316,7 @@ function renderBody(scrollReset=true){
     gDiv.append(el('button',{id:'gachaBtn', class:'btn wide', onclick:()=>runGacha((Math.random()*1e9|0))}, t('btn.gacha')));
     const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
-      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', step:'1', autocomplete:'off',
+      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', step:'1', autocomplete:'off', inputmode:'numeric',
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
       onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); },
       onchange:e=>{ const n=Math.round(Number(e.target.value)); if (Number.isFinite(n)&&n>=0) runGacha(n); }});
@@ -2664,12 +2667,14 @@ function applyLang(){
 $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); });
 $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); });
 $('btnScreenshot').addEventListener('click', doScreenshot);
-$('btnAbout').addEventListener('click',()=>$('aboutDlg').showModal());
+let _dlgReturnFocus = null;
+const openAbout=()=>{ _dlgReturnFocus=document.activeElement; $('aboutDlg').showModal(); };
+$('btnAbout').addEventListener('click', openAbout);
 $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 // close dialog on backdrop click (click on the dialog element itself = outside the content box)
 $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('aboutDlg').close(); });
-// Restore focus to the trigger button when dialog closes (keyboard/AT users lose position otherwise)
-$('aboutDlg').addEventListener('close',()=>{ $('btnAbout').focus(); });
+// Restore focus to the trigger element (or btnAbout fallback) when dialog closes
+$('aboutDlg').addEventListener('close',()=>{ (_dlgReturnFocus && typeof _dlgReturnFocus.focus==='function' ? _dlgReturnFocus : $('btnAbout')).focus(); _dlgReturnFocus=null; });
 
 // When WebGL is unavailable, create a centered overlay on the canvas so the
 // black rectangle doesn't look like a crash — hint bar text alone is easy to miss
@@ -2706,7 +2711,7 @@ document.addEventListener('keydown',e=>{
     e.preventDefault(); doScreenshot();
   }
   if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField && !$('aboutDlg').open){
-    e.preventDefault(); $('aboutDlg').showModal();
+    e.preventDefault(); openAbout();
   }
   if ((e.key==='m'||e.key==='M') && !e.ctrlKey && !e.metaKey && !e.altKey && notField){
     e.preventDefault();
