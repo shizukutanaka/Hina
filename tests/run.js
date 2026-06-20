@@ -5194,6 +5194,26 @@ function accData(j, bin, ai){
     'applyLang() updates <html lang> attribute to match current locale (WCAG 3.1.1)');
 }
 
+/* ---- Round 295: license URL field gets focus when Other is selected ---- */
+{
+  ok(/licUrlRow\.style\.display[\s\S]{0,130}u\.focus\(\)/.test(html),
+    'selecting Other license moves focus to the URL input so SR users discover the newly visible field');
+}
+
+/* ---- Round 294: select elements have font:inherit for cross-browser consistency ---- */
+{
+  ok(html.includes('.row select') && html.includes('font:inherit'),
+    '.row select has font:inherit so select font matches surrounding UI in all browsers');
+}
+
+/* ---- Round 293: rankBadge[role=button] gets cursor:pointer and hover border ---- */
+{
+  ok(html.includes('.rankBadge[role=button]{cursor:pointer'),
+    'rankBadge[role=button] gets cursor:pointer so sighted users see it is clickable');
+  ok(/rankBadge\[role=button\]:hover\{border-color/.test(html),
+    'rankBadge[role=button]:hover has border-color change for visual hover feedback');
+}
+
 /* ---- Round 287: btnAbout gets aria-haspopup=dialog ---- */
 {
   ok(html.includes("aria-haspopup', 'dialog'"),

@@ -912,7 +912,8 @@ function renderOut(bd){
       placeholder:t('out.license.url.ph'), oninput:e=>{meta.licenseUrl=e.target.value; saveState();}}));
   selRow('out.license','license',
     ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
-    'license', v=>{licUrlRow.style.display=v==='Other'?'':'none';});
+    'license', v=>{licUrlRow.style.display=v==='Other'?'':'none';
+      if (v==='Other'){ const u=document.getElementById(licUrlId); if(u) u.focus(); }});
   bd.append(licUrlRow);
 
   bd.append(el('div',{class:'sect', role:'heading', 'aria-level':'3'}, t('out.stats')));
