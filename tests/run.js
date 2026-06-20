@@ -5228,6 +5228,18 @@ function accData(j, bin, ai){
     '#selftestBox gets role=status so AT users know the content is a live status message');
 }
 
+/* ---- Round 317: doUndo() guards against _exporting to prevent race with async VRM export ---- */
+{
+  ok(/function doUndo[\s\S]{0,80}_exporting/.test(html),
+    'doUndo() returns early when _exporting is true to prevent param changes mid-export');
+}
+
+/* ---- Round 316: exprBar toolbar has aria-orientation=horizontal ---- */
+{
+  ok(html.includes('role="toolbar" aria-orientation="horizontal"'),
+    'exprBar toolbar has aria-orientation=horizontal for correct ARIA toolbar semantics');
+}
+
 /* ---- Round 315: skip link for WCAG 2.4.1 (bypass blocks) ---- */
 {
   ok(html.includes('id="skipLink"') && html.includes('href="#tabBody"'),

@@ -52,6 +52,7 @@ function captureUndo(){
 }
 function doUndo(){
   const sr=$('srStatus');
+  if (_exporting) return;
   if (!_undoSnap){ if(sr) sr.textContent=t('a11y.noUndo'); return; }
   const s = _undoSnap; _undoSnap = null;
   clearTimeout(_undoHintTimer);
