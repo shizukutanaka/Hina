@@ -4923,6 +4923,15 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
+/* ---- Round 269: Escape key deactivates active expression preview ---- */
+{
+  ok(/Escape[\s\S]{0,60}activeExpr[\s\S]{0,20}null/.test(html) ||
+     /key.*Escape[\s\S]{0,80}setExpr\(null\)/.test(html),
+    'Escape key calls setExpr(null) to deactivate expression when one is active');
+  ok(H.I18N.ja['about.keyList'].includes('Esc') && H.I18N.en['about.keyList'].includes('Esc'),
+    'about.keyList documents Esc key shortcut in both locales');
+}
+
 /* ---- Round 268: dragover shows hint.dropJson in hint bar with accent color ---- */
 {
   ok(/dragover[\s\S]{0,200}hint\.dropJson/.test(html),

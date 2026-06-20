@@ -1212,6 +1212,9 @@ document.addEventListener('keydown',e=>{
     const ti=parseInt(e.key)-1;
     if (ti<TABS.length){ e.preventDefault(); activeTab=TABS[ti]; renderTabs(); renderBody(); $('tab-'+TABS[ti]).focus(); }
   }
+  if (e.key==='Escape' && activeExpr !== null && !$('aboutDlg').open){
+    e.preventDefault(); setExpr(null);
+  }
 });
 window.addEventListener('beforeunload',()=>{
   clearTimeout(_saveTimer);
