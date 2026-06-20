@@ -5228,6 +5228,13 @@ function accData(j, bin, ai){
     '#selftestBox gets role=status so AT users know the content is a live status message');
 }
 
+/* ---- Round 321: first-time load respects navigator.language to auto-select English for non-Japanese users ---- */
+{
+  ok(html.includes('navigator.language') && html.includes("startsWith('ja')") &&
+     html.includes("lang = 'en'"),
+    'first-time load sets lang=en when navigator.language does not start with ja');
+}
+
 /* ---- Round 320: doScreenshot wraps cv.toBlob() in try-catch so SecurityError doesn't leave btn disabled ---- */
 {
   ok(/doScreenshot[\s\S]{0,700}catch\s*\(e\)[\s\S]{0,60}btn\.disabled=false/.test(html),

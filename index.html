@@ -1484,8 +1484,10 @@ function loadState(){
   try{
     const j = JSON.parse(localStorage.getItem(LS));
     if (!j){
-      // First-time load: start with the first preset selected so new users have a named starting point
-      activePresetId = HINA.PRESETS[0].id; params = HINA.presetParams(HINA.PRESETS[0]); return;
+      // First-time load: start with the first preset and respect browser language preference
+      activePresetId = HINA.PRESETS[0].id; params = HINA.presetParams(HINA.PRESETS[0]);
+      if (navigator.language && !navigator.language.toLowerCase().startsWith('ja')) lang = 'en';
+      return;
     }
     params = HINA.sanitize(j.params);
     if (j.meta && typeof j.meta==='object') Object.assign(meta, j.meta);
