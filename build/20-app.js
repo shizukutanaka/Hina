@@ -687,7 +687,8 @@ function paramRow(k){
         if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
         onParam(k);
         const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.sliderReset').replace('{label}',label).replace('{v}',s.def); },
-      onkeydown:e=>{ if(e.key!=='Delete'&&e.key!=='Backspace') return; e.preventDefault();
+      onkeydown:e=>{ if(/^Arrow/.test(e.key)){ captureUndo(); return; }
+        if(e.key!=='Delete'&&e.key!=='Backspace') return; e.preventDefault();
         captureUndo(); params[k]=s.def; r.value=String(s.def);
         r.setAttribute('aria-valuetext',String(s.def));
         if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
@@ -971,6 +972,7 @@ function renderOut(bd){
         const d=HINA.deserialize(text);
         if(d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null;
           rebuild(); renderBody(); saveState();
+          const tb=$('tabBody'); if(tb) tb.focus();
           const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.ok'); }
         else _pfail();
       }).catch(_pfail);
@@ -996,6 +998,7 @@ function renderOut(bd){
       if(_resetPending){
         clearTimeout(_resetTimer); _resetPending=false; resetBtn.textContent=t('btn.reset');
         captureUndo(); params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
+        const tb=$('tabBody'); if(tb) tb.focus();
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.reset');
       } else {
         _resetPending=true; resetBtn.textContent=t('btn.reset.confirm');

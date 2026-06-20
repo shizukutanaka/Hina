@@ -5462,7 +5462,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 278: Delete key on range slider resets to default ---- */
 {
-  ok(/onkeydown[\s\S]{0,420}sliderReset/.test(html) && html.includes("e.key!=='Delete'"),
+  ok(/onkeydown[\s\S]{0,480}sliderReset/.test(html) && html.includes("e.key!=='Delete'"),
     'range slider has Delete key handler that resets to default and announces via srStatus');
 }
 
@@ -5606,6 +5606,34 @@ function accData(j, bin, ai){
     'doUndo() checks whether focus was inside tabBody before rebuilding');
   ok(/tabBody[\s\S]{0,30}\.focus\(\)/.test(undoBody),
     'doUndo() refocuses tabBody after renderBody so keyboard users can Tab into the panel');
+}
+
+/* ---- Round 328: pasteJson success and reset refocus tabBody (WCAG 2.4.3) ---- */
+{
+  // pasteJson success path calls tabBody.focus() after renderBody
+  ok(/btn\.pasteJson\.ok[\s\S]{0,120}tabBody[\s\S]{0,30}\.focus\(\)|tabBody[\s\S]{0,30}\.focus\(\)[\s\S]{0,120}btn\.pasteJson\.ok/.test(html),
+    'pasteJson success path refocuses tabBody after renderBody (WCAG 2.4.3)');
+
+  // reset to defaults success path calls tabBody.focus() after renderBody
+  const resetExecIdx = html.indexOf('params=HINA.defaults(); meta=Object.assign');
+  const afterReset = resetExecIdx >= 0 ? html.slice(resetExecIdx, resetExecIdx + 300) : '';
+  ok(/tabBody[\s\S]{0,30}\.focus\(\)/.test(afterReset),
+    'reset to defaults refocuses tabBody after renderBody (WCAG 2.4.3)');
+}
+
+/* ---- Round 329: range slider arrow-key presses capture undo (keyboard-only path) ---- */
+{
+  // The range slider's onkeydown should call captureUndo() for Arrow keys, not just Delete/Backspace
+  ok(/Arrow.*captureUndo\(\)|\/\^Arrow\/.*captureUndo/.test(html),
+    'range slider onkeydown calls captureUndo() on arrow keys (keyboard-only undo capture)');
+
+  // Arrow key handler must NOT call e.preventDefault() (allow native slider movement)
+  const arrowBlock = (() => {
+    const idx = html.indexOf('/^Arrow/');
+    return idx >= 0 ? html.slice(idx, idx + 80) : '';
+  })();
+  ok(!arrowBlock.includes('preventDefault()'),
+    'arrow key captureUndo branch does NOT call preventDefault (native slider movement must work)');
 }
 
 /* ---- selfTest ---- */
