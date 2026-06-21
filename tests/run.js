@@ -6454,6 +6454,16 @@ function accData(j, bin, ai){
     'structuredClone(meta) is used for undo snapshot and export isolation');
 }
 
+/* ---- Round 428: color picker onchange SR announcement + explicit aria-live=assertive on srAlert ---- */
+{
+  // role=alert implies aria-live=assertive but older NVDA/JAWS are more reliable with explicit attribute
+  ok(/id="srAlert"[\s\S]{0,80}aria-live="assertive"/.test(html),
+    'srAlert has explicit aria-live=assertive for NVDA/JAWS compatibility (role=alert alone is insufficient on some SR versions)');
+  // color picker onchange announces final color name/hex when native dialog closes
+  ok(/type:'color'[\s\S]{0,400}onchange:e=>\{[\s\S]{0,60}srStatus[\s\S]{0,60}PAL_NAMES/.test(html),
+    'color picker onchange announces selected color name via srStatus when native dialog closes');
+}
+
 /* ---- Round 427: CSS :focus-within on .row highlights active parameter row (Zenn 2024 a11y) ---- */
 {
   // When a slider, numIn, select, or color picker in a .row is focused, the whole row gets a subtle

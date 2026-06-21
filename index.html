@@ -157,7 +157,7 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
     <div id="hint"></div>
     <div id="selftestBox" role="status"></div>
     <div id="srStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
-    <div id="srAlert" class="sr-only" role="alert" aria-atomic="true"></div>
+    <div id="srAlert" class="sr-only" role="alert" aria-live="assertive" aria-atomic="true"></div>
     <span id="sliderDesc" class="sr-only"></span>
   </section>
   <aside id="panel">
@@ -2251,7 +2251,8 @@ function paramRow(k){
   const inp=el('input',{id:pid, type:'color', value:params[k], 'aria-label':label,
     onpointerdown:()=>captureUndo(), onfocus:()=>captureUndo(),
     oninput:e=>{params[k]=e.target.value; onParam(k); updateSwPressedState();
-      const ni=swBtns.findIndex(b=>b.dataset.c===e.target.value); if(ni>=0) setSwTab(ni);}});
+      const ni=swBtns.findIndex(b=>b.dataset.c===e.target.value); if(ni>=0) setSwTab(ni);},
+    onchange:e=>{ const sr=$('srStatus'); if(sr) sr.textContent=label+': '+((HINA.PAL_NAMES[e.target.value]||{})[lang]||e.target.value); }});
   // Roving tabindex on swatches: only one in tab order at a time (avoids N stops for N colors)
   const sw=el('div',{class:'swatches', role:'group', 'aria-label':label});
   const swBtns=[];
