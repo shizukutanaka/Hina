@@ -5363,7 +5363,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 298: .sw:hover transform:none in prefers-reduced-motion CSS ---- */
 {
-  ok(/prefers-reduced-motion[\s\S]{0,80}\.sw:hover\{transform:none\}/.test(html),
+  ok(/prefers-reduced-motion[\s\S]{0,130}\.sw:hover\{transform:none\}/.test(html),
     '.sw:hover has transform:none in prefers-reduced-motion so swatch hover does not move for motion-sensitive users');
 }
 
@@ -6452,6 +6452,20 @@ function accData(j, bin, ai){
     'structuredClone(params) is used for undo snapshot and export isolation');
   ok(/structuredClone\(meta\)/.test(html),
     'structuredClone(meta) is used for undo snapshot and export isolation');
+}
+
+/* ---- Round 424: @starting-style fade-in on drag-over overlay (Baseline 2024 enter animation) ---- */
+{
+  // @starting-style lets the drag-over ::after pseudo-element fade in from opacity:0
+  // instead of appearing abruptly — purely CSS, no JavaScript needed
+  ok(html.includes('@starting-style'),
+    '@starting-style rule present for CSS enter animation (Baseline 2024)');
+  ok(/body\.drag-over::after[\s\S]{0,200}opacity:1[\s\S]{0,40}transition:opacity/.test(html),
+    'drag-over overlay has opacity:1 + transition:opacity so @starting-style can animate the enter');
+  ok(/@starting-style\{body\.drag-over::after\{opacity:0\}\}/.test(html),
+    '@starting-style sets initial opacity:0 on drag-over overlay for the fade-in entry');
+  ok(/prefers-reduced-motion:reduce[\s\S]{0,100}drag-over::after[\s\S]{0,40}transition:none/.test(html),
+    'drag-over transition is suppressed under prefers-reduced-motion:reduce');
 }
 
 /* ---- Round 423: CSS :has([aria-invalid]) row tint (Baseline 2023 parent-aware selector) ---- */
