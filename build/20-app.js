@@ -73,6 +73,9 @@ function showErr(msg){
     _errTimer=setTimeout(()=>{ if($('hint')){ $('hint').style.color='';
       $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }},4500); }
 }
+// Safely extract a human-readable message from any thrown value (Error, string, null, plain object, etc.)
+// — avoids "Error: undefined" in the hint bar when non-Error values are thrown.
+const _errMsg = e => { try{ return (e && typeof e.message==='string' && e.message) || String(e); }catch(_){ return 'unknown error'; } };
 let _saveTimer = null, _saveBadgeTimer = null;
 function saveState(){
   clearTimeout(_saveTimer);
@@ -1172,7 +1175,7 @@ async function doExport(){
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
     if (_exportBtn){ _exportBtn.textContent=t('btn.exported');
       _exportedRevertTimer = setTimeout(()=>{ _exportedRevertTimer=null; if(_exportBtn && !_exporting) _exportBtn.textContent=t('btn.export'); },2000); }
-  }catch(e){ showErr(t('err.exportFailed')+': '+e.message); }
+  }catch(e){ showErr(t('err.exportFailed')+': '+_errMsg(e)); }
   finally{
     _exporting = false;
     if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.removeAttribute('aria-busy');
@@ -1213,7 +1216,7 @@ function doScreenshot(){
 function rebuild(){
   params=HINA.sanitize(params);
   try{ build=HINA.buildAvatar(params); }
-  catch(e){ showErr(t('err.buildFailed')+': '+e.message); return; }
+  catch(e){ showErr(t('err.buildFailed')+': '+_errMsg(e)); return; }
   drawAtlas(params);
   uploadTexture();
   uploadGeometry();

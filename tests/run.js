@@ -6135,6 +6135,19 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 397: _errMsg() coerces any thrown value to a safe string (avoids "Error: undefined") ---- */
+{
+  ok(/const _errMsg = e => /.test(html),
+    '_errMsg() helper defined to safely extract a message from any thrown value');
+  // Both catch sites use _errMsg() instead of e.message
+  ok(!/err\.exportFailed'\)\+': '\+e\.message/.test(html),
+    'doExport catch no longer uses raw e.message (uses _errMsg helper)');
+  ok(!/err\.buildFailed'\)\+': '\+e\.message/.test(html),
+    'rebuild catch no longer uses raw e.message (uses _errMsg helper)');
+  ok(/err\.exportFailed'\)\+': '\+_errMsg\(e\)/.test(html) && /err\.buildFailed'\)\+': '\+_errMsg\(e\)/.test(html),
+    'both catch sites use _errMsg(e) so non-Error throws produce a useful message instead of undefined');
+}
+
 /* ---- Round 396: stale "✓ Exported" revert timer cancelled on new export (no race overwrite) ---- */
 {
   ok(/_exportedRevertTimer\s*=\s*null/.test(html),
