@@ -6333,6 +6333,14 @@ function accData(j, bin, ai){
     'dialog close event removes inert from header+main so normal keyboard browsing resumes after dialog closes');
 }
 
+/* ---- Round 412: CSS contain:layout paint style on #stage (Qiita CSS Containment perf) ---- */
+{
+  // CSS Containment tells the browser that #stage internals don't affect outer layout or paint.
+  // When sliders change the settings panel, the browser can skip recalculating #stage completely.
+  ok(/#stage\{[^}]{0,200}contain:layout paint style/.test(html),
+    '#stage has contain:layout paint style so browser skips outer layout recalc when WebGL canvas re-renders');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
