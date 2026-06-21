@@ -6454,6 +6454,17 @@ function accData(j, bin, ai){
     'structuredClone(meta) is used for undo snapshot and export isolation');
 }
 
+/* ---- Round 426: @starting-style fade-in on <details> open in about dialog (Baseline 2024) ---- */
+{
+  // Keyboard shortcut list fades in when details is expanded — @starting-style provides opacity:0 start
+  ok(/details\[open\]>:not\(summary\)\{opacity:1;transition:opacity/.test(html),
+    'details[open]>:not(summary) has opacity:1 + transition for @starting-style fade-in');
+  ok(/@starting-style\{details\[open\]>:not\(summary\)\{opacity:0\}\}/.test(html),
+    '@starting-style gives opacity:0 initial value so details content fades in on open');
+  ok(/prefers-reduced-motion:reduce[\s\S]{0,160}details\[open\]>:not\(summary\)[\s\S]{0,40}transition:none/.test(html),
+    'details open transition suppressed under prefers-reduced-motion:reduce');
+}
+
 /* ---- Round 425: drop beforeunload to enable bfcache (Zenn 2024 bfcache best practice) ---- */
 {
   // Any beforeunload listener — even one that doesn't show a dialog — prevents bfcache.

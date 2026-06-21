@@ -104,6 +104,8 @@ dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px;text-wrap:prett
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 body.drag-over::after{content:'';position:fixed;inset:0;border:3px dashed var(--accent);border-radius:8px;pointer-events:none;background:rgba(0,196,204,.06);z-index:999;opacity:1;transition:opacity .15s}
 @starting-style{body.drag-over::after{opacity:0}}
+details[open]>:not(summary){opacity:1;transition:opacity .2s}
+@starting-style{details[open]>:not(summary){opacity:0}}
 @media (max-width:760px){
   main{flex-direction:column}
   #stage{flex:0 0 44vh;flex:0 0 44dvh}
@@ -114,7 +116,7 @@ body.drag-over::after{content:'';position:fixed;inset:0;border:3px dashed var(--
 }
 #skipLink:focus-visible{top:8px}
 @media (prefers-contrast:more){:root{--text-dim:#c0ccd8;--text-faint:#9aa6b2;--line:#3f4f62}}
-@media (prefers-reduced-motion:reduce){.preCard,.sw,#autoSaveBadge,#skipLink,body.drag-over::after{transition:none}.sw:hover{transform:none}}
+@media (prefers-reduced-motion:reduce){.preCard,.sw,#autoSaveBadge,#skipLink,body.drag-over::after,details[open]>:not(summary){transition:none}.sw:hover{transform:none}}
 @media (forced-colors:active){
   .rk{forced-color-adjust:none;outline:1px solid ButtonText}
   .sw{forced-color-adjust:none;outline:2px solid ButtonText}
