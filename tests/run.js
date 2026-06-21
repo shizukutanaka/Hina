@@ -6135,6 +6135,13 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 398: visibilitychange handler flushes pending save when tab becomes hidden ---- */
+{
+  // Mobile browsers may kill backgrounded tabs without firing pagehide; flushing on visibilitychange covers that
+  ok(/document\.addEventListener\('visibilitychange',\s*\(\)=>\{ if\(document\.hidden && _saveTimer\) _emergencySave\(\)/.test(html),
+    'visibilitychange handler flushes pending save when tab becomes hidden (mobile-kill protection)');
+}
+
 /* ---- Round 397: _errMsg() coerces any thrown value to a safe string (avoids "Error: undefined") ---- */
 {
   ok(/const _errMsg = e => /.test(html),

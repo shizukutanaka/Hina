@@ -1362,6 +1362,8 @@ document.addEventListener('keydown',e=>{
 const _emergencySave=()=>{ clearTimeout(_saveTimer); try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed})); }catch(e){} };
 window.addEventListener('beforeunload', _emergencySave);
 window.addEventListener('pagehide', _emergencySave);
+// Mobile browsers may kill backgrounded tabs without firing pagehide — flush on visibilitychange too.
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden && _saveTimer) _emergencySave(); });
 // Drag-and-drop JSON loading — complement the file button; 'Files' check avoids conflicts with 3D canvas drag
 document.body.addEventListener('dragover',e=>{
   if (!e.dataTransfer.types.includes('Files')) return;
