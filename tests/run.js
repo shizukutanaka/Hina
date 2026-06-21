@@ -6135,6 +6135,15 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 394: expression bar buttons meet WCAG 2.5.8 AA target size (24x24 min) ---- */
+{
+  // .eBtn now uses min-height:24px (was height:22px) to meet WCAG 2.5.8 AA Target Size
+  ok(/\.eBtn\{[^}]{0,200}min-height:24px/.test(html),
+    '.eBtn has min-height:24px to meet WCAG 2.5.8 AA Target Size (was 22px)');
+  ok(/\.eBtn\{[^}]{0,200}min-width:30px/.test(html),
+    '.eBtn has min-width:30px (allows expansion for longer expression labels)');
+}
+
 /* ---- Round 393: fnPreview SR announcement is debounced via srStatus to avoid per-keystroke spam ---- */
 {
   // fnPreview is no longer an aria-live region itself (visible text only)
