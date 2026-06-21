@@ -6136,6 +6136,14 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 407: mobile inputs use 16px font-size to prevent iOS Safari auto-zoom on focus ---- */
+{
+  // Media query bumps select/text/numIn font-size to 16px so iOS does not zoom in on focus.
+  // Pattern: the rule lives inside the existing (max-width:760px) media block.
+  ok(/@media \(max-width:760px\)\{[\s\S]{0,400}\.row select,\.row input\[type=text\],\.row input\.numIn\{font-size:16px\}/.test(html),
+    'mobile media block (≤760px) sets input font-size to 16px so iOS Safari does not auto-zoom on focus');
+}
+
 /* ---- Round 406: iOS standalone web-app meta tags for Add-to-Home-Screen UX ---- */
 {
   // mobile-web-app-capable (modern Chrome) alongside the existing apple-mobile-web-app-capable
