@@ -1457,7 +1457,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2500)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2700)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -6326,7 +6326,7 @@ function accData(j, bin, ai){
   ok(/_dlgBg\s*=\s*\(\)\s*=>/.test(html),
     '_dlgBg() helper collects header+main elements for inert toggling (Zenn 2025 dialog a11y pattern)');
   // openAbout() calls _dlgBg().forEach(el=>{ el.inert=true }) before showModal
-  ok(/openAbout=\(\)=>\{[\s\S]{0,60}_dlgBg\(\)\.forEach\(el=>\{[\s\S]{0,20}el\.inert=true[\s\S]{0,10}\}\)[\s\S]{0,20}showModal/.test(html),
+  ok(/openAbout=\(\)=>\{[\s\S]{0,60}_dlgBg\(\)\.forEach\(el=>\{[\s\S]{0,20}el\.inert=true[\s\S]{0,10}\}\)[\s\S]{0,80}showModal/.test(html),
     'openAbout() marks header+main as inert before showModal() so screen readers cannot browse behind dialog');
   // close handler calls _dlgBg().forEach(el=>{ el.inert=false }) to restore
   ok(/_dlgBg\(\)\.forEach\(el=>\{[^}]*el\.inert=false/.test(html),
@@ -6413,6 +6413,19 @@ function accData(j, bin, ai){
     'inline SVG favicon present as data:image/svg+xml link (no external file needed)');
   ok(/fill='%230F1216'/.test(html) && /fill='%2300C4CC'/.test(html),
     'favicon uses dark background (#0F1216) with accent color (#00C4CC) matching brand palette');
+}
+
+/* ---- Round 420: aria-expanded on btnAbout updates when dialog opens/closes (Zenn a11y button) ---- */
+{
+  // Zenn confirms that toggle-style buttons with aria-haspopup should also carry aria-expanded
+  // so screen readers announce "open" or "closed" state to users.
+  ok(/openAbout=\(\)=>\{[\s\S]{0,100}\$\('btnAbout'\)\.setAttribute\('aria-expanded','true'\)/.test(html),
+    'openAbout() sets aria-expanded=true on btnAbout before showModal');
+  ok(/\$\('btnAbout'\)\.setAttribute\('aria-expanded','false'\)[\s\S]{0,200}close\b/.test(html) ||
+     /close[\s\S]{0,200}\$\('btnAbout'\)\.setAttribute\('aria-expanded','false'\)/.test(html),
+    'dialog close event sets aria-expanded=false on btnAbout to signal closed state to SR');
+  ok(/if \(!\$\('aboutDlg'\)\.open\) \$\('btnAbout'\)\.setAttribute\('aria-expanded',\s*'false'\)/.test(html),
+    'applyLang() initialises aria-expanded=false on btnAbout (only when dialog is not open)');
 }
 
 /* ---- selfTest ---- */
