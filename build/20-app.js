@@ -728,6 +728,7 @@ function paramRow(k){
     if (mode==='detail'){
       valEl=el('input',{type:'number',class:'num numIn',min:s.min,max:s.max,step:s.step,value:params[k],
         'aria-label':t('a11y.numIn').replace('{label}',label), inputmode:'decimal', enterkeyhint:'done',
+        onwheel:e=>e.preventDefault(),
         onchange:e=>{ captureUndo(); let n=parseFloat(e.target.value);
           const _announce=(v)=>{ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srStatus');
             const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',v);
@@ -879,6 +880,7 @@ function renderBody(scrollReset=true){
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', max:'4294967295', step:'1', autocomplete:'off', inputmode:'numeric', enterkeyhint:'go',
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
+      onwheel:e=>e.preventDefault(),
       onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); },
       onchange:e=>{ let n=Math.round(Number(e.target.value));
         if (!Number.isFinite(n)||n<0){

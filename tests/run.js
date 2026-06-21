@@ -6360,6 +6360,19 @@ function accData(j, bin, ai){
     'prefers-contrast:more lifts --text-dim, --text-faint, and --line to higher-contrast values');
 }
 
+/* ---- Round 415: onwheel:e=>e.preventDefault() on numIn inputs prevents accidental scroll-increment (Qiita) ---- */
+{
+  // Chrome/Firefox increment <input type=number> when the user scrolls over a focused input,
+  // causing accidental parameter changes while scrolling the settings panel.
+  // e.preventDefault() on wheel stops the increment without blocking panel scrolling.
+  ok(/onwheel:e=>e\.preventDefault\(\)[\s\S]{0,60}inputmode:'decimal'/.test(html) ||
+     /inputmode:'decimal'[\s\S]{0,300}onwheel:e=>e\.preventDefault\(\)/.test(html),
+    'numIn (detail slider) has onwheel:e.preventDefault() to stop accidental scroll-increment (Qiita tip)');
+  ok(/onwheel:e=>e\.preventDefault\(\)[\s\S]{0,60}onkeydown:e=>\{ if\(e\.key==='Enter'\)/.test(html) ||
+     /inputmode:'numeric'[\s\S]{0,300}onwheel:e=>e\.preventDefault\(\)/.test(html),
+    'gacha seed input also has onwheel:e.preventDefault() (also type=number, same risk)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
