@@ -726,7 +726,7 @@ function paramRow(k){
         onParam(k); }});
     if (mode==='detail'){
       valEl=el('input',{type:'number',class:'num numIn',min:s.min,max:s.max,step:s.step,value:params[k],
-        'aria-label':t('a11y.numIn').replace('{label}',label), inputmode:'decimal',
+        'aria-label':t('a11y.numIn').replace('{label}',label), inputmode:'decimal', enterkeyhint:'done',
         onchange:e=>{ captureUndo(); let n=parseFloat(e.target.value);
           const _announce=(v)=>{ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srStatus');
             const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',v);
@@ -876,7 +876,7 @@ function renderBody(scrollReset=true){
     gDiv.append(el('button',{id:'gachaBtn', class:'btn wide', onclick:()=>runGacha((Math.random()*1e9|0))}, t('btn.gacha')));
     const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
-      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', max:'4294967295', step:'1', autocomplete:'off', inputmode:'numeric',
+      placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', max:'4294967295', step:'1', autocomplete:'off', inputmode:'numeric', enterkeyhint:'go',
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
       onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); },
       onchange:e=>{ let n=Math.round(Number(e.target.value));
@@ -938,7 +938,7 @@ function renderOut(bd){
   bd.append(el('div',{class:'sect', role:'heading', 'aria-level':'3'}, t('out.meta')));
   const txt=(key,mk,ph)=>{ const id='meta-'+mk; bd.append(el('div',{class:'row'},
     el('label',{'for':id},t(key)),
-    el('input',{id, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
+    el('input',{id, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', enterkeyhint:'done', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
   // Visible preview updates instantly; the SR announcement via srStatus is debounced so
   // typing into the title field doesn't spam the live region with per-keystroke updates.
   const fnPrev=el('div',{class:'limit', id:'fnPreview'});
@@ -952,7 +952,7 @@ function renderOut(bd){
   };
   bd.append(el('div',{class:'row'},
     el('label',{'for':'meta-title'},t('out.title')),
-    el('input',{id:'meta-title', type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', 'aria-describedby':'fnPreview', value:meta.title||'', placeholder:t('out.title.ph'),
+    el('input',{id:'meta-title', type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', enterkeyhint:'done', 'aria-describedby':'fnPreview', value:meta.title||'', placeholder:t('out.title.ph'),
       oninput:e=>{ meta.title=e.target.value; saveState(); updateFnPrev(); }})));
   updateFnPrev();
   bd.append(fnPrev);
@@ -975,7 +975,7 @@ function renderOut(bd){
   const licUrlRow=el('div',{class:'row', style: meta.license==='Other' ? '' : 'display:none'});
   licUrlRow.append(
     el('label',{'for':licUrlId}, t('out.license.url')),
-    el('input',{id:licUrlId, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', value:meta.licenseUrl||'',
+    el('input',{id:licUrlId, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', enterkeyhint:'done', value:meta.licenseUrl||'',
       placeholder:t('out.license.url.ph'), oninput:e=>{meta.licenseUrl=e.target.value; saveState();}}));
   selRow('out.license','license',
     ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],

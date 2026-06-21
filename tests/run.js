@@ -5845,7 +5845,7 @@ function accData(j, bin, ai){
 {
   const si = html.indexOf("placeholder:t('gacha.seed.ph')");
   ok(si !== -1, 'gacha seed input exists');
-  const chunk = html.slice(si, si + 700);
+  const chunk = html.slice(si, si + 800);
   ok(/aria-errormessage[\s\S]{0,30}srStatus[\s\S]{0,150}seedInvalid/.test(chunk),
     'seed input sets aria-errormessage=srStatus alongside aria-invalid for AT error pointer');
   ok(/seedInvalid[\s\S]{0,100}removeAttribute\('aria-errormessage'\)/.test(chunk),
@@ -6134,6 +6134,19 @@ function accData(j, bin, ai){
   // ja and en both have the key (i18n parity)
   ok(/'a11y\.viewLimit':'視点の限界に達しました'/.test(html) && /'a11y\.viewLimit':'View limit reached'/.test(html),
     'a11y.viewLimit defined in both ja and en (i18n parity)');
+}
+
+/* ---- Round 408: enterkeyhint attribute on inputs shows appropriate iOS keyboard label ---- */
+{
+  // Text inputs (meta title/version/author/contact/reference/licenseUrl) get enterkeyhint=done
+  ok(/type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', enterkeyhint:'done'/.test(html),
+    'text meta inputs use enterkeyhint=done so iOS shows "Done" on the Return key');
+  // Slider numIn inputs get enterkeyhint=done
+  ok(/inputmode:'decimal', enterkeyhint:'done'/.test(html),
+    'detail-mode numIn inputs (inputmode=decimal) use enterkeyhint=done');
+  // Gacha seed input uses enterkeyhint=go (Enter runs gacha)
+  ok(/inputmode:'numeric', enterkeyhint:'go'/.test(html),
+    'gacha seed input uses enterkeyhint=go to suggest "Go" on the keyboard since Enter triggers gacha');
 }
 
 /* ---- Round 407: mobile inputs use 16px font-size to prevent iOS Safari auto-zoom on focus ---- */
