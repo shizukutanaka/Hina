@@ -2599,10 +2599,14 @@ const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 let _glLost = false;
 const _hintDefault=()=>!GLOK?t('hint.noGL'):_glLost?t('hint.glLost'):t('hint.drag');
 let _screenshotting = false;
-let _exporting = false, _exportBtn = null;
+let _exporting = false, _exportBtn = null, _exportedRevertTimer = null;
 async function doExport(){
   if (_exporting){ const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); return; }
   if (!build) return;
+  // Cancel any pending "Exported ✓ → Export VRM" revert from a previous export so it doesn't
+  // overwrite the "Exporting…" label of THIS export (Ctrl+S re-press within 2s of completion).
+  clearTimeout(_exportedRevertTimer);
+  _exportedRevertTimer = null;
   _exporting = true;
   // Snapshot all mutable state so slider/meta changes during async awaits don't affect the export
   const exportBuild = build;
@@ -2630,7 +2634,8 @@ async function doExport(){
     download(bytes, fname, 'application/octet-stream');
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
-    if (_exportBtn){ _exportBtn.textContent=t('btn.exported'); setTimeout(()=>{ if(_exportBtn) _exportBtn.textContent=t('btn.export'); },2000); }
+    if (_exportBtn){ _exportBtn.textContent=t('btn.exported');
+      _exportedRevertTimer = setTimeout(()=>{ _exportedRevertTimer=null; if(_exportBtn && !_exporting) _exportBtn.textContent=t('btn.export'); },2000); }
   }catch(e){ showErr(t('err.exportFailed')+': '+e.message); }
   finally{
     _exporting = false;

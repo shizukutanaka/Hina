@@ -6135,6 +6135,17 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 396: stale "✓ Exported" revert timer cancelled on new export (no race overwrite) ---- */
+{
+  ok(/_exportedRevertTimer\s*=\s*null/.test(html),
+    '_exportedRevertTimer module-level ref exists for cancel-on-new-export pattern');
+  ok(/clearTimeout\(_exportedRevertTimer\)/.test(html),
+    'doExport() clears any pending _exportedRevertTimer before starting new export');
+  // The deferred revert checks !_exporting so even if cleared too late, it won't overwrite "Exporting…"
+  ok(/if\(_exportBtn && !_exporting\) _exportBtn\.textContent=t\('btn\.export'\)/.test(html),
+    'deferred revert double-checks !_exporting before overwriting button text (belt-and-suspenders guard)');
+}
+
 /* ---- Round 395: input placeholder text uses --text-dim for WCAG 1.4.3 AA contrast ---- */
 {
   ok(/input::placeholder\{color:var\(--text-dim\)/.test(html),
