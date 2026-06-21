@@ -4764,12 +4764,12 @@ function accData(j, bin, ai){
 
 /* ---- Round 227: filename preview div has aria-live so SR announces changes ---- */
 {
-  ok(/id:'fnPreview'[\s\S]{0,80}'aria-live':'polite'/.test(html) ||
-     /id:"fnPreview"[\s\S]{0,80}"aria-live":"polite"/.test(html) ||
-     /fnPreview[\s\S]{0,80}aria-live[\s\S]{0,20}polite/.test(html),
-    'fnPreview element has aria-live="polite" so SR announces filename changes');
-  ok(/aria-atomic.*true[\s\S]{0,200}fnPreview|fnPreview[\s\S]{0,200}aria-atomic.*true/.test(html),
-    'fnPreview has aria-atomic="true" for complete announcement');
+  // Round 393: fnPreview is no longer itself an aria-live region; SR announcements debounced via srStatus.
+  // Verify fnPreview still exists as a visible element with id, and aria-describedby still wires to title input.
+  ok(/id:'fnPreview'/.test(html),
+    'fnPreview element exists (debounced SR routing via srStatus — Round 393)');
+  ok(/'aria-describedby':'fnPreview'/.test(html),
+    'meta-title input still has aria-describedby=fnPreview for static SR description on focus');
 }
 
 /* ---- Round 226: doUndo() clears the undoReady hint timer immediately ---- */
@@ -4839,9 +4839,9 @@ function accData(j, bin, ai){
 
 /* ---- Round 237: fnPreview only sets textContent when value changes to avoid SR re-announcement ---- */
 {
-  ok(/fnPrev\.textContent!==nxt[\s\S]{0,30}fnPrev\.textContent=nxt/.test(html) ||
-     /fnPrev\.textContent\s*!==/.test(html),
-    'fnPreview guarded: only sets textContent when filename actually changes');
+  ok(/fnPrev\.textContent===nxt\) return/.test(html) ||
+     /fnPrev\.textContent\s*!==\s*nxt/.test(html),
+    'fnPreview guarded: only updates textContent when filename actually changes (early-return on equal)');
 }
 
 /* ---- Round 236: color-scheme:dark so native form controls render in dark mode ---- */
@@ -6133,6 +6133,16 @@ function accData(j, bin, ai){
   // ja and en both have the key (i18n parity)
   ok(/'a11y\.viewLimit':'視点の限界に達しました'/.test(html) && /'a11y\.viewLimit':'View limit reached'/.test(html),
     'a11y.viewLimit defined in both ja and en (i18n parity)');
+}
+
+/* ---- Round 393: fnPreview SR announcement is debounced via srStatus to avoid per-keystroke spam ---- */
+{
+  // fnPreview is no longer an aria-live region itself (visible text only)
+  ok(/id:'fnPreview'\}\)/.test(html),
+    'fnPreview element no longer carries aria-live attributes (debounced via srStatus instead)');
+  // Debounce timer routes through srStatus after 500ms idle
+  ok(/_fnPrevTimer=setTimeout\([\s\S]{0,80}srStatus[\s\S]{0,60}500\)/.test(html),
+    'fnPreview update schedules a debounced srStatus announcement (500ms) so typing the title does not spam the live region');
 }
 
 /* ---- selfTest ---- */

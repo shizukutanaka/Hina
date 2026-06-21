@@ -924,9 +924,17 @@ function renderOut(bd){
   const txt=(key,mk,ph)=>{ const id='meta-'+mk; bd.append(el('div',{class:'row'},
     el('label',{'for':id},t(key)),
     el('input',{id, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
-  const fnPrev=el('div',{class:'limit', id:'fnPreview', 'aria-live':'polite', 'aria-atomic':'true'});
+  // Visible preview updates instantly; the SR announcement via srStatus is debounced so
+  // typing into the title field doesn't spam the live region with per-keystroke updates.
+  const fnPrev=el('div',{class:'limit', id:'fnPreview'});
+  let _fnPrevTimer=null;
   const updateFnPrev=()=>{ const s=fnameStem(); const nxt=t('out.filename')+': '+s+'.vrm';
-    if(fnPrev.textContent!==nxt) fnPrev.textContent=nxt; document.title='雛 — '+s; };
+    document.title='雛 — '+s;
+    if(fnPrev.textContent===nxt) return;
+    fnPrev.textContent=nxt;
+    clearTimeout(_fnPrevTimer);
+    _fnPrevTimer=setTimeout(()=>{ const sr=$('srStatus'); if(sr) sr.textContent=nxt; }, 500);
+  };
   bd.append(el('div',{class:'row'},
     el('label',{'for':'meta-title'},t('out.title')),
     el('input',{id:'meta-title', type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', 'aria-describedby':'fnPreview', value:meta.title||'', placeholder:t('out.title.ph'),
