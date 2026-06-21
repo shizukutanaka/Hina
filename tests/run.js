@@ -24,7 +24,7 @@ const M = H.M;
 /* ---- index.html structural (zero-dependency claim) ---- */
 ok(html.startsWith('<!DOCTYPE html>'), 'doctype first');
 ok(!/<script[^>]*\ssrc=/.test(html), 'no external <script src>');
-ok(!/<link[^>]*\shref=/.test(html), 'no external <link href>');
+ok(!/<link[^>]*\shref=['"](?!data:)/.test(html), 'no external <link href> (data: URIs allowed for inline favicon)');
 ok(!/\bfetch\s*\(\s*['"]http/.test(html), 'no external fetch');
 ok((html.match(/<canvas/g) || []).length === 1, 'single canvas');
 ok(html.includes("'guide.s1'") && html.indexOf("guide.s1") !== html.lastIndexOf("guide.s1"), 'in-app upload guide wired (i18n + UI)');
@@ -6403,6 +6403,16 @@ function accData(j, bin, ai){
     '.note has text-wrap:pretty to prevent orphaned last words in paragraph-length notes');
   ok(/dialog h2\{[^}]{0,200}text-wrap:balance/.test(html),
     'dialog h2 has text-wrap:balance for evenly distributed heading lines');
+}
+
+/* ---- Round 419: inline SVG data-URL favicon shows 雛 in browser tab without external file ---- */
+{
+  // Without a favicon the browser tab shows a blank icon. An inline data-URL SVG favicon embeds
+  // the icon in the single HTML file without violating the zero-dependency constraint.
+  ok(/rel="icon" type="image\/svg\+xml" href="data:image\/svg\+xml,/.test(html),
+    'inline SVG favicon present as data:image/svg+xml link (no external file needed)');
+  ok(/fill='%230F1216'/.test(html) && /fill='%2300C4CC'/.test(html),
+    'favicon uses dark background (#0F1216) with accent color (#00C4CC) matching brand palette');
 }
 
 /* ---- selfTest ---- */
