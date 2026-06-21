@@ -6136,6 +6136,12 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 405: Web Share payload includes avatar name in title/text for recipient context ---- */
+{
+  ok(/title:'雛 — '\+fnameStem\(\),\s*text:meta\.title\|\|fnameStem\(\)/.test(html),
+    'navigator.share() includes the avatar title in its share payload (better recipient context than generic "Hina")');
+}
+
 /* ---- Round 404: button { touch-action: manipulation } removes 300ms tap delay on iOS ---- */
 {
   ok(/button\{[^}]*touch-action:manipulation/.test(html),

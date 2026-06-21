@@ -1228,7 +1228,7 @@ function doScreenshot(){
       };
       const sr=$('srStatus');
       if (file && navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
-        navigator.share({files:[file], title:'Hina'}).then(()=>{
+        navigator.share({files:[file], title:'雛 — '+fnameStem(), text:meta.title||fnameStem()}).then(()=>{
           if(sr) sr.textContent=t('a11y.screenshotShared');
         }).catch(err=>{
           // AbortError = user cancelled — silently ignore. Other errors → fallback.
