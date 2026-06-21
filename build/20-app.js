@@ -52,7 +52,7 @@ let _undoSnap = null, _undoAt = 0, _undoHintTimer = null;
 function captureUndo(){
   const now = Date.now();
   if (!_undoSnap || now - _undoAt > 1500){
-    _undoSnap = { p: JSON.parse(JSON.stringify(params)), m: JSON.parse(JSON.stringify(meta)), aid: activePresetId, seed: lastGachaSeed };
+    _undoSnap = { p: structuredClone(params), m: structuredClone(meta), aid: activePresetId, seed: lastGachaSeed };
     _undoAt = now;
     // Flash hint bar to tell users undo is available (3 s then restore)
     const h = $('hint');
@@ -1165,8 +1165,8 @@ async function doExport(){
   _exporting = true;
   // Snapshot all mutable state so slider/meta changes during async awaits don't affect the export
   const exportBuild = build;
-  const exportParams = JSON.parse(JSON.stringify(params));
-  const exportMeta = JSON.parse(JSON.stringify(meta));
+  const exportParams = structuredClone(params);
+  const exportMeta = structuredClone(meta);
   const _exportFocusWasBtn = document.activeElement === _exportBtn;
   if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.setAttribute('aria-busy','true'); _exportBtn.textContent = t('btn.exporting'); }
   { const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); }

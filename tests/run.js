@@ -5243,8 +5243,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 319: doExport snapshots params and meta too so live changes during awaits don't affect the export ---- */
 {
-  ok(html.includes('const exportParams = JSON.parse(JSON.stringify(params))') &&
-     html.includes('const exportMeta = JSON.parse(JSON.stringify(meta))'),
+  ok((html.includes('const exportParams = structuredClone(params)') || html.includes('const exportParams = JSON.parse(JSON.stringify(params))')) &&
+     (html.includes('const exportMeta = structuredClone(meta)') || html.includes('const exportMeta = JSON.parse(JSON.stringify(meta))')),
     'doExport() deep-clones params and meta at start to isolate export from concurrent slider changes');
   ok(html.includes('HINA.exportVRM(exportBuild, exportParams, exportMeta,'),
     'exportVRM() called with snapshotted exportParams and exportMeta');
@@ -6439,6 +6439,19 @@ function accData(j, bin, ai){
     'showErr() populates srAlert via requestAnimationFrame to trigger announcement even on repeated identical errors');
   ok(/srAlert[\s\S]{0,80}textContent\s*=\s*''[\s\S]{0,80}textContent\s*=\s*msg/.test(html),
     'showErr() clears srAlert before re-setting content so repeated identical errors are re-announced');
+}
+
+/* ---- Round 422: structuredClone() replaces JSON.parse(JSON.stringify()) deep-clone (Zenn 2024 modern JS) ---- */
+{
+  // structuredClone is Baseline 2022 — faster, no JSON roundtrip, supports more types (Date, Map, ArrayBuffer, etc.)
+  ok(!html.includes('JSON.parse(JSON.stringify(params))'),
+    'captureUndo() no longer uses JSON.parse(JSON.stringify(params)) deep clone');
+  ok(!html.includes('JSON.parse(JSON.stringify(meta))'),
+    'captureUndo()/doExport() no longer uses JSON.parse(JSON.stringify(meta)) deep clone');
+  ok(/structuredClone\(params\)/.test(html),
+    'structuredClone(params) is used for undo snapshot and export isolation');
+  ok(/structuredClone\(meta\)/.test(html),
+    'structuredClone(meta) is used for undo snapshot and export isolation');
 }
 
 /* ---- selfTest ---- */
