@@ -6135,6 +6135,12 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 399: about dialog adds aria-describedby for full SR context (per Zenn dialog a11y article) ---- */
+{
+  ok(/<dialog id="aboutDlg" aria-labelledby="aboutH2" aria-describedby="aboutTxt" aria-modal="true">/.test(html),
+    'aboutDlg has aria-describedby="aboutTxt" so SR announces both title and description when opened');
+}
+
 /* ---- Round 398: visibilitychange handler flushes pending save when tab becomes hidden ---- */
 {
   // Mobile browsers may kill backgrounded tabs without firing pagehide; flushing on visibilitychange covers that
