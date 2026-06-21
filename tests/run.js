@@ -6349,6 +6349,17 @@ function accData(j, bin, ai){
     '#tabBody has scrollbar-gutter:stable so Windows classic-scrollbar appearance does not cause CLS');
 }
 
+/* ---- Round 414: @media (prefers-contrast:more) boosts dim/faint text contrast (Qiita a11y CSS) ---- */
+{
+  // prefers-contrast:more is activated on macOS "Increase Contrast" or equivalent system setting.
+  // --text-dim and --text-faint are too low-contrast at their defaults; boosting them here satisfies
+  // users who need higher contrast without forcing full forced-colors mode.
+  ok(/@media \(prefers-contrast:more\)/.test(html),
+    '@media (prefers-contrast:more) block present to boost contrast for users with system contrast preference');
+  ok(/@media \(prefers-contrast:more\)\{:root\{--text-dim:#c0ccd8;--text-faint:#9aa6b2;--line:#3f4f62\}\}/.test(html),
+    'prefers-contrast:more lifts --text-dim, --text-faint, and --line to higher-contrast values');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
