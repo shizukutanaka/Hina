@@ -6454,6 +6454,16 @@ function accData(j, bin, ai){
     'structuredClone(meta) is used for undo snapshot and export isolation');
 }
 
+/* ---- Round 423: CSS :has([aria-invalid]) row tint (Baseline 2023 parent-aware selector) ---- */
+{
+  // When a numIn input is clamped and gets aria-invalid=true, the parent .row should be visually tinted
+  // CSS :has() (Baseline 2023) selects the .row ancestor based on its descendants' state — no JS needed
+  ok(/\.row:has\(\[aria-invalid="true"\]\)[\s\S]{0,80}background/.test(html),
+    '.row:has([aria-invalid="true"]) applies error tint background via CSS :has() (Baseline 2023)');
+  ok(/\.row:has\(\[aria-invalid="true"\]\)[\s\S]{0,80}border-radius/.test(html),
+    '.row:has([aria-invalid="true"]) adds border-radius so tint looks contained, not clipped');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

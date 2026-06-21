@@ -59,6 +59,7 @@ main{flex:1;display:flex;min-height:0}
 .row input.numIn{font-size:11px;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:3px 5px;height:24px;cursor:text;appearance:textfield;-moz-appearance:textfield}
 .row input.numIn::-webkit-inner-spin-button,.row input.numIn::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .row input.numIn:hover{border-color:var(--accent)}
+.row:has([aria-invalid="true"]){background:rgba(224,90,90,.06);border-radius:6px}
 .limit{display:block;font-size:10px;color:var(--text-faint);margin-top:3px;line-height:1.4}
 .row select,.row input[type=text]{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font:inherit;font-size:12px}
 input::placeholder{color:var(--text-dim);opacity:1}
