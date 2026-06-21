@@ -6135,6 +6135,15 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 395: input placeholder text uses --text-dim for WCAG 1.4.3 AA contrast ---- */
+{
+  ok(/input::placeholder\{color:var\(--text-dim\)/.test(html),
+    'input::placeholder uses --text-dim for WCAG 1.4.3 AA contrast (browser default low-contrast placeholder)');
+  // opacity:1 prevents browser opacity from reducing contrast below threshold
+  ok(/input::placeholder\{color:var\(--text-dim\);opacity:1/.test(html),
+    'input::placeholder uses opacity:1 to prevent browser default opacity reducing contrast');
+}
+
 /* ---- Round 394: expression bar buttons meet WCAG 2.5.8 AA target size (24x24 min) ---- */
 {
   // .eBtn now uses min-height:24px (was height:22px) to meet WCAG 2.5.8 AA Target Size
