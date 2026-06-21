@@ -6373,6 +6373,19 @@ function accData(j, bin, ai){
     'gacha seed input also has onwheel:e.preventDefault() (also type=number, same risk)');
 }
 
+/* ---- Round 416: unhandledrejection global handler surfaces async errors via showErr (Zenn error handling) ---- */
+{
+  // Any uncaught promise rejection (e.g. from unexpected async failures) now routes to showErr()
+  // so the user sees an error message in the hint bar rather than a silent failure.
+  ok(/window\.addEventListener\('unhandledrejection'/.test(html),
+    'global unhandledrejection listener present to catch any uncaught async errors');
+  ok(/unhandledrejection[\s\S]{0,80}showErr\(t\('err\.unexpected'\)/.test(html),
+    'unhandledrejection routes to showErr with err.unexpected key for user-visible feedback');
+  // err.unexpected defined in both ja and en
+  ok(/'err\.unexpected':'予期しないエラーが発生しました'/.test(html) && /'err\.unexpected':'An unexpected error occurred'/.test(html),
+    'err.unexpected i18n key defined in ja and en (i18n parity)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

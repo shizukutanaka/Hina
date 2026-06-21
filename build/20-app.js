@@ -1464,6 +1464,7 @@ if (location.search.indexOf('selftest')>=0){
     box.append(el('div',{style:'color:'+(r.ok?'var(--text-dim)':'var(--err)')},
       (r.ok?'✓ ':'✗ ')+r.name+(r.msg?' — '+r.msg:'')));
 }
+window.addEventListener('unhandledrejection', e=>{ if(e.reason) showErr(t('err.unexpected')+': '+_errMsg(e.reason)); });
 let _rafPaused = false;
 document.addEventListener('visibilitychange', () => { _rafPaused = document.hidden; });
 (function loop(t){ requestAnimationFrame(loop); if (!_rafPaused) renderFrame(t||0); })(0);
