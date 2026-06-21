@@ -6310,6 +6310,16 @@ function accData(j, bin, ai){
     '#tabBody overflow:visible in @media print so all parameters render, not just the scrolled viewport');
 }
 
+/* ---- Round 410: main fragment shader uses #ifdef GL_FRAGMENT_PRECISION_HIGH guard (Qiita precision) ---- */
+{
+  // Qiita confirms mediump float in fragment shaders causes visible errors on Android Chrome/old iOS.
+  // The guard uses highp where supported, falls back to mediump on hardware that doesn't support it.
+  ok(/GL_FRAGMENT_PRECISION_HIGH/.test(html),
+    'main fragment shader uses #ifdef GL_FRAGMENT_PRECISION_HIGH precision guard (Qiita mobile precision fix)');
+  ok(/#ifdef GL_FRAGMENT_PRECISION_HIGH\\nprecision highp float;\\n#else\\nprecision mediump float;\\n#endif/.test(html),
+    'precision guard selects highp where available, mediump otherwise (safe for old mobile GPUs)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

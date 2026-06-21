@@ -1717,7 +1717,8 @@ if (GLOK){
     'attribute vec3 aPos;attribute vec3 aNrm;attribute vec2 aUv;'+
     'uniform mat4 uVP;varying vec3 vN;varying vec2 vUv;varying vec3 vW;'+
     'void main(){vN=aNrm;vUv=aUv;vW=aPos;gl_Position=uVP*vec4(aPos,1.0);}',
-    'precision mediump float;varying vec3 vN;varying vec2 vUv;varying vec3 vW;'+
+    '#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\n'+
+    'varying vec3 vN;varying vec2 vUv;varying vec3 vW;'+
     'uniform sampler2D uTex;uniform vec3 uLight;uniform vec3 uEye;'+
     'void main(){vec4 c=texture2D(uTex,vUv);if(c.a<0.5)discard;'+
     'vec3 N=normalize(vN);float nl=dot(N,uLight)*0.5+0.5;'+
