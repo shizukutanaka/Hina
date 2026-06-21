@@ -6136,6 +6136,12 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 404: button { touch-action: manipulation } removes 300ms tap delay on iOS ---- */
+{
+  ok(/button\{[^}]*touch-action:manipulation/.test(html),
+    'all <button> elements get touch-action:manipulation so iOS Safari does not delay tap by 300ms or zoom on double-tap');
+}
+
 /* ---- Round 403: viewport meta adds interactive-widget=resizes-content (mobile keyboard handling) ---- */
 {
   ok(/<meta name="viewport" content="[^"]*interactive-widget=resizes-content/.test(html),
