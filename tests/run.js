@@ -4832,7 +4832,7 @@ function accData(j, bin, ai){
   // showErr() must exist and use srStatus + hint bar
   ok(/function showErr\(/.test(html), 'showErr() helper function defined');
   ok(/showErr[\s\S]{0,200}srStatus/.test(html), 'showErr() announces via srStatus live region');
-  ok(/showErr[\s\S]{0,200}var\(--err\)/.test(html), 'showErr() marks hint bar in error color');
+  ok(/showErr[\s\S]{0,400}var\(--err\)/.test(html), 'showErr() marks hint bar in error color');
   // No alert() calls should remain for user-facing errors
   ok(!/alert\(t\('err\./.test(html), 'no alert() calls for i18n error keys (all replaced by showErr)');
 }
@@ -6426,6 +6426,19 @@ function accData(j, bin, ai){
     'dialog close event sets aria-expanded=false on btnAbout to signal closed state to SR');
   ok(/if \(!\$\('aboutDlg'\)\.open\) \$\('btnAbout'\)\.setAttribute\('aria-expanded',\s*'false'\)/.test(html),
     'applyLang() initialises aria-expanded=false on btnAbout (only when dialog is not open)');
+}
+
+/* ---- Round 421: role=alert live region for showErr() (Zenn 2024 a11y — errors need assertive not polite) ---- */
+{
+  // Errors like export/load/build failures must interrupt SR immediately (polite status won't do that)
+  ok(/id="srAlert"[\s\S]{0,60}role="alert"/.test(html),
+    'srAlert element with role=alert is present in markup for immediate error announcements');
+  ok(/role="alert"[\s\S]{0,60}aria-atomic="true"/.test(html),
+    'srAlert has aria-atomic=true so the entire message is announced at once, not word-by-word');
+  ok(/showErr[\s\S]{0,200}srAlert[\s\S]{0,200}requestAnimationFrame/.test(html),
+    'showErr() populates srAlert via requestAnimationFrame to trigger announcement even on repeated identical errors');
+  ok(/srAlert[\s\S]{0,80}textContent\s*=\s*''[\s\S]{0,80}textContent\s*=\s*msg/.test(html),
+    'showErr() clears srAlert before re-setting content so repeated identical errors are re-announced');
 }
 
 /* ---- selfTest ---- */

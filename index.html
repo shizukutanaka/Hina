@@ -152,6 +152,7 @@ body.drag-over::after{content:'';position:fixed;inset:0;border:3px dashed var(--
     <div id="hint"></div>
     <div id="selftestBox" role="status"></div>
     <div id="srStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="srAlert" class="sr-only" role="alert" aria-atomic="true"></div>
     <span id="sliderDesc" class="sr-only"></span>
   </section>
   <aside id="panel">
@@ -1565,6 +1566,7 @@ function doUndo(){
 let _errTimer = null;
 function showErr(msg){
   const sr=$('srStatus'); if(sr) sr.textContent=msg;
+  const sa=$('srAlert'); if(sa){ sa.textContent=''; requestAnimationFrame(()=>{ const a=$('srAlert'); if(a) a.textContent=msg; setTimeout(()=>{ const a2=$('srAlert'); if(a2) a2.textContent=''; },5500); }); }
   const h=$('hint'); if(h){ clearTimeout(_errTimer); h.textContent=msg; h.style.color='var(--err)';
     _errTimer=setTimeout(()=>{ if($('hint')){ $('hint').style.color='';
       $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }},4500); }
