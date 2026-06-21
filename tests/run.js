@@ -6136,6 +6136,19 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 406: iOS standalone web-app meta tags for Add-to-Home-Screen UX ---- */
+{
+  // mobile-web-app-capable (modern Chrome) alongside the existing apple-mobile-web-app-capable
+  ok(/<meta name="mobile-web-app-capable" content="yes">/.test(html),
+    'mobile-web-app-capable=yes set so Chrome/Edge supports standalone mode (was apple-only)');
+  // Short app title for the home screen icon label
+  ok(/<meta name="apple-mobile-web-app-title" content="雛">/.test(html),
+    'apple-mobile-web-app-title="雛" set so iOS home-screen icon label is the brand name');
+  // Status bar style for standalone mode
+  ok(/<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">/.test(html),
+    'apple-mobile-web-app-status-bar-style=black-translucent so dark theme status bar blends with the canvas');
+}
+
 /* ---- Round 405: Web Share payload includes avatar name in title/text for recipient context ---- */
 {
   ok(/title:'雛 — '\+fnameStem\(\),\s*text:meta\.title\|\|fnameStem\(\)/.test(html),
