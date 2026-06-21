@@ -2802,13 +2802,14 @@ $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveStat
 $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); const sr=$('srStatus'); if(sr) sr.textContent=mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip'); });
 $('btnScreenshot').addEventListener('click', doScreenshot);
 let _dlgReturnFocus = null;
-const openAbout=()=>{ _dlgReturnFocus=document.activeElement; $('aboutDlg').showModal(); };
+const _dlgBg = ()=>{ const h=document.querySelector('header'), m=document.querySelector('main'); return h&&m?[h,m]:[]; };
+const openAbout=()=>{ _dlgReturnFocus=document.activeElement; _dlgBg().forEach(el=>{ el.inert=true; }); $('aboutDlg').showModal(); };
 $('btnAbout').addEventListener('click', openAbout);
 $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
 // close dialog on backdrop click (click on the dialog element itself = outside the content box)
 $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('aboutDlg').close(); });
 // Restore focus to the trigger element (or btnAbout fallback) when dialog closes
-$('aboutDlg').addEventListener('close',()=>{ ((_dlgReturnFocus && _dlgReturnFocus.isConnected) ? _dlgReturnFocus : $('btnAbout')).focus(); _dlgReturnFocus=null; });
+$('aboutDlg').addEventListener('close',()=>{ _dlgBg().forEach(el=>{ el.inert=false; }); ((_dlgReturnFocus && _dlgReturnFocus.isConnected) ? _dlgReturnFocus : $('btnAbout')).focus(); _dlgReturnFocus=null; });
 
 // When WebGL is unavailable, create a centered overlay on the canvas so the
 // black rectangle doesn't look like a crash — hint bar text alone is easy to miss

@@ -6320,6 +6320,19 @@ function accData(j, bin, ai){
     'precision guard selects highp where available, mediump otherwise (safe for old mobile GPUs)');
 }
 
+/* ---- Round 411: dialog openAbout sets inert on background header+main (Zenn 2025 dialog a11y pattern) ---- */
+{
+  // _dlgBg() helper selects header and main to inert/uninert on dialog open/close
+  ok(/_dlgBg\s*=\s*\(\)\s*=>/.test(html),
+    '_dlgBg() helper collects header+main elements for inert toggling (Zenn 2025 dialog a11y pattern)');
+  // openAbout() calls _dlgBg().forEach(el=>{ el.inert=true }) before showModal
+  ok(/openAbout=\(\)=>\{[\s\S]{0,60}_dlgBg\(\)\.forEach\(el=>\{[\s\S]{0,20}el\.inert=true[\s\S]{0,10}\}\)[\s\S]{0,20}showModal/.test(html),
+    'openAbout() marks header+main as inert before showModal() so screen readers cannot browse behind dialog');
+  // close handler calls _dlgBg().forEach(el=>{ el.inert=false }) to restore
+  ok(/_dlgBg\(\)\.forEach\(el=>\{[^}]*el\.inert=false/.test(html),
+    'dialog close event removes inert from header+main so normal keyboard browsing resumes after dialog closes');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
