@@ -6135,6 +6135,19 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 401: deserialize() strips UTF-8 BOM before JSON.parse (Windows Notepad compat) ---- */
+{
+  // Code-level test: BOM-stripping branch exists
+  ok(/text\.charCodeAt\(0\)===0xFEFF\) text = text\.slice\(1\)/.test(html),
+    'deserialize() strips UTF-8 BOM (U+FEFF) before JSON.parse');
+  // Behavior test: BOM-prefixed JSON deserializes successfully
+  const sample = JSON.stringify({app:'hina', params:H.defaults(), meta:{title:'bom-test'}});
+  const withBom = '﻿' + sample;
+  const d = H.deserialize(withBom);
+  ok(d !== null && d.meta && d.meta.title==='bom-test',
+    'BOM-prefixed JSON parses successfully (Windows Notepad-saved files work)');
+}
+
 /* ---- Round 400: localStorage roundtrip probe detects Safari Private mode silent failures ---- */
 {
   ok(/let _lsBroken = false/.test(html),

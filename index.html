@@ -506,6 +506,9 @@ function rank(stats, platform){
 /* ---------- serialization ---------- */
 function serialize(p, meta){ return JSON.stringify({app:'hina', version:VERSION, params:p, meta:meta||{}}, null, 1); }
 function deserialize(text){
+  // Strip UTF-8 BOM (U+FEFF) — common when JSON is edited in Notepad on Windows;
+  // JSON.parse does not treat BOM as whitespace and would throw SyntaxError.
+  if (typeof text==='string' && text.charCodeAt(0)===0xFEFF) text = text.slice(1);
   let j; try{ j=JSON.parse(text); }catch(e){ return null; }
   if (!j || j.app!=='hina') return null;
   return { params: sanitize(j.params), meta: (j.meta && typeof j.meta==='object' && !Array.isArray(j.meta)) ? j.meta : {} };
