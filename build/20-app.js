@@ -625,6 +625,7 @@ function renderFrame(time){
   cv.addEventListener('keydown',e=>{
     const rot=0.18, zoom=0.12; let used=true;
     const H0=build?build.dims.H:1.45;
+    const _prev = {pitch:camPitch, dist:camDist, ty:camTarget[1]};
     switch(e.key){
       case 'ArrowLeft':  camYaw += rot; break;
       case 'ArrowRight': camYaw -= rot; break;
@@ -642,7 +643,15 @@ function renderFrame(time){
         { const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.viewReset'); } break;
       default: used=false;
     }
-    if (used) e.preventDefault();
+    if (used){ e.preventDefault();
+      // Announce when a clamp limit is reached so SR users know why nothing moved (WCAG 4.1.3)
+      if (/^Arrow/.test(e.key) && _prev.pitch===camPitch && _prev.dist===camDist && _prev.ty===camTarget[1]
+          && (e.key==='ArrowUp' || e.key==='ArrowDown')){
+        const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.viewLimit');
+      } else if ((e.key==='+'||e.key==='='||e.key==='-'||e.key==='_') && _prev.dist===camDist){
+        const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.viewLimit');
+      }
+    }
   });
 })();
 

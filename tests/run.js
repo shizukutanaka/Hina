@@ -6126,6 +6126,15 @@ function accData(j, bin, ai){
     'reset button announces a11y.resetDone when confirmed and a11y.resetCancelled when timeout expires, not generic btn.reset');
 }
 
+/* ---- Round 392: canvas keyboard handler announces a11y.viewLimit when clamp prevents motion (Qiita/Zenn DOM-canvas sync) ---- */
+{
+  ok(/a11y\.viewLimit/.test(html),
+    'a11y.viewLimit i18n key referenced from canvas keydown handler so SR users know why arrows produced no movement');
+  // ja and en both have the key (i18n parity)
+  ok(/'a11y\.viewLimit':'視点の限界に達しました'/.test(html) && /'a11y\.viewLimit':'View limit reached'/.test(html),
+    'a11y.viewLimit defined in both ja and en (i18n parity)');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
