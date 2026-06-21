@@ -1214,12 +1214,32 @@ function doScreenshot(){
     cv.toBlob(blob=>{
       _scrDone();
       if (!blob){ showErr(t('err.exportFailed')); return; }
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url; a.download=fnameStem()+'.png'; a.setAttribute('aria-hidden','true');
-      document.body.append(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),1000);
-      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.screenshotDone');
+      const fname = fnameStem()+'.png';
+      // Web Share API on mobile: native share sheet (send to chat, save to photos, etc.) is more
+      // useful than a Downloads-folder file. Falls back to <a download> when share unavailable or
+      // user cancels. canShare check guards against browsers that have navigator.share but not file support.
+      const file = (typeof File==='function') ? new File([blob], fname, {type:'image/png'}) : null;
+      const _fallbackDownload = ()=>{
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download=fname; a.setAttribute('aria-hidden','true');
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+      };
+      const sr=$('srStatus');
+      if (file && navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+        navigator.share({files:[file], title:'Hina'}).then(()=>{
+          if(sr) sr.textContent=t('a11y.screenshotShared');
+        }).catch(err=>{
+          // AbortError = user cancelled — silently ignore. Other errors → fallback.
+          if (err && err.name==='AbortError') return;
+          _fallbackDownload();
+          if(sr) sr.textContent=t('a11y.screenshotDone');
+        });
+      } else {
+        _fallbackDownload();
+        if(sr) sr.textContent=t('a11y.screenshotDone');
+      }
     },'image/png');
   }catch(e){ _scrDone(); showErr(t('err.exportFailed')); }
 }

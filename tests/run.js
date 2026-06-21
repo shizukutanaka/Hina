@@ -5101,8 +5101,9 @@ function accData(j, bin, ai){
 
 /* ---- Round 248: screenshot <a> appended to DOM before click() for cross-browser compat ---- */
 {
-  ok(/fnameStem\(\)\+'.png'[\s\S]{0,50}document\.body\.append\(a\)[\s\S]{0,20}a\.click\(\)[\s\S]{0,20}a\.remove\(\)/.test(html),
-    'doScreenshot appends <a> to DOM before click() and removes after (Firefox/Safari compat)');
+  // Round 402: fallback download path (inside _fallbackDownload helper) still appends → click → remove
+  ok(/_fallbackDownload[\s\S]{0,200}document\.body\.append\(a\)[\s\S]{0,20}a\.click\(\)[\s\S]{0,20}a\.remove\(\)/.test(html),
+    'doScreenshot fallback download appends <a> to DOM before click() and removes after (Firefox/Safari compat)');
 }
 
 /* ---- Round 247: aboutDlg restores focus to btnAbout on close ---- */
@@ -5236,7 +5237,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 320: doScreenshot wraps cv.toBlob() in try-catch so SecurityError doesn't leave btn disabled ---- */
 {
-  ok(/doScreenshot[\s\S]{0,1200}catch\s*\(e\)[\s\S]{0,20}_scrDone\(\)/.test(html),
+  ok(/doScreenshot[\s\S]{0,2200}catch\s*\(e\)[\s\S]{0,20}_scrDone\(\)/.test(html),
     'doScreenshot() has try-catch around cv.toBlob() to re-enable button via _scrDone if canvas throws (e.g. SecurityError)');
 }
 
@@ -5978,7 +5979,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 369: screenshot download anchor also gets aria-hidden=true (same as download() helper) ---- */
 {
-  ok(/doScreenshot[\s\S]{0,800}a\.setAttribute\('aria-hidden','true'\)[\s\S]{0,60}document\.body\.append\(a\)/.test(html),
+  ok(/doScreenshot[\s\S]{0,1800}a\.setAttribute\('aria-hidden','true'\)[\s\S]{0,60}document\.body\.append\(a\)/.test(html),
     'doScreenshot anchor sets aria-hidden=true before appending (consistent with download() helper)');
 }
 
@@ -6133,6 +6134,19 @@ function accData(j, bin, ai){
   // ja and en both have the key (i18n parity)
   ok(/'a11y\.viewLimit':'視点の限界に達しました'/.test(html) && /'a11y\.viewLimit':'View limit reached'/.test(html),
     'a11y.viewLimit defined in both ja and en (i18n parity)');
+}
+
+/* ---- Round 402: doScreenshot uses Web Share API on mobile when available (download fallback) ---- */
+{
+  ok(/navigator\.canShare && navigator\.canShare\(\{files:\[file\]\}\) && navigator\.share/.test(html),
+    'doScreenshot detects Web Share API + file support before calling navigator.share');
+  ok(/err\.name==='AbortError'\) return/.test(html),
+    'user-cancelled share (AbortError) is silently ignored — no error toast');
+  ok(/_fallbackDownload\(\)/.test(html),
+    'fallback to <a download> when share fails or unavailable');
+  // i18n parity for the new key
+  ok(/'a11y\.screenshotShared':'スクリーンショットを共有しました'/.test(html) && /'a11y\.screenshotShared':'Screenshot shared'/.test(html),
+    'a11y.screenshotShared defined in both ja and en');
 }
 
 /* ---- Round 401: deserialize() strips UTF-8 BOM before JSON.parse (Windows Notepad compat) ---- */
