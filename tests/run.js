@@ -89,7 +89,7 @@ ok(html.includes('name="theme-color"') && html.includes('#0F1216'), 'theme-color
 ok(html.includes('apple-mobile-web-app-capable'), 'apple-mobile-web-app-capable meta for iOS home screen');
 ok(html.includes('activePresetId, lastGachaSeed'), 'activePresetId and lastGachaSeed saved to localStorage');
 ok(html.includes('Number.isFinite(j.lastGachaSeed)'), 'lastGachaSeed restored safely handling 0 value');
-ok(html.includes("addEventListener('beforeunload'") && html.includes('clearTimeout(_saveTimer)'), 'beforeunload flushes debounced saveState to avoid losing last edit');
+ok(html.includes("addEventListener('pagehide'") && html.includes('clearTimeout(_saveTimer)'), 'pagehide (not beforeunload) flushes debounced saveState — pagehide is bfcache-compatible');
 ok(/deserialize[\s\S]{0,120}activePresetId=null/.test(html), 'JSON load clears stale activePresetId so preset highlight resets');
 ok(H.I18N.ja['err.exportFailed'] && H.I18N.en['err.exportFailed'], 'export error message i18n in both languages');
 ok(html.includes('_exporting') && html.includes('_exporting = false'), 'doExport has re-entrancy guard (_exporting flag)');
@@ -5914,7 +5914,7 @@ function accData(j, bin, ai){
 /* ---- Round 361: pagehide listener for emergency save on iOS Safari where beforeunload is unreliable ---- */
 {
   ok(html.includes('_emergencySave'),
-    '_emergencySave helper extracted for both beforeunload and pagehide');
+    '_emergencySave helper is registered on pagehide and visibilitychange');
   ok(html.includes("window.addEventListener('pagehide', _emergencySave)"),
     'pagehide listener registered for mobile browser backgrounding/close (iOS Safari compat)');
 }
@@ -6452,6 +6452,18 @@ function accData(j, bin, ai){
     'structuredClone(params) is used for undo snapshot and export isolation');
   ok(/structuredClone\(meta\)/.test(html),
     'structuredClone(meta) is used for undo snapshot and export isolation');
+}
+
+/* ---- Round 425: drop beforeunload to enable bfcache (Zenn 2024 bfcache best practice) ---- */
+{
+  // Any beforeunload listener — even one that doesn't show a dialog — prevents bfcache.
+  // pagehide fires in every scenario beforeunload would, and is bfcache-compatible.
+  ok(!html.includes("addEventListener('beforeunload', _emergencySave)"),
+    'beforeunload is not registered for _emergencySave so bfcache is not blocked');
+  ok(html.includes("addEventListener('pagehide', _emergencySave)"),
+    'pagehide listener replaces beforeunload and covers all real-world navigation scenarios');
+  ok(/pagehide.*bfcache|bfcache.*pagehide/.test(html),
+    'comment in code explains why pagehide is used instead of beforeunload (bfcache)');
 }
 
 /* ---- Round 424: @starting-style fade-in on drag-over overlay (Baseline 2024 enter animation) ---- */
