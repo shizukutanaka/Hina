@@ -6394,6 +6394,17 @@ function accData(j, bin, ai){
     'text inputs have autocorrect:off and autocapitalize:none to prevent iOS unwanted correction/capitalization of names');
 }
 
+/* ---- Round 418: text-wrap:pretty on .note paragraphs and text-wrap:balance on dialog h2 (Zenn 2026 CSS) ---- */
+{
+  // text-wrap:pretty prevents orphaned last words on .note paragraphs (guide steps, quest notes).
+  // text-wrap:balance makes the dialog h2 heading lines more evenly distributed.
+  // Both are Baseline 2024 and supported in all modern browsers.
+  ok(/\.note\{[^}]{0,200}text-wrap:pretty/.test(html),
+    '.note has text-wrap:pretty to prevent orphaned last words in paragraph-length notes');
+  ok(/dialog h2\{[^}]{0,200}text-wrap:balance/.test(html),
+    'dialog h2 has text-wrap:balance for evenly distributed heading lines');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
