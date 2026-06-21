@@ -6136,6 +6136,12 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 403: viewport meta adds interactive-widget=resizes-content (mobile keyboard handling) ---- */
+{
+  ok(/<meta name="viewport" content="[^"]*interactive-widget=resizes-content/.test(html),
+    'viewport meta uses interactive-widget=resizes-content so the mobile virtual keyboard resizes the layout viewport (iOS 16.4+, Chrome 108+)');
+}
+
 /* ---- Round 402: doScreenshot uses Web Share API on mobile when available (download fallback) ---- */
 {
   ok(/navigator\.canShare && navigator\.canShare\(\{files:\[file\]\}\) && navigator\.share/.test(html),
