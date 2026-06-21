@@ -6341,6 +6341,14 @@ function accData(j, bin, ai){
     '#stage has contain:layout paint style so browser skips outer layout recalc when WebGL canvas re-renders');
 }
 
+/* ---- Round 413: scrollbar-gutter:stable on #tabBody prevents CLS when scrollbar appears (Zenn Modern CSS) ---- */
+{
+  // On Windows with classic scrollbars, adding a scrollbar shifts content left causing layout shift.
+  // scrollbar-gutter:stable reserves the gutter space even when no scrollbar is visible, eliminating the shift.
+  ok(/#tabBody\{[^}]{0,300}scrollbar-gutter:stable/.test(html),
+    '#tabBody has scrollbar-gutter:stable so Windows classic-scrollbar appearance does not cause CLS');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();
