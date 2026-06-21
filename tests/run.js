@@ -6139,7 +6139,7 @@ function accData(j, bin, ai){
 /* ---- Round 408: enterkeyhint attribute on inputs shows appropriate iOS keyboard label ---- */
 {
   // Text inputs (meta title/version/author/contact/reference/licenseUrl) get enterkeyhint=done
-  ok(/type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', enterkeyhint:'done'/.test(html),
+  ok(/type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false'[^}]{0,60}enterkeyhint:'done'/.test(html),
     'text meta inputs use enterkeyhint=done so iOS shows "Done" on the Return key');
   // Slider numIn inputs get enterkeyhint=done
   ok(/inputmode:'decimal', enterkeyhint:'done'/.test(html),
@@ -6384,6 +6384,14 @@ function accData(j, bin, ai){
   // err.unexpected defined in both ja and en
   ok(/'err\.unexpected':'予期しないエラーが発生しました'/.test(html) && /'err\.unexpected':'An unexpected error occurred'/.test(html),
     'err.unexpected i18n key defined in ja and en (i18n parity)');
+}
+
+/* ---- Round 417: autocorrect:off and autocapitalize:none on text inputs (Qiita iOS UX) ---- */
+{
+  // iOS autocapitalizes the first letter and autocorrects avatar/author names to English.
+  // autocorrect:off + autocapitalize:none stops both behaviors for all meta text inputs.
+  ok(/type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done'/.test(html),
+    'text inputs have autocorrect:off and autocapitalize:none to prevent iOS unwanted correction/capitalization of names');
 }
 
 /* ---- selfTest ---- */

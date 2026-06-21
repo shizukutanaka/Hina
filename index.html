@@ -2424,7 +2424,7 @@ function renderOut(bd){
   bd.append(el('div',{class:'sect', role:'heading', 'aria-level':'3'}, t('out.meta')));
   const txt=(key,mk,ph)=>{ const id='meta-'+mk; bd.append(el('div',{class:'row'},
     el('label',{'for':id},t(key)),
-    el('input',{id, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', enterkeyhint:'done', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
+    el('input',{id, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
   // Visible preview updates instantly; the SR announcement via srStatus is debounced so
   // typing into the title field doesn't spam the live region with per-keystroke updates.
   const fnPrev=el('div',{class:'limit', id:'fnPreview'});
@@ -2438,7 +2438,7 @@ function renderOut(bd){
   };
   bd.append(el('div',{class:'row'},
     el('label',{'for':'meta-title'},t('out.title')),
-    el('input',{id:'meta-title', type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', enterkeyhint:'done', 'aria-describedby':'fnPreview', value:meta.title||'', placeholder:t('out.title.ph'),
+    el('input',{id:'meta-title', type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', 'aria-describedby':'fnPreview', value:meta.title||'', placeholder:t('out.title.ph'),
       oninput:e=>{ meta.title=e.target.value; saveState(); updateFnPrev(); }})));
   updateFnPrev();
   bd.append(fnPrev);
@@ -2461,7 +2461,7 @@ function renderOut(bd){
   const licUrlRow=el('div',{class:'row', style: meta.license==='Other' ? '' : 'display:none'});
   licUrlRow.append(
     el('label',{'for':licUrlId}, t('out.license.url')),
-    el('input',{id:licUrlId, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', enterkeyhint:'done', value:meta.licenseUrl||'',
+    el('input',{id:licUrlId, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta.licenseUrl||'',
       placeholder:t('out.license.url.ph'), oninput:e=>{meta.licenseUrl=e.target.value; saveState();}}));
   selRow('out.license','license',
     ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
