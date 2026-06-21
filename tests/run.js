@@ -6135,6 +6135,18 @@ function accData(j, bin, ai){
     'a11y.viewLimit defined in both ja and en (i18n parity)');
 }
 
+/* ---- Round 400: localStorage roundtrip probe detects Safari Private mode silent failures ---- */
+{
+  ok(/let _lsBroken = false/.test(html),
+    '_lsBroken flag declared for detecting non-persistent localStorage');
+  // Probe IIFE: setItem → getItem comparison → removeItem
+  ok(/_probeLS[\s\S]{0,200}localStorage\.setItem\(K, V\)[\s\S]{0,80}localStorage\.getItem\(K\) !== V/.test(html),
+    'IIFE probe does setItem then getItem roundtrip and flags _lsBroken when readback fails');
+  // Persistent warning when broken — uses hint.saveFail
+  ok(/if \(_lsBroken\)\{[\s\S]{0,300}hint\.saveFail/.test(html),
+    'startup shows hint.saveFail warning when _lsBroken (Safari Private mode)');
+}
+
 /* ---- Round 399: about dialog adds aria-describedby for full SR context (per Zenn dialog a11y article) ---- */
 {
   ok(/<dialog id="aboutDlg" aria-labelledby="aboutH2" aria-describedby="aboutTxt" aria-modal="true">/.test(html),

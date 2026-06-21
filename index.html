@@ -1481,6 +1481,18 @@ let build = null;
 const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
 
 const LS = 'hina.v1';
+// Safari Private mode allows setItem but writes don't persist. Verify with a roundtrip
+// (set probe → read back → delete). If readback fails, persistence is broken — surface this
+// once at startup so users export JSON before they lose work.
+let _lsBroken = false;
+(function _probeLS(){
+  try{
+    const K='hina.probe', V=String(Date.now());
+    localStorage.setItem(K, V);
+    if (localStorage.getItem(K) !== V) _lsBroken = true;
+    localStorage.removeItem(K);
+  }catch(_){ _lsBroken = true; }
+})();
 function loadState(){
   try{
     const j = JSON.parse(localStorage.getItem(LS));
@@ -2773,6 +2785,13 @@ if (!GLOK){
 loadState();
 rebuild();
 applyLang();
+// Persistent warning when localStorage is broken (Safari Private mode etc.) — surfaces after
+// applyLang() so the i18n key resolves correctly. Bypasses the auto-fade timer of showErr().
+if (_lsBroken){
+  const b=$('autoSaveBadge');
+  if (b){ b.removeAttribute('aria-hidden'); b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
+  const sr=$('srStatus'); if(sr) sr.textContent=t('hint.saveFail');
+}
 // Rank badges are clickable shortcuts to the Stats/Export tab
 document.querySelectorAll('.rankBadge').forEach(b=>{
   b.style.cursor='pointer';
