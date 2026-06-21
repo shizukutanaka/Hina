@@ -6454,6 +6454,19 @@ function accData(j, bin, ai){
     'structuredClone(meta) is used for undo snapshot and export isolation');
 }
 
+/* ---- Round 427: CSS :focus-within on .row highlights active parameter row (Zenn 2024 a11y) ---- */
+{
+  // When a slider, numIn, select, or color picker in a .row is focused, the whole row gets a subtle
+  // accent tint — helps keyboard/mobile users track which parameter they are editing
+  ok(/\.row:focus-within\{background:rgba\(0,196,204,.04\);border-radius:6px\}/.test(html),
+    '.row:focus-within applies subtle accent tint to highlight the focused parameter row');
+  // error rule must come AFTER so it overrides the focus tint when clamping is in progress
+  const focusIdx = html.indexOf('.row:focus-within{');
+  const errIdx = html.indexOf('.row:has([aria-invalid="true"]){');
+  ok(focusIdx > 0 && errIdx > focusIdx,
+    ':has([aria-invalid]) rule is declared after :focus-within so error color takes precedence');
+}
+
 /* ---- Round 426: @starting-style fade-in on <details> open in about dialog (Baseline 2024) ---- */
 {
   // Keyboard shortcut list fades in when details is expanded — @starting-style provides opacity:0 start
