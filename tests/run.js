@@ -6291,6 +6291,25 @@ function accData(j, bin, ai){
     'fnPreview update schedules a debounced srStatus announcement (500ms) so typing the title does not spam the live region');
 }
 
+/* ---- Round 409: @media print hides WebGL canvas so printing shows text stats, not a black box ---- */
+{
+  // Print block must exist
+  ok(/@media print\{/.test(html),
+    '@media print block present so Ctrl+P does not render just a black WebGL canvas');
+  // WebGL stage hidden in print so it does not appear as a blank/black rectangle
+  ok(/@media print\{[^}]{0,200}#stage[^}]{0,80}display:none/.test(html),
+    '#stage has display:none in @media print to hide the WebGL canvas');
+  // body/html height and overflow unlocked so panel content scrolls into print pages
+  ok(/@media print\{[\s\S]{0,300}html,body\{height:auto;overflow:visible\}/.test(html),
+    'html,body height:auto and overflow:visible in @media print so page does not clip at viewport');
+  // Panel expands to full width for print (no side-panel beside a hidden canvas)
+  ok(/@media print\{[\s\S]{0,400}#panel\{width:100%;border-left:none\}/.test(html),
+    '#panel expands to full width in @media print (canvas is gone so panel takes the page)');
+  // tabBody overflow removed so all parameter rows render instead of being clipped
+  ok(/@media print\{[\s\S]{0,500}#tabBody\{overflow:visible/.test(html),
+    '#tabBody overflow:visible in @media print so all parameters render, not just the scrolled viewport');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

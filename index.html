@@ -116,6 +116,13 @@ body.drag-over::after{content:'';position:fixed;inset:0;border:3px dashed var(--
   .sw{forced-color-adjust:none;outline:2px solid ButtonText}
   .rankBadge .val{forced-color-adjust:none}
 }
+@media print{
+  #stage,#hint,#exprBar,#selftestBox,.hdr-actions,#skipLink{display:none}
+  html,body{height:auto;overflow:visible}
+  main{height:auto}
+  #panel{width:100%;border-left:none}
+  #tabBody{overflow:visible;height:auto;max-height:none;padding-bottom:0}
+}
 </style>
 </head>
 <body>
