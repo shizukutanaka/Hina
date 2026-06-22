@@ -980,8 +980,10 @@ function renderOut(bd){
   const licUrlRow=el('div',{class:'row', style: meta.license==='Other' ? '' : 'display:none'});
   licUrlRow.append(
     el('label',{'for':licUrlId}, t('out.license.url')),
-    el('input',{id:licUrlId, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta.licenseUrl||'',
-      placeholder:t('out.license.url.ph'), oninput:e=>{meta.licenseUrl=e.target.value; saveState();}}));
+    el('input',{id:licUrlId, type:'url', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta.licenseUrl||'',
+      placeholder:t('out.license.url.ph'),
+      oninput:e=>{ e.target.removeAttribute('aria-invalid'); meta.licenseUrl=e.target.value; saveState(); },
+      onblur:e=>{ if(e.target.value&&!e.target.validity.valid) e.target.setAttribute('aria-invalid','true'); else e.target.removeAttribute('aria-invalid'); }}));
   selRow('out.license','license',
     ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
     'license', v=>{

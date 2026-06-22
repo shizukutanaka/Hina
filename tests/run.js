@@ -6551,6 +6551,20 @@ function accData(j, bin, ai){
     '.row:has([aria-invalid="true"]) adds border-radius so tint looks contained, not clipped');
 }
 
+/* ---- Round 433: type='url' + onblur aria-invalid for licenseUrl input (semantic URL field) ---- */
+{
+  // licenseUrl is a URL per VRM spec — type='url' gives mobile URL keyboard and enables validity API
+  ok(/id:licUrlId[\s\S]{0,40}type:'url'/.test(html),
+    "licenseUrl input uses type='url' for semantic correctness and mobile URL keyboard");
+  // onblur validation: if a non-empty value is not a valid URL, set aria-invalid='true'
+  // this triggers Round 423's :has([aria-invalid="true"]) error row tint
+  ok(/onblur:e=>\{[^}]*validity\.valid[\s\S]{0,80}aria-invalid/.test(html),
+    'licenseUrl onblur sets aria-invalid="true" when value is non-empty but not a valid URL');
+  // oninput must clear aria-invalid as user types to allow correction without stale error state
+  ok(/oninput:e=>\{[^}]*removeAttribute\('aria-invalid'\)[\s\S]{0,80}licenseUrl/.test(html),
+    'licenseUrl oninput removes aria-invalid so error clears as user corrects the URL');
+}
+
 /* ---- Round 432: hover:none + pointer:coarse guards for touch UX (Baseline 2015/2018) ---- */
 {
   // On touch devices (hover:none), swatch scale:1.15 sticks after tap causing a jarring layout shift.
