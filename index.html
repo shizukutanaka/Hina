@@ -118,6 +118,8 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
   .row select,.row input[type=text],.row input.numIn{font-size:16px}
 }
 #skipLink:focus-visible{top:8px}
+@media (hover:none){.sw:hover{scale:1}}
+@media (pointer:coarse){.eBtn{min-height:36px;padding:0 10px}}
 @media (prefers-contrast:more){:root{--text-dim:#c0ccd8;--text-faint:#9aa6b2;--line:#3f4f62}}
 @media (prefers-reduced-transparency:reduce){.rankBadge,#exprBar{backdrop-filter:none;background:var(--bg)}#hint{background:var(--bg)}dialog::backdrop{background:rgba(0,0,0,.85)}}
 @media (prefers-reduced-motion:reduce){.preCard,.sw,#autoSaveBadge,#skipLink,body.drag-over::after,details[open]>:not(summary),dialog{transition:none}.sw:hover{scale:1}}

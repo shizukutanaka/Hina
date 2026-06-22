@@ -6551,6 +6551,20 @@ function accData(j, bin, ai){
     '.row:has([aria-invalid="true"]) adds border-radius so tint looks contained, not clipped');
 }
 
+/* ---- Round 432: hover:none + pointer:coarse guards for touch UX (Baseline 2015/2018) ---- */
+{
+  // On touch devices (hover:none), swatch scale:1.15 sticks after tap causing a jarring layout shift.
+  // @media(hover:none) resets scale:1 so swatches don't pop on touch.
+  ok(/@media \(hover:none\)\{\.sw:hover\{scale:1\}\}/.test(html),
+    '@media(hover:none) resets .sw:hover scale to 1, preventing sticky scale on touch tap');
+  // expression bar buttons (.eBtn) have min-height:24px which is below 44px minimum touch target.
+  // pointer:coarse (touch screens, Quest browser) gets min-height:36px for easier tapping.
+  ok(/@media \(pointer:coarse\)\{\.eBtn\{min-height:36px/.test(html),
+    '@media(pointer:coarse) increases .eBtn min-height for adequate touch targets');
+  ok(/@media \(pointer:coarse\)\{\.eBtn\{[^}]*padding/.test(html),
+    '@media(pointer:coarse) also increases .eBtn padding for better touch ergonomics');
+}
+
 /* ---- Round 431: dialog fade-in via @starting-style + transition-behavior:allow-discrete + overscroll-behavior:contain (Baseline 2024) ---- */
 {
   // dialog[open] fade-in: opacity starts at 0 (via @starting-style) and transitions to 1
