@@ -1363,6 +1363,9 @@ if (!GLOK){
 loadState();
 rebuild();
 applyLang();
+// Request durable storage so browsers don't LRU-evict auto-saved avatar state under storage pressure.
+// Fire-and-forget: no UI on grant (silent win); no UI on denial (existing behaviour, warn devs only).
+if (!_lsBroken) navigator.storage?.persist?.();
 // Persistent warning when localStorage is broken (Safari Private mode etc.) — surfaces after
 // applyLang() so the i18n key resolves correctly. Bypasses the auto-fade timer of showErr().
 if (_lsBroken){

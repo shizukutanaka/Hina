@@ -6598,6 +6598,20 @@ function accData(j, bin, ai){
     'licenseUrl oninput removes aria-invalid so error clears as user corrects the URL');
 }
 
+/* ---- Round 437: navigator.storage.persist() to prevent auto-save eviction (Baseline 2022) ---- */
+{
+  // Mobile browsers (Chrome/Firefox/Safari) can evict localStorage under storage pressure via LRU.
+  // navigator.storage.persist() requests durable storage so the browser won't clear auto-saved state.
+  ok(html.includes('navigator.storage?.persist?.()'),
+    'navigator.storage.persist() called at startup to request durable storage (Baseline 2022)');
+  // Must only be called when localStorage is confirmed working — no point if already broken
+  ok(/!_lsBroken.*navigator\.storage/.test(html),
+    'storage.persist() is guarded by !_lsBroken so it only runs when localStorage is usable');
+  // Must appear after loadState() so we know the storage probe result before calling persist
+  ok(html.indexOf('loadState()') < html.indexOf('navigator.storage?.persist?.()'),
+    'storage.persist() called after loadState() so _lsBroken state is resolved first');
+}
+
 /* ---- Round 436: crypto.getRandomValues() for gacha seed (Baseline 2017, full Uint32 range) ---- */
 {
   // Math.random()*1e9|0 only covers 0–999999999, filling 23% of the 0–4294967295 seed space.
