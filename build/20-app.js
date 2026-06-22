@@ -1166,6 +1166,13 @@ async function doExport(){
   clearTimeout(_exportedRevertTimer);
   _exportedRevertTimer = null;
   _exporting = true;
+  // Compute fname before showSaveFilePicker so the picker can offer it as the suggested filename.
+  const fname = safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom'))+'.vrm';
+  // Progressive enhancement: File System Access API (Chrome/Edge) lets users choose where to save
+  // instead of always sending to the default Downloads folder. Called before any other await so
+  // user-activation context is still fresh. AbortError = user cancelled → abort silently.
+  let _fsHandle = null;
+  if (typeof window.showSaveFilePicker === 'function'){ try { _fsHandle = await window.showSaveFilePicker({ suggestedName: fname, types: [{ description: 'VRM 3D Avatar', accept: { 'application/octet-stream': ['.vrm'] } }] }); } catch(e){ if (e.name === 'AbortError'){ _exporting = false; return; } } }
   // Snapshot all mutable state so slider/meta changes during async awaits don't affect the export
   const exportBuild = build;
   const exportParams = structuredClone(params);
@@ -1188,8 +1195,14 @@ async function doExport(){
     if (!atlasBlob) throw new Error('atlas toBlob returned null');
     const ab = await atlasBlob.arrayBuffer();
     const {bytes} = HINA.exportVRM(exportBuild, exportParams, exportMeta, new Uint8Array(ab), thumbBytes);
-    const fname = safeName(exportMeta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom'))+'.vrm';
-    download(bytes, fname, 'application/octet-stream');
+    if (_fsHandle){
+      // Write directly to user-chosen file via File System Access API
+      const w = await _fsHandle.createWritable();
+      await w.write(new Blob([bytes], { type: 'application/octet-stream' }));
+      await w.close();
+    } else {
+      download(bytes, fname, 'application/octet-stream');
+    }
     const sr=$('srStatus');
     if (sr) sr.textContent = t('a11y.exported').replace('{name}',fname).replace('{size}',Math.round(bytes.length/1024)+' KB');
     if (_exportBtn){ _exportBtn.textContent=t('btn.exported');

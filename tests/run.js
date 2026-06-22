@@ -6551,6 +6551,25 @@ function accData(j, bin, ai){
     '.row:has([aria-invalid="true"]) adds border-radius so tint looks contained, not clipped');
 }
 
+/* ---- Round 435: File System Access API progressive enhancement for VRM export (Chrome/Edge desktop) ---- */
+{
+  // showSaveFilePicker lets users choose save location instead of always going to Downloads folder
+  ok(html.includes('showSaveFilePicker'),
+    'doExport uses showSaveFilePicker (File System Access API) for direct save on Chrome/Edge');
+  // Must be called before other awaits so user-activation context is still fresh
+  ok(html.indexOf('showSaveFilePicker') < html.indexOf('const exportBuild = build'),
+    'showSaveFilePicker called before exportBuild snapshot so activation context is still fresh');
+  // AbortError (user cancelled picker) must abort silently without showing an error
+  ok(/AbortError[\s\S]{0,60}_exporting = false/.test(html),
+    'AbortError from showSaveFilePicker resets _exporting and returns early without showing an error');
+  // Falls back to <a download> on browsers without File System Access API
+  ok(/typeof window\.showSaveFilePicker/.test(html),
+    'showSaveFilePicker gated behind typeof check for progressive enhancement fallback');
+  // On supported browsers, write via FileSystemWritableFileStream instead of <a download>
+  ok(/createWritable[\s\S]{0,80}w\.write[\s\S]{0,80}w\.close/.test(html),
+    'File System Access API writes via createWritable().write().close() stream pipeline');
+}
+
 /* ---- Round 434: move skip-link transition from inline style to CSS so prefers-reduced-motion can suppress it ---- */
 {
   // Inline styles have higher specificity than media query rules, so prefers-reduced-motion
