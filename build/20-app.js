@@ -970,7 +970,7 @@ function renderOut(bd){
   txt('out.reference','reference', t('out.reference.ph'));
   const selRow=(key,mk,opts,tp,onChange)=>{
     const id='sel-'+mk;
-    const sel=el('select',{id, onchange:e=>{meta[mk]=e.target.value; saveState(); if(onChange) onChange(e.target.value);}});
+    const sel=el('select',{id, onchange:e=>{captureUndo(); meta[mk]=e.target.value; saveState(); if(onChange) onChange(e.target.value);}});
     for(const o of opts) sel.append(el('option',{value:o, ...(meta[mk]===o?{selected:''}:{})},
       tp?t(tp+'.'+o):o));
     bd.append(el('div',{class:'row'}, el('label',{'for':id},t(key)), sel));

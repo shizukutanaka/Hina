@@ -6613,6 +6613,18 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 445: selRow metadata selects call captureUndo() — Ctrl+Z now undoes license/content-flag changes ---- */
+{
+  // paramRow enum selects call captureUndo(); selRow metadata selects did not.
+  // _undoSnap captures meta, so undo will restore license type, allowed-users, content flags.
+  // captureUndo() must come BEFORE meta[mk]=e.target.value to snapshot state before the change.
+  ok(/selRow[\s\S]{0,200}captureUndo\(\).*meta\[mk\]=e\.target\.value/.test(html.replace(/\s+/g,' ')),
+    'selRow onchange calls captureUndo() before assigning meta[mk] so Ctrl+Z restores prior value');
+  // Confirm paramRow enum also calls captureUndo for parity reference
+  ok(/paramRow|enum[\s\S]{0,300}captureUndo\(\).*params\[k\]=e\.target\.value/.test(html.replace(/\s+/g,' ')),
+    'paramRow enum select also calls captureUndo() before params[k] assignment (parity reference)');
+}
+
 /* ---- Round 444: seed copy button (cpBtn) gets aria-busy+disabled — matches copyJson pattern ---- */
 {
   // Round 443 fixed copyJson; the gacha seed copy button had the same gap.
