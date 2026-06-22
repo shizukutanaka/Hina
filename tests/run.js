@@ -5545,7 +5545,7 @@ function accData(j, bin, ai){
     'copySeed clipboard-unavailable path announces btn.copySeed.err to srStatus');
 
   // .catch() path announces error
-  ok(/\.catch\(\(\)=>\{[\s\S]{0,200}btn\.copySeed\.err/.test(html),
+  ok(/\.catch\(\(\)=>\{[\s\S]{0,280}btn\.copySeed\.err/.test(html),
     'copySeed .catch() path announces btn.copySeed.err to srStatus');
 }
 
@@ -6613,6 +6613,23 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 448: focus restoration after async clipboard ops — matches doExport/doScreenshot pattern ---- */
+{
+  // doExport and doScreenshot both capture _wasFocused before disabling and restore after.
+  // copyJson (cpj), seed copy (cpBtn), and pasteJson (pstj) disabled the button without restoring
+  // focus — keyboard users lost their place after every clipboard operation.
+  ok(/_cpBF=document\.activeElement===cpBtn.*cpBtn\.disabled=true/.test(html.replace(/\s+/g,' ')),
+    'cpBtn: captures focus state before disabling so it can be restored after clipboard write');
+  ok(/cpBtn\.disabled=false.*cpBtn\.removeAttribute\('aria-busy'\).*_cpBF.*cpBtn\.focus\(\)/.test(html.replace(/\s+/g,' ')),
+    'cpBtn: restores focus in .then() success path when _cpBF is true');
+  ok(/_cpjF=document\.activeElement===cpj.*cpj\.disabled=true/.test(html.replace(/\s+/g,' ')),
+    'cpj: captures focus state before disabling so it can be restored in fail/success paths');
+  ok(/const _fail[\s\S]{0,100}_cpjF.*cpj\.focus\(\)/.test(html),
+    'cpj: _fail() restores focus via _cpjF before showing ! error state');
+  ok(/_pstjF=document\.activeElement===pstj[\s\S]{0,100}_pfail.*pstj\.focus\(\)/.test(html),
+    'pstj: _pfail() restores focus via _pstjF (paste success intentionally focuses tabBody instead)');
+}
+
 /* ---- Round 447: saveJson() button gets id + aria-busy/disabled guard — matches doExport pattern ---- */
 {
   // saveJson() is async (showSaveFilePicker + write) but the Save JSON button had no aria-busy or
@@ -6663,7 +6680,7 @@ function accData(j, bin, ai){
   // writeText() is async — aria-busy prevents double-clicks and signals AT that an op is in progress.
   ok(/cpBtn\.disabled=true.*cpBtn\.setAttribute\('aria-busy','true'\)/.test(html.replace(/\s+/g,' ')),
     'cpBtn: disabled=true and aria-busy set before navigator.clipboard.writeText(lastGachaSeed)');
-  ok(/cpBtn\.disabled=false.*cpBtn\.removeAttribute\('aria-busy'\)[\s\S]{0,60}btn\.copied/.test(html.replace(/\s+/g,' ')),
+  ok(/cpBtn\.disabled=false.*cpBtn\.removeAttribute\('aria-busy'\)[\s\S]{0,130}btn\.copied/.test(html.replace(/\s+/g,' ')),
     'cpBtn: aria-busy cleared in .then() before textContent changes to btn.copied');
   ok(/cpBtn\.disabled=false.*cpBtn\.removeAttribute\('aria-busy'\)[\s\S]{0,250}copySeed\.err/.test(html.replace(/\s+/g,' ')),
     'cpBtn: aria-busy cleared in .catch() before showing ! error and copySeed.err announce');
@@ -6676,9 +6693,9 @@ function accData(j, bin, ai){
   // that an async operation was in progress.
   ok(/copyJson[\s\S]{0,200}cpj\.disabled=true.*cpj\.setAttribute\('aria-busy','true'\)/.test(html.replace(/\s+/g,' ')),
     'copyJson: cpj.disabled=true and aria-busy set before navigator.clipboard.writeText()');
-  ok(/writeText\(json\)\.then[\s\S]{0,30}cpj\.disabled=false.*cpj\.removeAttribute\('aria-busy'\)[\s\S]{0,70}copyJsonDone/.test(html.replace(/\s+/g,' ')),
+  ok(/writeText\(json\)\.then[\s\S]{0,30}cpj\.disabled=false.*cpj\.removeAttribute\('aria-busy'\)[\s\S]{0,130}copyJsonDone/.test(html.replace(/\s+/g,' ')),
     'copyJson: aria-busy and disabled cleared in .then() before text reverts to Done state');
-  ok(/const _fail[\s\S]{0,30}cpj\.disabled=false.*cpj\.removeAttribute\('aria-busy'\)[\s\S]{0,150}copyJson\.err/.test(html.replace(/\s+/g,' ')),
+  ok(/const _fail[\s\S]{0,30}cpj\.disabled=false.*cpj\.removeAttribute\('aria-busy'\)[\s\S]{0,220}copyJson\.err/.test(html.replace(/\s+/g,' ')),
     'copyJson: _fail clears aria-busy and disabled before showing ! error state');
 }
 

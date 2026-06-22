@@ -903,13 +903,13 @@ function renderBody(scrollReset=true){
       onclick:()=>{
         if(lastGachaSeed===null) return;
         if (!navigator.clipboard?.writeText){ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); return; }
-        cpBtn.disabled=true; cpBtn.setAttribute('aria-busy','true');
+        const _cpBF=document.activeElement===cpBtn; cpBtn.disabled=true; cpBtn.setAttribute('aria-busy','true');
         navigator.clipboard.writeText(String(lastGachaSeed)).then(()=>{
-          cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy');
+          cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); if(_cpBF) cpBtn.focus();
           const orig=cpBtn.textContent; cpBtn.textContent=t('btn.copied');
           setTimeout(()=>{ cpBtn.textContent=orig; },1500);
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.seedCopied').replace('{n}',lastGachaSeed);
-        }).catch(()=>{ cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); });
+        }).catch(()=>{ cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); if(_cpBF) cpBtn.focus(); cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); });
       }
     }, t('btn.copySeed'));
     seedIn.addEventListener('wheel',e=>{ if(document.activeElement===seedIn) e.preventDefault(); },{passive:false});
@@ -1012,12 +1012,13 @@ function renderOut(bd){
   {
     const cpj=el('button',{class:'btn wide', onclick:()=>{
       const json=HINA.serialize(params,meta);
-      const _fail=()=>{ cpj.disabled=false; cpj.removeAttribute('aria-busy'); cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
+      const _cpjF=document.activeElement===cpj;
+      const _fail=()=>{ cpj.disabled=false; cpj.removeAttribute('aria-busy'); if(_cpjF) cpj.focus(); cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copyJson.err'); };
       if(!navigator.clipboard?.writeText){ _fail(); return; }
       cpj.disabled=true; cpj.setAttribute('aria-busy','true');
       navigator.clipboard.writeText(json).then(()=>{
-        cpj.disabled=false; cpj.removeAttribute('aria-busy');
+        cpj.disabled=false; cpj.removeAttribute('aria-busy'); if(_cpjF) cpj.focus();
         const orig=cpj.textContent; cpj.textContent=t('btn.copyJsonDone');
         setTimeout(()=>{ cpj.textContent=orig; },1800);
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copyJsonDone');
@@ -1027,7 +1028,8 @@ function renderOut(bd){
   }
   {
     const pstj=el('button',{class:'btn wide', onclick:()=>{
-      const _pfail=()=>{ pstj.disabled=false; pstj.removeAttribute('aria-busy'); pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
+      const _pstjF=document.activeElement===pstj;
+      const _pfail=()=>{ pstj.disabled=false; pstj.removeAttribute('aria-busy'); if(_pstjF) pstj.focus(); pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); };
       if (typeof navigator.clipboard?.readText !== 'function'){ _pfail(); return; }
       pstj.disabled=true; pstj.setAttribute('aria-busy','true');
