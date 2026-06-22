@@ -117,6 +117,7 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
      Bumping touch-device inputs to 16px keeps the layout viewport unchanged on focus. */
   .row select,.row input[type=text],.row input.numIn{font-size:16px}
 }
+#skipLink{transition:top .1s}
 #skipLink:focus-visible{top:8px}
 @media (hover:none){.sw:hover{scale:1}}
 @media (pointer:coarse){.eBtn{min-height:36px;padding:0 10px}}
@@ -138,7 +139,7 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
 </style>
 </head>
 <body>
-<a id="skipLink" href="#tabBody" style="position:fixed;top:-4rem;left:8px;z-index:9999;padding:8px 14px;background:var(--accent);color:#06282a;border-radius:6px;font-weight:700;text-decoration:none;transition:top .1s">Skip to content</a>
+<a id="skipLink" href="#tabBody" style="position:fixed;top:-4rem;left:8px;z-index:9999;padding:8px 14px;background:var(--accent);color:#06282a;border-radius:6px;font-weight:700;text-decoration:none">Skip to content</a>
 <noscript><div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;text-align:center;padding:24px"><div><div style="font-size:32px;margin-bottom:16px">雛</div><p style="margin-bottom:8px">このツールの使用には JavaScript が必要です。</p><p style="color:var(--text-dim)">Hina requires JavaScript to run. Please enable it in your browser settings.</p></div></div></noscript>
 <header>
   <div class="logo" aria-label="雛 Hina — VRM Avatar Maker" role="img"><b aria-hidden="true">雛</b><span aria-hidden="true">Hina · VRM Avatar Maker</span></div>

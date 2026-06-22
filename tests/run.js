@@ -6551,6 +6551,20 @@ function accData(j, bin, ai){
     '.row:has([aria-invalid="true"]) adds border-radius so tint looks contained, not clipped');
 }
 
+/* ---- Round 434: move skip-link transition from inline style to CSS so prefers-reduced-motion can suppress it ---- */
+{
+  // Inline styles have higher specificity than media query rules, so prefers-reduced-motion
+  // could NOT override transition:top if it was inline. Moving it to a CSS rule fixes this.
+  ok(/#skipLink\{transition:top/.test(html),
+    '#skipLink transition:top defined in stylesheet so prefers-reduced-motion media query can override it');
+  // Verify skip link HTML element no longer has transition in its inline style
+  ok(!/<a id="skipLink"[^>]*transition[^>]*>/.test(html),
+    'skip link element has no transition in inline style (inline styles beat media queries)');
+  // prefers-reduced-motion must still list #skipLink so the CSS rule above is suppressed
+  ok(/prefers-reduced-motion:reduce[\s\S]{0,200}#skipLink[\s\S]{0,60}transition:none/.test(html),
+    '#skipLink included in prefers-reduced-motion:reduce block so CSS transition is suppressed');
+}
+
 /* ---- Round 433: type='url' + onblur aria-invalid for licenseUrl input (semantic URL field) ---- */
 {
   // licenseUrl is a URL per VRM spec — type='url' gives mobile URL keyboard and enables validity API
