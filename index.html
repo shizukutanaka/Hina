@@ -2189,6 +2189,7 @@ function renderTabs(){
       id:'tab-'+tb, class:'tab', role:'tab',
       'aria-selected':String(tb===activeTab),
       'aria-controls':'tabBody',
+      'aria-keyshortcuts':String(TABS.indexOf(tb)+1),
       tabindex: tb===activeTab?'0':'-1',
       onclick:()=>{ const changed=tb!==activeTab; activeTab=tb; renderTabs(); renderBody(changed); $('tab-'+tb).focus(); },
     }, t('tab.'+tb)));

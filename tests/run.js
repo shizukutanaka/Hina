@@ -6613,6 +6613,17 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 439: tab buttons get aria-keyshortcuts for digit 1–8 shortcuts ---- */
+{
+  // The 1-8 digit shortcuts exist (keydown handler at global level) but were not declared on the
+  // tab buttons themselves, so AT users had no in-context hint about them.
+  // aria-keyshortcuts on each role="tab" button lets AT announce the shortcut (e.g. "Presets tab, 1").
+  ok(/renderTabs[\s\S]{0,400}aria-keyshortcuts/.test(html),
+    'renderTabs() adds aria-keyshortcuts attribute to each tab button');
+  ok(/TABS\.indexOf\(tb\)\+1/.test(html),
+    'tab shortcut ordinal derived from TABS.indexOf(tb)+1 so it stays in sync with tab order');
+}
+
 /* ---- Round 437: navigator.storage.persist() to prevent auto-save eviction (Baseline 2022) ---- */
 {
   // Mobile browsers (Chrome/Firefox/Safari) can evict localStorage under storage pressure via LRU.
