@@ -2443,7 +2443,7 @@ function renderOut(bd){
   bd.append(el('div',{class:'sect', role:'heading', 'aria-level':'3'}, t('out.meta')));
   const txt=(key,mk,ph)=>{ const id='meta-'+mk; bd.append(el('div',{class:'row'},
     el('label',{'for':id},t(key)),
-    el('input',{id, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta[mk]||'', placeholder:ph||'', oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
+    el('input',{id, type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta[mk]||'', placeholder:ph||'', onfocus:()=>captureUndo(), oninput:e=>{meta[mk]=e.target.value; saveState();}}))); };
   // Visible preview updates instantly; the SR announcement via srStatus is debounced so
   // typing into the title field doesn't spam the live region with per-keystroke updates.
   const fnPrev=el('div',{class:'limit', id:'fnPreview'});
@@ -2458,7 +2458,7 @@ function renderOut(bd){
   bd.append(el('div',{class:'row'},
     el('label',{'for':'meta-title'},t('out.title')),
     el('input',{id:'meta-title', type:'text', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', 'aria-describedby':'fnPreview', value:meta.title||'', placeholder:t('out.title.ph'),
-      oninput:e=>{ meta.title=e.target.value; saveState(); updateFnPrev(); }})));
+      onfocus:()=>captureUndo(), oninput:e=>{ meta.title=e.target.value; saveState(); updateFnPrev(); }})));
   updateFnPrev();
   bd.append(fnPrev);
   txt('out.version','version', t('out.version.ph'));
@@ -2826,6 +2826,7 @@ function applyLang(){
   if (!$('aboutDlg').open) $('btnAbout').setAttribute('aria-expanded', 'false');
   $('btnAbout').setAttribute('aria-keyshortcuts', '?');
   $('btnMode').setAttribute('aria-keyshortcuts', 'M');
+  $('aboutClose').setAttribute('aria-keyshortcuts', 'Escape');
   $('aboutTxt').textContent = t('about');
   if ($('aboutKeysSumm')) $('aboutKeysSumm').textContent = t('about.keys');
   if ($('aboutKeys')) $('aboutKeys').textContent = t('about.keyList');

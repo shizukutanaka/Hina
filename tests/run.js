@@ -4384,7 +4384,7 @@ function accData(j, bin, ai){
     'renderBody() only resets scrollTop when scrollReset is truthy');
 
   // applyLang() calls renderBody(false) to preserve scroll position
-  ok(/function applyLang\(\)[\s\S]{0,2500}renderBody\(false\)/.test(html),
+  ok(/function applyLang\(\)[\s\S]{0,2700}renderBody\(false\)/.test(html),
     'applyLang() calls renderBody(false) to preserve panel scroll on language/mode switch');
 
   // Tab switches still call renderBody() (default true → scroll resets to 0)
@@ -6611,6 +6611,21 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,600}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 446: meta text inputs get onfocus captureUndo; aboutClose gets aria-keyshortcuts=Escape ---- */
+{
+  // Sliders use onpointerdown to snapshot before drag; enum selects use onchange. Text inputs had
+  // no captureUndo at all — typing over a field then Ctrl+Z couldn't restore the pre-typing value.
+  // onfocus fires once per edit session (not per keystroke), matching the slider granularity intent.
+  ok(/el\('input',\{id, type:'text'[\s\S]{0,220}onfocus:\(\)=>captureUndo\(\)[\s\S]{0,20}oninput/.test(html),
+    'txt() helper input has onfocus:()=>captureUndo() so Ctrl+Z can restore pre-typing meta values');
+  ok(/meta-title[\s\S]{0,300}onfocus:\(\)=>captureUndo\(\)[\s\S]{0,30}oninput/.test(html),
+    'title input has onfocus:()=>captureUndo() so Ctrl+Z can restore pre-typing title');
+  // native <dialog> already closes on Escape, but the close button had no aria-keyshortcuts
+  // declaration — AT users had no in-context hint that Escape works.
+  ok(/aboutClose[\s\S]{0,40}aria-keyshortcuts.*Escape/.test(html),
+    'aboutClose button gets aria-keyshortcuts="Escape" in applyLang() for AT discoverability');
 }
 
 /* ---- Round 445: selRow metadata selects call captureUndo() — Ctrl+Z now undoes license/content-flag changes ---- */
