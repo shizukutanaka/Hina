@@ -6613,6 +6613,16 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 441: autoSaveBadge gets role="status" — matches srStatus/selftestBox convention ---- */
+{
+  // srStatus and selftestBox both carry role="status" alongside aria-live="polite".
+  // autoSaveBadge had aria-live+aria-atomic but no role, which older SRs may not handle reliably.
+  ok(/autoSaveBadge[\s\S]{0,60}role="status"/.test(html),
+    'autoSaveBadge has role="status" (belt-and-suspenders alongside aria-live="polite")');
+  ok(/autoSaveBadge[\s\S]{0,80}aria-live="polite"[\s\S]{0,80}aria-atomic="true"/.test(html),
+    'autoSaveBadge keeps aria-live="polite" and aria-atomic="true" alongside role="status"');
+}
+
 /* ---- Round 440: forced-colors: .preCard.selected gets Highlight outline ---- */
 {
   // .preCard.selected uses border-color+rgba background for selection state; both are silently
