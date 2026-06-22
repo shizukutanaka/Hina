@@ -2712,9 +2712,10 @@ async function doExport(){
       if (_exportFocusWasBtn && _exportBtn.isConnected) _exportBtn.focus(); }
   }
 }
-function saveJson(){
+async function saveJson(){
   const fname=fnameStem()+'.hina.json';
-  download(new TextEncoder().encode(HINA.serialize(params, meta)), fname, 'application/json');
+  const bytes=new TextEncoder().encode(HINA.serialize(params,meta));
+  if (typeof window.showSaveFilePicker==='function'){ try { const h=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Hina JSON',accept:{'application/json':['.json']}}]}); const w=await h.createWritable(); await w.write(new Blob([bytes],{type:'application/json'})); await w.close(); } catch(e){ if(e.name==='AbortError') return; download(bytes,fname,'application/json'); } } else { download(bytes,fname,'application/json'); }
   const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',fname);
 }
 function doScreenshot(){

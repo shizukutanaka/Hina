@@ -4625,7 +4625,7 @@ function accData(j, bin, ai){
     'a11y.savedJson key present in ja locale with {name} placeholder');
   ok(/'a11y\.savedJson':'Saved \{name\}'/.test(html),
     'a11y.savedJson key present in en locale');
-  ok(/function saveJson[\s\S]{0,200}a11y\.savedJson/.test(html),
+  ok(/function saveJson[\s\S]{0,700}a11y\.savedJson/.test(html),
     'saveJson() announces a11y.savedJson to SR live region');
 }
 
@@ -5522,7 +5522,7 @@ function accData(j, bin, ai){
     'drag-and-drop JSON load announces a11y.loadedJson (not savedJson) to srStatus');
 
   // saveJson() still uses savedJson
-  ok(/saveJson[\s\S]{0,200}a11y\.savedJson/.test(html),
+  ok(/saveJson[\s\S]{0,700}a11y\.savedJson/.test(html),
     'saveJson() still announces a11y.savedJson (not changed to loadedJson)');
 
   // Loaded message differs from saved message in both locales
@@ -6596,6 +6596,21 @@ function accData(j, bin, ai){
   // oninput must clear aria-invalid as user types to allow correction without stale error state
   ok(/oninput:e=>\{[^}]*removeAttribute\('aria-invalid'\)[\s\S]{0,80}licenseUrl/.test(html),
     'licenseUrl oninput removes aria-invalid so error clears as user corrects the URL');
+}
+
+/* ---- Round 438: File System Access API for saveJson() — consistent with doExport() (Baseline 2023) ---- */
+{
+  // saveJson() now uses showSaveFilePicker so JSON exports also go to a chosen location on Chrome/Edge
+  ok(/async function saveJson/.test(html),
+    'saveJson() is async to support showSaveFilePicker await');
+  ok(/function saveJson[\s\S]{0,200}showSaveFilePicker/.test(html),
+    'saveJson() uses showSaveFilePicker for direct save on Chrome/Edge (consistent with doExport)');
+  // AbortError (user cancelled JSON picker) must abort silently (same pattern as doExport)
+  ok(/saveJson[\s\S]{0,500}AbortError[\s\S]{0,30}return/.test(html),
+    'saveJson() AbortError from showSaveFilePicker returns early without download or SR announce');
+  // Falls back to <a download> on unsupported browsers
+  ok(/saveJson[\s\S]{0,600}download\(bytes,fname/.test(html),
+    'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
 /* ---- Round 437: navigator.storage.persist() to prevent auto-save eviction (Baseline 2022) ---- */
