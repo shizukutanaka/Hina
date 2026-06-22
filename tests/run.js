@@ -6613,6 +6613,17 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 442: licenseUrl input gets aria-invalid on initial render when stored value is invalid ---- */
+{
+  // Previously, aria-invalid was only applied on blur — so a user returning to the app with a
+  // previously-saved invalid URL would see no error until they interacted with the field.
+  // Extracting the element lets us check validity.valid immediately after setting the value.
+  ok(/licUrlInp\.value.*licUrlInp\.validity\.valid.*licUrlInp\.setAttribute\('aria-invalid'/.test(html.replace(/\s+/g,' ')),
+    'licenseUrl: aria-invalid is set immediately on render when stored value fails URL validation');
+  ok(/licUrlInp=el\('input'[\s\S]{0,700}licUrlRow\.append[\s\S]{0,80}licUrlInp/.test(html),
+    'licenseUrl: input extracted as licUrlInp before appending so validity can be checked synchronously');
+}
+
 /* ---- Round 441: autoSaveBadge gets role="status" — matches srStatus/selftestBox convention ---- */
 {
   // srStatus and selftestBox both carry role="status" alongside aria-live="polite".
