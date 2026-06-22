@@ -6598,6 +6598,19 @@ function accData(j, bin, ai){
     'licenseUrl oninput removes aria-invalid so error clears as user corrects the URL');
 }
 
+/* ---- Round 436: crypto.getRandomValues() for gacha seed (Baseline 2017, full Uint32 range) ---- */
+{
+  // Math.random()*1e9|0 only covers 0–999999999, filling 23% of the 0–4294967295 seed space.
+  // crypto.getRandomValues(new Uint32Array(1))[0] fills the entire Uint32 range uniformly.
+  ok(!html.includes("Math.random()*1e9|0"),
+    'gacha no longer uses Math.random()*1e9|0 (only covers 23% of seed range)');
+  ok(/crypto\.getRandomValues\(new Uint32Array\(1\)\)\[0\]/.test(html),
+    'gacha uses crypto.getRandomValues(new Uint32Array(1))[0] for full Uint32 seed range (Baseline 2017)');
+  // Ensure the crypto call is wired into runGacha (not just present elsewhere)
+  ok(/runGacha\(crypto\.getRandomValues/.test(html),
+    'gachaBtn onclick passes crypto.getRandomValues result directly to runGacha()');
+}
+
 /* ---- Round 432: hover:none + pointer:coarse guards for touch UX (Baseline 2015/2018) ---- */
 {
   // On touch devices (hover:none), swatch scale:1.15 sticks after tap causing a jarring layout shift.
