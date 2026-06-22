@@ -6551,6 +6551,22 @@ function accData(j, bin, ai){
     '.row:has([aria-invalid="true"]) adds border-radius so tint looks contained, not clipped');
 }
 
+/* ---- Round 431: dialog fade-in via @starting-style + transition-behavior:allow-discrete + overscroll-behavior:contain (Baseline 2024) ---- */
+{
+  // dialog[open] fade-in: opacity starts at 0 (via @starting-style) and transitions to 1
+  // transition-behavior:allow-discrete enables animating discrete 'display' so fade-out also works on close
+  ok(/dialog\{[^}]*opacity:0[^}]*transition:opacity[^}]*allow-discrete/.test(html),
+    'dialog base rule has opacity:0 and transition with allow-discrete for enter/exit animation');
+  ok(/dialog\[open\]\{opacity:1\}/.test(html),
+    'dialog[open] sets opacity:1 so the dialog fades in when showModal() is called');
+  ok(/@starting-style\{dialog\[open\]\{opacity:0\}\}/.test(html),
+    '@starting-style sets dialog[open] opacity:0 as the enter-from value so fade-in starts from invisible');
+  ok(/dialog\{[^}]*overscroll-behavior:contain/.test(html),
+    'dialog has overscroll-behavior:contain to prevent scroll chaining to the page behind it');
+  ok(/prefers-reduced-motion:reduce[\s\S]{0,200},dialog\{transition:none/.test(html),
+    'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
+}
+
 /* ---- selfTest ---- */
 {
   const st = H.selfTest();

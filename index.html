@@ -93,7 +93,8 @@ input::placeholder{color:var(--text-dim);opacity:1}
 .rk{font-weight:700;padding:1px 8px;border-radius:99px;font-size:11px}
 .note{font-size:11px;color:var(--text-faint);margin:8px 0 14px;line-height:1.7;text-wrap:pretty}
 .note a{color:var(--accent)}
-dialog{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:24px;max-width:420px;margin:auto;max-height:90vh;max-height:90dvh;overflow-y:auto}
+dialog{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:24px;max-width:420px;margin:auto;max-height:90vh;max-height:90dvh;overflow-y:auto;overscroll-behavior:contain;opacity:0;transition:opacity .2s,display .2s allow-discrete}
+dialog[open]{opacity:1}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog h2{font-size:16px;margin-bottom:12px;text-wrap:balance}
 dialog p{font-size:12px;color:var(--text-dim);margin-bottom:10px;text-wrap:pretty}
@@ -107,6 +108,7 @@ body.drag-over::after{content:'';position:fixed;inset:0;border:3px dashed var(--
 @starting-style{body.drag-over::after{opacity:0}}
 details[open]>:not(summary){opacity:1;transition:opacity .2s}
 @starting-style{details[open]>:not(summary){opacity:0}}
+@starting-style{dialog[open]{opacity:0}}
 @media (max-width:760px){
   main{flex-direction:column}
   #stage{flex:0 0 44vh;flex:0 0 44dvh}
@@ -118,7 +120,7 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
 #skipLink:focus-visible{top:8px}
 @media (prefers-contrast:more){:root{--text-dim:#c0ccd8;--text-faint:#9aa6b2;--line:#3f4f62}}
 @media (prefers-reduced-transparency:reduce){.rankBadge,#exprBar{backdrop-filter:none;background:var(--bg)}#hint{background:var(--bg)}dialog::backdrop{background:rgba(0,0,0,.85)}}
-@media (prefers-reduced-motion:reduce){.preCard,.sw,#autoSaveBadge,#skipLink,body.drag-over::after,details[open]>:not(summary){transition:none}.sw:hover{scale:1}}
+@media (prefers-reduced-motion:reduce){.preCard,.sw,#autoSaveBadge,#skipLink,body.drag-over::after,details[open]>:not(summary),dialog{transition:none}.sw:hover{scale:1}}
 @media (forced-colors:active){
   .rk{forced-color-adjust:none;outline:1px solid ButtonText}
   .sw{forced-color-adjust:none;outline:2px solid ButtonText}
