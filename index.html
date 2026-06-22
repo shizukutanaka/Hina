@@ -2400,11 +2400,13 @@ function renderBody(scrollReset=true){
       onclick:()=>{
         if(lastGachaSeed===null) return;
         if (!navigator.clipboard?.writeText){ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); return; }
+        cpBtn.disabled=true; cpBtn.setAttribute('aria-busy','true');
         navigator.clipboard.writeText(String(lastGachaSeed)).then(()=>{
+          cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy');
           const orig=cpBtn.textContent; cpBtn.textContent=t('btn.copied');
           setTimeout(()=>{ cpBtn.textContent=orig; },1500);
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.seedCopied').replace('{n}',lastGachaSeed);
-        }).catch(()=>{ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); });
+        }).catch(()=>{ cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); });
       }
     }, t('btn.copySeed'));
     seedIn.addEventListener('wheel',e=>{ if(document.activeElement===seedIn) e.preventDefault(); },{passive:false});

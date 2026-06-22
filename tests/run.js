@@ -6613,6 +6613,18 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 444: seed copy button (cpBtn) gets aria-busy+disabled — matches copyJson pattern ---- */
+{
+  // Round 443 fixed copyJson; the gacha seed copy button had the same gap.
+  // writeText() is async — aria-busy prevents double-clicks and signals AT that an op is in progress.
+  ok(/cpBtn\.disabled=true.*cpBtn\.setAttribute\('aria-busy','true'\)/.test(html.replace(/\s+/g,' ')),
+    'cpBtn: disabled=true and aria-busy set before navigator.clipboard.writeText(lastGachaSeed)');
+  ok(/cpBtn\.disabled=false.*cpBtn\.removeAttribute\('aria-busy'\)[\s\S]{0,60}btn\.copied/.test(html.replace(/\s+/g,' ')),
+    'cpBtn: aria-busy cleared in .then() before textContent changes to btn.copied');
+  ok(/cpBtn\.disabled=false.*cpBtn\.removeAttribute\('aria-busy'\)[\s\S]{0,250}copySeed\.err/.test(html.replace(/\s+/g,' ')),
+    'cpBtn: aria-busy cleared in .catch() before showing ! error and copySeed.err announce');
+}
+
 /* ---- Round 443: copyJson button gets aria-busy+disabled during async clipboard write ---- */
 {
   // pasteJson already sets aria-busy+disabled during readText(); copyJson missed the same pattern.
