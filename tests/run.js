@@ -4625,7 +4625,7 @@ function accData(j, bin, ai){
     'a11y.savedJson key present in ja locale with {name} placeholder');
   ok(/'a11y\.savedJson':'Saved \{name\}'/.test(html),
     'a11y.savedJson key present in en locale');
-  ok(/function saveJson[\s\S]{0,700}a11y\.savedJson/.test(html),
+  ok(/function saveJson[\s\S]{0,900}a11y\.savedJson/.test(html),
     'saveJson() announces a11y.savedJson to SR live region');
 }
 
@@ -5522,7 +5522,7 @@ function accData(j, bin, ai){
     'drag-and-drop JSON load announces a11y.loadedJson (not savedJson) to srStatus');
 
   // saveJson() still uses savedJson
-  ok(/saveJson[\s\S]{0,700}a11y\.savedJson/.test(html),
+  ok(/saveJson[\s\S]{0,900}a11y\.savedJson/.test(html),
     'saveJson() still announces a11y.savedJson (not changed to loadedJson)');
 
   // Loaded message differs from saved message in both locales
@@ -6603,14 +6603,31 @@ function accData(j, bin, ai){
   // saveJson() now uses showSaveFilePicker so JSON exports also go to a chosen location on Chrome/Edge
   ok(/async function saveJson/.test(html),
     'saveJson() is async to support showSaveFilePicker await');
-  ok(/function saveJson[\s\S]{0,200}showSaveFilePicker/.test(html),
+  ok(/function saveJson[\s\S]{0,400}showSaveFilePicker/.test(html),
     'saveJson() uses showSaveFilePicker for direct save on Chrome/Edge (consistent with doExport)');
   // AbortError (user cancelled JSON picker) must abort silently (same pattern as doExport)
-  ok(/saveJson[\s\S]{0,500}AbortError[\s\S]{0,30}return/.test(html),
+  ok(/saveJson[\s\S]{0,750}AbortError[\s\S]{0,30}return/.test(html),
     'saveJson() AbortError from showSaveFilePicker returns early without download or SR announce');
   // Falls back to <a download> on unsupported browsers
-  ok(/saveJson[\s\S]{0,600}download\(bytes,fname/.test(html),
+  ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 447: saveJson() button gets id + aria-busy/disabled guard — matches doExport pattern ---- */
+{
+  // saveJson() is async (showSaveFilePicker + write) but the Save JSON button had no aria-busy or
+  // disabled guard — rapid clicks could open multiple pickers; AT had no busy signal. doExport and
+  // doScreenshot already use this pattern; saveJson was the only async button that didn't.
+  ok(/btnSaveJson[\s\S]{0,100}saveJson/.test(html),
+    'Save JSON button has id="btnSaveJson" so saveJson() can find and disable it');
+  ok(/function saveJson[\s\S]{0,100}btn\.disabled=true.*btn\.setAttribute\('aria-busy','true'\)/.test(html.replace(/\s+/g,' ')),
+    'saveJson() disables button and sets aria-busy before any await');
+  // AbortError (user cancelled picker) must clear busy state before early return
+  ok(/_done\(\); if\(e\.name==='AbortError'\)/.test(html),
+    'saveJson() calls _done() before checking AbortError so cancel always re-enables the button');
+  // Success path clears busy after file close, before SR announce
+  ok(/w\.close\(\)[\s\S]{0,100}_done\(\)/.test(html),
+    'saveJson() calls _done() after w.close() on success path');
 }
 
 /* ---- Round 446: meta text inputs get onfocus captureUndo; aboutClose gets aria-keyshortcuts=Escape ---- */

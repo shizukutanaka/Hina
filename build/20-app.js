@@ -1008,7 +1008,7 @@ function renderOut(bd){
   tbl.append(el('tr',{}, el('th',{scope:'row'},'PC'), rkPC));
   tbl.append(el('tr',{}, el('th',{scope:'row'},'Quest'), rkQ));
   bd.append(tbl);
-  bd.append(el('button',{class:'btn wide', 'aria-keyshortcuts':'Control+Shift+S Meta+Shift+S', onclick:saveJson}, t('btn.saveJson')));
+  bd.append(el('button',{id:'btnSaveJson', class:'btn wide', 'aria-keyshortcuts':'Control+Shift+S Meta+Shift+S', onclick:saveJson}, t('btn.saveJson')));
   {
     const cpj=el('button',{class:'btn wide', onclick:()=>{
       const json=HINA.serialize(params,meta);
@@ -1222,9 +1222,12 @@ async function doExport(){
   }
 }
 async function saveJson(){
+  const btn=$('btnSaveJson'); if(btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
+  const _done=()=>{ if(btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); } };
   const fname=fnameStem()+'.hina.json';
   const bytes=new TextEncoder().encode(HINA.serialize(params,meta));
-  if (typeof window.showSaveFilePicker==='function'){ try { const h=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Hina JSON',accept:{'application/json':['.json']}}]}); const w=await h.createWritable(); await w.write(new Blob([bytes],{type:'application/json'})); await w.close(); } catch(e){ if(e.name==='AbortError') return; download(bytes,fname,'application/json'); } } else { download(bytes,fname,'application/json'); }
+  if (typeof window.showSaveFilePicker==='function'){ try { const h=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Hina JSON',accept:{'application/json':['.json']}}]}); const w=await h.createWritable(); await w.write(new Blob([bytes],{type:'application/json'})); await w.close(); } catch(e){ _done(); if(e.name==='AbortError') return; download(bytes,fname,'application/json'); const sr2=$('srStatus'); if(sr2) sr2.textContent=t('a11y.savedJson').replace('{name}',fname); return; } } else { download(bytes,fname,'application/json'); }
+  _done();
   const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',fname);
 }
 function doScreenshot(){
