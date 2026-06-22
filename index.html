@@ -2507,10 +2507,12 @@ function renderOut(bd){
   {
     const cpj=el('button',{class:'btn wide', onclick:()=>{
       const json=HINA.serialize(params,meta);
-      const _fail=()=>{ cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
+      const _fail=()=>{ cpj.disabled=false; cpj.removeAttribute('aria-busy'); cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copyJson.err'); };
       if(!navigator.clipboard?.writeText){ _fail(); return; }
+      cpj.disabled=true; cpj.setAttribute('aria-busy','true');
       navigator.clipboard.writeText(json).then(()=>{
+        cpj.disabled=false; cpj.removeAttribute('aria-busy');
         const orig=cpj.textContent; cpj.textContent=t('btn.copyJsonDone');
         setTimeout(()=>{ cpj.textContent=orig; },1800);
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copyJsonDone');

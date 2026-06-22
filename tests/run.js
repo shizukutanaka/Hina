@@ -6613,6 +6613,19 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 443: copyJson button gets aria-busy+disabled during async clipboard write ---- */
+{
+  // pasteJson already sets aria-busy+disabled during readText(); copyJson missed the same pattern.
+  // Without it: multiple rapid clicks could queue parallel writeText() calls, and AT had no signal
+  // that an async operation was in progress.
+  ok(/copyJson[\s\S]{0,200}cpj\.disabled=true.*cpj\.setAttribute\('aria-busy','true'\)/.test(html.replace(/\s+/g,' ')),
+    'copyJson: cpj.disabled=true and aria-busy set before navigator.clipboard.writeText()');
+  ok(/writeText\(json\)\.then[\s\S]{0,30}cpj\.disabled=false.*cpj\.removeAttribute\('aria-busy'\)[\s\S]{0,70}copyJsonDone/.test(html.replace(/\s+/g,' ')),
+    'copyJson: aria-busy and disabled cleared in .then() before text reverts to Done state');
+  ok(/const _fail[\s\S]{0,30}cpj\.disabled=false.*cpj\.removeAttribute\('aria-busy'\)[\s\S]{0,150}copyJson\.err/.test(html.replace(/\s+/g,' ')),
+    'copyJson: _fail clears aria-busy and disabled before showing ! error state');
+}
+
 /* ---- Round 442: licenseUrl input gets aria-invalid on initial render when stored value is invalid ---- */
 {
   // Previously, aria-invalid was only applied on blur — so a user returning to the app with a
