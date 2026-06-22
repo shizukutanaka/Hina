@@ -6454,6 +6454,17 @@ function accData(j, bin, ai){
     'structuredClone(meta) is used for undo snapshot and export isolation');
 }
 
+/* ---- Round 429: prefers-reduced-transparency removes backdrop-filter blur (macOS Reduce Transparency) ---- */
+{
+  // Users with macOS "Reduce Transparency" get no backdrop-filter blur on rank badges and expr bar
+  ok(/@media \(prefers-reduced-transparency:reduce\)/.test(html),
+    'prefers-reduced-transparency media query present');
+  ok(/prefers-reduced-transparency:reduce[\s\S]{0,120}backdrop-filter:none/.test(html),
+    'backdrop-filter:none applied under prefers-reduced-transparency');
+  ok(/prefers-reduced-transparency:reduce[\s\S]{0,160}background:var\(--bg\)/.test(html),
+    'semi-transparent overlays get fully opaque --bg background under prefers-reduced-transparency');
+}
+
 /* ---- Round 428: color picker onchange SR announcement + explicit aria-live=assertive on srAlert ---- */
 {
   // role=alert implies aria-live=assertive but older NVDA/JAWS are more reliable with explicit attribute
