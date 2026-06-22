@@ -6613,6 +6613,17 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 440: forced-colors: .preCard.selected gets Highlight outline ---- */
+{
+  // .preCard.selected uses border-color+rgba background for selection state; both are silently
+  // overridden by forced-colors (Windows High Contrast Mode). Sighted HCM users can't tell which
+  // preset is selected. outline:Highlight restores visual selection without touching aria-pressed.
+  ok(/@media\s*\(forced-colors:active\)[\s\S]{0,300}preCard\.selected/.test(html),
+    'forced-colors block contains .preCard.selected rule so HCM users see which preset is active');
+  ok(/@media\s*\(forced-colors:active\)[\s\S]{0,300}Highlight/.test(html),
+    'forced-colors .preCard.selected uses Highlight system color so outline matches OS selection color');
+}
+
 /* ---- Round 439: tab buttons get aria-keyshortcuts for digit 1–8 shortcuts ---- */
 {
   // The 1-8 digit shortcuts exist (keydown handler at global level) but were not declared on the
