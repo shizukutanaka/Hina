@@ -5363,8 +5363,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 298: .sw:hover transform:none in prefers-reduced-motion CSS ---- */
 {
-  ok(/prefers-reduced-motion[\s\S]{0,130}\.sw:hover\{transform:none\}/.test(html),
-    '.sw:hover has transform:none in prefers-reduced-motion so swatch hover does not move for motion-sensitive users');
+  ok(/prefers-reduced-motion[\s\S]{0,130}\.sw:hover\{scale:1\}/.test(html),
+    '.sw:hover scale reset to 1 in prefers-reduced-motion so swatch hover does not move for motion-sensitive users');
 }
 
 /* ---- Round 297: VRChat guide title gets role=heading aria-level=4 ---- */
@@ -6452,6 +6452,22 @@ function accData(j, bin, ai){
     'structuredClone(params) is used for undo snapshot and export isolation');
   ok(/structuredClone\(meta\)/.test(html),
     'structuredClone(meta) is used for undo snapshot and export isolation');
+}
+
+/* ---- Round 430: CSS individual transform properties — translate/scale (Baseline 2022) ---- */
+{
+  // Individual CSS transform properties avoid clobbering other transform axes
+  ok(/#hint[\s\S]{0,80}translate:-50% 0/.test(html),
+    '#hint uses individual translate property instead of transform:translateX(-50%)');
+  ok(/#exprBar[\s\S]{0,80}translate:-50% 0/.test(html),
+    '#exprBar uses individual translate property instead of transform:translateX(-50%)');
+  ok(/\.sw:hover\{scale:1\.15\}/.test(html),
+    '.sw:hover uses individual scale property instead of transform:scale(1.15)');
+  ok(/prefers-reduced-motion:reduce[\s\S]{0,200}\.sw:hover\{scale:1\}/.test(html),
+    'sw:hover scale is reset to 1 (not transform:none) under prefers-reduced-motion');
+  // Verify old transform pattern is gone
+  ok(!html.includes('transform:translateX(-50%)'),
+    'transform:translateX(-50%) removed in favour of individual translate property');
 }
 
 /* ---- Round 429: prefers-reduced-transparency removes backdrop-filter blur (macOS Reduce Transparency) ---- */
