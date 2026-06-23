@@ -6614,6 +6614,21 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 451: eBtn.active and sw[aria-pressed=true] focus-visible gaps fixed ---- */
+{
+  // .btn.primary already got outline-color:#06282a because accent background made the accent focus
+  // ring invisible. .eBtn.active has the SAME background:var(--accent) pattern and was missing the
+  // identical fix — keyboard focus on an active expression button was invisible.
+  ok(/eBtn\.active:focus-visible\{outline-color:#06282a\}/.test(html),
+    '.eBtn.active:focus-visible uses dark outline-color so focus ring is visible on accent background');
+  ok(/btn\.primary:focus-visible\{outline-color:#06282a\}/.test(html),
+    '.btn.primary:focus-visible still has dark outline (reference pattern, not regressed)');
+  // .sw[aria-pressed=true] always shows outline:2px (selected state); when also focused it looked
+  // identical — no extra signal for keyboard focus. Larger offset distinguishes focused+active.
+  ok(/sw\[aria-pressed=true\]:focus-visible\{outline-offset:5px\}/.test(html),
+    '.sw[aria-pressed=true]:focus-visible uses outline-offset:5px to distinguish focused+active from active-only');
+}
+
 /* ---- Round 450: logo div→h1 gives page a heading; applyLang updates its aria-label ---- */
 {
   // The page had no <h1>. Screen reader users navigating by heading (H key) found nothing on the
