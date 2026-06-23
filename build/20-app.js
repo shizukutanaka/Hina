@@ -1400,7 +1400,7 @@ document.querySelectorAll('.rankBadge').forEach(b=>{
 // Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about, 1-8=tabs
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;
-  const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag);
+  const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag) && !document.activeElement.isContentEditable;
   const dlgOpen = $('aboutDlg').open;
   if (!dlgOpen){
     if ((e.ctrlKey||e.metaKey) && e.key==='S' && e.shiftKey && notField){

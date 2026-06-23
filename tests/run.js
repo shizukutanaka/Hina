@@ -6614,6 +6614,24 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 453: notField guard adds isContentEditable check to keyboard shortcut handler ---- */
+{
+  // notField was guarding shortcuts against INPUT/SELECT/TEXTAREA by tagName only.
+  // Any contentEditable element (e.g. a future rich-text title field) would not be in that list,
+  // so Ctrl+Z, ?, M, 1-8 would all steal keystrokes while the user is typing.
+  // isContentEditable is the correct DOM property to check (handles both contenteditable="true"
+  // and elements that inherit editability from an ancestor).
+  ok(/notField.*isContentEditable/.test(html.replace(/\s+/g,' ')),
+    'notField guard includes isContentEditable so keyboard shortcuts yield to any future rich-text elements');
+  ok(/notField = !\['INPUT','SELECT','TEXTAREA'\].*isContentEditable/.test(html.replace(/\s+/g,' ')),
+    'notField checks tagName list AND isContentEditable in a single expression');
+  // Confirm all major shortcuts still reference notField (guard is applied uniformly)
+  ok(/key==='s'.*notField/.test(html.replace(/\s+/g,' ')),
+    'Ctrl+S (doExport) still references the updated notField guard');
+  ok(/key==='z'.*notField/.test(html.replace(/\s+/g,' ')),
+    'Ctrl+Z (doUndo) still references the updated notField guard');
+}
+
 /* ---- Round 452: showErr() srAlert timer race condition fixed with _srAlertTimer ---- */
 {
   // showErr() stored no reference for the srAlert clear-timer. A second error within 5.5s of the
