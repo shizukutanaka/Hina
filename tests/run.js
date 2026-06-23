@@ -6617,6 +6617,39 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 456: all buttons get explicit type="button" so AT doesn't announce "Submit button" ---- */
+{
+  // Buttons without an explicit type attribute default to type="submit" per the HTML spec.
+  // Screen readers (VoiceOver, NVDA, JAWS) announce these as "Submit button", which is confusing
+  // because none of these buttons submit a form — they trigger JS actions.
+  // Fix: add type="button" to every <button> in both the static HTML and dynamic JS.
+  ok(/type="button".*id="btnScreenshot"/.test(html)||/id="btnScreenshot".*type="button"/.test(html),
+    'btnScreenshot has type="button" in static HTML so AT announces it as a button, not Submit button');
+  ok(/type="button".*id="btnMode"/.test(html)||/id="btnMode".*type="button"/.test(html),
+    'btnMode has type="button" in static HTML');
+  ok(/type="button".*id="btnLang"/.test(html)||/id="btnLang".*type="button"/.test(html),
+    'btnLang has type="button" in static HTML');
+  ok(/type="button".*id="btnAbout"/.test(html)||/id="btnAbout".*type="button"/.test(html),
+    'btnAbout has type="button" in static HTML');
+  ok(/type="button".*id="aboutClose"/.test(html)||/id="aboutClose".*type="button"/.test(html),
+    'aboutClose has type="button" in static HTML');
+  // Dynamic buttons
+  ok(/tab-.*class:'tab'[\s\S]{0,30}role:'tab'[\s\S]{0,5}|el\('button',\{[\s\S]{0,20}type:'button'[\s\S]{0,200}role:'tab'/.test(html.replace(/\s+/g,' ')),
+    'tab buttons built with type:button so AT announces them as buttons not submit');
+  ok(/type:'button'[\s\S]{0,30}class:'preCard'/.test(html.replace(/\s+/g,' ')),
+    'preCard buttons have type:button');
+  ok(/type:'button'[\s\S]{0,30}id:'gachaBtn'/.test(html.replace(/\s+/g,' ')),
+    'gachaBtn has type:button');
+  ok(/nb\.type\s*=\s*'button'/.test(html),
+    'expression bar neutral button (nb) has .type="button" set after createElement');
+  ok(/b\.type\s*=\s*'button'/.test(html),
+    'expression bar morph buttons (b) have .type="button" set after createElement');
+  ok(/type:'button'[\s\S]{0,50}id:'btnSaveJson'/.test(html.replace(/\s+/g,' '))||/id:'btnSaveJson'[\s\S]{0,50}type:'button'/.test(html.replace(/\s+/g,' ')),
+    'btnSaveJson has type:button');
+  ok(/type:'button'[\s\S]{0,60}btn primary wide/.test(html.replace(/\s+/g,' ')),
+    'export button (_exportBtn) has type:button');
+}
+
 /* ---- Round 455: validation errors use assertive srAlert; license Other announces URL field ---- */
 {
   // Number input _announce() and seed input validation used aria-errormessage='srStatus' (polite).

@@ -378,6 +378,7 @@ function buildExprBar(){
   bar.innerHTML = '';
   const activeKey = activeExpr === null ? '' : activeExpr;
   const nb = document.createElement('button');
+  nb.type = 'button';
   nb.className = 'eBtn' + (activeExpr === null ? ' active' : '');
   nb.dataset.expr = '';
   nb.textContent = 'N';
@@ -390,6 +391,7 @@ function buildExprBar(){
   for(const name of build.morphs.names){
     if (name === 'blink_l' || name === 'blink_r') continue;
     const b = document.createElement('button');
+    b.type = 'button';
     b.className = 'eBtn' + (activeExpr === name ? ' active' : '');
     b.dataset.expr = name;
     b.textContent = EXPR_LABELS[name] || name.slice(0,3);
@@ -691,7 +693,7 @@ function renderTabs(){
   const nav=$('tabs'); nav.textContent='';
   for(const tb of TABS){
     nav.append(el('button',{
-      id:'tab-'+tb, class:'tab', role:'tab',
+      type:'button', id:'tab-'+tb, class:'tab', role:'tab',
       'aria-selected':String(tb===activeTab),
       'aria-controls':'tabBody',
       'aria-keyshortcuts':String(TABS.indexOf(tb)+1),
@@ -838,7 +840,7 @@ function renderBody(scrollReset=true){
         title:lang==='ja'?'プリセットから変更中':'Modified from preset',
         role:'img', 'aria-label':lang==='ja'?'プリセットから変更中':'Modified from preset'
       }, '●'));
-      grid.append(el('button',{class:'preCard'+(isSelected?' selected':''),
+      grid.append(el('button',{type:'button', class:'preCard'+(isSelected?' selected':''),
         'aria-pressed':String(isSelected),
         tabindex: (isSelected || (!hasSelected && _firstCard)) ? '0' : '-1',
         onclick:()=>{
@@ -866,7 +868,7 @@ function renderBody(scrollReset=true){
     const activePre = activePresetId ? HINA.PRESETS.find(p=>p.id===activePresetId) : null;
     if (activePre && JSON.stringify(HINA.presetParams(activePre)) !== _sCur){
       const preLabel = lang==='ja' ? activePre.ja : activePre.en;
-      bd.append(el('button',{class:'btn wide',style:'margin-top:10px',
+      bd.append(el('button',{type:'button', class:'btn wide',style:'margin-top:10px',
         onclick:()=>{ captureUndo(); params=HINA.presetParams(activePre); rebuild(); renderBody(false);
           const sel=$('tabBody').querySelector('.preCard.selected'); if(sel) sel.focus();
           const sr=$('srStatus'); if(sr) sr.textContent=t('btn.revert').replace('{p}',preLabel); }},
@@ -880,7 +882,7 @@ function renderBody(scrollReset=true){
       // Return focus to gacha button so keyboard users can run it again or Tab onwards
       const gb=$('gachaBtn'); if(gb) gb.focus();
     };
-    gDiv.append(el('button',{id:'gachaBtn', class:'btn wide', onclick:()=>runGacha(crypto.getRandomValues(new Uint32Array(1))[0])}, t('btn.gacha')));
+    gDiv.append(el('button',{type:'button', id:'gachaBtn', class:'btn wide', onclick:()=>runGacha(crypto.getRandomValues(new Uint32Array(1))[0])}, t('btn.gacha')));
     const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', max:'4294967295', step:'1', autocomplete:'off', inputmode:'numeric', enterkeyhint:'go',
@@ -899,7 +901,7 @@ function renderBody(scrollReset=true){
         const clamped=Math.min(n,4294967295);
         if(clamped!==n){ e.target.value=String(clamped); const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',clamped); }
         runGacha(clamped); }});
-    const cpBtn=el('button',{class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
+    const cpBtn=el('button',{type:'button', class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       ...(lastGachaSeed===null?{disabled:''}:{}),
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
       onclick:()=>{
@@ -940,7 +942,7 @@ function renderBody(scrollReset=true){
 let statEls={};
 function renderOut(bd){
   // Primary action at top — the export button is why the user opened this tab
-  _exportBtn = el('button',{class:'btn primary wide', 'aria-keyshortcuts':'Control+S Meta+S', onclick:doExport}, _exporting?t('btn.exporting'):t('btn.export'));
+  _exportBtn = el('button',{type:'button', class:'btn primary wide', 'aria-keyshortcuts':'Control+S Meta+S', onclick:doExport}, _exporting?t('btn.exporting'):t('btn.export'));
   if (_exporting){ _exportBtn.disabled=true; _exportBtn.setAttribute('aria-busy','true'); }
   bd.append(_exportBtn);
   bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:10px'}, t('hint.ctrlS')));
@@ -1010,9 +1012,9 @@ function renderOut(bd){
   tbl.append(el('tr',{}, el('th',{scope:'row'},'PC'), rkPC));
   tbl.append(el('tr',{}, el('th',{scope:'row'},'Quest'), rkQ));
   bd.append(tbl);
-  bd.append(el('button',{id:'btnSaveJson', class:'btn wide', 'aria-keyshortcuts':'Control+Shift+S Meta+Shift+S', onclick:saveJson}, t('btn.saveJson')));
+  bd.append(el('button',{type:'button', id:'btnSaveJson', class:'btn wide', 'aria-keyshortcuts':'Control+Shift+S Meta+Shift+S', onclick:saveJson}, t('btn.saveJson')));
   {
-    const cpj=el('button',{class:'btn wide', onclick:()=>{
+    const cpj=el('button',{type:'button', class:'btn wide', onclick:()=>{
       const json=HINA.serialize(params,meta);
       const _cpjF=document.activeElement===cpj;
       const _fail=()=>{ cpj.disabled=false; cpj.removeAttribute('aria-busy'); if(_cpjF) cpj.focus(); cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
@@ -1029,7 +1031,7 @@ function renderOut(bd){
     bd.append(cpj);
   }
   {
-    const pstj=el('button',{class:'btn wide', onclick:()=>{
+    const pstj=el('button',{type:'button', class:'btn wide', onclick:()=>{
       const _pstjF=document.activeElement===pstj;
       const _pfail=()=>{ pstj.disabled=false; pstj.removeAttribute('aria-busy'); if(_pstjF) pstj.focus(); pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
         const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); };
@@ -1059,11 +1061,11 @@ function renderOut(bd){
       rd.onerror=rd.onabort=()=>showErr(t('err.loadFailed'));
       rd.readAsText(f); e.target.value=''; }});
   bd.append(file);
-  bd.append(el('button',{class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
+  bd.append(el('button',{type:'button', class:'btn wide', onclick:()=>file.click()}, t('btn.loadJson')));
   bd.append(el('div',{class:'limit', style:'text-align:center;margin-bottom:8px'}, t('hint.dropJson')));
   {
     let _resetPending=false, _resetTimer=null;
-    const resetBtn=el('button',{class:'btn wide', onclick:()=>{
+    const resetBtn=el('button',{type:'button', class:'btn wide', onclick:()=>{
       if(_resetPending){
         clearTimeout(_resetTimer); _resetPending=false; resetBtn.textContent=t('btn.reset');
         captureUndo(); params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
