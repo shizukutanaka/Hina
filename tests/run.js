@@ -6618,6 +6618,25 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 458: licUrlInp gets aria-errormessage + showErr on blur, oninput clears both attrs ---- */
+{
+  // licUrlInp set aria-invalid on blur when the URL was malformed, but never set aria-errormessage
+  // pointing to an error description region, and never posted an error message to a live region.
+  // AT users heard silence: the field went invalid (focus ring changed color) but no voice feedback.
+  // Fix: add aria-errormessage='srAlert' and call showErr(t('a11y.licUrlInvalid')) on blur,
+  // remove both attrs on oninput (clear-while-editing) and on the valid branch.
+  ok(html.includes("'a11y.licUrlInvalid':'有効なURL") && html.includes("'a11y.licUrlInvalid':'Enter a valid URL"),
+    'a11y.licUrlInvalid i18n key present in both ja and en locales');
+  ok(/onblur[\s\S]{0,200}aria-errormessage','srAlert'[\s\S]{0,100}showErr\(t\('a11y\.licUrlInvalid'\)\)/.test(html.replace(/\s+/g,' ')),
+    'licUrlInp onblur sets aria-errormessage=srAlert and calls showErr() with licUrlInvalid message');
+  ok(/onblur[\s\S]{0,400}removeAttribute\('aria-errormessage'\)/.test(html.replace(/\s+/g,' ')),
+    'licUrlInp onblur removes aria-errormessage when URL becomes valid');
+  ok(/removeAttribute\('aria-invalid'\); e\.target\.removeAttribute\('aria-errormessage'\); meta\.licenseUrl/.test(html.replace(/\s+/g,' ')),
+    'licUrlInp oninput removes both aria-invalid and aria-errormessage while user is typing');
+  ok(/licUrlInp\.setAttribute\('aria-errormessage','srAlert'\)/.test(html),
+    'licUrlInp initial render sets aria-errormessage=srAlert alongside aria-invalid for pre-saved invalid URLs');
+}
+
 /* ---- Round 457: guide heading in Out tab upgraded from b[role=heading aria-level=4] to div.sect[aria-level=3] ---- */
 {
   // The upload-guide heading ("VRChat upload steps") was <b role="heading" aria-level="4">.
@@ -6885,7 +6904,7 @@ function accData(j, bin, ai){
   // Extracting the element lets us check validity.valid immediately after setting the value.
   ok(/licUrlInp\.value.*licUrlInp\.validity\.valid.*licUrlInp\.setAttribute\('aria-invalid'/.test(html.replace(/\s+/g,' ')),
     'licenseUrl: aria-invalid is set immediately on render when stored value fails URL validation');
-  ok(/licUrlInp=el\('input'[\s\S]{0,700}licUrlRow\.append[\s\S]{0,80}licUrlInp/.test(html),
+  ok(/licUrlInp=el\('input'[\s\S]{0,870}licUrlRow\.append[\s\S]{0,80}licUrlInp/.test(html),
     'licenseUrl: input extracted as licUrlInp before appending so validity can be checked synchronously');
 }
 

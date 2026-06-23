@@ -987,9 +987,9 @@ function renderOut(bd){
   const licUrlRow=el('div',{class:'row', style: meta.license==='Other' ? '' : 'display:none'});
   const licUrlInp=el('input',{id:licUrlId, type:'url', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta.licenseUrl||'',
     placeholder:t('out.license.url.ph'),
-    oninput:e=>{ e.target.removeAttribute('aria-invalid'); meta.licenseUrl=e.target.value; saveState(); },
-    onblur:e=>{ if(e.target.value&&!e.target.validity.valid) e.target.setAttribute('aria-invalid','true'); else e.target.removeAttribute('aria-invalid'); }});
-  if (licUrlInp.value && !licUrlInp.validity.valid) licUrlInp.setAttribute('aria-invalid','true');
+    oninput:e=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); meta.licenseUrl=e.target.value; saveState(); },
+    onblur:e=>{ if(e.target.value&&!e.target.validity.valid){ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srAlert'); showErr(t('a11y.licUrlInvalid')); } else { e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); } }});
+  if (licUrlInp.value && !licUrlInp.validity.valid){ licUrlInp.setAttribute('aria-invalid','true'); licUrlInp.setAttribute('aria-errormessage','srAlert'); }
   licUrlRow.append(el('label',{'for':licUrlId}, t('out.license.url')), licUrlInp);
   selRow('out.license','license',
     ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
