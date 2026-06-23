@@ -5291,10 +5291,12 @@ function accData(j, bin, ai){
     'applyLang() updates sliderDesc text to the localized hint.sliderReset string');
 }
 
-/* ---- Round 313: numIn clamped path sets aria-errormessage=srStatus alongside aria-invalid ---- */
+/* ---- Round 313: numIn clamped path sets aria-errormessage alongside aria-invalid (Round 455: upgraded to srAlert) ---- */
 {
-  ok(html.includes("setAttribute('aria-errormessage','srStatus')"),
-    'numIn onchange clamped path sets aria-errormessage=srStatus for WCAG 1.3.1 error association');
+  // Round 455 upgraded the target from srStatus (polite) to srAlert (assertive) so validation errors
+  // interrupt ongoing AT speech rather than waiting politely. WCAG 1.3.1 still satisfied either way.
+  ok(html.includes("setAttribute('aria-errormessage','srAlert')"),
+    'numIn onchange clamped path sets aria-errormessage=srAlert for WCAG 1.3.1 error association (assertive region)');
   ok(html.includes("removeAttribute('aria-errormessage')"),
     'numIn timeout removes aria-errormessage when aria-invalid is cleared');
 }
@@ -5842,13 +5844,14 @@ function accData(j, bin, ai){
     'webglcontextlost hides screenshot button (disabled+display:none) to prevent blank screenshots');
 }
 
-/* ---- Round 353: seed input sets aria-errormessage='srStatus' (consistent with numIn) so AT users get error pointer ---- */
+/* ---- Round 353: seed input sets aria-errormessage alongside aria-invalid (Round 455: upgraded to srAlert) ---- */
 {
+  // Round 455 upgraded the target from srStatus (polite) to srAlert (assertive) to match numIn upgrade.
   const si = html.indexOf("placeholder:t('gacha.seed.ph')");
   ok(si !== -1, 'gacha seed input exists');
   const chunk = html.slice(si, si + 800);
-  ok(/aria-errormessage[\s\S]{0,30}srStatus[\s\S]{0,150}seedInvalid/.test(chunk),
-    'seed input sets aria-errormessage=srStatus alongside aria-invalid for AT error pointer');
+  ok(/aria-errormessage[\s\S]{0,30}srAlert[\s\S]{0,150}seedInvalid/.test(chunk),
+    'seed input sets aria-errormessage=srAlert alongside aria-invalid for assertive AT error pointer');
   ok(/seedInvalid[\s\S]{0,100}removeAttribute\('aria-errormessage'\)/.test(chunk),
     'seed input clears aria-errormessage after timeout (same as aria-invalid cleanup)');
 }
@@ -6612,6 +6615,29 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 455: validation errors use assertive srAlert; license Other announces URL field ---- */
+{
+  // Number input _announce() and seed input validation used aria-errormessage='srStatus' (polite).
+  // A polite live region won't interrupt an ongoing announcement, so AT users who caused an error
+  // while the SR was reading something else would miss the correction entirely.
+  // Fix: change aria-errormessage to point to srAlert (assertive) and replace the manual sr.textContent
+  // calls with showErr(), which posts to both srStatus (persistent) and srAlert (interrupting).
+  ok(/_announce=\(v\)[\s\S]{0,110}aria-errormessage','srAlert'/.test(html.replace(/\s+/g,' ')),
+    'numIn _announce: aria-errormessage points to assertive srAlert region (not polite srStatus)');
+  ok(/_announce=\(v\)[\s\S]{0,130}showErr\(t\('a11y\.clamped'\)/.test(html.replace(/\s+/g,' ')),
+    'numIn _announce: calls showErr() so clamped value is announced assertively via srAlert and persistently via srStatus');
+  ok(/Number\.isFinite\(n\)\|\|n<0[\s\S]{0,120}aria-errormessage','srAlert'/.test(html.replace(/\s+/g,' ')),
+    'seedIn validation: aria-errormessage points to assertive srAlert region');
+  ok(/Number\.isFinite\(n\)\|\|n<0[\s\S]{0,150}showErr\(t\('a11y\.seedInvalid'\)\)/.test(html.replace(/\s+/g,' ')),
+    'seedIn validation: calls showErr() so invalid seed is announced assertively and persistently');
+
+  // When the license select changes to "Other", a URL input row appears (licUrlRow) and focus moves
+  // to it — but screen reader users relying on srStatus for contextual hints had no announcement
+  // that a new required field was now visible. Fix: post t('out.license.url') to srStatus.
+  ok(/v==='Other'[\s\S]{0,170}srStatus.*textContent=t\('out\.license\.url'\)/.test(html.replace(/\s+/g,' ')),
+    'license onChange: when Other is selected, srStatus announces the URL field label for context');
 }
 
 /* ---- Round 454: onParam() clears lastGachaSeed on structural changes — filename consistency ---- */

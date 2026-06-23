@@ -2233,8 +2233,8 @@ function paramRow(k){
         'aria-label':t('a11y.numIn').replace('{label}',label), inputmode:'decimal', enterkeyhint:'done',
         onwheel:e=>e.preventDefault(),
         onchange:e=>{ captureUndo(); let n=parseFloat(e.target.value);
-          const _announce=(v)=>{ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srStatus');
-            const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',v);
+          const _announce=(v)=>{ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srAlert');
+            showErr(t('a11y.clamped').replace('{v}',v));
             setTimeout(()=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); },1500); };
           if (!Number.isFinite(n)){ _announce(params[k]); n=params[k]; }
           const clamped=M.clamp(n,s.min,s.max);
@@ -2390,8 +2390,8 @@ function renderBody(scrollReset=true){
       onchange:e=>{ let n=Math.round(Number(e.target.value));
         if (!Number.isFinite(n)||n<0){
           e.target.setAttribute('aria-invalid','true');
-          e.target.setAttribute('aria-errormessage','srStatus');
-          const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.seedInvalid');
+          e.target.setAttribute('aria-errormessage','srAlert');
+          showErr(t('a11y.seedInvalid'));
           setTimeout(()=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); },1500);
           return;
         }
@@ -2494,7 +2494,7 @@ function renderOut(bd){
     'license', v=>{
       const focusWasInUrl = licUrlRow.contains(document.activeElement);
       licUrlRow.style.display=v==='Other'?'':'none';
-      if (v==='Other'){ const u=document.getElementById(licUrlId); if(u) u.focus(); }
+      if (v==='Other'){ const u=document.getElementById(licUrlId); if(u) u.focus(); const sr=$('srStatus'); if(sr) sr.textContent=t('out.license.url'); }
       else if (focusWasInUrl){ const s=document.getElementById('sel-license'); if(s) s.focus(); }});
   bd.append(licUrlRow);
 
