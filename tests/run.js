@@ -1457,7 +1457,7 @@ function accData(j, bin, ai){
     'rebuild() resets activeExpr and calls buildExprBar() to refresh the bar');
 
   // expression bar rebuilt on language switch (tooltips must update)
-  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2700)),
+  ok(/buildExprBar\(\)/.test(html.slice(html.indexOf('function applyLang'), html.indexOf('function applyLang') + 2950)),
     'applyLang() calls buildExprBar() so expression tooltips re-render in the new language');
 
   // expression bar iterates over build.morphs.names
@@ -4384,7 +4384,7 @@ function accData(j, bin, ai){
     'renderBody() only resets scrollTop when scrollReset is truthy');
 
   // applyLang() calls renderBody(false) to preserve scroll position
-  ok(/function applyLang\(\)[\s\S]{0,2700}renderBody\(false\)/.test(html),
+  ok(/function applyLang\(\)[\s\S]{0,2950}renderBody\(false\)/.test(html),
     'applyLang() calls renderBody(false) to preserve panel scroll on language/mode switch');
 
   // Tab switches still call renderBody() (default true → scroll resets to 0)
@@ -4925,12 +4925,13 @@ function accData(j, bin, ai){
     'about.keyList documents M key shortcut');
 }
 
-/* ---- Round 270: logo div gets aria-label + role=img for cohesive SR reading ---- */
+/* ---- Round 270: logo gets aria-label for cohesive SR reading (Round 450 upgraded div→h1) ---- */
 {
   ok(/class="logo"[\s\S]{0,30}aria-label/.test(html),
-    'logo div has aria-label so screen readers read it as one unit, not two fragments');
-  ok(/class="logo"[\s\S]{0,50}role="img"/.test(html),
-    'logo div has role=img so AT treats it as a decorative heading, not interactive content');
+    'logo has aria-label so screen readers read it as one unit, not two fragments');
+  // Round 450 replaced role="img" with a real <h1> for proper heading navigation
+  ok(/<h1[^>]*class="logo"/.test(html),
+    'logo is an <h1> element (Round 450 upgraded from div+role=img to real heading)');
 }
 
 /* ---- Round 269: Escape key deactivates active expression preview ---- */
@@ -6611,6 +6612,25 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 450: logo div→h1 gives page a heading; applyLang updates its aria-label ---- */
+{
+  // The page had no <h1>. Screen reader users navigating by heading (H key) found nothing on the
+  // main page — only the About dialog's <h2>. Changing the logo div to <h1> fixes the heading
+  // hierarchy without altering the visual design; .logo CSS now includes margin:0 to reset UA styles.
+  ok(/<h1[^>]*class="logo"/.test(html),
+    'logo element is an <h1> (was <div role="img">) so heading navigation lands on the page title');
+  ok(/<h1[^>]*id="mainH1"/.test(html),
+    'h1.logo has id="mainH1" so applyLang() can update its aria-label');
+  ok(/<h1[^>]*aria-label/.test(html),
+    'h1.logo has aria-label so AT announces a meaningful name despite aria-hidden children');
+  ok(!/class="logo"[^>]*role="img"/.test(html),
+    'logo no longer uses role="img" — real heading element conveys semantics natively');
+  ok(/mainH1[\s\S]{0,80}aria-label/.test(html),
+    'applyLang() updates mainH1 aria-label so SR announces localised title after lang switch');
+  ok(/\.logo\{[^}]*margin:0/.test(html),
+    '.logo CSS includes margin:0 to neutralise browser UA h1 default margins');
 }
 
 /* ---- Round 449: autoSaveBadge transition moved to CSS; applyLang sets document.title per lang ---- */
