@@ -2486,6 +2486,7 @@ function renderOut(bd){
   const licUrlId='meta-licenseUrl';
   const licUrlRow=el('div',{class:'row', style: meta.license==='Other' ? '' : 'display:none'});
   const licUrlInp=el('input',{id:licUrlId, type:'url', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta.licenseUrl||'',
+    ...(meta.license==='Other'?{'aria-required':'true'}:{}),
     placeholder:t('out.license.url.ph'),
     oninput:e=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); meta.licenseUrl=e.target.value; saveState(); },
     onblur:e=>{ if(e.target.value&&!e.target.validity.valid){ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srAlert'); showErr(t('a11y.licUrlInvalid')); } else { e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); } }});
@@ -2496,8 +2497,8 @@ function renderOut(bd){
     'license', v=>{
       const focusWasInUrl = licUrlRow.contains(document.activeElement);
       licUrlRow.style.display=v==='Other'?'':'none';
-      if (v==='Other'){ const u=document.getElementById(licUrlId); if(u) u.focus(); const sr=$('srStatus'); if(sr) sr.textContent=t('out.license.url'); }
-      else if (focusWasInUrl){ const s=document.getElementById('sel-license'); if(s) s.focus(); }});
+      if (v==='Other'){ licUrlInp.setAttribute('aria-required','true'); const u=document.getElementById(licUrlId); if(u) u.focus(); const sr=$('srStatus'); if(sr) sr.textContent=t('out.license.url'); }
+      else { licUrlInp.removeAttribute('aria-required'); if (focusWasInUrl){ const s=document.getElementById('sel-license'); if(s) s.focus(); } }});
   bd.append(licUrlRow);
 
   bd.append(el('div',{class:'sect', role:'heading', 'aria-level':'3'}, t('out.stats')));

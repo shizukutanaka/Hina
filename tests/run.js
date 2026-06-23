@@ -5199,7 +5199,7 @@ function accData(j, bin, ai){
 
 /* ---- Round 295: license URL field gets focus when Other is selected ---- */
 {
-  ok(/licUrlRow\.style\.display[\s\S]{0,130}u\.focus\(\)/.test(html),
+  ok(/licUrlRow\.style\.display[\s\S]{0,190}u\.focus\(\)/.test(html),
     'selecting Other license moves focus to the URL input so SR users discover the newly visible field');
 }
 
@@ -6618,6 +6618,21 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 459: licUrlInp gets aria-required when license=Other; removed when license changes away ---- */
+{
+  // When the user selects "Other" as the license, the URL field becomes visible and is required
+  // by the VRM spec (otherLicenseUrl must be a valid URL). Without aria-required="true", AT users
+  // may not know the field must be filled before exporting.
+  // Fix: set aria-required="true" on initial render (when license is already Other) and in the
+  // selRow onChange when switching to Other; remove it when switching away from Other.
+  ok(/meta\.license==='Other'\?\{'aria-required':'true'\}:\{\}/.test(html.replace(/\s+/g,' ')),
+    'licUrlInp: aria-required=true set conditionally on initial render when license is already Other');
+  ok(/v==='Other'[\s\S]{0,60}licUrlInp\.setAttribute\('aria-required','true'\)/.test(html.replace(/\s+/g,' ')),
+    'licUrlInp: aria-required=true set in onChange when Other is selected');
+  ok(/licUrlInp\.removeAttribute\('aria-required'\)/.test(html),
+    'licUrlInp: aria-required removed when license changes away from Other (field is now hidden/optional)');
+}
+
 /* ---- Round 458: licUrlInp gets aria-errormessage + showErr on blur, oninput clears both attrs ---- */
 {
   // licUrlInp set aria-invalid on blur when the URL was malformed, but never set aria-errormessage
@@ -6904,7 +6919,7 @@ function accData(j, bin, ai){
   // Extracting the element lets us check validity.valid immediately after setting the value.
   ok(/licUrlInp\.value.*licUrlInp\.validity\.valid.*licUrlInp\.setAttribute\('aria-invalid'/.test(html.replace(/\s+/g,' ')),
     'licenseUrl: aria-invalid is set immediately on render when stored value fails URL validation');
-  ok(/licUrlInp=el\('input'[\s\S]{0,870}licUrlRow\.append[\s\S]{0,80}licUrlInp/.test(html),
+  ok(/licUrlInp=el\('input'[\s\S]{0,950}licUrlRow\.append[\s\S]{0,80}licUrlInp/.test(html),
     'licenseUrl: input extracted as licUrlInp before appending so validity can be checked synchronously');
 }
 
