@@ -4980,10 +4980,10 @@ function accData(j, bin, ai){
     'autoSaveBadge clears textContent after fade-out so stale "✓ saved" is not re-read by AT');
 }
 
-/* ---- Round 263: WebGL context-lost event announces to srStatus ---- */
+/* ---- Round 263: WebGL context-lost event announces to SR live region ---- */
 {
-  ok(/webglcontextlost[\s\S]{0,130}srStatus[\s\S]{0,30}hint\.glLost/.test(html),
-    'webglcontextlost event announces hint.glLost to srStatus live region');
+  ok(/webglcontextlost[\s\S]{0,80}showErr\(t\('hint\.glLost'\)\)/.test(html),
+    'webglcontextlost event announces hint.glLost via showErr() for assertive SR delivery (Round 462)');
 }
 
 /* ---- Round 262: revert-to-preset announces success and preserves scroll ---- */
@@ -6616,6 +6616,17 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 462: webglcontextlost upgraded to showErr() — GPU context loss is assertive, not polite ---- */
+{
+  // Context loss kills the 3D preview silently. showErr() posts to srAlert (assertive) so AT interrupts.
+  ok(/webglcontextlost[\s\S]{0,80}showErr\(t\('hint\.glLost'\)\)/.test(html),
+    'R462: webglcontextlost uses showErr() for assertive SR announcement on GL context loss');
+
+  // Redundant explicit hint line removed — showErr() now handles hint bar, srStatus, and srAlert
+  ok(!/webglcontextlost[\s\S]{0,200}\$\('hint'\)\.textContent=t\('hint\.glLost'\)/.test(html),
+    'R462: redundant $hint.textContent in webglcontextlost removed (showErr covers it)');
 }
 
 /* ---- Round 461: copyJson _fail and pasteJson _pfail upgraded to showErr() for assertive SR announcement ---- */
