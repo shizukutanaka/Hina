@@ -6613,6 +6613,24 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 449: autoSaveBadge transition moved to CSS; applyLang sets document.title per lang ---- */
+{
+  // Inline styles have higher specificity than stylesheet rules, so the inline transition:opacity .3s
+  // on #autoSaveBadge was silently overriding the @media(prefers-reduced-motion:reduce) rule that
+  // listed it. Moving transition to CSS lets the media query actually suppress it.
+  ok(/#autoSaveBadge\{transition:opacity/.test(html),
+    '#autoSaveBadge transition:opacity .3s is declared as a CSS rule (not inline) so prefers-reduced-motion can override it');
+  ok(!/id="autoSaveBadge"[^>]*transition/.test(html),
+    '#autoSaveBadge span has no inline transition style — motion preference now takes effect');
+  ok(/@media\s*\(prefers-reduced-motion:reduce\)[\s\S]{0,200}#autoSaveBadge[\s\S]{0,80}transition:none/.test(html),
+    '#autoSaveBadge is listed in prefers-reduced-motion:reduce rule with transition:none');
+  // document.title update in applyLang() so bookmarks/AT reflect language
+  ok(/function applyLang[\s\S]{0,130}Hina.*VRM Avatar Maker/.test(html),
+    'applyLang() sets document.title to English title when lang is en');
+  ok(/function applyLang[\s\S]{0,110}VRMアバターメーカー/.test(html),
+    'applyLang() sets document.title to Japanese title when lang is ja');
+}
+
 /* ---- Round 448: focus restoration after async clipboard ops — matches doExport/doScreenshot pattern ---- */
 {
   // doExport and doScreenshot both capture _wasFocused before disabling and restore after.

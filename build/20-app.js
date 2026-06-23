@@ -1315,6 +1315,7 @@ function rebuild(){
 if ($('aboutVer')) $('aboutVer').textContent = 'v' + HINA.VERSION;
 function applyLang(){
   document.documentElement.lang = lang;
+  document.title = lang==='ja' ? '雛 — VRMアバターメーカー' : 'Hina — VRM Avatar Maker';
   const bl=$('btnLang'); bl.textContent=lang==='ja'?'EN':'JA';
   bl.title=t('btn.lang.tip'); bl.setAttribute('aria-label', t('btn.lang.tip'));
   const bm=$('btnMode'); bm.textContent=mode==='easy'?t('mode.easy'):t('mode.detail');

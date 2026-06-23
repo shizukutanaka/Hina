@@ -119,6 +119,7 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
 }
 #skipLink{transition:top .1s}
 #skipLink:focus-visible{top:8px}
+#autoSaveBadge{transition:opacity .3s}
 @media (hover:none){.sw:hover{scale:1}}
 @media (pointer:coarse){.eBtn{min-height:36px;padding:0 10px}}
 @media (prefers-contrast:more){:root{--text-dim:#c0ccd8;--text-faint:#9aa6b2;--line:#3f4f62}}
@@ -145,7 +146,7 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
 <header>
   <div class="logo" aria-label="雛 Hina — VRM Avatar Maker" role="img"><b aria-hidden="true">雛</b><span aria-hidden="true">Hina · VRM Avatar Maker</span></div>
   <div class="hdr-actions">
-    <span id="autoSaveBadge" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true" style="font-size:11px;color:var(--ok);opacity:0;transition:opacity .3s;pointer-events:none"></span>
+    <span id="autoSaveBadge" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true" style="font-size:11px;color:var(--ok);opacity:0;pointer-events:none"></span>
     <button class="hbtn" id="btnScreenshot" title=""></button>
     <button class="hbtn" id="btnMode" aria-pressed="false"></button>
     <button class="hbtn" id="btnLang">EN</button>
