@@ -2519,7 +2519,7 @@ function renderOut(bd){
       const json=HINA.serialize(params,meta);
       const _cpjF=document.activeElement===cpj;
       const _fail=()=>{ cpj.disabled=false; cpj.removeAttribute('aria-busy'); if(_cpjF) cpj.focus(); cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
-        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copyJson.err'); };
+        showErr(t('btn.copyJson.err')); };
       if(!navigator.clipboard?.writeText){ _fail(); return; }
       cpj.disabled=true; cpj.setAttribute('aria-busy','true');
       navigator.clipboard.writeText(json).then(()=>{
@@ -2535,7 +2535,7 @@ function renderOut(bd){
     const pstj=el('button',{type:'button', class:'btn wide', onclick:()=>{
       const _pstjF=document.activeElement===pstj;
       const _pfail=()=>{ pstj.disabled=false; pstj.removeAttribute('aria-busy'); if(_pstjF) pstj.focus(); pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
-        const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.err'); };
+        showErr(t('btn.pasteJson.err')); };
       if (typeof navigator.clipboard?.readText !== 'function'){ _pfail(); return; }
       pstj.disabled=true; pstj.setAttribute('aria-busy','true');
       navigator.clipboard.readText().then(text=>{

@@ -6618,6 +6618,17 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 461: copyJson _fail and pasteJson _pfail upgraded to showErr() for assertive SR announcement ---- */
+{
+  // copyJson: clipboard write failure now announces assertively (consistent with cpBtn from Round 460)
+  ok(/const _fail=\(\)=>\{[\s\S]{0,250}showErr\(t\('btn\.copyJson\.err'\)\)/.test(html),
+    'R461: cpj _fail uses showErr() for assertive SR announcement (not srStatus-only)');
+
+  // pasteJson: clipboard read failure now announces assertively
+  ok(/const _pfail=\(\)=>\{[\s\S]{0,250}showErr\(t\('btn\.pasteJson\.err'\)\)/.test(html),
+    'R461: pstj _pfail uses showErr() for assertive SR announcement (not srStatus-only)');
+}
+
 /* ---- Round 460: failure-path SR announcements in doUndo/seed-clamp/cpBtn upgraded to showErr() ---- */
 {
   // doUndo _exporting: showErr() so Ctrl+Z during export interrupts AT (not swallowed by polite queue)
