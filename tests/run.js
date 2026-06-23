@@ -5830,10 +5830,10 @@ function accData(j, bin, ai){
     'canvas aria-label in applyLang uses _hintDefault() accounting for _glLost');
 }
 
-/* ---- Round 351: doUndo announces btn.exporting via srStatus when _exporting is true (not silent) ---- */
+/* ---- Round 351: doUndo announces btn.exporting when _exporting is true (not silent) ---- */
 {
-  ok(html.includes("if (_exporting){ if(sr) sr.textContent=t('btn.exporting'); return; }"),
-    'doUndo announces exporting state to srStatus instead of silently returning');
+  ok(html.includes("if (_exporting){ showErr(t('btn.exporting')); return; }"),
+    'doUndo announces exporting state via showErr() instead of silently returning (Round 460: upgraded from srStatus-only)');
 }
 
 /* ---- Round 352: webglcontextlost hides screenshot button so it can't produce a blank image ---- */
@@ -6616,6 +6616,29 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 460: failure-path SR announcements in doUndo/seed-clamp/cpBtn upgraded to showErr() ---- */
+{
+  // doUndo _exporting: showErr() so Ctrl+Z during export interrupts AT (not swallowed by polite queue)
+  ok(html.includes("if (_exporting){ showErr(t('btn.exporting')); return; }"),
+    'R460: doUndo uses showErr() when _exporting=true (assertive announcement)');
+
+  // doUndo !_undoSnap: showErr() so "nothing to undo" response interrupts AT when stack is empty
+  ok(html.includes("if (!_undoSnap){ showErr(t('a11y.noUndo')); return; }"),
+    'R460: doUndo uses showErr() when undo stack is empty (assertive announcement)');
+
+  // seed clamp: showErr() — consistent with numIn clamp (Round 455 used same a11y.clamped key)
+  ok(/clamped!==n\)\{ e\.target\.value=String\(clamped\); showErr\(t\('a11y\.clamped'\)/.test(html),
+    'R460: seed clamp uses showErr() matching numIn clamp pattern from Round 455');
+
+  // cpBtn clipboard-unavailable: showErr() not srStatus-only
+  ok(/!navigator\.clipboard[\s\S]{0,150}showErr\(t\('btn\.copySeed\.err'\)\)/.test(html),
+    'R460: cpBtn clipboard-unavailable path uses showErr() for assertive SR announcement');
+
+  // cpBtn .catch: showErr() not srStatus-only
+  ok(/\.catch\(\(\)=>\{[\s\S]{0,280}showErr\(t\('btn\.copySeed\.err'\)\)/.test(html),
+    'R460: cpBtn .catch() path uses showErr() for assertive SR announcement');
 }
 
 /* ---- Round 459: licUrlInp gets aria-required when license=Other; removed when license changes away ---- */

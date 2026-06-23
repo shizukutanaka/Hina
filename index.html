@@ -1566,8 +1566,8 @@ function captureUndo(){
 }
 function doUndo(){
   const sr=$('srStatus');
-  if (_exporting){ if(sr) sr.textContent=t('btn.exporting'); return; }
-  if (!_undoSnap){ if(sr) sr.textContent=t('a11y.noUndo'); return; }
+  if (_exporting){ showErr(t('btn.exporting')); return; }
+  if (!_undoSnap){ showErr(t('a11y.noUndo')); return; }
   const s = _undoSnap; _undoSnap = null;
   clearTimeout(_undoHintTimer);
   const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
@@ -2399,21 +2399,21 @@ function renderBody(scrollReset=true){
         }
         e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage');
         const clamped=Math.min(n,4294967295);
-        if(clamped!==n){ e.target.value=String(clamped); const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.clamped').replace('{v}',clamped); }
+        if(clamped!==n){ e.target.value=String(clamped); showErr(t('a11y.clamped').replace('{v}',clamped)); }
         runGacha(clamped); }});
     const cpBtn=el('button',{type:'button', class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       ...(lastGachaSeed===null?{disabled:''}:{}),
       'aria-label':t('btn.copySeed'), title:t('btn.copySeed'),
       onclick:()=>{
         if(lastGachaSeed===null) return;
-        if (!navigator.clipboard?.writeText){ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); return; }
+        if (!navigator.clipboard?.writeText){ cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); showErr(t('btn.copySeed.err')); return; }
         const _cpBF=document.activeElement===cpBtn; cpBtn.disabled=true; cpBtn.setAttribute('aria-busy','true');
         navigator.clipboard.writeText(String(lastGachaSeed)).then(()=>{
           cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); if(_cpBF) cpBtn.focus();
           const orig=cpBtn.textContent; cpBtn.textContent=t('btn.copied');
           setTimeout(()=>{ cpBtn.textContent=orig; },1500);
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.seedCopied').replace('{n}',lastGachaSeed);
-        }).catch(()=>{ cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); if(_cpBF) cpBtn.focus(); cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.copySeed.err'); });
+        }).catch(()=>{ cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); if(_cpBF) cpBtn.focus(); cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); showErr(t('btn.copySeed.err')); });
       }
     }, t('btn.copySeed'));
     seedIn.addEventListener('wheel',e=>{ if(document.activeElement===seedIn) e.preventDefault(); },{passive:false});
