@@ -803,6 +803,7 @@ function onParam(k){
   const s=PARAMS[k];
   if (s.k==='color'){ drawAtlas(params); uploadTexture(); saveState(); return; }
   if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
+  lastGachaSeed=null; // structural change: seed no longer reproduces this avatar's geometry
   rebuild();
   // Only re-render panel when the param changes row structure (skirtLen↔outfit, spring sliders↔springOff).
   // All other params leave the panel layout unchanged — skipping renderBody() prevents the

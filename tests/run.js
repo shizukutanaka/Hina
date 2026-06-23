@@ -4316,7 +4316,7 @@ function accData(j, bin, ai){
 
   // Verify: non-structural slider param (e.g. height) still leads to rebuild() in onParam
   // (rebuild is always called for non-color, non-phys params)
-  ok(/if \(s\.tab==='phys'[\s\S]{0,40}return\s*;[\s\S]{0,60}rebuild\(\)/.test(html.replace(/\n/g,' ')),
+  ok(/if \(s\.tab==='phys'[\s\S]{0,60}return;[\s\S]{0,150}rebuild\(\)/.test(html.replace(/\n/g,' ')),
     'onParam() calls rebuild() for all geometry params after the phys short-circuit guard');
 }
 
@@ -6612,6 +6612,20 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 454: onParam() clears lastGachaSeed on structural changes — filename consistency ---- */
+{
+  // activePresetId was already cleared in onParam() so preset cards deselect after manual edits.
+  // lastGachaSeed was NOT cleared — fnameStem() would produce "hina_gacha_12345.vrm" for an avatar
+  // that no longer matches seed 12345 because body/outfit/springOff was changed.
+  // Color and live-physics params return early (no rebuild) and correctly keep the seed, since
+  // the seed still describes the geometry for those changes.
+  ok(/activePresetId=null;[\s\S]{0,200}lastGachaSeed=null[\s\S]{0,30}rebuild\(\)/.test(html),
+    'onParam() clears lastGachaSeed before rebuild() so structural changes invalidate the stale seed display');
+  // Color early-return path must NOT have cleared lastGachaSeed (seed still valid for geometry)
+  ok(/s\.k==='color'[\s\S]{0,60}return/.test(html),
+    "onParam() color early-return fires before lastGachaSeed=null so color tweaks keep the seed");
 }
 
 /* ---- Round 453: notField guard adds isContentEditable check to keyboard shortcut handler ---- */
