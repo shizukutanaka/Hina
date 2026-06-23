@@ -1579,9 +1579,10 @@ function doUndo(){
 }
 
 let _errTimer = null;
+let _srAlertTimer = null;
 function showErr(msg){
   const sr=$('srStatus'); if(sr) sr.textContent=msg;
-  const sa=$('srAlert'); if(sa){ sa.textContent=''; requestAnimationFrame(()=>{ const a=$('srAlert'); if(a) a.textContent=msg; setTimeout(()=>{ const a2=$('srAlert'); if(a2) a2.textContent=''; },5500); }); }
+  const sa=$('srAlert'); if(sa){ clearTimeout(_srAlertTimer); sa.textContent=''; requestAnimationFrame(()=>{ const a=$('srAlert'); if(a) a.textContent=msg; _srAlertTimer=setTimeout(()=>{ const a2=$('srAlert'); if(a2) a2.textContent=''; },5500); }); }
   const h=$('hint'); if(h){ clearTimeout(_errTimer); h.textContent=msg; h.style.color='var(--err)';
     _errTimer=setTimeout(()=>{ if($('hint')){ $('hint').style.color='';
       $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }},4500); }

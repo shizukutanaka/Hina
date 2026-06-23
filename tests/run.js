@@ -6614,6 +6614,22 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 452: showErr() srAlert timer race condition fixed with _srAlertTimer ---- */
+{
+  // showErr() stored no reference for the srAlert clear-timer. A second error within 5.5s of the
+  // first would cause the first timer to fire mid-second-error, prematurely clearing the srAlert
+  // live region — screen reader users would get less than the intended 5.5s to hear the message.
+  // _errTimer (for the hint bar) was already handled correctly; srAlert now mirrors that pattern.
+  ok(/let _srAlertTimer/.test(html),
+    'showErr() declares _srAlertTimer so the clear-setTimeout can be cancelled on rapid re-calls');
+  ok(/clearTimeout\(_srAlertTimer\)[\s\S]{0,80}requestAnimationFrame/.test(html.replace(/\s+/g,' ')),
+    'showErr() clears _srAlertTimer before the RAF so stale timers cannot prematurely clear new messages');
+  ok(/_srAlertTimer=setTimeout\(\(\)/.test(html),
+    'showErr() stores the new clear-timer in _srAlertTimer so subsequent calls can cancel it');
+  ok(/clearTimeout\(_errTimer\)/.test(html),
+    '_errTimer pattern (hint bar) still in place — not regressed by _srAlertTimer addition');
+}
+
 /* ---- Round 451: eBtn.active and sw[aria-pressed=true] focus-visible gaps fixed ---- */
 {
   // .btn.primary already got outline-color:#06282a because accent background made the accent focus
