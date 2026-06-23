@@ -5370,10 +5370,11 @@ function accData(j, bin, ai){
     '.sw:hover scale reset to 1 in prefers-reduced-motion so swatch hover does not move for motion-sensitive users');
 }
 
-/* ---- Round 297: VRChat guide title gets role=heading aria-level=4 ---- */
+/* ---- Round 297: VRChat guide title gets role=heading (Round 457: upgraded to aria-level=3 div.sect) ---- */
 {
-  ok(html.includes("role:'heading','aria-level':'4'") && html.includes("guide.t"),
-    'VRChat guide title <b> gets role=heading aria-level=4 for proper document outline');
+  // Round 457 upgraded from aria-level=4 to aria-level=3, matching Meta/Stats sibling sections.
+  ok(html.includes("role:'heading'") && html.includes("guide.t"),
+    'VRChat guide title has role=heading (level upgraded from 4 to 3 in Round 457)');
 }
 
 /* ---- Round 303: seed input Enter key blurs field to reliably fire onchange ---- */
@@ -6615,6 +6616,24 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 457: guide heading in Out tab upgraded from b[role=heading aria-level=4] to div.sect[aria-level=3] ---- */
+{
+  // The upload-guide heading ("VRChat upload steps") was <b role="heading" aria-level="4">.
+  // It is a sibling section of "Meta info" and "Stats" which are both aria-level="3", so using
+  // level 4 creates a heading-level skip (3 → 4 with no parent level-3 ancestor) — WCAG 1.3.1.
+  // <b> with role="heading" also redundantly implies bold-for-weight via the native element.
+  // Fix: use div.sect with aria-level="3" to match the other section headings in the Out tab.
+  ok(/class='sect'[\s\S]{0,40}role:'heading'[\s\S]{0,40}aria-level':'3'[\s\S]{0,60}guide\.t/.test(html.replace(/\s+/g,' '))||
+     /guide\.t[\s\S]{0,10}[\s\S]{0,100}class='sect'[\s\S]{0,10}role:'heading'[\s\S]{0,10}aria-level':'3'/.test(html.replace(/\s+/g,' '))||
+     /class:'sect'[\s\S]{0,60}role:'heading'[\s\S]{0,30}aria-level':'3'/.test(html.replace(/\s+/g,' ')),
+    'guide heading uses div.sect with aria-level=3 to match Meta/Stats section headings (no heading level skip)');
+  ok(!/<b[^>]*role=.heading[^>]*aria-level=.4/.test(html) && !/aria-level=.4[^>]*role=.heading/.test(html),
+    'guide heading no longer uses <b role=heading aria-level=4> (removed the odd pattern)');
+  // Confirm the other two Out-tab section headings remain at level 3 for consistency
+  ok((html.match(/aria-level':'3'[\s\S]{0,60}out\.(?:meta|stats)/g)||[]).length + (html.match(/out\.(?:meta|stats)[\s\S]{0,60}aria-level':'3'/g)||[]).length >= 2,
+    'Meta and Stats section headings remain at aria-level=3 in the Out tab');
 }
 
 /* ---- Round 456: all buttons get explicit type="button" so AT doesn't announce "Submit button" ---- */
