@@ -5994,10 +5994,10 @@ function accData(j, bin, ai){
     'saveState catch block clears badge timer before showing saveFail (prevents prior success timer from hiding the error)');
 }
 
-/* ---- Round 371: saveState catch block announces hint.saveFail via srStatus (autoSaveBadge aria-hidden toggle risks missing live-region) ---- */
+/* ---- Round 371: saveState catch block announces hint.saveFail to SR (Round 463: upgraded to showErr()) ---- */
 {
-  ok(/catch\s*\(e\)\s*\{[\s\S]{0,400}srStatus[\s\S]{0,60}hint\.saveFail/.test(html),
-    'saveState catch block announces hint.saveFail via srStatus for guaranteed SR delivery');
+  ok(/catch\s*\(e\)\s*\{[\s\S]{0,400}showErr\(t\('hint\.saveFail'\)\)/.test(html),
+    'saveState catch block announces hint.saveFail via showErr() for assertive SR delivery (Round 463)');
 }
 
 /* ---- Round 372: seed input announces a11y.clamped when value exceeds 4294967295 (consistent with numIn) ---- */
@@ -6616,6 +6616,23 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 463: doExport re-entry guard and hint.saveFail paths upgraded to showErr() ---- */
+{
+  // doExport _exporting guard: same pattern as doUndo (Round 460) — now consistent
+  const expFnIdx = html.indexOf('async function doExport()');
+  const expBlock = expFnIdx >= 0 ? html.slice(expFnIdx, expFnIdx + 200) : '';
+  ok(/showErr\(t\('btn\.exporting'\)\)[\s\S]{0,20}return/.test(expBlock),
+    'R463: doExport re-entry guard uses showErr() matching doUndo pattern from Round 460');
+
+  // saveState catch: data-loss scenario gets assertive SR announcement
+  ok(/catch\s*\(e\)\s*\{[\s\S]{0,400}showErr\(t\('hint\.saveFail'\)\)/.test(html),
+    'R463: saveState catch uses showErr() for assertive SR on save failure');
+
+  // _lsBroken startup: persistent badge provides visual; showErr() adds assertive SR at startup
+  ok(/if \(_lsBroken\)\{[\s\S]{0,300}showErr\(t\('hint\.saveFail'\)\)/.test(html),
+    'R463: _lsBroken startup uses showErr() for assertive SR announcement');
 }
 
 /* ---- Round 462: webglcontextlost upgraded to showErr() — GPU context loss is assertive, not polite ---- */

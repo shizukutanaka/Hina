@@ -108,7 +108,7 @@ function saveState(){
       clearTimeout(_saveBadgeTimer);
       const b=$('autoSaveBadge');
       if (b){ b.removeAttribute('aria-hidden'); b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
-      const sr2=$('srStatus'); if(sr2) sr2.textContent=t('hint.saveFail');
+      showErr(t('hint.saveFail'));
     }
   }, 500);
 }
@@ -1171,7 +1171,7 @@ const _hintDefault=()=>!GLOK?t('hint.noGL'):_glLost?t('hint.glLost'):t('hint.dra
 let _screenshotting = false;
 let _exporting = false, _exportBtn = null, _exportedRevertTimer = null;
 async function doExport(){
-  if (_exporting){ const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); return; }
+  if (_exporting){ showErr(t('btn.exporting')); return; }
   if (!build) return;
   // Cancel any pending "Exported ✓ → Export VRM" revert from a previous export so it doesn't
   // overwrite the "Exporting…" label of THIS export (Ctrl+S re-press within 2s of completion).
@@ -1386,11 +1386,11 @@ applyLang();
 // Fire-and-forget: no UI on grant (silent win); no UI on denial (existing behaviour, warn devs only).
 if (!_lsBroken) navigator.storage?.persist?.();
 // Persistent warning when localStorage is broken (Safari Private mode etc.) — surfaces after
-// applyLang() so the i18n key resolves correctly. Bypasses the auto-fade timer of showErr().
+// applyLang() so the i18n key resolves correctly. Badge stays permanently; showErr() adds assertive SR.
 if (_lsBroken){
   const b=$('autoSaveBadge');
   if (b){ b.removeAttribute('aria-hidden'); b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
-  const sr=$('srStatus'); if(sr) sr.textContent=t('hint.saveFail');
+  showErr(t('hint.saveFail'));
 }
 // Rank badges are clickable shortcuts to the Stats/Export tab
 document.querySelectorAll('.rankBadge').forEach(b=>{
