@@ -1243,7 +1243,7 @@ async function saveJson(){
   const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',fname);
 }
 function doScreenshot(){
-  if (!GLOK || _glLost){ const sr=$('srStatus'); if(sr) sr.textContent=_hintDefault(); return; }
+  if (!GLOK || _glLost){ showErr(_hintDefault()); return; }
   if (_screenshotting) return;
   _screenshotting = true;
   const btn=$('btnScreenshot');

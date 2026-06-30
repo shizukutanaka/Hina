@@ -6110,12 +6110,12 @@ function accData(j, bin, ai){
     'autoSaveBadge has aria-hidden="true" in initial HTML so screen readers skip the empty placeholder');
 }
 
-/* ---- Round 389: doScreenshot() announces GL-unavailable reason before returning early ---- */
+/* ---- Round 389: doScreenshot() announces GL-unavailable reason before returning early (R466: upgraded to showErr()) ---- */
 {
   const scrFnIdx = html.indexOf('function doScreenshot()');
   const scrBlock = scrFnIdx >= 0 ? html.slice(scrFnIdx, scrFnIdx + 200) : '';
-  ok(/!GLOK \|\| _glLost[\s\S]{0,120}srStatus[\s\S]{0,80}return/.test(scrBlock),
-    'doScreenshot() announces GL-unavailable error via srStatus before returning early when GL is missing or lost');
+  ok(/!GLOK \|\| _glLost[\s\S]{0,80}showErr\(_hintDefault\(\)\)[\s\S]{0,30}return/.test(scrBlock),
+    'doScreenshot() announces GL-unavailable error via showErr() (assertive) before returning early (Round 466)');
 }
 
 /* ---- Round 390: doExport() re-announces btn.exporting when called while already exporting ---- */
@@ -6617,6 +6617,19 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 466: doScreenshot() GL-unavailable path upgraded to showErr() — assertive SR on failure ---- */
+{
+  // Ctrl+Shift+P when GL is lost/unavailable produced only a polite srStatus announcement (Round 389).
+  // A screenshot that silently fails needs an assertive interrupt (showErr) consistent with R460-463 pattern.
+  // applyLang() retains its own srStatus-only GL-unavailable message for informational display on lang switch.
+  const scrFnIdx = html.indexOf('function doScreenshot()');
+  const scrBlock = scrFnIdx >= 0 ? html.slice(scrFnIdx, scrFnIdx + 200) : '';
+  ok(/showErr\(_hintDefault\(\)\)/.test(scrBlock),
+    'R466: doScreenshot() GL-unavailable path uses showErr(_hintDefault()) for assertive SR announcement');
+  ok(!/!GLOK \|\| _glLost[\s\S]{0,80}sr\b[\s\S]{0,60}textContent/.test(scrBlock),
+    'R466: doScreenshot() GL-unavailable path no longer sets srStatus textContent directly');
 }
 
 /* ---- Round 465: GLB magic-bytes + length guard in doExport() before download ---- */
