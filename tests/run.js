@@ -6619,6 +6619,25 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 465: GLB magic-bytes + length guard in doExport() before download ---- */
+{
+  // A corrupt or zero-byte VRM silently downloads; users only discover the breakage in Unity.
+  // Fix: validate GLB header (magic 0x46546C67='glTF', version=2, length matches) before download.
+  // If invalid → showErr(hint.exportCorrupt) and abort. i18n key added in both ja and en.
+  ok(/hint\.exportCorrupt/.test(html),
+    'R465: i18n key hint.exportCorrupt is defined');
+  ok(/0x46546C67/.test(html),
+    'R465: GLB magic bytes constant 0x46546C67 present in export validation');
+  // The guard must come between exportVRM() call and the _fsHandle/download branch
+  const expVrmIdx = html.indexOf('HINA.exportVRM(');
+  const fsIdx = html.indexOf('_fsHandle', expVrmIdx > 0 ? expVrmIdx : 0);
+  const guardSlice = expVrmIdx >= 0 && fsIdx > expVrmIdx ? html.slice(expVrmIdx, fsIdx + 100) : '';
+  ok(/0x46546C67[\s\S]{0,200}hint\.exportCorrupt/.test(guardSlice),
+    'R465: GLB magic check and hint.exportCorrupt are present between exportVRM() and _fsHandle branch');
+  ok(/getUint32\(0,true\)[\s\S]{0,60}getUint32\(4,true\)[\s\S]{0,60}getUint32\(8,true\)/.test(guardSlice),
+    'R465: DataView reads magic(0), version(4), and length(8) offsets for full GLB header validation');
+}
+
 /* ---- Round 464: role="alert" removed from srAlert — Firefox+NVDA ghost "Alert" bug fix ---- */
 {
   // WordPress Trac #36289: having both role="alert" AND aria-live="assertive" on a hidden element

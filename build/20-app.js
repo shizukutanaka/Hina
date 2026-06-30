@@ -1207,6 +1207,11 @@ async function doExport(){
     if (!atlasBlob) throw new Error('atlas toBlob returned null');
     const ab = await atlasBlob.arrayBuffer();
     const {bytes} = HINA.exportVRM(exportBuild, exportParams, exportMeta, new Uint8Array(ab), thumbBytes);
+    // Guard: verify GLB magic (0x46546C67 = 'glTF'), version=2, and length field before download
+    if (!bytes || bytes.length < 12) { showErr(t('hint.exportCorrupt')); return; }
+    { const _dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+      if (_dv.getUint32(0,true)!==0x46546C67||_dv.getUint32(4,true)!==2||_dv.getUint32(8,true)!==bytes.length){
+        showErr(t('hint.exportCorrupt')); return; } }
     if (_fsHandle){
       // Write directly to user-chosen file via File System Access API
       const w = await _fsHandle.createWritable();
