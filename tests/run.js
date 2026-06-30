@@ -6619,6 +6619,22 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 467: doScreenshot() failure paths use err.screenshotFailed not err.exportFailed ---- */
+{
+  // toBlob null and catch block both erroneously reported "VRM export failed" for screenshot failures.
+  // Added err.screenshotFailed key (ja/en) for correct messaging; err.exportFailed now only for doExport().
+  ok(/err\.screenshotFailed/.test(html),
+    'R467: i18n key err.screenshotFailed is defined');
+  // Both failure paths in doScreenshot use the new key
+  const scrFnIdx = html.indexOf('function doScreenshot()');
+  const scrEnd = html.indexOf('\nfunction ', scrFnIdx + 20);
+  const scrFn = scrFnIdx >= 0 ? html.slice(scrFnIdx, scrEnd > 0 ? scrEnd : scrFnIdx + 2000) : '';
+  ok((scrFn.match(/err\.screenshotFailed/g)||[]).length >= 2,
+    'R467: both failure paths inside doScreenshot() use err.screenshotFailed (at least 2 occurrences)');
+  ok(!/err\.exportFailed/.test(scrFn),
+    'R467: doScreenshot() no longer uses err.exportFailed (wrong message for screenshot context)');
+}
+
 /* ---- Round 466: doScreenshot() GL-unavailable path upgraded to showErr() — assertive SR on failure ---- */
 {
   // Ctrl+Shift+P when GL is lost/unavailable produced only a polite srStatus announcement (Round 389).

@@ -1254,7 +1254,7 @@ function doScreenshot(){
     renderFrame(performance.now()); // render into buffer before browser flushes it
     cv.toBlob(blob=>{
       _scrDone();
-      if (!blob){ showErr(t('err.exportFailed')); return; }
+      if (!blob){ showErr(t('err.screenshotFailed')); return; }
       const fname = fnameStem()+'.png';
       // Web Share API on mobile: native share sheet (send to chat, save to photos, etc.) is more
       // useful than a Downloads-folder file. Falls back to <a download> when share unavailable or
@@ -1282,7 +1282,7 @@ function doScreenshot(){
         if(sr) sr.textContent=t('a11y.screenshotDone');
       }
     },'image/png');
-  }catch(e){ _scrDone(); showErr(t('err.exportFailed')); }
+  }catch(e){ _scrDone(); showErr(t('err.screenshotFailed')); }
 }
 
 /* ---------- rebuild ---------- */
