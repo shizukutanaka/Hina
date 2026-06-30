@@ -6434,11 +6434,12 @@ function accData(j, bin, ai){
 }
 
 /* ---- Round 421: role=alert live region for showErr() (Zenn 2024 a11y — errors need assertive not polite) ---- */
+/* Note: role="alert" removed in Round 464 to fix Firefox+NVDA ghost "Alert" announcements (WordPress Trac #36289) */
 {
   // Errors like export/load/build failures must interrupt SR immediately (polite status won't do that)
-  ok(/id="srAlert"[\s\S]{0,60}role="alert"/.test(html),
-    'srAlert element with role=alert is present in markup for immediate error announcements');
-  ok(/role="alert"[\s\S]{0,60}aria-atomic="true"/.test(html),
+  ok(/id="srAlert"[\s\S]{0,80}aria-live="assertive"/.test(html),
+    'srAlert element with aria-live=assertive is present in markup for immediate error announcements (role=alert removed R464)');
+  ok(/id="srAlert"[\s\S]{0,80}aria-atomic="true"/.test(html),
     'srAlert has aria-atomic=true so the entire message is announced at once, not word-by-word');
   ok(/showErr[\s\S]{0,200}srAlert[\s\S]{0,200}requestAnimationFrame/.test(html),
     'showErr() populates srAlert via requestAnimationFrame to trigger announcement even on repeated identical errors');
@@ -6616,6 +6617,19 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 464: role="alert" removed from srAlert — Firefox+NVDA ghost "Alert" bug fix ---- */
+{
+  // WordPress Trac #36289: having both role="alert" AND aria-live="assertive" on a hidden element
+  // causes Firefox+NVDA to announce "Alert" spuriously on every DOM repaint when the region is empty.
+  // Fix: remove role attribute; keep only aria-live="assertive" which all current AT support (Baseline 2022).
+  ok(!html.includes('id="srAlert"') || !/id="srAlert"[\s\S]{0,60}role="alert"/.test(html),
+    'R464: srAlert no longer has role=alert (removed to fix Firefox+NVDA ghost announcement bug)');
+  ok(/id="srAlert"[\s\S]{0,80}aria-live="assertive"/.test(html),
+    'R464: srAlert retains aria-live=assertive for assertive SR delivery without role=alert');
+  ok(/id="srAlert"[\s\S]{0,80}aria-atomic="true"/.test(html),
+    'R464: srAlert retains aria-atomic=true so full message is announced atomically');
 }
 
 /* ---- Round 463: doExport re-entry guard and hint.saveFail paths upgraded to showErr() ---- */
