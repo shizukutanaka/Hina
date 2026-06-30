@@ -1052,7 +1052,7 @@ function renderOut(bd){
   }
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
-      if(f.size>2*1024*1024){ showErr(t('err.loadFailed')); e.target.value=''; return; }
+      if(f.size>2*1024*1024){ showErr(t('err.loadTooLarge')); e.target.value=''; return; }
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
         if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
@@ -1469,7 +1469,7 @@ document.body.addEventListener('drop',e=>{
   e.preventDefault();
   const f=e.dataTransfer.files[0];
   if (!f.name.endsWith('.json') && f.type!=='application/json') { showErr(t('err.loadFailed')); return; }
-  if (f.size>2*1024*1024) { showErr(t('err.loadFailed')); return; }
+  if (f.size>2*1024*1024) { showErr(t('err.loadTooLarge')); return; }
   const rd=new FileReader();
   rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
     if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();

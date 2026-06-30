@@ -6619,6 +6619,20 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 468: err.loadTooLarge i18n key — file-size-limit rejection gets correct message ---- */
+{
+  // The 2 MB file-size guard used err.loadFailed ("invalid format or not a Hina file"),
+  // which is wrong — a large file may be perfectly valid. Added err.loadTooLarge in ja/en
+  // and used it in both the file-input and drag-drop load paths.
+  ok(/err\.loadTooLarge/.test(html),
+    'R468: i18n key err.loadTooLarge is defined');
+  // Both size-limit checks must use the new key, not err.loadFailed
+  ok((html.match(/err\.loadTooLarge/g)||[]).length >= 2,
+    'R468: err.loadTooLarge used in at least 2 places (file-input and drag-drop load paths)');
+  ok(!/f\.size>2\*1024\*1024[\s\S]{0,40}err\.loadFailed/.test(html),
+    'R468: size-limit check no longer uses err.loadFailed');
+}
+
 /* ---- Round 467: doScreenshot() failure paths use err.screenshotFailed not err.exportFailed ---- */
 {
   // toBlob null and catch block both erroneously reported "VRM export failed" for screenshot failures.

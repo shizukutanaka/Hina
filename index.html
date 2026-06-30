@@ -407,6 +407,7 @@ const I18N = {
     'out.title.ph':'例: 雛アバター','out.author.ph':'例: あなたの名前',
     'selftest.ok':'自己診断: 全て正常','selftest.ng':'自己診断: 異常あり','selftest.count':'{pass}/{total} 項目',
     'err.loadFailed':'JSONファイルを読み込めませんでした（形式が不正か、雛のJSONではありません）',
+    'err.loadTooLarge':'ファイルが大きすぎます（2 MB以下のJSONのみ読み込めます）',
     'err.buildFailed':'アバター生成に失敗しました',
     'err.exportFailed':'VRM書き出しに失敗しました',
     'err.screenshotFailed':'スクリーンショットの保存に失敗しました',
@@ -458,6 +459,7 @@ const I18N = {
     'out.title.ph':'e.g. my-avatar','out.author.ph':'e.g. Your Name',
     'selftest.ok':'Self-test: all OK','selftest.ng':'Self-test: FAILED','selftest.count':'{pass}/{total} checks',
     'err.loadFailed':'Could not load JSON (invalid format or not a Hina file)',
+    'err.loadTooLarge':'File too large — only JSON files under 2 MB can be loaded',
     'err.buildFailed':'Avatar build failed',
     'err.exportFailed':'VRM export failed',
     'err.screenshotFailed':'Screenshot failed',
@@ -2554,7 +2556,7 @@ function renderOut(bd){
   }
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
-      if(f.size>2*1024*1024){ showErr(t('err.loadFailed')); e.target.value=''; return; }
+      if(f.size>2*1024*1024){ showErr(t('err.loadTooLarge')); e.target.value=''; return; }
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
         if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
@@ -2971,7 +2973,7 @@ document.body.addEventListener('drop',e=>{
   e.preventDefault();
   const f=e.dataTransfer.files[0];
   if (!f.name.endsWith('.json') && f.type!=='application/json') { showErr(t('err.loadFailed')); return; }
-  if (f.size>2*1024*1024) { showErr(t('err.loadFailed')); return; }
+  if (f.size>2*1024*1024) { showErr(t('err.loadTooLarge')); return; }
   const rd=new FileReader();
   rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
     if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
