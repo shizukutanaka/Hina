@@ -380,7 +380,7 @@ function randomParams(seed){
 const I18N = {
   ja: {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
-    'btn.gacha':'ガチャ（ランダム生成）','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.copySeed.err':'シードのコピーに失敗しました','btn.copyLink':'リンクをコピー','btn.copyLink.err':'リンクのコピーに失敗しました','a11y.linkCopied':'共有リンクをクリップボードにコピーしました','btn.copied':'✓ コピー済','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.exported':'✓ 書き出し完了','btn.saveJson':'パラメータ保存 (.json)','btn.copyJson':'クリップボードにコピー','btn.copyJson.err':'クリップボードへのコピーに失敗しました','btn.copyJsonDone':'✓ コピー済','btn.pasteJson':'クリップボードから貼り付け','btn.pasteJson.ok':'✓ 貼り付けました','btn.pasteJson.err':'クリップボードの内容が不正です','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','a11y.resetDone':'初期化しました','a11y.resetCancelled':'初期化をキャンセルしました','btn.revert':'↺ {p} に戻す','btn.screenshot':'PNG','btn.screenshot.tip':'スクリーンショットを保存（Ctrl/⌘+Shift+P）','btn.lang.tip':'言語切替 — クリックで English に切替','hint.ctrlS':'Ctrl/⌘+S → VRM書き出し / Ctrl/⌘+Shift+S → JSON保存 / Ctrl/⌘+Z → 元に戻す / Ctrl/⌘+Shift+P → PNG / M → かんたん/詳細切替 / ? → ヘルプ / 1〜8 → タブ切替',
+    'btn.gacha':'ガチャ（ランダム生成）','gacha.lock':'ロック対象','gacha.lock.hint':'ロックした項目は再生成の対象外になります','a11y.gachaRanPartial':'ガチャ — 一部の項目をロックして生成しました','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.copySeed.err':'シードのコピーに失敗しました','btn.copyLink':'リンクをコピー','btn.copyLink.err':'リンクのコピーに失敗しました','a11y.linkCopied':'共有リンクをクリップボードにコピーしました','btn.copied':'✓ コピー済','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.exported':'✓ 書き出し完了','btn.saveJson':'パラメータ保存 (.json)','btn.copyJson':'クリップボードにコピー','btn.copyJson.err':'クリップボードへのコピーに失敗しました','btn.copyJsonDone':'✓ コピー済','btn.pasteJson':'クリップボードから貼り付け','btn.pasteJson.ok':'✓ 貼り付けました','btn.pasteJson.err':'クリップボードの内容が不正です','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','a11y.resetDone':'初期化しました','a11y.resetCancelled':'初期化をキャンセルしました','btn.revert':'↺ {p} に戻す','btn.screenshot':'PNG','btn.screenshot.tip':'スクリーンショットを保存（Ctrl/⌘+Shift+P）','btn.lang.tip':'言語切替 — クリックで English に切替','hint.ctrlS':'Ctrl/⌘+S → VRM書き出し / Ctrl/⌘+Shift+S → JSON保存 / Ctrl/⌘+Z → 元に戻す / Ctrl/⌘+Shift+P → PNG / M → かんたん/詳細切替 / ? → ヘルプ / 1〜8 → タブ切替',
     'mode.easy':'かんたん','mode.detail':'詳細','mode.easy.tip':'かんたんモード: 基本パラメータのみ表示','mode.detail.tip':'詳細モード: 全パラメータを表示',
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.version':'バージョン','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.filename':'ファイル名','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'out.version.ph':'例: 1.0','out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
@@ -433,7 +433,7 @@ const I18N = {
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.copySeed.err':'Failed to copy seed','btn.copyLink':'Copy link','btn.copyLink.err':'Failed to copy link','a11y.linkCopied':'Share link copied to clipboard','btn.copied':'✓ Copied','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.exported':'✓ Exported','btn.saveJson':'Save params (.json)','btn.copyJson':'Copy to clipboard','btn.copyJson.err':'Failed to copy to clipboard','btn.copyJsonDone':'✓ Copied','btn.pasteJson':'Paste from clipboard','btn.pasteJson.ok':'✓ Pasted','btn.pasteJson.err':'Clipboard content is not valid Hina JSON','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','a11y.resetDone':'Avatar reset to defaults','a11y.resetCancelled':'Reset cancelled','btn.revert':'↺ Revert to {p}','btn.screenshot':'PNG','btn.screenshot.tip':'Save screenshot (Ctrl/⌘+Shift+P)','btn.lang.tip':'Switch language — click for 日本語','hint.ctrlS':'Ctrl/⌘+S → Export VRM / Ctrl/⌘+Shift+S → Save JSON / Ctrl/⌘+Z → Undo / Ctrl/⌘+Shift+P → PNG / M → Easy/Detail toggle / ? → Help / 1-8 → Switch tab',
+    'btn.gacha':'Gacha (randomize)','gacha.lock':'Lock categories','gacha.lock.hint':'Locked categories are excluded from the reroll','a11y.gachaRanPartial':'Gacha — rerolled with some categories locked','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.copySeed.err':'Failed to copy seed','btn.copyLink':'Copy link','btn.copyLink.err':'Failed to copy link','a11y.linkCopied':'Share link copied to clipboard','btn.copied':'✓ Copied','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.exported':'✓ Exported','btn.saveJson':'Save params (.json)','btn.copyJson':'Copy to clipboard','btn.copyJson.err':'Failed to copy to clipboard','btn.copyJsonDone':'✓ Copied','btn.pasteJson':'Paste from clipboard','btn.pasteJson.ok':'✓ Pasted','btn.pasteJson.err':'Clipboard content is not valid Hina JSON','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','a11y.resetDone':'Avatar reset to defaults','a11y.resetCancelled':'Reset cancelled','btn.revert':'↺ Revert to {p}','btn.screenshot':'PNG','btn.screenshot.tip':'Save screenshot (Ctrl/⌘+Shift+P)','btn.lang.tip':'Switch language — click for 日本語','hint.ctrlS':'Ctrl/⌘+S → Export VRM / Ctrl/⌘+Shift+S → Save JSON / Ctrl/⌘+Z → Undo / Ctrl/⌘+Shift+P → PNG / M → Easy/Detail toggle / ? → Help / 1-8 → Switch tab',
     'mode.easy':'Easy','mode.detail':'Detail','mode.easy.tip':'Easy mode: basic params only','mode.detail.tip':'Detail mode: all params shown',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.version':'Version','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.filename':'File name','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'out.version.ph':'e.g. 1.0','out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
@@ -1534,6 +1534,10 @@ _rmMQ.addEventListener('change', e => { reduceMotion = e.matches; });
 /* ---------- state ---------- */
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
 let activePresetId = null, lastGachaSeed = null;
+// Round 476: gacha category locks — full reroll only ever replaced everything; users who liked
+// 90% of a result had no way to keep it. Locked categories are excluded from the reroll.
+const GACHA_LOCK_TABS = ['body','face','hair','outfit','color'];
+let gachaLocks = {body:false, face:false, hair:false, outfit:false, color:false};
 let params = HINA.defaults();
 const META_DEFAULTS = {title:'', version:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
 let meta = Object.assign({}, META_DEFAULTS);
@@ -1569,6 +1573,8 @@ function loadState(){
     if (j.activeTab && TABS.includes(j.activeTab)) activeTab = j.activeTab;
     if (j.activePresetId && HINA.PRESETS.some(p=>p.id===j.activePresetId)) activePresetId = j.activePresetId;
     if (Number.isFinite(j.lastGachaSeed)) lastGachaSeed = j.lastGachaSeed;
+    if (j.gachaLocks && typeof j.gachaLocks==='object')
+      for(const k of GACHA_LOCK_TABS) gachaLocks[k] = !!j.gachaLocks[k];
   }catch(e){}
 }
 // Single-level undo (Ctrl+Z) — captures state before user-initiated changes
@@ -1619,7 +1625,7 @@ function saveState(){
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(()=>{
     try{
-      localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed}));
+      localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks}));
       const b=$('autoSaveBadge');
       if (b){
         b.removeAttribute('aria-hidden'); b.textContent=t('hint.saved'); b.style.color='var(--ok)';
@@ -2405,13 +2411,34 @@ function renderBody(scrollReset=true){
     }
     const gDiv=el('div',{style:'margin-top:14px'});
     const runGacha=seed=>{
-      captureUndo(); lastGachaSeed=seed; params=HINA.randomParams(seed);
+      captureUndo();
+      const rolled=HINA.randomParams(seed);
+      const anyLock=GACHA_LOCK_TABS.some(tk=>gachaLocks[tk]);
+      if (anyLock) for(const k in HINA.PARAMS) if (gachaLocks[HINA.PARAMS[k].tab]) rolled[k]=params[k];
+      // A locked reroll is no longer fully determined by the seed alone, so it can't be reproduced
+      // by re-entering that seed — clearing it keeps the "same seed = same avatar" promise honest
+      // for the seed input, Copy/Copy Link buttons, and the ?seed=N sharing feature (Rounds 474-475).
+      lastGachaSeed=anyLock?null:seed;
+      params=rolled;
       activePresetId=null; rebuild(); renderBody();
-      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.gachaRan').replace('{n}',seed);
+      const sr=$('srStatus'); if(sr) sr.textContent=anyLock?t('a11y.gachaRanPartial'):t('a11y.gachaRan').replace('{n}',seed);
       // Return focus to gacha button so keyboard users can run it again or Tab onwards
       const gb=$('gachaBtn'); if(gb) gb.focus();
     };
     gDiv.append(el('button',{type:'button', id:'gachaBtn', class:'btn wide', onclick:()=>runGacha(crypto.getRandomValues(new Uint32Array(1))[0])}, t('btn.gacha')));
+    // Round 476: category locks — collapsed by default so the default 3-click flow (SPEC §2) stays
+    // uncluttered; discoverable via disclosure, same pattern as the About dialog's shortcut list.
+    const lockDet=el('details',{style:'margin-top:8px'});
+    lockDet.append(el('summary',{style:'font-size:12px;color:var(--text-dim);cursor:pointer'}, t('gacha.lock')));
+    const lockWrap=el('div',{style:'margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 12px'});
+    for(const tabKey of GACHA_LOCK_TABS){
+      const lid='gachaLock-'+tabKey;
+      const lcb=el('input',{id:lid, type:'checkbox', ...(gachaLocks[tabKey]?{checked:''}:{}),
+        onchange:e=>{ gachaLocks[tabKey]=e.target.checked; saveState(); }});
+      lockWrap.append(el('label',{'for':lid, style:'display:flex;align-items:center;gap:4px;font-size:12px'}, lcb, t('tab.'+tabKey)));
+    }
+    lockDet.append(lockWrap, el('div',{class:'limit', style:'margin-top:4px'}, t('gacha.lock.hint')));
+    gDiv.append(lockDet);
     const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', max:'4294967295', step:'1', autocomplete:'off', inputmode:'numeric', enterkeyhint:'go',
@@ -3023,7 +3050,7 @@ document.addEventListener('keydown',e=>{
     }
   }
 });
-const _emergencySave=()=>{ clearTimeout(_saveTimer); try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed})); }catch(e){} };
+const _emergencySave=()=>{ clearTimeout(_saveTimer); try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks})); }catch(e){} };
 // pagehide is sufficient and does not prevent bfcache (unlike beforeunload, which blocks it).
 window.addEventListener('pagehide', _emergencySave);
 // Mobile browsers may kill backgrounded tabs without firing pagehide — flush on visibilitychange too.

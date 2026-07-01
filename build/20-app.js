@@ -10,6 +10,10 @@ _rmMQ.addEventListener('change', e => { reduceMotion = e.matches; });
 /* ---------- state ---------- */
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
 let activePresetId = null, lastGachaSeed = null;
+// Round 476: gacha category locks — full reroll only ever replaced everything; users who liked
+// 90% of a result had no way to keep it. Locked categories are excluded from the reroll.
+const GACHA_LOCK_TABS = ['body','face','hair','outfit','color'];
+let gachaLocks = {body:false, face:false, hair:false, outfit:false, color:false};
 let params = HINA.defaults();
 const META_DEFAULTS = {title:'', version:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
 let meta = Object.assign({}, META_DEFAULTS);
@@ -45,6 +49,8 @@ function loadState(){
     if (j.activeTab && TABS.includes(j.activeTab)) activeTab = j.activeTab;
     if (j.activePresetId && HINA.PRESETS.some(p=>p.id===j.activePresetId)) activePresetId = j.activePresetId;
     if (Number.isFinite(j.lastGachaSeed)) lastGachaSeed = j.lastGachaSeed;
+    if (j.gachaLocks && typeof j.gachaLocks==='object')
+      for(const k of GACHA_LOCK_TABS) gachaLocks[k] = !!j.gachaLocks[k];
   }catch(e){}
 }
 // Single-level undo (Ctrl+Z) — captures state before user-initiated changes
@@ -95,7 +101,7 @@ function saveState(){
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(()=>{
     try{
-      localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed}));
+      localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks}));
       const b=$('autoSaveBadge');
       if (b){
         b.removeAttribute('aria-hidden'); b.textContent=t('hint.saved'); b.style.color='var(--ok)';
@@ -881,13 +887,34 @@ function renderBody(scrollReset=true){
     }
     const gDiv=el('div',{style:'margin-top:14px'});
     const runGacha=seed=>{
-      captureUndo(); lastGachaSeed=seed; params=HINA.randomParams(seed);
+      captureUndo();
+      const rolled=HINA.randomParams(seed);
+      const anyLock=GACHA_LOCK_TABS.some(tk=>gachaLocks[tk]);
+      if (anyLock) for(const k in HINA.PARAMS) if (gachaLocks[HINA.PARAMS[k].tab]) rolled[k]=params[k];
+      // A locked reroll is no longer fully determined by the seed alone, so it can't be reproduced
+      // by re-entering that seed — clearing it keeps the "same seed = same avatar" promise honest
+      // for the seed input, Copy/Copy Link buttons, and the ?seed=N sharing feature (Rounds 474-475).
+      lastGachaSeed=anyLock?null:seed;
+      params=rolled;
       activePresetId=null; rebuild(); renderBody();
-      const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.gachaRan').replace('{n}',seed);
+      const sr=$('srStatus'); if(sr) sr.textContent=anyLock?t('a11y.gachaRanPartial'):t('a11y.gachaRan').replace('{n}',seed);
       // Return focus to gacha button so keyboard users can run it again or Tab onwards
       const gb=$('gachaBtn'); if(gb) gb.focus();
     };
     gDiv.append(el('button',{type:'button', id:'gachaBtn', class:'btn wide', onclick:()=>runGacha(crypto.getRandomValues(new Uint32Array(1))[0])}, t('btn.gacha')));
+    // Round 476: category locks — collapsed by default so the default 3-click flow (SPEC §2) stays
+    // uncluttered; discoverable via disclosure, same pattern as the About dialog's shortcut list.
+    const lockDet=el('details',{style:'margin-top:8px'});
+    lockDet.append(el('summary',{style:'font-size:12px;color:var(--text-dim);cursor:pointer'}, t('gacha.lock')));
+    const lockWrap=el('div',{style:'margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 12px'});
+    for(const tabKey of GACHA_LOCK_TABS){
+      const lid='gachaLock-'+tabKey;
+      const lcb=el('input',{id:lid, type:'checkbox', ...(gachaLocks[tabKey]?{checked:''}:{}),
+        onchange:e=>{ gachaLocks[tabKey]=e.target.checked; saveState(); }});
+      lockWrap.append(el('label',{'for':lid, style:'display:flex;align-items:center;gap:4px;font-size:12px'}, lcb, t('tab.'+tabKey)));
+    }
+    lockDet.append(lockWrap, el('div',{class:'limit', style:'margin-top:4px'}, t('gacha.lock.hint')));
+    gDiv.append(lockDet);
     const seedRow=el('div',{style:'display:flex;gap:6px;align-items:center;margin-top:8px'});
     const seedIn=el('input',{type:'number',class:'num numIn',style:'flex:1;min-width:0',
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', max:'4294967295', step:'1', autocomplete:'off', inputmode:'numeric', enterkeyhint:'go',
@@ -1499,7 +1526,7 @@ document.addEventListener('keydown',e=>{
     }
   }
 });
-const _emergencySave=()=>{ clearTimeout(_saveTimer); try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed})); }catch(e){} };
+const _emergencySave=()=>{ clearTimeout(_saveTimer); try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks})); }catch(e){} };
 // pagehide is sufficient and does not prevent bfcache (unlike beforeunload, which blocks it).
 window.addEventListener('pagehide', _emergencySave);
 // Mobile browsers may kill backgrounded tabs without firing pagehide — flush on visibilitychange too.

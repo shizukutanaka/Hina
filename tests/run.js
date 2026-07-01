@@ -4136,7 +4136,8 @@ function accData(j, bin, ai){
     'en hint.saveFail key present with ⚠ warning symbol');
 
   // saveState catch block must reference hint.saveFail and show the badge
-  const saveStateSrc = html.slice(html.indexOf('function saveState'), html.indexOf('function saveState') + 1000);
+  // Window widened in Round 476 for the gachaLocks field added to the saved-state JSON blob
+  const saveStateSrc = html.slice(html.indexOf('function saveState'), html.indexOf('function saveState') + 1050);
   ok(saveStateSrc.includes("'hint.saveFail'") || saveStateSrc.includes('"hint.saveFail"'),
     'saveState catch block references hint.saveFail i18n key');
   ok(/catch\s*\(e\)\s*\{[\s\S]{0,350}hint\.saveFail/.test(saveStateSrc),
@@ -5133,12 +5134,14 @@ function accData(j, bin, ai){
     'aboutDlg close event restores focus to triggering element or btnAbout so keyboard users keep their position');
 }
 
-/* ---- Round 246: runGacha() announces seed to screen reader via srStatus ---- */
+/* ---- Round 246: runGacha() announces seed to screen reader via srStatus (Round 476: now conditional) ---- */
 {
   ok(H.I18N.ja['a11y.gachaRan'] && H.I18N.en['a11y.gachaRan'],
     'a11y.gachaRan i18n key exists in both locales for gacha screen reader announcement');
-  ok(/runGacha[\s\S]{0,200}a11y\.gachaRan/.test(html),
-    'runGacha() announces the seed to srStatus live region after generating a random avatar');
+  const rgIdx = html.indexOf('const runGacha=seed=>{');
+  const rgBlock = rgIdx >= 0 ? html.slice(rgIdx, rgIdx + 1000) : '';
+  ok(/sr\.textContent=anyLock\?t\('a11y\.gachaRanPartial'\):t\('a11y\.gachaRan'\)\.replace\('\{n\}',seed\)/.test(rgBlock),
+    'runGacha() announces the seed to srStatus live region after generating a random avatar (Round 476: falls back to a11y.gachaRanPartial when any category is locked)');
 }
 
 /* ---- Round 245: tablist aria-orientation + aria-label for screen reader navigation ---- */
@@ -6638,6 +6641,57 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 476: gacha category locks — reroll can now keep liked categories instead of all-or-nothing ---- */
+{
+  // Full reroll only ever replaced every param; users who liked 90% of a result had no way to
+  // keep it short of manually recreating it tab-by-tab. Add 5 lock checkboxes (body/face/hair/
+  // outfit/color, matching the existing PARAMS.tab grouping) in a collapsed <details> disclosure
+  // so the default 3-click flow (SPEC §2) stays uncluttered.
+  ok(/const GACHA_LOCK_TABS = \['body','face','hair','outfit','color'\]/.test(html),
+    'R476: GACHA_LOCK_TABS covers the 5 param-schema tab categories');
+  ok(/let gachaLocks = \{body:false, face:false, hair:false, outfit:false, color:false\}/.test(html),
+    'R476: gachaLocks state defaults to all-unlocked');
+
+  // i18n parity: new keys in both languages
+  ok(/'gacha\.lock':/.test(html) && (html.match(/'gacha\.lock':/g)||[]).length>=2,
+    'R476: gacha.lock i18n key defined in both ja and en');
+  ok(/'gacha\.lock\.hint':/.test(html) && (html.match(/'gacha\.lock\.hint':/g)||[]).length>=2,
+    'R476: gacha.lock.hint i18n key defined in both ja and en');
+  ok(/'a11y\.gachaRanPartial':/.test(html) && (html.match(/'a11y\.gachaRanPartial':/g)||[]).length>=2,
+    'R476: a11y.gachaRanPartial i18n key defined in both ja and en');
+
+  // runGacha() logic: locked-category params are restored from current params after the reroll
+  const rgIdx = html.indexOf('const runGacha=seed=>{');
+  const rgBlock = rgIdx >= 0 ? html.slice(rgIdx, rgIdx + 1000) : '';
+  ok(/const rolled=HINA\.randomParams\(seed\)/.test(rgBlock),
+    'R476: runGacha() rolls a full random result first, same as before locks existed');
+  ok(/if \(anyLock\) for\(const k in HINA\.PARAMS\) if \(gachaLocks\[HINA\.PARAMS\[k\]\.tab\]\) rolled\[k\]=params\[k\]/.test(rgBlock),
+    'R476: locked-category params are overwritten back to their pre-reroll values');
+
+  // Seed-reproducibility invariant: a locked (partial) reroll must NOT claim a reproducible seed,
+  // since the seed alone no longer determines the full result — protects Rounds 474/475's sharing
+  // features and the "Copy"/"Copy Link" buttons from producing misleading links.
+  ok(/const anyLock=GACHA_LOCK_TABS\.some\(tk=>gachaLocks\[tk\]\)/.test(rgBlock),
+    'R476: anyLock is computed from the current gachaLocks state before rolling');
+  ok(/lastGachaSeed=anyLock\?null:seed/.test(rgBlock),
+    'R476: lastGachaSeed is cleared (not set to the rolled seed) whenever any category is locked');
+
+  // UI: collapsed <details> disclosure, checkboxes persist to gachaLocks + saveState()
+  ok(/const lockDet=el\('details'/.test(html),
+    'R476: lock UI is a collapsed <details> disclosure (matches the About-dialog shortcut-list pattern)');
+  ok(/GACHA_LOCK_TABS\)\{[\s\S]{0,50}const lid='gachaLock-'\+tabKey/.test(html),
+    'R476: one checkbox is rendered per GACHA_LOCK_TABS entry');
+  ok(/onchange:e=>\{ gachaLocks\[tabKey\]=e\.target\.checked; saveState\(\); \}/.test(html),
+    'R476: toggling a lock checkbox updates gachaLocks and persists via saveState()');
+
+  // Persistence: gachaLocks is saved and restored across both localStorage write sites
+  // (saveState's debounced write and the pagehide/visibilitychange emergency flush)
+  ok((html.match(/JSON\.stringify\(\{params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks\}\)/g)||[]).length===2,
+    'R476: gachaLocks is included in BOTH saveState() and _emergencySave() write sites');
+  ok(/if \(j\.gachaLocks && typeof j\.gachaLocks==='object'\)[\s\S]{0,80}gachaLocks\[k\] = !!j\.gachaLocks\[k\]/.test(html),
+    'R476: loadState() restores gachaLocks from the saved JSON, coercing each value to boolean');
 }
 
 /* ---- Round 475: "Copy Link" button makes the ?seed=N sharing feature (Round 474) discoverable ---- */
