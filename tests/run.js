@@ -1034,6 +1034,26 @@ function accData(j, bin, ai){
     'deserialize with array meta returns empty {}');
 }
 
+/* ---- Round 469: deserialize() whitelists meta keys — prevents __proto__ pollution via Object.assign ---- */
+{
+  // A raw meta object let a "__proto__" key survive to the app's Object.assign(meta, d.meta) call,
+  // which — via the [[Set]] Annex B accessor — reassigns the meta object's own prototype. sanitizeMeta()
+  // now builds a fresh object from a fixed whitelist, so unknown/dangerous keys never reach the result.
+  const poll = H.deserialize('{"app":"hina","meta":{"title":"t","__proto__":{"polluted":true},"constructor":{"prototype":{"polluted":true}},"extra":"x"}}');
+  ok(poll !== null && poll.meta.title === 't',
+    'R469: deserialize keeps whitelisted string meta keys (title) after sanitizeMeta');
+  ok(!Object.prototype.hasOwnProperty.call(poll.meta, '__proto__') && !({}).hasOwnProperty.call(poll.meta,'constructor'),
+    'R469: deserialize meta has no own __proto__/constructor properties — pollution keys stripped');
+  ok(poll.meta.extra === undefined,
+    'R469: deserialize meta drops keys not in the whitelist (e.g. "extra")');
+  ok(Object.getPrototypeOf({}) === Object.getPrototypeOf(poll.meta),
+    'R469: sanitizeMeta()-produced meta object has the normal Object.prototype (not overwritten)');
+  // Non-string values for whitelisted keys are dropped, not coerced (type-confusion defense)
+  const typ = H.deserialize('{"app":"hina","meta":{"title":123,"author":["x"],"version":"1.0"}}');
+  ok(typ !== null && typ.meta.title === undefined && typ.meta.author === undefined && typ.meta.version === '1.0',
+    'R469: sanitizeMeta() drops non-string values for whitelisted keys, keeps valid string values');
+}
+
 /* ---- BinWriter alignment ---- */
 {
   const bw = new H.BinWriter();

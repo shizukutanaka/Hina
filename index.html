@@ -542,13 +542,28 @@ function rank(stats, platform){
 
 /* ---------- serialization ---------- */
 function serialize(p, meta){ return JSON.stringify({app:'hina', version:VERSION, params:p, meta:meta||{}}, null, 1); }
+// Whitelist of meta keys mirrors the app's META_DEFAULTS shape — every value is a string.
+// A raw Object.assign(meta, j.meta) would let pasted/loaded JSON carry a "__proto__" key that,
+// via [[Set]] during the merge, reassigns the meta object's own prototype (Annex B legacy accessor).
+// Building a fresh object from a fixed key list — never indexed by attacker-supplied key names —
+// makes that impossible, matching the whitelist approach sanitize() already uses for params.
+const META_KEYS = ['title','version','author','contact','reference','allowed','violent','sexual','commercial','license','licenseUrl'];
+function sanitizeMeta(m){
+  const o = {};
+  if (!m || typeof m!=='object') return o;
+  for (const k of META_KEYS){
+    const v = m[k];
+    if (typeof v==='string') o[k]=v;
+  }
+  return o;
+}
 function deserialize(text){
   // Strip UTF-8 BOM (U+FEFF) — common when JSON is edited in Notepad on Windows;
   // JSON.parse does not treat BOM as whitespace and would throw SyntaxError.
   if (typeof text==='string' && text.charCodeAt(0)===0xFEFF) text = text.slice(1);
   let j; try{ j=JSON.parse(text); }catch(e){ return null; }
   if (!j || j.app!=='hina') return null;
-  return { params: sanitize(j.params), meta: (j.meta && typeof j.meta==='object' && !Array.isArray(j.meta)) ? j.meta : {} };
+  return { params: sanitize(j.params), meta: sanitizeMeta(j.meta) };
 }
 
 /* 1x1 transparent PNG (fallback / Node tests) */
