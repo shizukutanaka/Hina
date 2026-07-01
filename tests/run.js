@@ -6640,6 +6640,34 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 474: shareable ?seed=N URL loads the exact gacha result on startup ---- */
+{
+  // A gacha "seed" number only helps sharing if the recipient reproduces it manually — friction
+  // that a URL query param removes entirely. Purely client-side (URLSearchParams on location.search),
+  // no server round-trip, matching the existing ?selftest precedent for "zero communication" posture.
+  ok(/new URLSearchParams\(location\.search\)\.get\('seed'\)/.test(html),
+    'R474: boot sequence reads a "seed" query-string param via URLSearchParams');
+  // Must run after loadState() (so it overrides restored local state) and before rebuild()
+  // (so the seed-derived params are actually used for the first render).
+  const loadIdx = html.indexOf('loadState();');
+  const qSeedIdx = html.indexOf("new URLSearchParams(location.search).get('seed')");
+  const rebuildIdx = html.indexOf('rebuild();', qSeedIdx);
+  ok(loadIdx>=0 && qSeedIdx>loadIdx && rebuildIdx>qSeedIdx,
+    'R474: URL-seed parsing runs after loadState() and before the first rebuild()');
+  // Same clamp bounds as the manual seed input (0..4294967295) — invalid/negative/non-numeric
+  // values are silently ignored rather than erroring, since a malformed link isn't the user's fault.
+  ok(/Math\.min\(n, 4294967295\)/.test(html),
+    'R474: URL seed is clamped to the same [0, 4294967295] range as the manual seed input');
+  ok(/Number\.isFinite\(n\)\s*&&\s*n>=0/.test(html),
+    'R474: non-numeric or negative seed query params are rejected (fall back to local state)');
+  ok(/lastGachaSeed = clamped;\s*\n\s*params = HINA\.randomParams\(clamped\);\s*\n\s*activePresetId = null;/.test(html),
+    'R474: a valid URL seed sets lastGachaSeed, regenerates params via randomParams(), and clears activePresetId');
+
+  // Functional check: HINA.randomParams(seed) is itself deterministic (already covered by Round-old
+  // tests), so the URL-loading wiring just needs to reach it correctly — verified above by source
+  // inspection since this is boot-sequence code with no isolated function to call directly.
+}
+
 /* ---- Round 473: MToon outline export toggle (roadmap v0.2 item — "MToonアウトライン出力") ---- */
 {
   // materialProperties already carried _OutlineWidth/_OutlineColor with mode hardcoded to 0 (off).

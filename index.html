@@ -2927,6 +2927,22 @@ if (!GLOK){
   $('stage').appendChild(ov);
 }
 loadState();
+// Shareable seed link: ?seed=N reproduces the exact gacha result — no server round-trip,
+// purely client-side query-string parsing (same "zero communication" posture as ?selftest).
+// Overrides whatever loadState() restored, since an explicit URL seed signals deliberate intent
+// to view that avatar. A malformed/missing param is silently ignored (falls back to local state).
+{
+  const qSeed = new URLSearchParams(location.search).get('seed');
+  if (qSeed !== null){
+    const n = Math.round(Number(qSeed));
+    if (Number.isFinite(n) && n>=0){
+      const clamped = Math.min(n, 4294967295);
+      lastGachaSeed = clamped;
+      params = HINA.randomParams(clamped);
+      activePresetId = null;
+    }
+  }
+}
 rebuild();
 applyLang();
 // Request durable storage so browsers don't LRU-evict auto-saved avatar state under storage pressure.
