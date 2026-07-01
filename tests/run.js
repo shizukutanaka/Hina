@@ -6643,6 +6643,19 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 477: gacha lock <details> auto-opens when a lock is active, surviving runGacha's renderBody() ---- */
+{
+  // runGacha() calls renderBody(), which fully recreates the Preset tab DOM including the lock
+  // <details> — without this, a user with active locks would see the disclosure snap shut on
+  // every reroll, unable to glance at their own lock state without re-expanding it each time.
+  ok(/const lockDet=el\('details',\{style:'margin-top:8px', \.\.\.\(GACHA_LOCK_TABS\.some\(tk=>gachaLocks\[tk\]\)\?\{open:''\}:\{\}\)\}\)/.test(html),
+    'R477: lock <details> gets open:\'\' when any GACHA_LOCK_TABS entry is currently locked');
+  // Must stay collapsed (no open attribute forced) when nothing is locked — preserves the
+  // Round 476 default of an uncluttered 3-click flow for the common no-locks case.
+  ok(/GACHA_LOCK_TABS\.some\(tk=>gachaLocks\[tk\]\)\?\{open:''\}:\{\}/.test(html),
+    'R477: falls back to {} (no open attribute) when no categories are locked');
+}
+
 /* ---- Round 476: gacha category locks — reroll can now keep liked categories instead of all-or-nothing ---- */
 {
   // Full reroll only ever replaced every param; users who liked 90% of a result had no way to

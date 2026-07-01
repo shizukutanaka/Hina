@@ -904,7 +904,10 @@ function renderBody(scrollReset=true){
     gDiv.append(el('button',{type:'button', id:'gachaBtn', class:'btn wide', onclick:()=>runGacha(crypto.getRandomValues(new Uint32Array(1))[0])}, t('btn.gacha')));
     // Round 476: category locks — collapsed by default so the default 3-click flow (SPEC §2) stays
     // uncluttered; discoverable via disclosure, same pattern as the About dialog's shortcut list.
-    const lockDet=el('details',{style:'margin-top:8px'});
+    // Round 477: renderBody() recreates this <details> on every gacha click (runGacha calls it),
+    // which would otherwise snap the disclosure shut even while locks are active — auto-open it
+    // whenever any lock is set so users can always see/manage their active locks without re-expanding.
+    const lockDet=el('details',{style:'margin-top:8px', ...(GACHA_LOCK_TABS.some(tk=>gachaLocks[tk])?{open:''}:{})});
     lockDet.append(el('summary',{style:'font-size:12px;color:var(--text-dim);cursor:pointer'}, t('gacha.lock')));
     const lockWrap=el('div',{style:'margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 12px'});
     for(const tabKey of GACHA_LOCK_TABS){
