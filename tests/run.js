@@ -6640,6 +6640,37 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 475: "Copy Link" button makes the ?seed=N sharing feature (Round 474) discoverable ---- */
+{
+  // Round 474 shipped ?seed=N URL loading, but nothing in the UI hinted it existed — only
+  // reachable by manually editing the address bar. Add a paired button next to the existing
+  // seed-number "Copy" button that copies a full shareable link instead.
+  ok(/'btn\.copyLink':/.test(html), 'R475: i18n key btn.copyLink is defined');
+  ok(/'btn\.copyLink\.err'/.test(html), 'R475: i18n key btn.copyLink.err is defined');
+  ok(/'a11y\.linkCopied'/.test(html), 'R475: i18n key a11y.linkCopied is defined');
+  ok((html.match(/'btn\.copyLink'/g)||[]).length>=2 && (html.match(/'a11y\.linkCopied'/g)||[]).length>=2,
+    'R475: btn.copyLink and a11y.linkCopied are defined in both ja and en (i18n parity)');
+
+  const cpLinkIdx = html.indexOf('const cpLinkBtn=el(');
+  ok(cpLinkIdx>=0, 'R475: cpLinkBtn is constructed in the gacha seed row');
+  const cpLinkBlock = html.slice(cpLinkIdx, cpLinkIdx+1400);
+  ok(/link=location\.origin\+location\.pathname\+'\?seed='\+lastGachaSeed/.test(cpLinkBlock),
+    'R475: cpLinkBtn builds a link from location.origin+pathname+"?seed="+lastGachaSeed');
+  ok(/lastGachaSeed===null\?\{disabled:''\}/.test(cpLinkBlock) || /\.\.\.\(lastGachaSeed===null\?\{disabled:''\}:\{\}\)/.test(html.slice(cpLinkIdx-50, cpLinkIdx+200)),
+    'R475: cpLinkBtn is disabled until a gacha seed exists, matching cpBtn\'s pattern');
+  ok(/navigator\.clipboard\.writeText\(link\)/.test(cpLinkBlock),
+    'R475: cpLinkBtn writes the constructed link (not just the bare seed) to the clipboard');
+  ok(/showErr\(t\('btn\.copyLink\.err'\)\)/.test(cpLinkBlock),
+    'R475: cpLinkBtn failure path uses showErr() for assertive SR announcement (consistent with cpBtn)');
+  ok(/sr\.textContent=t\('a11y\.linkCopied'\)/.test(cpLinkBlock),
+    'R475: cpLinkBtn success path announces a11y.linkCopied via srStatus');
+
+  // Both buttons must be present in the row together — Copy (seed number) still works standalone
+  // (useful when Hina is opened via file:// and the link alone isn't meaningfully shareable)
+  ok(/seedRow\.append\(el\('span',\{class:'limit'\},t\('gacha\.seed'\)\), seedIn, cpBtn, cpLinkBtn\)/.test(html),
+    'R475: seedRow includes both cpBtn (seed number) and cpLinkBtn (share link)');
+}
+
 /* ---- Round 474: shareable ?seed=N URL loads the exact gacha result on startup ---- */
 {
   // A gacha "seed" number only helps sharing if the recipient reproduces it manually — friction

@@ -921,8 +921,26 @@ function renderBody(scrollReset=true){
         }).catch(()=>{ cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); if(_cpBF) cpBtn.focus(); cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); showErr(t('btn.copySeed.err')); });
       }
     }, t('btn.copySeed'));
+    // Round 475: makes the ?seed=N sharing added in Round 474 discoverable — that feature had
+    // zero UI surface before this (only reachable by manually editing the address bar).
+    const cpLinkBtn=el('button',{type:'button', class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
+      ...(lastGachaSeed===null?{disabled:''}:{}),
+      'aria-label':t('btn.copyLink'), title:t('btn.copyLink'),
+      onclick:()=>{
+        if(lastGachaSeed===null) return;
+        const link=location.origin+location.pathname+'?seed='+lastGachaSeed;
+        if (!navigator.clipboard?.writeText){ cpLinkBtn.textContent='!'; setTimeout(()=>{ cpLinkBtn.textContent=t('btn.copyLink'); },1500); showErr(t('btn.copyLink.err')); return; }
+        const _cpLF=document.activeElement===cpLinkBtn; cpLinkBtn.disabled=true; cpLinkBtn.setAttribute('aria-busy','true');
+        navigator.clipboard.writeText(link).then(()=>{
+          cpLinkBtn.disabled=false; cpLinkBtn.removeAttribute('aria-busy'); if(_cpLF) cpLinkBtn.focus();
+          const orig=cpLinkBtn.textContent; cpLinkBtn.textContent=t('btn.copied');
+          setTimeout(()=>{ cpLinkBtn.textContent=orig; },1500);
+          const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.linkCopied');
+        }).catch(()=>{ cpLinkBtn.disabled=false; cpLinkBtn.removeAttribute('aria-busy'); if(_cpLF) cpLinkBtn.focus(); cpLinkBtn.textContent='!'; setTimeout(()=>{ cpLinkBtn.textContent=t('btn.copyLink'); },1500); showErr(t('btn.copyLink.err')); });
+      }
+    }, t('btn.copyLink'));
     seedIn.addEventListener('wheel',e=>{ if(document.activeElement===seedIn) e.preventDefault(); },{passive:false});
-    seedRow.append(el('span',{class:'limit'},t('gacha.seed')), seedIn, cpBtn);
+    seedRow.append(el('span',{class:'limit'},t('gacha.seed')), seedIn, cpBtn, cpLinkBtn);
     gDiv.append(seedRow);
     bd.append(grid, gDiv);
     return;
