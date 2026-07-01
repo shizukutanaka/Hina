@@ -805,6 +805,10 @@ function onParam(k){
   activePresetId=null;
   const s=PARAMS[k];
   if (s.k==='color'){ drawAtlas(params); uploadTexture(); saveState(); return; }
+  // outline is an export-only material flag — no geometry/atlas/preview impact, so skip the
+  // expensive rebuild() (unlike springOff, which does change the live preview and PB counts).
+  // renderBody(false) still runs to show/hide the note.outline hint below the checkbox.
+  if (k==='outline'){ saveState(); renderBody(false); const re=document.getElementById('pr-outline'); if(re) re.focus(); return; }
   if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
   lastGachaSeed=null; // structural change: seed no longer reproduces this avatar's geometry
   rebuild();
@@ -938,6 +942,8 @@ function renderBody(scrollReset=true){
       bd.append(el('div',{class:'note'}, t('note.springOff')));
     bd.append(el('div',{class:'note'}, t(hasS ? 'note.quest' : 'note.quest.nospring')));
   }
+  if (activeTab==='color' && params.outline)
+    bd.append(el('div',{class:'note'}, t('note.outline')));
 }
 
 let statEls={};

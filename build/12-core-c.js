@@ -75,7 +75,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
   const aWgt=addAcc(addView(bw.push(fWgt),fWgt.byteLength,34962),5126,nV,'VEC4');
   const aIdx=addAcc(addView(bw.push(uIdx),uIdx.byteLength,34963),5123,uIdx.length,'SCALAR');
 
-  /* morph targets — glTF sparse accessor (only non-zero delta verts; SPEC §9 "スパース化") */
+  /* morph targets — glTF sparse accessor (only non-zero delta verts; SPEC §5.3) */
   const targetNames = build.morphs.names.slice();
   const targets = targetNames.map(name=>{
     const entries = build.morphs.sparse[name];
@@ -218,7 +218,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
       _ShadeShift:0, _ShadeToony:0.9, _LightColorAttenuation:0, _IndirectLightIntensity:0.1,
       _RimLightingMix:0, _RimFresnelPower:1, _RimLift:0,
       _OutlineWidth:0.07, _OutlineScaledMaxDistance:1, _OutlineLightingMix:1,
-      _OutlineColorMode:0, _OutlineWidthMode:0, _OutlineCullMode:1,
+      _OutlineColorMode:0, _OutlineWidthMode: p.outline?1:0, _OutlineCullMode:1,
       _UvAnimScrollX:0, _UvAnimScrollY:0, _UvAnimRotation:0,
       _MToonVersion:38, _DebugMode:0, _BlendMode:1, _CullMode:0,
       _SrcBlend:1, _DstBlend:0, _ZWrite:1,

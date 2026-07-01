@@ -84,6 +84,7 @@
 - 母音5種は口形状の頂点モーフ（VRChatリップシンク変換対象）
 - look系は空バインド（視線はBone方式のため）
 - モーフはメッシュ`extras.targetNames`に名称を格納（UniVRM互換）
+- 各モーフはglTFスパースアクセサ（非ゼロ頂点のみ格納）で書き出す。ファイルサイズ縮小のため
 
 ### 5.4 SpringBone（secondaryAnimation）
 - boneGroups: 共通パラメータ `stiffiness`(VRM0原文ママ)/gravityPower/gravityDir(0,-1,0)/dragForce/hitRadius、`bones`=チェーン根ノード
@@ -91,7 +92,7 @@
 - プレビュー物理は同一パラメータのVerlet実装（見た目の事前確認用）
 
 ### 5.5 マテリアル（materialProperties）
-shader `VRM/MToon`。`_BlendMode=1(Cutout)`,`_Cutoff=0.5`,`_CullMode=0(両面)`,`_ShadeToony=0.9`,`_ShadeShift=0`。glTF側は`alphaMode:MASK`をミラー。アウトラインは既定OFF（Unity側で任意有効化）。
+shader `VRM/MToon`。`_BlendMode=1(Cutout)`,`_Cutoff=0.5`,`_CullMode=0(両面)`,`_ShadeToony=0.9`,`_ShadeShift=0`。glTF側は`alphaMode:MASK`をミラー。アウトラインは既定OFF、`outline`パラメータ（詳細モード・色タブ）でON時`_OutlineWidthMode=1`を書き出す。Quest側シェーダーは非対応のためPC限定表示（UIで明示）。
 
 ### 5.6 メタ（meta）
 title/version/author/contactInformation/reference/texture(サムネイル)/allowedUserName/violentUssageName/sexualUssageName/commercialUssageName/licenseName/otherLicenseUrl。既定は `OnlyAuthor / Disallow×3 / Redistribution_Prohibited`（最も保守的）。UIで変更可。
@@ -126,7 +127,7 @@ Quest: Triangles 7.5k/10k/15k/20k ・ Bones 75/90/150/150 ・ SkinnedMesh 1/1/2/
 
 | 版 | 内容 |
 |----|------|
-| v0.2 | 指ボーン+指モーフ・髪/衣装プリセット追加・スパースモーフ格納(ファイル縮小)・MToonアウトライン出力 |
+| v0.2 | 指ボーン+指モーフ・髪/衣装プリセット追加（スパースモーフ格納・MToonアウトライン出力は実装済み、§5.3/§5.5参照） |
 | v0.3 | テクスチャレイヤーペイント・表情エディタ・アクセサリ |
 | v1.0 | VRM 1.0出力・VRMA対応・プリセット共有形式 |
 

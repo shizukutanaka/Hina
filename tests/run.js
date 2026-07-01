@@ -481,8 +481,8 @@ const B = H.buildAvatar(P);
 /* ---- adv (detail-mode-only) parameters ---- */
 {
   const advKeys = Object.keys(H.PARAMS).filter(k => H.PARAMS[k].adv);
-  ok(advKeys.length === 4 && ['armTh','legTh','irisSize','socks'].every(k => advKeys.includes(k)),
-    'exactly 4 adv:1 params: armTh, legTh, irisSize, socks');
+  ok(advKeys.length === 5 && ['armTh','legTh','irisSize','socks','outline'].every(k => advKeys.includes(k)),
+    'exactly 5 adv:1 params: armTh, legTh, irisSize, socks, outline (Round 473)');
   // extreme arm/leg thickness builds must not crash or produce non-finite geometry
   const wide = H.buildAvatar(Object.assign(H.defaults(), { armTh: 1.5, legTh: 1.5 }));
   ok(wide.geom.pos.every(Number.isFinite) && wide.geom.nrm.every(Number.isFinite),
@@ -6638,6 +6638,52 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 473: MToon outline export toggle (roadmap v0.2 item — "MToonアウトライン出力") ---- */
+{
+  // materialProperties already carried _OutlineWidth/_OutlineColor with mode hardcoded to 0 (off).
+  // Expose it as a normal PARAMS bool so users can enable outline without editing in Unity.
+  // Modeled as a springOff-sibling "technical toggle": excluded from gacha randomization (an
+  // export/rendering choice, not an appearance trait) and skips the geometry rebuild in onParam()
+  // since it has zero effect on tris/bones/mesh/atlas — purely a material flag at export time.
+  ok(H.PARAMS.outline && H.PARAMS.outline.k==='bool' && H.PARAMS.outline.def===false,
+    'R473: PARAMS.outline is a bool param defaulting to false (off, matching pre-existing SPEC behavior)');
+  ok(typeof H.PARAMS.outline.ja==='string' && typeof H.PARAMS.outline.en==='string',
+    'R473: PARAMS.outline has both ja and en labels (CLAUDE.md PARAMS+I18N parity rule)');
+  ok(H.PARAMS.outline.tab==='color' && H.PARAMS.outline.adv===1,
+    'R473: PARAMS.outline lives in the color tab, detail-mode only (adv:1)');
+
+  // exportVRM(): _OutlineWidthMode toggles 0↔1 (World Coordinates) with p.outline, nothing else changes
+  const offExp = H.exportVRM(B, Object.assign({}, P, {outline:false}), {}, H.b64ToBytes(H.PNG1));
+  const onExp  = H.exportVRM(B, Object.assign({}, P, {outline:true}), {}, H.b64ToBytes(H.PNG1));
+  const mpOff = offExp.json.extensions.VRM.materialProperties[0].floatProperties;
+  const mpOn  = onExp.json.extensions.VRM.materialProperties[0].floatProperties;
+  ok(mpOff._OutlineWidthMode===0, 'R473: outline:false exports _OutlineWidthMode=0 (unchanged default)');
+  ok(mpOn._OutlineWidthMode===1, 'R473: outline:true exports _OutlineWidthMode=1 (World Coordinates)');
+  ok(mpOff._OutlineWidth===mpOn._OutlineWidth && mpOff._OutlineWidth===0.07,
+    'R473: _OutlineWidth stays at its existing default (0.07) regardless of the toggle');
+
+  // randomParams(): outline is excluded from gacha randomization, like springOff
+  ok(/k!==.springOff.\s*&&\s*k!==.outline./.test(html),
+    'R473: randomParams() excludes outline from bool randomization (technical toggle, not an appearance trait)');
+  ok(/p\.springOff=false;\s*p\.outline=false;/.test(html),
+    'R473: randomParams() forces outline=false after the loop, mirroring springOff');
+  for (let seed=0; seed<20; seed++){
+    ok(H.randomParams(seed).outline===false, `R473: randomParams(seed=${seed}) always yields outline=false`);
+  }
+
+  // onParam() skips the expensive rebuild() for outline (export-only, no geometry/atlas impact)
+  const onParamIdx = html.indexOf('function onParam(k)');
+  const onParamBlock = onParamIdx >= 0 ? html.slice(onParamIdx, onParamIdx + 900) : '';
+  ok(/if \(k===.outline.\)\{ saveState\(\); renderBody\(false\)/.test(onParamBlock),
+    'R473: onParam() short-circuits for outline — saveState()+renderBody(false), no rebuild()');
+
+  // note.outline i18n key present in both languages, shown only when outline is enabled
+  ok(/'note\.outline'/.test(html) && (html.match(/note\.outline/g)||[]).length>=3,
+    'R473: note.outline i18n key defined (ja+en) and referenced in the color-tab render logic');
+  ok(/activeTab===.color.\s*&&\s*params\.outline\)\s*\n?\s*bd\.append\(el\('div',\{class:'note'\}, t\('note\.outline'\)\)\)/.test(html),
+    'R473: color-tab render appends note.outline only when params.outline is true');
 }
 
 /* ---- Round 472: safeName() guards against Windows reserved device names (CON, PRN, AUX, NUL, COM1-9, LPT1-9) ---- */

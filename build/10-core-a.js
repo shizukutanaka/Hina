@@ -131,6 +131,8 @@ const PARAMS = {
   clothSub:  {k:'color', def:'#f2f2f2', pal:'accent',tab:'color', ja:'服サブ', en:'Cloth sub'},
   clothAccent:{k:'color',def:'#d9534f', pal:'accent',tab:'color', ja:'アクセント', en:'Accent'},
   shoeColor: {k:'color', def:'#384048', pal:'cloth', tab:'color', ja:'靴', en:'Shoes'},
+  // technical toggle (like springOff) — export-only, excluded from gacha randomization
+  outline:   {k:'bool', def:false, tab:'color', adv:1, ja:'アウトライン', en:'Outline'},
   // 物理
   springOff: {k:'bool', def:false, tab:'phys', ja:'揺れ物オフ (Quest Excellent)', en:'No springs (Quest Excellent)'},
   hairStiff: {k:'num', min:0, max:1, def:0.65, step:0.01, tab:'phys', ja:'髪の硬さ', en:'Hair stiffness'},
@@ -180,10 +182,11 @@ function randomParams(seed){
       p[k]=M.clamp(Number(p[k].toFixed(4)),s.min,s.max);
     }
     else if (s.k==='enum') p[k]=pick(s.opts);
-    else if (s.k==='bool' && k!=='springOff') p[k]=r()<0.5;
+    else if (s.k==='bool' && k!=='springOff' && k!=='outline') p[k]=r()<0.5;
     else if (s.k==='color') p[k]=pick(PAL[s.pal]);
   }
   p.springOff=false;
+  p.outline=false;
   return sanitize(p);
 }
 
@@ -211,6 +214,7 @@ const I18N = {
     'a11y.rankBadge':'ランクバッジ — クリックで統計タブへ','a11y.skip':'コンテンツへスキップ',
     'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.screenshotShared':'スクリーンショットを共有しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました','a11y.gachaRan':'ガチャ — シード {n} で生成しました','a11y.undone':'元に戻しました','a11y.noUndo':'元に戻す履歴がありません','a11y.savedJson':'{name} を保存しました','a11y.loadedJson':'{name} を読み込みました','a11y.clamped':'値を {v} に制限しました','a11y.viewReset':'プレビュー視点をリセットしました','a11y.viewLimit':'視点の限界に達しました','a11y.seedInvalid':'シードは0以上の整数を入力してください','a11y.licUrlInvalid':'有効なURLを入力してください（例: https://example.com）',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。','note.springOff':'揺れ物オフ中：スライダーは非表示。オンにすると表示されます。',
+    'note.outline':'アウトラインはPC版でのみ表示されます（Questのシェーダーは非対応）。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
     'about.keys':'キーボードショートカット','about.keyList':'Ctrl/⌘+S             → VRM書き出し\nCtrl/⌘+Shift+S       → JSON保存\nCtrl/⌘+Z             → 元に戻す\nCtrl/⌘+Shift+P       → スクリーンショット\n?                    → このダイアログ\nM                    → かんたん/詳細 切替\n1〜8                 → タブ切替\nEsc                  → 表情プレビューを解除\n↑↓←→              → 3D回転（プレビュー選択時）\nShift+↑↓           → 上下パン（顔・足を確認）\n+/−                 → ズーム\nHome / 0             → 視点リセット\nダブルクリック       → プレビュー: 視点リセット / スライダー: デフォルト値\nDelete / Backspace   → スライダー: デフォルト値にリセット',
     'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
@@ -263,6 +267,7 @@ const I18N = {
     'a11y.rankBadge':'Rank badge — click to open Stats tab','a11y.skip':'Skip to content',
     'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.screenshotShared':'Screenshot shared','a11y.seedCopied':'Seed {n} copied to clipboard','a11y.gachaRan':'Gacha — generated with seed {n}','a11y.undone':'Undone','a11y.noUndo':'Nothing to undo','a11y.savedJson':'Saved {name}','a11y.loadedJson':'Loaded {name}','a11y.clamped':'Value clamped to {v}','a11y.viewReset':'Preview view reset','a11y.viewLimit':'View limit reached','a11y.seedInvalid':'Seed must be a non-negative integer','a11y.licUrlInvalid':'Enter a valid URL (e.g. https://example.com)',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).','note.springOff':'Springs are OFF — sliders hidden. Enable springs above to show them.',
+    'note.outline':'The outline only renders on PC — Quest\'s shader does not support it.',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
     'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl/⌘+S           → Export VRM\nCtrl/⌘+Shift+S     → Save JSON\nCtrl/⌘+Z           → Undo\nCtrl/⌘+Shift+P     → Screenshot\n?                  → This dialog\nM                  → Toggle Easy/Detail mode\n1–8                → Switch tabs\nEsc                → Deactivate expression preview\nArrow keys         → Rotate preview (when canvas focused)\nShift+↑/↓         → Pan up/down (inspect face or feet)\n+/−                → Zoom\nHome / 0           → Reset view\nDouble-click       → Preview: reset view / Slider: reset to default\nDelete / Backspace → Slider: reset to default',
     'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
