@@ -1623,11 +1623,12 @@ function saveState(){
         _saveBadgeTimer=setTimeout(()=>{ const b2=$('autoSaveBadge'); if(b2){ b2.style.opacity='0'; setTimeout(()=>{ if(b2&&b2.style.opacity==='0'){ b2.setAttribute('aria-hidden','true'); b2.textContent=''; } },400); } },2000);
       }
     }catch(e){
-      // localStorage full or unavailable (private browsing) — show persistent warning
       clearTimeout(_saveBadgeTimer);
+      // localStorage broken (private browsing/quota) — showErr() once per transition only.
+      const wasBroken=_lsBroken; _lsBroken=true;
       const b=$('autoSaveBadge');
       if (b){ b.removeAttribute('aria-hidden'); b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
-      showErr(t('hint.saveFail'));
+      if (!wasBroken) showErr(t('hint.saveFail'));
     }
   }, 500);
 }

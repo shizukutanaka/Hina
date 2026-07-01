@@ -6009,8 +6009,9 @@ function accData(j, bin, ai){
 }
 
 /* ---- Round 370: saveState catch block clears _saveBadgeTimer so a pending success-hide can't dismiss the error badge ---- */
+/* Window widened in Round 471 for the _lsBroken transition-tracking code inserted between clearTimeout and the badge update */
 {
-  ok(/catch\s*\(e\)\s*\{[\s\S]{0,200}clearTimeout\(_saveBadgeTimer\)[\s\S]{0,200}hint\.saveFail/.test(html),
+  ok(/catch\s*\(e\)\s*\{[\s\S]{0,200}clearTimeout\(_saveBadgeTimer\)[\s\S]{0,300}hint\.saveFail/.test(html),
     'saveState catch block clears badge timer before showing saveFail (prevents prior success timer from hiding the error)');
 }
 
@@ -6637,6 +6638,28 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 471: saveState() catch only calls showErr() once per broken-localStorage transition ---- */
+{
+  // saveState() debounces to 500ms after each edit. With localStorage broken (Safari Private,
+  // quota-full), every failed write previously called showErr() unconditionally — during
+  // continuous typing (e.g. the title field) that fires an assertive SR interruption roughly
+  // every 500ms-1s, spamming the user. Track the broken→broken transition via _lsBroken and
+  // only announce once; the persistent badge (unconditional) still reflects ongoing failure.
+  const saveFnIdx = html.indexOf('function saveState()');
+  const saveEnd = html.indexOf('\nfunction ', saveFnIdx + 20);
+  const saveFn = saveFnIdx >= 0 ? html.slice(saveFnIdx, saveEnd > 0 ? saveEnd : saveFnIdx + 1500) : '';
+  ok(/const wasBroken\s*=\s*_lsBroken;\s*_lsBroken\s*=\s*true/.test(saveFn),
+    'R471: saveState catch tracks the pre-failure _lsBroken state before marking it broken');
+  ok(/if\s*\(!wasBroken\)\s*showErr\(t\('hint\.saveFail'\)\)/.test(saveFn),
+    'R471: saveState catch only calls showErr() when this is a new transition into the broken state');
+  // The badge update itself remains unconditional (always runs) so the persistent visual warning
+  // still refreshes on every failed save, only the assertive SR interrupt is throttled.
+  const badgeIdx = saveFn.indexOf("if (b){ b.removeAttribute('aria-hidden')");
+  const wasBrokenIdx = saveFn.indexOf('wasBroken');
+  ok(badgeIdx > 0 && wasBrokenIdx > 0 && badgeIdx > wasBrokenIdx && badgeIdx < saveFn.indexOf('if (!wasBroken)'),
+    'R471: badge textContent update runs unconditionally, before the conditional showErr() call');
 }
 
 /* ---- Round 470: pasteJson() guards against oversized clipboard text (DoS via JSON.parse hang) ---- */
