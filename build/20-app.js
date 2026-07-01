@@ -1040,6 +1040,14 @@ function renderOut(bd){
       pstj.disabled=true; pstj.setAttribute('aria-busy','true');
       navigator.clipboard.readText().then(text=>{
         pstj.disabled=false; pstj.removeAttribute('aria-busy');
+        // Unlike file/drag-drop loads, clipboard text has no browser-enforced size cap — a hostile
+        // page's "copy" button could place gigabytes on the clipboard and hang JSON.parse on paste.
+        if (text.length > 2*1024*1024){
+          pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
+          if(_pstjF) pstj.focus();
+          showErr(t('err.loadTooLarge'));
+          return;
+        }
         const d=HINA.deserialize(text);
         if(d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null;
           rebuild(); renderBody(); saveState();

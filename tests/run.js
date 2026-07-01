@@ -6639,6 +6639,21 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 470: pasteJson() guards against oversized clipboard text (DoS via JSON.parse hang) ---- */
+{
+  // File load and drag-drop both cap input at 2 MB (Round 468's err.loadTooLarge), but pasteJson()
+  // read clipboard text with no size check — clipboard content is not browser-size-limited like
+  // File objects are, so a malicious page's copy button could hang the tab on paste.
+  const pstjIdx = html.indexOf("const pstj=el('button'");
+  const pstjBlock = pstjIdx >= 0 ? html.slice(pstjIdx, pstjIdx + 1200) : '';
+  ok(/text\.length > 2\*1024\*1024/.test(pstjBlock),
+    'R470: pasteJson() checks clipboard text.length against the 2 MB guard before deserialize');
+  ok(/text\.length > 2\*1024\*1024[\s\S]{0,150}showErr\(t\('err\.loadTooLarge'\)\)/.test(pstjBlock),
+    'R470: oversized clipboard text announces err.loadTooLarge via showErr()');
+  ok(/text\.length > 2\*1024\*1024[\s\S]{0,300}HINA\.deserialize\(text\)/.test(pstjBlock),
+    'R470: size guard runs before HINA.deserialize(text) is called, preventing the JSON.parse hang');
+}
+
 /* ---- Round 468: err.loadTooLarge i18n key — file-size-limit rejection gets correct message ---- */
 {
   // The 2 MB file-size guard used err.loadFailed ("invalid format or not a Hina file"),
