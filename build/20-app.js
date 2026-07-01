@@ -1172,7 +1172,10 @@ function download(bytes, name, type){
   setTimeout(()=>URL.revokeObjectURL(u), 8000);
 }
 // 100-char cap: longest suffix is '.hina.json' (10) → 110 chars total, well under OS limits (255 bytes)
-function safeName(s, fb){ const v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').slice(0,100); return v||fb; }
+// Windows reserves these device names for ANY extension (CON.vrm is blocked same as bare CON) —
+// a title that sanitizes down to one of them would make the exported file unsaveable on Windows.
+const WIN_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+function safeName(s, fb){ let v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').slice(0,100); if (WIN_RESERVED.test(v)) v+='_'; return v||fb; }
 function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom')); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 let _glLost = false;

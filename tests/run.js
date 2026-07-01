@@ -6640,6 +6640,22 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 472: safeName() guards against Windows reserved device names (CON, PRN, AUX, NUL, COM1-9, LPT1-9) ---- */
+{
+  // Windows blocks these names for ANY extension — "con.vrm" is just as unsaveable as bare "con".
+  // A title that sanitizes down to one of them would silently break export/save on Windows with
+  // no useful error message (showSaveFilePicker throws, or <a download> gets silently mangled).
+  ok(/WIN_RESERVED\s*=\s*\/\^\(con\|prn\|aux\|nul\|com\[1-9\]\|lpt\[1-9\]\)\$\/i/.test(html),
+    'R472: WIN_RESERVED regex covers all Windows reserved device names, case-insensitive');
+  ok(/if \(WIN_RESERVED\.test\(v\)\) v\+='_'/.test(html),
+    'R472: safeName() appends an underscore suffix when the sanitized stem matches a reserved name');
+  // Order matters: the reserved-name check must run on the already-trimmed/replaced/sliced value
+  const snIdx = html.indexOf('function safeName(s, fb)');
+  const snLine = snIdx >= 0 ? html.slice(snIdx, snIdx + 220) : '';
+  ok(/slice\(0,100\)[\s\S]{0,20}if \(WIN_RESERVED\.test\(v\)\)/.test(snLine),
+    'R472: reserved-name check runs after trim/replace/slice, on the final sanitized stem');
+}
+
 /* ---- Round 471: saveState() catch only calls showErr() once per broken-localStorage transition ---- */
 {
   // saveState() debounces to 500ms after each edit. With localStorage broken (Safari Private,
