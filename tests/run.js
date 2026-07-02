@@ -6647,6 +6647,22 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 480: expression-mix sliders no longer spam SR/hint/bar on every drag tick ---- */
+{
+  // Self-review of Round 479: applyValue() originally called the full setExpr(name) on every
+  // oninput event — which can fire dozens of times per second during a drag — re-announcing
+  // srStatus, rewriting the hint bar, and re-highlighting every expression-bar button each time,
+  // even though the active expression never changes mid-drag (only its weight does). Only the
+  // full setExpr() path should run when actually switching which expression is active; otherwise
+  // morphW should resync directly without the side effects.
+  const rxIdx = html.indexOf('const applyValue = n =>');
+  const rxBlock = rxIdx>=0 ? html.slice(rxIdx, rxIdx+400) : '';
+  ok(/if \(activeExpr!==name\) setExpr\(name\);/.test(rxBlock),
+    'R480: applyValue() only calls the full setExpr() when switching to a different active expression');
+  ok(/else \{ const mx=exprMix\[name\]; morphW=\{\}; for\(const m in mx\) morphW\[m\]=mx\[m\]\/100; morphDirty=true; \}/.test(rxBlock),
+    'R480: applyValue() resyncs morphW directly (no setExpr side effects) when the expression is already active');
+}
+
 /* ---- Round 479: expression editor — blend existing morphs into the 4 emotion expressions ---- */
 {
   // Only the 4 emotions are editable — vowels are VRChat lip-sync visemes, blink is auto-blink,

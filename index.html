@@ -2434,9 +2434,17 @@ function renderExprEditor(bd){
       const rid = 'exprMix-'+name+'-'+morphKey;
       const rowLabel = t('a11y.exprMix').replace('{expr}',t('expr.'+name)).replace('{morph}',t('expr.'+morphKey));
       let numEl;
+      // setExpr(name) does more than sync morphW — it also re-announces srStatus, rewrites the
+      // hint bar, and re-highlights every expression-bar button. Calling it on every oninput tick
+      // during a drag (which can fire dozens of times per second) would spam all three needlessly,
+      // since the active expression itself never changes mid-drag, only its weight. Only take the
+      // full setExpr() path when actually switching which expression is being previewed; otherwise
+      // just resync morphW directly from the updated mix.
       const applyValue = n => {
         if (n>0) exprMix[name][morphKey]=n; else delete exprMix[name][morphKey];
-        setExpr(name); saveState();
+        if (activeExpr!==name) setExpr(name);
+        else { const mx=exprMix[name]; morphW={}; for(const m in mx) morphW[m]=mx[m]/100; morphDirty=true; }
+        saveState();
       };
       const r = el('input',{id:rid, type:'range', min:0, max:100, step:1, value:v,
         'aria-label':rowLabel, 'aria-valuetext':String(v),
