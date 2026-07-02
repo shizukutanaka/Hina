@@ -1808,9 +1808,10 @@ function accData(j, bin, ai){
     'vowel morph vertices are disjoint from blink vertices (mouth ≠ eye+brow regions)');
 
   // setExpr() updates hint bar with expression name when active
-  ok(/setExpr[\s\S]{0,200}hintEl.*textContent.*expr\..*exprOff/.test(html.replace(/\s+/g,' ')),
+  // Windows widened in Round 479 for the exprMix-aware morphW block added at the top of setExpr()
+  ok(/setExpr[\s\S]{0,550}hintEl.*textContent.*expr\..*exprOff/.test(html.replace(/\s+/g,' ')),
     'setExpr() updates hint bar with expression name and deactivation hint');
-  ok(/setExpr[\s\S]{0,320}_hintDefault\(\)/.test(html),
+  ok(/setExpr[\s\S]{0,700}_hintDefault\(\)/.test(html),
     'setExpr() restores hint via _hintDefault() when returning to neutral');
 
   // hint.exprOff i18n key in both languages
@@ -1892,9 +1893,10 @@ function accData(j, bin, ai){
   ok(H.I18N.en['a11y.exprNeutral'] === 'Returned to neutral', 'a11y.exprNeutral EN');
 
   // setExpr() updates srStatus with expression announcement
-  ok(/setExpr[\s\S]{0,400}srEl[\s\S]{0,80}a11y\.exprActive/.test(html),
+  // Windows widened in Round 479 for the exprMix-aware morphW block added at the top of setExpr()
+  ok(/setExpr[\s\S]{0,700}srEl[\s\S]{0,80}a11y\.exprActive/.test(html),
     'setExpr() updates srStatus with a11y.exprActive message when expression is active');
-  ok(/setExpr[\s\S]{0,500}a11y\.exprNeutral/.test(html),
+  ok(/setExpr[\s\S]{0,900}a11y\.exprNeutral/.test(html),
     'setExpr() updates srStatus with a11y.exprNeutral when returning to neutral');
 
   // a11y.rankStatus template has {pc} and {q} placeholders in both languages
@@ -4520,7 +4522,8 @@ function accData(j, bin, ai){
   // doUndo must announce 'a11y.undone' on success and 'a11y.noUndo' when stack empty
   ok(/a11y\.undone/.test(html), 'a11y.undone key exists in build');
   ok(/a11y\.noUndo/.test(html),  'a11y.noUndo key exists in build');
-  ok(/doUndo[\s\S]{0,650}a11y\.undone/.test(html),
+  // Window widened in Round 479 for the exprMix restore + comment added to doUndo()
+  ok(/doUndo[\s\S]{0,950}a11y\.undone/.test(html),
     'doUndo() announces a11y.undone to SR on success');
   ok(/doUndo[\s\S]{0,200}a11y\.noUndo/.test(html),
     'doUndo() announces a11y.noUndo to SR when nothing to undo');
@@ -5408,7 +5411,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 302: doUndo uses renderBody(false) to preserve scroll position ---- */
 {
-  ok(/function doUndo[\s\S]{0,520}renderBody\(false\)/.test(html),
+  // Window widened in Round 479 for the exprMix restore + comment added to doUndo()
+  ok(/function doUndo[\s\S]{0,850}renderBody\(false\)/.test(html),
     'doUndo() calls renderBody(false) to preserve scroll position after undo');
 }
 
@@ -6643,6 +6647,125 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 479: expression editor — blend existing morphs into the 4 emotion expressions ---- */
+{
+  // Only the 4 emotions are editable — vowels are VRChat lip-sync visemes, blink is auto-blink,
+  // editing either would break functional behavior, not just appearance.
+  ok(JSON.stringify(H.EXPR_EDITABLE)===JSON.stringify(['joy','angry','sorrow','fun']),
+    'R479: EXPR_EDITABLE is exactly the 4 emotion expressions');
+  ok(H.EXPR_INGREDIENTS.length===10 && !H.EXPR_INGREDIENTS.includes('blink_l') && !H.EXPR_INGREDIENTS.includes('blink_r'),
+    'R479: EXPR_INGREDIENTS has 10 morphs, excluding blink_l/blink_r (already hidden from the preview bar)');
+  ok(H.EXPR_INGREDIENTS.every(m=>B.morphs.names.includes(m)),
+    'R479: every EXPR_INGREDIENTS entry is a real morph target');
+
+  // defaultExprMix(): each editable expression maps to itself at full weight — identity mix
+  const dmx = H.defaultExprMix();
+  ok(H.EXPR_EDITABLE.every(e=>JSON.stringify(dmx[e])===JSON.stringify({[e]:100})),
+    'R479: defaultExprMix() gives each emotion a single self-bind at weight 100');
+
+  // sanitizeExprMix(): whitelist-rebuild pattern mirrors sanitizeMeta (Round 469)
+  const pollution = H.sanitizeExprMix({
+    joy: {__proto__:{polluted:true}, constructor:{prototype:{polluted:true}}, joy:60, a:30, evil:99},
+    extraExpr: {joy:100}, // unknown top-level expression key — must be dropped
+  });
+  ok(!Object.prototype.hasOwnProperty.call(pollution,'extraExpr') && Object.keys(pollution).length===4,
+    'R479: sanitizeExprMix() drops unknown top-level expression keys (only the 4 editable ones survive)');
+  ok(!Object.prototype.hasOwnProperty.call(pollution.joy,'__proto__') && !Object.prototype.hasOwnProperty.call(pollution.joy,'constructor'),
+    'R479: sanitizeExprMix() strips __proto__/constructor from the inner ingredient map');
+  ok(pollution.joy.joy===60 && pollution.joy.a===30 && pollution.joy.evil===undefined,
+    'R479: sanitizeExprMix() keeps known ingredients, drops unknown ones (evil)');
+  ok(Object.getPrototypeOf(pollution)===Object.getPrototypeOf({}) && Object.getPrototypeOf(pollution.joy)===Object.getPrototypeOf({}),
+    'R479: sanitizeExprMix() output has the normal Object.prototype at both levels — no pollution survives');
+  // Missing/invalid expression entries keep the identity default; explicit empty object is honored
+  const partial = H.sanitizeExprMix({angry:{angry:100}});
+  ok(JSON.stringify(partial.joy)===JSON.stringify({joy:100}) && JSON.stringify(partial.fun)===JSON.stringify({fun:100}),
+    'R479: sanitizeExprMix() keeps the identity default for expressions missing from the input');
+  const empty = H.sanitizeExprMix({joy:{}});
+  ok(JSON.stringify(empty.joy)==='{}',
+    'R479: sanitizeExprMix() honors an explicitly-provided empty mix (0-bind group, valid like neutral/look)');
+  // Clamping and rounding
+  const clamp = H.sanitizeExprMix({joy:{joy:150, a:-5, i:33.7, u:NaN, e:'x'}});
+  ok(clamp.joy.joy===100 && clamp.joy.a===undefined && clamp.joy.i===34 && clamp.joy.u===undefined && clamp.joy.e===undefined,
+    'R479: sanitizeExprMix() clamps to [0,100], drops 0/negative/NaN/non-numeric, rounds fractional weights');
+  ok(H.sanitizeExprMix(null) && JSON.stringify(H.sanitizeExprMix(null))===JSON.stringify(H.defaultExprMix()),
+    'R479: sanitizeExprMix(null) returns the full default mix');
+
+  // Byte-compatibility: default mix export is structurally identical to the pre-R479 export
+  const noArgExport = H.exportVRM(B, P, {}, H.b64ToBytes(H.PNG1));
+  const defaultMixExport = H.exportVRM(B, P, {}, H.b64ToBytes(H.PNG1), undefined, H.defaultExprMix());
+  ok(noArgExport.bytes.length===defaultMixExport.bytes.length,
+    'R479: exportVRM() without exprMix and with defaultExprMix() produce the same byte length');
+  ok(Buffer.compare(Buffer.from(noArgExport.bytes), Buffer.from(defaultMixExport.bytes))===0,
+    'R479: exportVRM() without exprMix and with defaultExprMix() are byte-identical (no regression for untouched avatars)');
+  const jGrp = noArgExport.json.extensions.VRM.blendShapeMaster.blendShapeGroups.find(g=>g.presetName==='joy');
+  ok(jGrp.binds.length===1 && jGrp.binds[0].weight===100,
+    'R479: default-mix joy group is still a single bind at weight 100 (legacy shape)');
+
+  // Custom mix export: multi-bind groups with correct indices, weights, ascending order
+  const targetNames = noArgExport.json.meshes[0].extras.targetNames;
+  const customExport = H.exportVRM(B, P, {}, H.b64ToBytes(H.PNG1), undefined, {joy:{joy:60, a:30}});
+  const bsg = customExport.json.extensions.VRM.blendShapeMaster.blendShapeGroups;
+  ok(bsg.length===17, 'R479: custom mix export still has exactly 17 blendShapeGroups');
+  const joyCustom = bsg.find(g=>g.presetName==='joy');
+  ok(joyCustom.binds.length===2, 'R479: custom joy mix produces 2 binds (joy + a)');
+  ok(joyCustom.binds[0].index < joyCustom.binds[1].index,
+    'R479: custom joy binds are in ascending target-index order');
+  ok(joyCustom.binds.every(b=>b.mesh===0 && targetNames[b.index]===(b.index===targetNames.indexOf('joy')?'joy':'a')),
+    'R479: custom joy binds reference the correct target names (joy and a)');
+  ok(joyCustom.binds.find(b=>targetNames[b.index]==='joy').weight===60 && joyCustom.binds.find(b=>targetNames[b.index]==='a').weight===30,
+    'R479: custom joy binds carry the exact weights from the mix (60 and 30)');
+  const angryCustom = bsg.find(g=>g.presetName==='angry');
+  ok(angryCustom.binds.length===1 && angryCustom.binds[0].weight===100,
+    'R479: untouched emotions (angry) in a partially-customized mix stay at their default single bind');
+  ok(bsg.find(g=>g.presetName==='neutral').binds.length===0 && bsg.filter(g=>['lookup','lookdown','lookleft','lookright'].includes(g.presetName)).every(g=>g.binds.length===0),
+    'R479: neutral and the 4 look groups still have empty binds in a custom-mix export');
+  ok(bsg.every(g=>g.isBinary===false),
+    'R479: all blendShapeGroups remain isBinary=false in a custom-mix export');
+  ok(bsg.every(g=>g.binds.every(b=>b.index>=0 && b.index<targetNames.length)),
+    'R479: all bind indices remain within the valid target-name range in a custom-mix export');
+
+  // Roundtrip through serialize/deserialize — compare against the canonicalized (sanitized) form,
+  // since sanitizeExprMix() rebuilds inner objects in EXPR_INGREDIENTS order regardless of the
+  // input's own key order (a before joy), so a literal in a different order is still equal data.
+  const customMix = {joy:{joy:60,a:30}, angry:{angry:100}, sorrow:{sorrow:100}, fun:{fun:100}};
+  const rt = H.deserialize(H.serialize(P, {}, customMix));
+  ok(JSON.stringify(rt.exprMix)===JSON.stringify(H.sanitizeExprMix(customMix)),
+    'R479: serialize→deserialize roundtrips a custom exprMix exactly (canonicalized)');
+  const legacy = H.deserialize('{"app":"hina","params":{}}');
+  ok(JSON.stringify(legacy.exprMix)===JSON.stringify(H.defaultExprMix()),
+    'R479: deserialize() on legacy JSON (no exprMix field) yields the default mix');
+
+  // UI wiring (source inspection)
+  ok((html.match(/JSON\.stringify\(\{params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks, exprMix\}\)/g)||[]).length===2,
+    'R479: exprMix is included in BOTH saveState() and _emergencySave() write sites');
+  ok(/exprMix = HINA\.sanitizeExprMix\(j\.exprMix\)/.test(html),
+    'R479: loadState() restores exprMix via the sanitizer');
+  ok(/emx: structuredClone\(exprMix\)/.test(html),
+    'R479: captureUndo() snapshots exprMix');
+  ok(/lastGachaSeed = s\.seed; exprMix = s\.emx;/.test(html),
+    'R479: doUndo() restores exprMix from the snapshot');
+  ok(/exprMix=HINA\.defaultExprMix\(\)/.test(html),
+    'R479: the Reset button restores exprMix to the default');
+  ok(/const exportExprMix = structuredClone\(exprMix\)/.test(html) && /HINA\.exportVRM\(exportBuild, exportParams, exportMeta, new Uint8Array\(ab\), thumbBytes, exportExprMix\)/.test(html),
+    'R479: doExport() snapshots exprMix and passes it into HINA.exportVRM()');
+  ok((html.match(/HINA\.serialize\(params,meta,exprMix\)/g)||[]).length===2,
+    'R479: both saveJson() and the copy-JSON button pass exprMix into HINA.serialize()');
+  ok((html.match(/exprMix=d\.exprMix;/g)||[]).length===3,
+    'R479: all 3 deserialize consumers (paste/file-load/drag-drop) assign exprMix from the result');
+  ok(/if \(HINA\.EXPR_EDITABLE\.includes\(activeExpr\)\)/.test(html),
+    'R479: setExpr() branches on EXPR_EDITABLE to preview the custom mix instead of weight-1');
+  ok(/if \(activeTab==='face' && mode==='detail'\) renderExprEditor\(bd\)/.test(html),
+    'R479: the expression editor is gated to the face tab in detail mode only');
+  ok(/function renderExprEditor\(bd\)/.test(html),
+    'R479: renderExprEditor() is defined');
+
+  // i18n parity for the new keys
+  for (const k of ['expr.edit','expr.edit.hint','expr.reset','expr.customized','a11y.exprMix','a11y.exprReset']){
+    ok(typeof H.I18N.ja[k]==='string' && typeof H.I18N.en[k]==='string' && H.I18N.ja[k] && H.I18N.en[k],
+      `R479: i18n key ${k} defined in both ja and en`);
+  }
+}
+
 /* ---- Round 477: gacha lock <details> auto-opens when a lock is active, surviving runGacha's renderBody() ---- */
 {
   // runGacha() calls renderBody(), which fully recreates the Preset tab DOM including the lock
@@ -6701,7 +6824,8 @@ function accData(j, bin, ai){
 
   // Persistence: gachaLocks is saved and restored across both localStorage write sites
   // (saveState's debounced write and the pagehide/visibilitychange emergency flush)
-  ok((html.match(/JSON\.stringify\(\{params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks\}\)/g)||[]).length===2,
+  // Widened in Round 479 for the exprMix field added to the same blob.
+  ok((html.match(/JSON\.stringify\(\{params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks, exprMix\}\)/g)||[]).length===2,
     'R476: gachaLocks is included in BOTH saveState() and _emergencySave() write sites');
   ok(/if \(j\.gachaLocks && typeof j\.gachaLocks==='object'\)[\s\S]{0,80}gachaLocks\[k\] = !!j\.gachaLocks\[k\]/.test(html),
     'R476: loadState() restores gachaLocks from the saved JSON, coercing each value to boolean');

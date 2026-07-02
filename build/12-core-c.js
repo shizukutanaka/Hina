@@ -36,7 +36,7 @@ function utf8(str){
    Spec notes (vrm.dev): Y-up right-handed, model faces Z-, T-pose with identity
    rotations (translations only) → IBM = translate(-worldPos).
    Field names keep official VRM0 typos: "stiffiness", "*UssageName". */
-function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
+function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
   p = sanitize(p);
   meta = (meta && typeof meta==='object') ? meta : {};
   const g = build.geom, bones = build.bones;
@@ -176,6 +176,12 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
 
   const grp=(name,preset,binds)=>({name, presetName:preset, binds:binds||[], materialValues:[], isBinary:false});
   const bind1=n=>[{mesh:0, index:targetNames.indexOf(n), weight:100}];
+  // Round 479: the 4 emotion groups draw their binds from the user-editable expression mix
+  // instead of a fixed single morph. sanitizeExprMix() guarantees every EXPR_EDITABLE key exists;
+  // the default mix ({joy:{joy:100}, ...}) produces the exact same single-bind@100 shape as the
+  // old bind1() call, so an untouched avatar's export is byte-identical to before this feature.
+  const mix = sanitizeExprMix(exprMix);
+  const bindN = n => EXPR_INGREDIENTS.filter(m=>mix[n][m]).map(m=>({mesh:0, index:targetNames.indexOf(m), weight:mix[n][m]}));
   const blendShapeGroups=[
     grp('Neutral','neutral'),
     grp('A','a',bind1('a')), grp('I','i',bind1('i')), grp('U','u',bind1('u')),
@@ -183,8 +189,8 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes){
     grp('Blink','blink',bind1('blink')),
     grp('Blink_L','blink_l',bind1('blink_l')),
     grp('Blink_R','blink_r',bind1('blink_r')),
-    grp('Joy','joy',bind1('joy')), grp('Angry','angry',bind1('angry')),
-    grp('Sorrow','sorrow',bind1('sorrow')), grp('Fun','fun',bind1('fun')),
+    grp('Joy','joy',bindN('joy')), grp('Angry','angry',bindN('angry')),
+    grp('Sorrow','sorrow',bindN('sorrow')), grp('Fun','fun',bindN('fun')),
     grp('LookUp','lookup'), grp('LookDown','lookdown'),
     grp('LookLeft','lookleft'), grp('LookRight','lookright'),
   ];
@@ -395,6 +401,7 @@ return {
   I18N, TEX, ATLAS, uvBlock, uvRect,
   RANKS, RANK_NAMES, estimate, rank,
   serialize, deserialize, PNG1, b64ToBytes,
+  EXPR_EDITABLE, EXPR_INGREDIENTS, defaultExprMix, sanitizeExprMix,
   HB, buildSkeleton, buildAvatar, BinWriter, exportVRM, selfTest,
 };
 })();

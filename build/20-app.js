@@ -17,6 +17,12 @@ let gachaLocks = {body:false, face:false, hair:false, outfit:false, color:false}
 let params = HINA.defaults();
 const META_DEFAULTS = {title:'', version:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
 let meta = Object.assign({}, META_DEFAULTS);
+// Round 479: expression editor. exprMix is avatar data (like meta), unlike gachaLocks which is a
+// tool preference — it changes what the exported VRM looks like, so it's part of undo/persistence.
+let exprMix = HINA.defaultExprMix();
+// <details> open-state per emotion — transient (not persisted), reset by renderBody() rebuilds,
+// same rationale as the Round 477 gachaLocks disclosure fix.
+let exprEdOpen = {joy:false, angry:false, sorrow:false, fun:false};
 let build = null;
 const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
 
@@ -51,6 +57,7 @@ function loadState(){
     if (Number.isFinite(j.lastGachaSeed)) lastGachaSeed = j.lastGachaSeed;
     if (j.gachaLocks && typeof j.gachaLocks==='object')
       for(const k of GACHA_LOCK_TABS) gachaLocks[k] = !!j.gachaLocks[k];
+    exprMix = HINA.sanitizeExprMix(j.exprMix);
   }catch(e){}
 }
 // Single-level undo (Ctrl+Z) — captures state before user-initiated changes
@@ -58,7 +65,7 @@ let _undoSnap = null, _undoAt = 0, _undoHintTimer = null;
 function captureUndo(){
   const now = Date.now();
   if (!_undoSnap || now - _undoAt > 1500){
-    _undoSnap = { p: structuredClone(params), m: structuredClone(meta), aid: activePresetId, seed: lastGachaSeed };
+    _undoSnap = { p: structuredClone(params), m: structuredClone(meta), aid: activePresetId, seed: lastGachaSeed, emx: structuredClone(exprMix) };
     _undoAt = now;
     // Flash hint bar to tell users undo is available (3 s then restore)
     const h = $('hint');
@@ -77,7 +84,10 @@ function doUndo(){
   const s = _undoSnap; _undoSnap = null;
   clearTimeout(_undoHintTimer);
   const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
-  params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed;
+  params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed; exprMix = s.emx;
+  // rebuild() unconditionally resets the expression preview to neutral (same as every other
+  // avatar-altering action), so no extra resync is needed here — the restored exprMix is
+  // simply what the next expression-button click will read.
   const _undoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_undoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
@@ -101,7 +111,7 @@ function saveState(){
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(()=>{
     try{
-      localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks}));
+      localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks, exprMix}));
       const b=$('autoSaveBadge');
       if (b){
         b.removeAttribute('aria-hidden'); b.textContent=t('hint.saved'); b.style.color='var(--ok)';
@@ -360,7 +370,14 @@ const EXPR_LABELS = {a:'a',i:'i',u:'u',e:'e',o:'o',blink:'blk',joy:'joy',angry:'
 function setExpr(name){
   activeExpr = name || null;
   morphW = {};
-  if (activeExpr) morphW[activeExpr] = 1;
+  // Round 479: for the 4 user-editable emotions, preview the actual export mix (weights/100)
+  // instead of a fixed weight-1 single morph, so what you see always matches what you export.
+  if (activeExpr){
+    if (HINA.EXPR_EDITABLE.includes(activeExpr)){
+      const mx = exprMix[activeExpr];
+      for (const m in mx) morphW[m] = mx[m]/100;
+    } else morphW[activeExpr] = 1;
+  }
   morphDirty = true;
   const hintEl = $('hint');
   if (hintEl) hintEl.textContent = activeExpr
@@ -827,6 +844,60 @@ function onParam(k){
       const sr=$('srStatus'); if(sr) sr.textContent=params.springOff?t('note.springOff'):(hasS?t('note.quest'):t('note.quest.nospring')); } }
 }
 
+// Round 479: expression editor — face tab, detail mode only. Lets users blend the 10 user-facing
+// morphs (5 vowels + blink + 4 emotions) into the 4 emotion expressions; vowels/blink themselves
+// stay fixed (VRChat lip-sync/auto-blink). One <details> per emotion, collapsed by default.
+function renderExprEditor(bd){
+  bd.append(el('div',{class:'sect', role:'heading', 'aria-level':'3'}, t('expr.edit')));
+  bd.append(el('div',{class:'limit', style:'margin-bottom:8px'}, t('expr.edit.hint')));
+  for (const name of HINA.EXPR_EDITABLE){
+    const mix = exprMix[name];
+    const keys = Object.keys(mix);
+    const isDefault = keys.length===1 && mix[name]===100;
+    const det = el('details',{style:'margin-top:6px', ...(exprEdOpen[name]?{open:''}:{})});
+    det.addEventListener('toggle', ()=>{ exprEdOpen[name]=det.open; if (det.open) setExpr(name); });
+    const summary = el('summary',{style:'font-size:12px;color:var(--text-dim);cursor:pointer'}, t('expr.'+name));
+    if (!isDefault) summary.append(el('span',{
+      style:'color:var(--accent);font-size:9px;vertical-align:super;margin-left:4px',
+      role:'img', 'aria-label':t('expr.customized')
+    }, '●'));
+    det.append(summary);
+    const wrap = el('div',{style:'margin-top:6px'});
+    for (const morphKey of HINA.EXPR_INGREDIENTS){
+      const v = mix[morphKey]||0;
+      const rid = 'exprMix-'+name+'-'+morphKey;
+      const rowLabel = t('a11y.exprMix').replace('{expr}',t('expr.'+name)).replace('{morph}',t('expr.'+morphKey));
+      let numEl;
+      const applyValue = n => {
+        if (n>0) exprMix[name][morphKey]=n; else delete exprMix[name][morphKey];
+        setExpr(name); saveState();
+      };
+      const r = el('input',{id:rid, type:'range', min:0, max:100, step:1, value:v,
+        'aria-label':rowLabel, 'aria-valuetext':String(v),
+        onpointerdown:()=>captureUndo(),
+        oninput:e=>{ const n=Math.round(Number(e.target.value));
+          r.setAttribute('aria-valuetext',String(n)); if(numEl) numEl.value=String(n);
+          applyValue(n); }});
+      numEl = el('input',{type:'number', class:'num numIn', min:'0', max:'100', step:'1', value:v,
+        'aria-label':t('a11y.numIn').replace('{label}',rowLabel), inputmode:'numeric', enterkeyhint:'done',
+        onwheel:e=>e.preventDefault(),
+        onchange:e=>{ captureUndo(); let n=Math.round(Number(e.target.value));
+          if (!Number.isFinite(n)) n=v;
+          const clamped=M.clamp(n,0,100);
+          e.target.value=String(clamped); r.value=String(clamped); r.setAttribute('aria-valuetext',String(clamped));
+          applyValue(clamped); }});
+      wrap.append(el('div',{class:'row'}, el('label',{'for':rid}, t('expr.'+morphKey)), r, numEl));
+    }
+    det.append(wrap);
+    det.append(el('button',{type:'button', id:'exprReset-'+name, class:'btn', style:'margin-top:6px;padding:4px 8px;font-size:11px',
+      onclick:()=>{ captureUndo(); exprMix[name]={[name]:100}; setExpr(name); renderBody(false);
+        const b=document.getElementById('exprReset-'+name); if(b) b.focus();
+        saveState(); const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.exprReset').replace('{expr}',t('expr.'+name)); }
+    }, t('expr.reset')));
+    bd.append(det);
+  }
+}
+
 function renderBody(scrollReset=true){
   const bd=$('tabBody'); if (scrollReset) bd.scrollTop=0; bd.textContent='';
   if (activeTab==='preset'){
@@ -984,6 +1055,7 @@ function renderBody(scrollReset=true){
     if (['hairStiff','hairGrav','hairDrag'].includes(k) && params.springOff) continue;
     bd.append(paramRow(k));
   }
+  if (activeTab==='face' && mode==='detail') renderExprEditor(bd);
   if (activeTab==='phys'){
     const hasS = build && build.springs && build.springs.length > 0;
     if (params.springOff && hasS)
@@ -1071,7 +1143,7 @@ function renderOut(bd){
   bd.append(el('button',{type:'button', id:'btnSaveJson', class:'btn wide', 'aria-keyshortcuts':'Control+Shift+S Meta+Shift+S', onclick:saveJson}, t('btn.saveJson')));
   {
     const cpj=el('button',{type:'button', class:'btn wide', onclick:()=>{
-      const json=HINA.serialize(params,meta);
+      const json=HINA.serialize(params,meta,exprMix);
       const _cpjF=document.activeElement===cpj;
       const _fail=()=>{ cpj.disabled=false; cpj.removeAttribute('aria-busy'); if(_cpjF) cpj.focus(); cpj.textContent='!'; setTimeout(()=>{ cpj.textContent=t('btn.copyJson'); },1500);
         showErr(t('btn.copyJson.err')); };
@@ -1104,7 +1176,7 @@ function renderOut(bd){
           return;
         }
         const d=HINA.deserialize(text);
-        if(d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null;
+        if(d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); exprMix=d.exprMix; activePresetId=null; lastGachaSeed=null;
           rebuild(); renderBody(); saveState();
           const tb=$('tabBody'); if(tb) tb.focus();
           const sr=$('srStatus'); if(sr) sr.textContent=t('btn.pasteJson.ok'); }
@@ -1118,7 +1190,7 @@ function renderOut(bd){
       if(f.size>2*1024*1024){ showErr(t('err.loadTooLarge')); e.target.value=''; return; }
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
-        if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
+        if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); exprMix=d.exprMix; activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
           const tb=$('tabBody'); if(tb) tb.focus();
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.loadedJson').replace('{name}',f.name); }
         else { showErr(t('err.loadFailed')); } };
@@ -1132,7 +1204,7 @@ function renderOut(bd){
     const resetBtn=el('button',{type:'button', class:'btn wide', onclick:()=>{
       if(_resetPending){
         clearTimeout(_resetTimer); _resetPending=false; resetBtn.textContent=t('btn.reset');
-        captureUndo(); params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
+        captureUndo(); params=HINA.defaults(); meta=Object.assign({},META_DEFAULTS); exprMix=HINA.defaultExprMix(); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
         const tb=$('tabBody'); if(tb) tb.focus();
         const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.resetDone');
       } else {
@@ -1255,6 +1327,7 @@ async function doExport(){
   const exportBuild = build;
   const exportParams = structuredClone(params);
   const exportMeta = structuredClone(meta);
+  const exportExprMix = structuredClone(exprMix);
   const _exportFocusWasBtn = document.activeElement === _exportBtn;
   if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.setAttribute('aria-busy','true'); _exportBtn.textContent = t('btn.exporting'); }
   { const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); }
@@ -1272,7 +1345,7 @@ async function doExport(){
     const atlasBlob = await canvasBlob(atlas);
     if (!atlasBlob) throw new Error('atlas toBlob returned null');
     const ab = await atlasBlob.arrayBuffer();
-    const {bytes} = HINA.exportVRM(exportBuild, exportParams, exportMeta, new Uint8Array(ab), thumbBytes);
+    const {bytes} = HINA.exportVRM(exportBuild, exportParams, exportMeta, new Uint8Array(ab), thumbBytes, exportExprMix);
     // Guard: verify GLB magic (0x46546C67 = 'glTF'), version=2, and length field before download
     if (!bytes || bytes.length < 12) { showErr(t('hint.exportCorrupt')); return; }
     { const _dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
@@ -1303,7 +1376,7 @@ async function saveJson(){
   const btn=$('btnSaveJson'); if(btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
   const _done=()=>{ if(btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); } };
   const fname=fnameStem()+'.hina.json';
-  const bytes=new TextEncoder().encode(HINA.serialize(params,meta));
+  const bytes=new TextEncoder().encode(HINA.serialize(params,meta,exprMix));
   if (typeof window.showSaveFilePicker==='function'){ try { const h=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Hina JSON',accept:{'application/json':['.json']}}]}); const w=await h.createWritable(); await w.write(new Blob([bytes],{type:'application/json'})); await w.close(); } catch(e){ _done(); if(e.name==='AbortError') return; download(bytes,fname,'application/json'); const sr2=$('srStatus'); if(sr2) sr2.textContent=t('a11y.savedJson').replace('{name}',fname); return; } } else { download(bytes,fname,'application/json'); }
   _done();
   const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.savedJson').replace('{name}',fname);
@@ -1529,7 +1602,7 @@ document.addEventListener('keydown',e=>{
     }
   }
 });
-const _emergencySave=()=>{ clearTimeout(_saveTimer); try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks})); }catch(e){} };
+const _emergencySave=()=>{ clearTimeout(_saveTimer); try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks, exprMix})); }catch(e){} };
 // pagehide is sufficient and does not prevent bfcache (unlike beforeunload, which blocks it).
 window.addEventListener('pagehide', _emergencySave);
 // Mobile browsers may kill backgrounded tabs without firing pagehide — flush on visibilitychange too.
@@ -1554,7 +1627,7 @@ document.body.addEventListener('drop',e=>{
   if (f.size>2*1024*1024) { showErr(t('err.loadTooLarge')); return; }
   const rd=new FileReader();
   rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));
-    if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
+    if (d){ captureUndo(); params=d.params; Object.assign(meta,d.meta); exprMix=d.exprMix; activePresetId=null; lastGachaSeed=null; rebuild(); renderBody(); saveState();
       const tb=$('tabBody'); if(tb) tb.focus();
       const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.loadedJson').replace('{name}',f.name); }
     else { showErr(t('err.loadFailed')); } };

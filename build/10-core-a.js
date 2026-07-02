@@ -243,6 +243,9 @@ const I18N = {
     'note.upload':'VRChatへは Unity + VRM Converter for VRChat 経由でアップロード。以下の手順を参照。',
     'expr.neutral':'ニュートラル','expr.a':'あ','expr.i':'い','expr.u':'う','expr.e':'え','expr.o':'お',
     'expr.blink':'まばたき','expr.joy':'喜び','expr.angry':'怒り','expr.sorrow':'悲しみ','expr.fun':'楽しい',
+    'expr.edit':'表情エディタ','expr.edit.hint':'喜び・怒り・悲しみ・楽しいの4表情を、基本モーフの組み合わせで調整できます（あ〜お はリップシンク用のため編集不可）',
+    'expr.reset':'デフォルトに戻す','expr.customized':'カスタム済',
+    'a11y.exprMix':'{expr} — {morph} の強度','a11y.exprReset':'{expr} をデフォルトに戻しました',
     'lbl.height':'高さ',
   },
   en: {
@@ -296,6 +299,9 @@ const I18N = {
     'note.upload':'Upload to VRChat via Unity + VRM Converter for VRChat. Follow the steps below.',
     'expr.neutral':'Neutral','expr.a':'A','expr.i':'I','expr.u':'U','expr.e':'E','expr.o':'O',
     'expr.blink':'Blink','expr.joy':'Joy','expr.angry':'Angry','expr.sorrow':'Sorrow','expr.fun':'Fun',
+    'expr.edit':'Expression editor','expr.edit.hint':'Blend the base morphs to customize the 4 emotion expressions (A–O stay fixed for lip-sync)',
+    'expr.reset':'Reset to default','expr.customized':'Customized',
+    'a11y.exprMix':'{expr} — {morph} weight','a11y.exprReset':'{expr} reset to default',
     'lbl.height':'Height',
   }
 };
@@ -376,13 +382,42 @@ function sanitizeMeta(m){
   }
   return o;
 }
+/* ---------- expression editor (Round 479) ----------
+   Only the 4 emotion expressions are user-editable — vowels are VRChat lip-sync visemes and
+   blink is auto-blink, so editing those would break functional behavior, not just appearance.
+   Weights are the VRM bind scale (integer 0-100); sparse (zero weights are dropped) so the
+   default mix serializes small and is trivially recognizable as "untouched". */
+const EXPR_EDITABLE = ['joy','angry','sorrow','fun'];
+const EXPR_INGREDIENTS = ['a','i','u','e','o','blink','joy','angry','sorrow','fun'];
+function defaultExprMix(){ const o={}; for(const e of EXPR_EDITABLE) o[e]={[e]:100}; return o; }
+// Same whitelist-rebuild pattern as sanitizeMeta (Round 469): only fixed, known key names are
+// ever used to index the fresh output object, so a pasted/loaded "__proto__" key in either the
+// outer (expression name) or inner (ingredient morph name) level can never reach it.
+function sanitizeExprMix(x){
+  const o = defaultExprMix();
+  if (!x || typeof x!=='object') return o;
+  for (const e of EXPR_EDITABLE){
+    const src = x[e];
+    if (!src || typeof src!=='object') continue; // missing/invalid entry keeps the identity default
+    const m = {};
+    for (const k of EXPR_INGREDIENTS){
+      const n = Number(src[k]);
+      if (!Number.isFinite(n)) continue;
+      const w = Math.round(M.clamp(n,0,100));
+      if (w>0) m[k]=w;
+    }
+    o[e]=m; // an explicitly-provided (possibly empty) mix replaces the default
+  }
+  return o;
+}
+function serialize(p, meta, exprMix){ return JSON.stringify({app:'hina', version:VERSION, params:p, meta:meta||{}, exprMix:sanitizeExprMix(exprMix)}, null, 1); }
 function deserialize(text){
   // Strip UTF-8 BOM (U+FEFF) — common when JSON is edited in Notepad on Windows;
   // JSON.parse does not treat BOM as whitespace and would throw SyntaxError.
   if (typeof text==='string' && text.charCodeAt(0)===0xFEFF) text = text.slice(1);
   let j; try{ j=JSON.parse(text); }catch(e){ return null; }
   if (!j || j.app!=='hina') return null;
-  return { params: sanitize(j.params), meta: sanitizeMeta(j.meta) };
+  return { params: sanitize(j.params), meta: sanitizeMeta(j.meta), exprMix: sanitizeExprMix(j.exprMix) };
 }
 
 /* 1x1 transparent PNG (fallback / Node tests) */
