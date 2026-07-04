@@ -1663,6 +1663,11 @@ function doUndo(){
   clearTimeout(_undoHintTimer);
   const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
   _restoreState(s);
+  // Force the next captureUndo() to start a fresh debounce session rather than possibly still
+  // grouping with whatever edit was captured just before this undo — otherwise a genuinely new
+  // edit made within 1.5s of that PRE-undo capture would be silently skipped (never pushed) while
+  // leaving _redoStack stale, so a later Ctrl+Shift+Z would jump to a now-irrelevant future state.
+  _undoAt = 0;
   // rebuild() unconditionally resets the expression preview to neutral (same as every other
   // avatar-altering action), so no extra resync is needed here — the restored exprMix is
   // simply what the next expression-button click will read.
@@ -1681,6 +1686,7 @@ function doRedo(){
   clearTimeout(_undoHintTimer);
   const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
   _restoreState(s);
+  _undoAt = 0; // same rationale as doUndo() — start the next edit as a fresh debounce session
   const _redoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_redoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }

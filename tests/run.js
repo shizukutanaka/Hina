@@ -4522,8 +4522,8 @@ function accData(j, bin, ai){
   // doUndo must announce 'a11y.undone' on success and 'a11y.noUndo' when stack empty
   ok(/a11y\.undone/.test(html), 'a11y.undone key exists in build');
   ok(/a11y\.noUndo/.test(html),  'a11y.noUndo key exists in build');
-  // Window widened in Round 479 for the exprMix restore + comment added to doUndo()
-  ok(/doUndo[\s\S]{0,950}a11y\.undone/.test(html),
+  // Window widened in Round 482 for the _undoAt=0 reset + comment added to doUndo()
+  ok(/doUndo[\s\S]{0,1350}a11y\.undone/.test(html),
     'doUndo() announces a11y.undone to SR on success');
   ok(/doUndo[\s\S]{0,200}a11y\.noUndo/.test(html),
     'doUndo() announces a11y.noUndo to SR when nothing to undo');
@@ -5412,8 +5412,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 302: doUndo uses renderBody(false) to preserve scroll position ---- */
 {
-  // Window widened in Round 479 for the exprMix restore + comment added to doUndo()
-  ok(/function doUndo[\s\S]{0,850}renderBody\(false\)/.test(html),
+  // Window widened in Round 482 for the _undoAt=0 reset + comment added to doUndo()
+  ok(/function doUndo[\s\S]{0,1300}renderBody\(false\)/.test(html),
     'doUndo() calls renderBody(false) to preserve scroll position after undo');
 }
 
@@ -6648,6 +6648,41 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 482: fix stale redo history when an edit follows undo within the debounce window ---- */
+{
+  // Self-review of Round 481: captureUndo()'s "start a new snapshot?" check is
+  // `now - _undoAt > 1500`, and _undoAt was only ever updated when a NEW snapshot was pushed.
+  // doUndo()/doRedo() didn't touch _undoAt at all — so if a genuinely new edit followed an
+  // undo/redo within 1.5s of whenever the PRE-undo edit was originally captured, captureUndo()
+  // would wrongly treat it as "still the same debounce session," skipping the push (and,
+  // critically, skipping the _redoStack clear that only happens inside that push branch). The
+  // result: a later Ctrl+Shift+Z would jump to a now-irrelevant future state instead of redoing
+  // nothing, and the new edit itself would never have been captured for its own undo.
+  ok(/_undoAt = 0;/.test(html) && (html.match(/_undoAt = 0;/g)||[]).length===2,
+    'R482: both doUndo() and doRedo() reset _undoAt to 0 after restoring state');
+  const duIdx2 = html.indexOf('function doUndo(){');
+  const duBlock2 = duIdx2>=0 ? html.slice(duIdx2, duIdx2+1300) : '';
+  ok(/_restoreState\(s\);\s*\n\s*\/\/ Force the next captureUndo\(\)/.test(duBlock2),
+    'R482: doUndo() resets _undoAt immediately after _restoreState(s), before rebuild()');
+  const drIdx2 = html.indexOf('function doRedo(){');
+  const drBlock2 = drIdx2>=0 ? html.slice(drIdx2, drIdx2+950) : '';
+  ok(/_restoreState\(s\);\s*\n\s*_undoAt = 0; \/\/ same rationale as doUndo\(\)/.test(drBlock2),
+    'R482: doRedo() resets _undoAt immediately after _restoreState(s), mirroring doUndo()');
+
+  // Behavioral trace reproducing the exact bug scenario, using the real debounce condition and
+  // the fix's reset — confirms _redoStack ends up empty (not stale) after a post-undo edit that
+  // falls within 1.5s of the pre-undo edit's original capture timestamp.
+  {
+    let stack=[], redo=[], at=0;
+    const push=(now,v)=>{ if(!stack.length||now-at>1500){ stack.push(v); redo=[]; at=now; return true;} return false; };
+    push(2000,2);                       // edit C captured at t=2000 (state-before-C = 2)
+    redo.push(3); stack.pop(); at=0;    // Ctrl+Z at t=2050: undo pops C's before-state, resets 'at' (the fix)
+    const pushed = push(2100, 2);       // new edit D at t=2100 — only 100ms after C's original capture
+    ok(pushed===true && redo.length===0,
+      'R482: an edit 100ms after undo (but within 1.5s of the pre-undo capture) still pushes fresh and clears stale redo');
+  }
+}
+
 /* ---- Round 481: multi-level undo/redo (Ctrl+Z / Ctrl+Shift+Z) replaces the single-slot undo ---- */
 {
   // The old _undoSnap was a single object slot — Ctrl+Z twice in a row did nothing on the second
@@ -6684,7 +6719,8 @@ function accData(j, bin, ai){
   // doRedo(): new function, mirrors doUndo() — pops _redoStack, pushes current state to _undoStack
   ok(/function doRedo\(\)\{/.test(html), 'R481: doRedo() is defined');
   const drIdx = html.indexOf('function doRedo(){');
-  const drBlock = drIdx>=0 ? html.slice(drIdx, drIdx+700) : '';
+  // Window widened in Round 482 for the _undoAt=0 reset + comment added to doRedo()
+  const drBlock = drIdx>=0 ? html.slice(drIdx, drIdx+950) : '';
   ok(/if \(_exporting\)\{ showErr\(t\('btn\.exporting'\)\); return; \}/.test(drBlock),
     'R481: doRedo() guards against _exporting, same as doUndo()');
   ok(/if \(!_redoStack\.length\)\{ showErr\(t\('a11y\.noRedo'\)\); return; \}/.test(drBlock),

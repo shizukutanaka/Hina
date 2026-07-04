@@ -5,8 +5,8 @@
 この文書は、AIコーディングセッション（コミット履歴上「Round 464」〜「Round 477」と呼ぶ14回の改善サイクル）で実施した機能監査の結果を、**前提知識のない後続セッションが読んで作業を引き継げる形**で記録したものである。Round 479 で §3-1 の表情エディタ、Round 481 で複数段Undo/Redoを実装したため、両項目を §2 へ移動済み。
 
 - 「Round N」はコミットメッセージ先頭の通し番号。`git log --oneline` で対応コミットを特定できる
-- 本文書作成時点のテスト数は **1873 passed / 0 failed**（`node tests/run.js`）
-- 次に新しい変更を行う場合の通し番号は **Round 482**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装）
+- 本文書作成時点のテスト数は **1877 passed / 0 failed**（`node tests/run.js`）
+- 次に新しい変更を行う場合の通し番号は **Round 483**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正）
 
 ## 1. プロダクト概要と交渉不可制約
 
@@ -59,7 +59,7 @@
 
 補足: エラー系アナウンスは `showErr(msg)` に統一されている（hint バー赤表示 + srStatus + srAlert への rAF 経由書き込み + 5.5秒後クリア）。エラー経路で `srStatus` に直接書くのは既存方針に反する。
 
-### 機能追加（7件）
+### 機能追加（8件）
 
 | Round | 内容 | アンカー |
 |-------|------|---------|
@@ -70,6 +70,7 @@
 | 477 | ロック使用中は `<details>` を自動展開。`runGacha()` が `renderBody()` を呼びDOMが再生成されるため、これがないと再生成のたびに閉じてしまう | `build/20-app.js` の `lockDet` 生成箇所の `open:''` 条件 |
 | 479 | 表情エディタ（旧v0.3ロードマップ項目）。喜び/怒り/悲しみ/楽しいの4感情のみ編集可（母音・まばたきはVRChatリップシンク/自動まばたき用のため固定）。10種の既存モーフ（あ〜お+まばたき+4感情）を重み0-100で組み合わせ可能。**重要な不変条件**: 未編集時（デフォルトミックス）は従来の単一バインド@weight100と**バイト完全一致**の書き出しを維持（`exportVRM()`第6引数省略時と同一）。`exprMix`はavatarデータとしてserialize/deserialize（`sanitizeExprMix()`によるRound 469型ホワイトリスト方式）・localStorage・undoスナップショット・Resetボタンに配線。ガチャはこれをランダム化しない | `build/10-core-a.js` の `EXPR_EDITABLE`/`EXPR_INGREDIENTS`/`sanitizeExprMix()` / `build/12-core-c.js` の `bindN()` / `build/20-app.js` の `renderExprEditor()`/`setExpr()` |
 | 481 | 複数段Undo/Redo（Ctrl+Z / Ctrl+Shift+Z）。単一スナップショット `_undoSnap` を最大20段の `_undoStack`/`_redoStack` 配列に一般化。1.5秒以内の連続編集を1操作にまとめる既存デバウンス挙動は完全維持。新規編集で `_redoStack` をクリア（標準的なUndo/Redoの意味論）。設計判断（段数上限20・メモリ方針=params/meta/exprMixの軽量structuredCloneのみでジオメトリ非依存）は本ラウンドで確定済み | `build/20-app.js` の `_undoStack`/`_redoStack`/`_snapState()`/`doUndo()`/`doRedo()` |
+| 482 | Round 481の自己レビューで発見: undo/redo実行後、直前の編集の捕捉タイムスタンプから1.5秒以内に**新規**編集を行うと、デバウンス判定が誤って「同一セッションの続き」と扱いプッシュをスキップし、結果として `_redoStack` がクリアされず古い未来状態が残存（後で redo すると無関係な状態にジャンプしてしまう）。`doUndo()`/`doRedo()` が状態復元後に `_undoAt = 0` をセットし、次の `captureUndo()` を強制的に新規セッション扱いにすることで解消 | `build/20-app.js` の `doUndo()`/`doRedo()` 内 `_undoAt = 0` |
 
 ## 3. 未対応の不足（優先順位順）
 
