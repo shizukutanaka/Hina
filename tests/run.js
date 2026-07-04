@@ -5112,7 +5112,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 250: captureUndo() announces undo-available to srStatus live region ---- */
 {
-  ok(/captureUndo[\s\S]{0,600}srStatus[\s\S]{0,60}hint\.undoReady/.test(html),
+  // Window widened in Round 481 for the multi-level undo/redo stack conversion
+  ok(/captureUndo[\s\S]{0,1100}srStatus[\s\S]{0,60}hint\.undoReady/.test(html),
     'captureUndo() announces hint.undoReady to srStatus so screen reader users know undo is available');
 }
 
@@ -6647,6 +6648,85 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 481: multi-level undo/redo (Ctrl+Z / Ctrl+Shift+Z) replaces the single-slot undo ---- */
+{
+  // The old _undoSnap was a single object slot — Ctrl+Z twice in a row did nothing on the second
+  // press. Generalized to bounded stacks (MAX_UNDO=20) with a mirror redo stack, preserving the
+  // existing 1.5s debounce-grouping behavior exactly (rapid re-edits within that window still
+  // collapse into one stack entry, matching the original captureUndo() semantics).
+  ok(/const MAX_UNDO = 20;/.test(html), 'R481: MAX_UNDO bounds the undo/redo stacks at 20 entries');
+  ok(/let _undoStack = \[\], _redoStack = \[\]/.test(html),
+    'R481: _undoStack and _redoStack are arrays (replacing the single-slot _undoSnap)');
+  ok(/function _snapState\(\)\{ return \{ p: structuredClone\(params\), m: structuredClone\(meta\), aid: activePresetId, seed: lastGachaSeed, emx: structuredClone\(exprMix\) \}; \}/.test(html),
+    'R481: _snapState() captures params/meta/activePresetId/lastGachaSeed/exprMix (same fields as before)');
+
+  // captureUndo(): still debounce-grouped, still only advances _undoAt when actually pushing,
+  // and now also clears _redoStack (a fresh edit invalidates any pending "redo forward" history)
+  const cuIdx = html.indexOf('function captureUndo(){');
+  const cuBlock = cuIdx>=0 ? html.slice(cuIdx, cuIdx+900) : '';
+  ok(/if \(!_undoStack\.length \|\| now - _undoAt > 1500\)\{/.test(cuBlock),
+    'R481: captureUndo() preserves the exact original debounce-grouping condition');
+  ok(/_undoStack\.push\(_snapState\(\)\)/.test(cuBlock) && /if \(_undoStack\.length > MAX_UNDO\) _undoStack\.shift\(\)/.test(cuBlock),
+    'R481: captureUndo() pushes a new snapshot and caps the stack at MAX_UNDO (oldest dropped)');
+  ok(/_redoStack = \[\]; \/\/ a fresh edit invalidates any pending redo history/.test(cuBlock),
+    'R481: captureUndo() clears _redoStack on every new edit (standard undo/redo semantics)');
+
+  // doUndo(): pops _undoStack, pushes the CURRENT state onto _redoStack before restoring
+  const duIdx = html.indexOf('function doUndo(){');
+  const duBlock = duIdx>=0 ? html.slice(duIdx, duIdx+700) : '';
+  ok(/if \(!_undoStack\.length\)\{ showErr\(t\('a11y\.noUndo'\)\); return; \}/.test(duBlock),
+    "R481: doUndo() guards on an empty _undoStack, not a null single-slot snapshot");
+  ok(/_redoStack\.push\(_snapState\(\)\)/.test(duBlock),
+    'R481: doUndo() pushes the current (pre-undo) state onto _redoStack before restoring');
+  ok(/const s = _undoStack\.pop\(\)/.test(duBlock),
+    'R481: doUndo() pops (not just reads) the most recent _undoStack entry');
+
+  // doRedo(): new function, mirrors doUndo() — pops _redoStack, pushes current state to _undoStack
+  ok(/function doRedo\(\)\{/.test(html), 'R481: doRedo() is defined');
+  const drIdx = html.indexOf('function doRedo(){');
+  const drBlock = drIdx>=0 ? html.slice(drIdx, drIdx+700) : '';
+  ok(/if \(_exporting\)\{ showErr\(t\('btn\.exporting'\)\); return; \}/.test(drBlock),
+    'R481: doRedo() guards against _exporting, same as doUndo()');
+  ok(/if \(!_redoStack\.length\)\{ showErr\(t\('a11y\.noRedo'\)\); return; \}/.test(drBlock),
+    'R481: doRedo() shows a11y.noRedo via showErr() when the redo stack is empty');
+  ok(/_undoStack\.push\(_snapState\(\)\)/.test(drBlock),
+    'R481: doRedo() pushes the current (pre-redo) state back onto _undoStack');
+  ok(/const s = _redoStack\.pop\(\)/.test(drBlock),
+    'R481: doRedo() pops the most recent _redoStack entry to restore');
+  ok(/sr\.textContent=t\('a11y\.redone'\)/.test(drBlock),
+    'R481: doRedo() announces a11y.redone to srStatus on success');
+
+  // Keyboard wiring: Ctrl/Cmd+Shift+Z → doRedo() (uppercase 'Z' + shiftKey, mirroring the existing
+  // Ctrl/Cmd+Shift+S pattern for saveJson — Shift+z produces the string 'Z' in KeyboardEvent.key)
+  ok(/\(e\.ctrlKey\|\|e\.metaKey\) && e\.key==='Z' && e\.shiftKey && notField\)\{\s*\n\s*e\.preventDefault\(\); doRedo\(\);/.test(html),
+    'R481: Ctrl/Cmd+Shift+Z triggers doRedo() (uppercase Z + shiftKey, not the lowercase undo branch)');
+
+  // i18n: new keys in both languages, and the two existing shortcut-list strings updated
+  for (const k of ['a11y.redone','a11y.noRedo']){
+    ok(typeof H.I18N.ja[k]==='string' && typeof H.I18N.en[k]==='string' && H.I18N.ja[k] && H.I18N.en[k],
+      `R481: i18n key ${k} defined in both ja and en`);
+  }
+  ok(H.I18N.ja['hint.ctrlS'].includes('Ctrl/⌘+Shift+Z → やり直す') && H.I18N.en['hint.ctrlS'].includes('Ctrl/⌘+Shift+Z → Redo'),
+    'R481: hint.ctrlS mentions the new redo shortcut in both languages');
+  ok(H.I18N.ja['about.keyList'].includes('Ctrl/⌘+Shift+Z') && H.I18N.en['about.keyList'].includes('Ctrl/⌘+Shift+Z'),
+    'R481: about.keyList (the About-dialog shortcut reference) mentions the new redo shortcut');
+
+  // Functional round-trip using the actual core state-shape (no DOM needed — _snapState()'s shape
+  // is exactly what captureUndo/doUndo/doRedo push and pop, verified structurally above; this
+  // checks the underlying data semantics hold for a manual push/pop/push simulation)
+  {
+    const stack = [], redo = [];
+    const snap = p => ({p});
+    stack.push(snap('A')); stack.push(snap('B')); stack.push(snap('C'));
+    const undone = stack.pop(); redo.push(undone); // undo: C -> back to B
+    ok(stack.length===2 && stack[stack.length-1].p==='B' && redo[0].p==='C',
+      'R481 (sanity): stack/redo push-pop semantics match doUndo()\'s pop-then-push-to-redo pattern');
+    const redone = redo.pop(); stack.push(redone); // redo: back to C
+    ok(stack.length===3 && stack[stack.length-1].p==='C' && redo.length===0,
+      'R481 (sanity): redo pop-then-push-to-undo restores the exact popped state');
+  }
+}
+
 /* ---- Round 480: expression-mix sliders no longer spam SR/hint/bar on every drag tick ---- */
 {
   // Self-review of Round 479: applyValue() originally called the full setExpr(name) on every
@@ -7125,8 +7205,9 @@ function accData(j, bin, ai){
   ok(html.includes("if (_exporting){ showErr(t('btn.exporting')); return; }"),
     'R460: doUndo uses showErr() when _exporting=true (assertive announcement)');
 
-  // doUndo !_undoSnap: showErr() so "nothing to undo" response interrupts AT when stack is empty
-  ok(html.includes("if (!_undoSnap){ showErr(t('a11y.noUndo')); return; }"),
+  // doUndo !_undoStack.length: showErr() so "nothing to undo" interrupts AT when stack is empty
+  // (Round 481: _undoSnap single-slot became the _undoStack array as part of multi-level undo/redo)
+  ok(html.includes("if (!_undoStack.length){ showErr(t('a11y.noUndo')); return; }"),
     'R460: doUndo uses showErr() when undo stack is empty (assertive announcement)');
 
   // seed clamp: showErr() — consistent with numIn clamp (Round 455 used same a11y.clamped key)
@@ -7402,7 +7483,7 @@ function accData(j, bin, ai){
 /* ---- Round 445: selRow metadata selects call captureUndo() — Ctrl+Z now undoes license/content-flag changes ---- */
 {
   // paramRow enum selects call captureUndo(); selRow metadata selects did not.
-  // _undoSnap captures meta, so undo will restore license type, allowed-users, content flags.
+  // The undo snapshot captures meta, so undo will restore license type, allowed-users, content flags.
   // captureUndo() must come BEFORE meta[mk]=e.target.value to snapshot state before the change.
   ok(/selRow[\s\S]{0,200}captureUndo\(\).*meta\[mk\]=e\.target\.value/.test(html.replace(/\s+/g,' ')),
     'selRow onchange calls captureUndo() before assigning meta[mk] so Ctrl+Z restores prior value');

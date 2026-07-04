@@ -380,7 +380,7 @@ function randomParams(seed){
 const I18N = {
   ja: {
     'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
-    'btn.gacha':'ガチャ（ランダム生成）','gacha.lock':'ロック対象','gacha.lock.hint':'ロックした項目は再生成の対象外になります','a11y.gachaRanPartial':'ガチャ — 一部の項目をロックして生成しました','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.copySeed.err':'シードのコピーに失敗しました','btn.copyLink':'リンクをコピー','btn.copyLink.err':'リンクのコピーに失敗しました','a11y.linkCopied':'共有リンクをクリップボードにコピーしました','btn.copied':'✓ コピー済','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.exported':'✓ 書き出し完了','btn.saveJson':'パラメータ保存 (.json)','btn.copyJson':'クリップボードにコピー','btn.copyJson.err':'クリップボードへのコピーに失敗しました','btn.copyJsonDone':'✓ コピー済','btn.pasteJson':'クリップボードから貼り付け','btn.pasteJson.ok':'✓ 貼り付けました','btn.pasteJson.err':'クリップボードの内容が不正です','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','a11y.resetDone':'初期化しました','a11y.resetCancelled':'初期化をキャンセルしました','btn.revert':'↺ {p} に戻す','btn.screenshot':'PNG','btn.screenshot.tip':'スクリーンショットを保存（Ctrl/⌘+Shift+P）','btn.lang.tip':'言語切替 — クリックで English に切替','hint.ctrlS':'Ctrl/⌘+S → VRM書き出し / Ctrl/⌘+Shift+S → JSON保存 / Ctrl/⌘+Z → 元に戻す / Ctrl/⌘+Shift+P → PNG / M → かんたん/詳細切替 / ? → ヘルプ / 1〜8 → タブ切替',
+    'btn.gacha':'ガチャ（ランダム生成）','gacha.lock':'ロック対象','gacha.lock.hint':'ロックした項目は再生成の対象外になります','a11y.gachaRanPartial':'ガチャ — 一部の項目をロックして生成しました','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.copySeed.err':'シードのコピーに失敗しました','btn.copyLink':'リンクをコピー','btn.copyLink.err':'リンクのコピーに失敗しました','a11y.linkCopied':'共有リンクをクリップボードにコピーしました','btn.copied':'✓ コピー済','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.exported':'✓ 書き出し完了','btn.saveJson':'パラメータ保存 (.json)','btn.copyJson':'クリップボードにコピー','btn.copyJson.err':'クリップボードへのコピーに失敗しました','btn.copyJsonDone':'✓ コピー済','btn.pasteJson':'クリップボードから貼り付け','btn.pasteJson.ok':'✓ 貼り付けました','btn.pasteJson.err':'クリップボードの内容が不正です','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','a11y.resetDone':'初期化しました','a11y.resetCancelled':'初期化をキャンセルしました','btn.revert':'↺ {p} に戻す','btn.screenshot':'PNG','btn.screenshot.tip':'スクリーンショットを保存（Ctrl/⌘+Shift+P）','btn.lang.tip':'言語切替 — クリックで English に切替','hint.ctrlS':'Ctrl/⌘+S → VRM書き出し / Ctrl/⌘+Shift+S → JSON保存 / Ctrl/⌘+Z → 元に戻す / Ctrl/⌘+Shift+Z → やり直す / Ctrl/⌘+Shift+P → PNG / M → かんたん/詳細切替 / ? → ヘルプ / 1〜8 → タブ切替',
     'mode.easy':'かんたん','mode.detail':'詳細','mode.easy.tip':'かんたんモード: 基本パラメータのみ表示','mode.detail.tip':'詳細モード: 全パラメータを表示',
     'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.version':'バージョン','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.filename':'ファイル名','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
     'out.version.ph':'例: 1.0','out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
@@ -398,11 +398,11 @@ const I18N = {
     'a11y.exprActive':'表情: {expr}','a11y.exprNeutral':'ニュートラルに戻りました',
     'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
     'a11y.rankBadge':'ランクバッジ — クリックで統計タブへ','a11y.skip':'コンテンツへスキップ',
-    'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.screenshotShared':'スクリーンショットを共有しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました','a11y.gachaRan':'ガチャ — シード {n} で生成しました','a11y.undone':'元に戻しました','a11y.noUndo':'元に戻す履歴がありません','a11y.savedJson':'{name} を保存しました','a11y.loadedJson':'{name} を読み込みました','a11y.clamped':'値を {v} に制限しました','a11y.viewReset':'プレビュー視点をリセットしました','a11y.viewLimit':'視点の限界に達しました','a11y.seedInvalid':'シードは0以上の整数を入力してください','a11y.licUrlInvalid':'有効なURLを入力してください（例: https://example.com）',
+    'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.screenshotShared':'スクリーンショットを共有しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました','a11y.gachaRan':'ガチャ — シード {n} で生成しました','a11y.undone':'元に戻しました','a11y.noUndo':'元に戻す履歴がありません','a11y.redone':'やり直しました','a11y.noRedo':'やり直す履歴がありません','a11y.savedJson':'{name} を保存しました','a11y.loadedJson':'{name} を読み込みました','a11y.clamped':'値を {v} に制限しました','a11y.viewReset':'プレビュー視点をリセットしました','a11y.viewLimit':'視点の限界に達しました','a11y.seedInvalid':'シードは0以上の整数を入力してください','a11y.licUrlInvalid':'有効なURLを入力してください（例: https://example.com）',
     'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。','note.springOff':'揺れ物オフ中：スライダーは非表示。オンにすると表示されます。',
     'note.outline':'アウトラインはPC版でのみ表示されます（Questのシェーダーは非対応）。',
     'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
-    'about.keys':'キーボードショートカット','about.keyList':'Ctrl/⌘+S             → VRM書き出し\nCtrl/⌘+Shift+S       → JSON保存\nCtrl/⌘+Z             → 元に戻す\nCtrl/⌘+Shift+P       → スクリーンショット\n?                    → このダイアログ\nM                    → かんたん/詳細 切替\n1〜8                 → タブ切替\nEsc                  → 表情プレビューを解除\n↑↓←→              → 3D回転（プレビュー選択時）\nShift+↑↓           → 上下パン（顔・足を確認）\n+/−                 → ズーム\nHome / 0             → 視点リセット\nダブルクリック       → プレビュー: 視点リセット / スライダー: デフォルト値\nDelete / Backspace   → スライダー: デフォルト値にリセット',
+    'about.keys':'キーボードショートカット','about.keyList':'Ctrl/⌘+S             → VRM書き出し\nCtrl/⌘+Shift+S       → JSON保存\nCtrl/⌘+Z             → 元に戻す\nCtrl/⌘+Shift+Z       → やり直す\nCtrl/⌘+Shift+P       → スクリーンショット\n?                    → このダイアログ\nM                    → かんたん/詳細 切替\n1〜8                 → タブ切替\nEsc                  → 表情プレビューを解除\n↑↓←→              → 3D回転（プレビュー選択時）\nShift+↑↓           → 上下パン（顔・足を確認）\n+/−                 → ズーム\nHome / 0             → 視点リセット\nダブルクリック       → プレビュー: 視点リセット / スライダー: デフォルト値\nDelete / Backspace   → スライダー: デフォルト値にリセット',
     'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
     'usage.Disallow':'不可','usage.Allow':'可',
     'license.Redistribution_Prohibited':'再配布禁止','license.CC0':'CC0（パブリックドメイン）',
@@ -436,7 +436,7 @@ const I18N = {
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','gacha.lock':'Lock categories','gacha.lock.hint':'Locked categories are excluded from the reroll','a11y.gachaRanPartial':'Gacha — rerolled with some categories locked','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.copySeed.err':'Failed to copy seed','btn.copyLink':'Copy link','btn.copyLink.err':'Failed to copy link','a11y.linkCopied':'Share link copied to clipboard','btn.copied':'✓ Copied','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.exported':'✓ Exported','btn.saveJson':'Save params (.json)','btn.copyJson':'Copy to clipboard','btn.copyJson.err':'Failed to copy to clipboard','btn.copyJsonDone':'✓ Copied','btn.pasteJson':'Paste from clipboard','btn.pasteJson.ok':'✓ Pasted','btn.pasteJson.err':'Clipboard content is not valid Hina JSON','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','a11y.resetDone':'Avatar reset to defaults','a11y.resetCancelled':'Reset cancelled','btn.revert':'↺ Revert to {p}','btn.screenshot':'PNG','btn.screenshot.tip':'Save screenshot (Ctrl/⌘+Shift+P)','btn.lang.tip':'Switch language — click for 日本語','hint.ctrlS':'Ctrl/⌘+S → Export VRM / Ctrl/⌘+Shift+S → Save JSON / Ctrl/⌘+Z → Undo / Ctrl/⌘+Shift+P → PNG / M → Easy/Detail toggle / ? → Help / 1-8 → Switch tab',
+    'btn.gacha':'Gacha (randomize)','gacha.lock':'Lock categories','gacha.lock.hint':'Locked categories are excluded from the reroll','a11y.gachaRanPartial':'Gacha — rerolled with some categories locked','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.copySeed.err':'Failed to copy seed','btn.copyLink':'Copy link','btn.copyLink.err':'Failed to copy link','a11y.linkCopied':'Share link copied to clipboard','btn.copied':'✓ Copied','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.exported':'✓ Exported','btn.saveJson':'Save params (.json)','btn.copyJson':'Copy to clipboard','btn.copyJson.err':'Failed to copy to clipboard','btn.copyJsonDone':'✓ Copied','btn.pasteJson':'Paste from clipboard','btn.pasteJson.ok':'✓ Pasted','btn.pasteJson.err':'Clipboard content is not valid Hina JSON','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','a11y.resetDone':'Avatar reset to defaults','a11y.resetCancelled':'Reset cancelled','btn.revert':'↺ Revert to {p}','btn.screenshot':'PNG','btn.screenshot.tip':'Save screenshot (Ctrl/⌘+Shift+P)','btn.lang.tip':'Switch language — click for 日本語','hint.ctrlS':'Ctrl/⌘+S → Export VRM / Ctrl/⌘+Shift+S → Save JSON / Ctrl/⌘+Z → Undo / Ctrl/⌘+Shift+Z → Redo / Ctrl/⌘+Shift+P → PNG / M → Easy/Detail toggle / ? → Help / 1-8 → Switch tab',
     'mode.easy':'Easy','mode.detail':'Detail','mode.easy.tip':'Easy mode: basic params only','mode.detail.tip':'Detail mode: all params shown',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.version':'Version','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.filename':'File name','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'out.version.ph':'e.g. 1.0','out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
@@ -454,11 +454,11 @@ const I18N = {
     'a11y.exprActive':'Expression: {expr}','a11y.exprNeutral':'Returned to neutral',
     'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
     'a11y.rankBadge':'Rank badge — click to open Stats tab','a11y.skip':'Skip to content',
-    'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.screenshotShared':'Screenshot shared','a11y.seedCopied':'Seed {n} copied to clipboard','a11y.gachaRan':'Gacha — generated with seed {n}','a11y.undone':'Undone','a11y.noUndo':'Nothing to undo','a11y.savedJson':'Saved {name}','a11y.loadedJson':'Loaded {name}','a11y.clamped':'Value clamped to {v}','a11y.viewReset':'Preview view reset','a11y.viewLimit':'View limit reached','a11y.seedInvalid':'Seed must be a non-negative integer','a11y.licUrlInvalid':'Enter a valid URL (e.g. https://example.com)',
+    'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.screenshotShared':'Screenshot shared','a11y.seedCopied':'Seed {n} copied to clipboard','a11y.gachaRan':'Gacha — generated with seed {n}','a11y.undone':'Undone','a11y.noUndo':'Nothing to undo','a11y.redone':'Redone','a11y.noRedo':'Nothing to redo','a11y.savedJson':'Saved {name}','a11y.loadedJson':'Loaded {name}','a11y.clamped':'Value clamped to {v}','a11y.viewReset':'Preview view reset','a11y.viewLimit':'View limit reached','a11y.seedInvalid':'Seed must be a non-negative integer','a11y.licUrlInvalid':'Enter a valid URL (e.g. https://example.com)',
     'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).','note.springOff':'Springs are OFF — sliders hidden. Enable springs above to show them.',
     'note.outline':'The outline only renders on PC — Quest\'s shader does not support it.',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
-    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl/⌘+S           → Export VRM\nCtrl/⌘+Shift+S     → Save JSON\nCtrl/⌘+Z           → Undo\nCtrl/⌘+Shift+P     → Screenshot\n?                  → This dialog\nM                  → Toggle Easy/Detail mode\n1–8                → Switch tabs\nEsc                → Deactivate expression preview\nArrow keys         → Rotate preview (when canvas focused)\nShift+↑/↓         → Pan up/down (inspect face or feet)\n+/−                → Zoom\nHome / 0           → Reset view\nDouble-click       → Preview: reset view / Slider: reset to default\nDelete / Backspace → Slider: reset to default',
+    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl/⌘+S           → Export VRM\nCtrl/⌘+Shift+S     → Save JSON\nCtrl/⌘+Z           → Undo\nCtrl/⌘+Shift+Z     → Redo\nCtrl/⌘+Shift+P     → Screenshot\n?                  → This dialog\nM                  → Toggle Easy/Detail mode\n1–8                → Switch tabs\nEsc                → Deactivate expression preview\nArrow keys         → Rotate preview (when canvas focused)\nShift+↑/↓         → Pan up/down (inspect face or feet)\n+/−                → Zoom\nHome / 0           → Reset view\nDouble-click       → Preview: reset view / Slider: reset to default\nDelete / Backspace → Slider: reset to default',
     'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
     'usage.Disallow':'Disallow','usage.Allow':'Allow',
     'license.Redistribution_Prohibited':'No redistribution','license.CC0':'CC0 (Public domain)',
@@ -1626,12 +1626,22 @@ function loadState(){
     exprMix = HINA.sanitizeExprMix(j.exprMix);
   }catch(e){}
 }
-// Single-level undo (Ctrl+Z) — captures state before user-initiated changes
-let _undoSnap = null, _undoAt = 0, _undoHintTimer = null;
+// Multi-level undo/redo (Ctrl+Z / Ctrl+Shift+Z, Round 481) — bounded stacks capture state before
+// user-initiated changes. MAX_UNDO caps memory (each entry is a small structuredClone of
+// params/meta/exprMix, not geometry/images, so 20 entries is cheap regardless of avatar complexity).
+const MAX_UNDO = 20;
+let _undoStack = [], _redoStack = [], _undoAt = 0, _undoHintTimer = null;
+function _snapState(){ return { p: structuredClone(params), m: structuredClone(meta), aid: activePresetId, seed: lastGachaSeed, emx: structuredClone(exprMix) }; }
+function _restoreState(s){ params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed; exprMix = s.emx; }
 function captureUndo(){
   const now = Date.now();
-  if (!_undoSnap || now - _undoAt > 1500){
-    _undoSnap = { p: structuredClone(params), m: structuredClone(meta), aid: activePresetId, seed: lastGachaSeed, emx: structuredClone(exprMix) };
+  // Debounce grouping preserved exactly as before: rapid successive edits (e.g. re-clicking a
+  // slider within 1.5s) collapse into the ONE stack entry already pushed for this edit session,
+  // rather than pushing a new entry per click — _undoAt only advances when we actually push.
+  if (!_undoStack.length || now - _undoAt > 1500){
+    _undoStack.push(_snapState());
+    if (_undoStack.length > MAX_UNDO) _undoStack.shift();
+    _redoStack = []; // a fresh edit invalidates any pending redo history (standard undo/redo semantics)
     _undoAt = now;
     // Flash hint bar to tell users undo is available (3 s then restore)
     const h = $('hint');
@@ -1646,11 +1656,13 @@ function captureUndo(){
 function doUndo(){
   const sr=$('srStatus');
   if (_exporting){ showErr(t('btn.exporting')); return; }
-  if (!_undoSnap){ showErr(t('a11y.noUndo')); return; }
-  const s = _undoSnap; _undoSnap = null;
+  if (!_undoStack.length){ showErr(t('a11y.noUndo')); return; }
+  _redoStack.push(_snapState());
+  if (_redoStack.length > MAX_UNDO) _redoStack.shift();
+  const s = _undoStack.pop();
   clearTimeout(_undoHintTimer);
   const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
-  params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed; exprMix = s.emx;
+  _restoreState(s);
   // rebuild() unconditionally resets the expression preview to neutral (same as every other
   // avatar-altering action), so no extra resync is needed here — the restored exprMix is
   // simply what the next expression-button click will read.
@@ -1658,6 +1670,21 @@ function doUndo(){
   rebuild(); renderBody(false); saveState();
   if (_undoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
   if(sr) sr.textContent=t('a11y.undone');
+}
+function doRedo(){
+  const sr=$('srStatus');
+  if (_exporting){ showErr(t('btn.exporting')); return; }
+  if (!_redoStack.length){ showErr(t('a11y.noRedo')); return; }
+  _undoStack.push(_snapState());
+  if (_undoStack.length > MAX_UNDO) _undoStack.shift();
+  const s = _redoStack.pop();
+  clearTimeout(_undoHintTimer);
+  const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
+  _restoreState(s);
+  const _redoFocusInPanel = $('tabBody').contains(document.activeElement);
+  rebuild(); renderBody(false); saveState();
+  if (_redoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
+  if(sr) sr.textContent=t('a11y.redone');
 }
 
 let _errTimer = null;
@@ -3135,7 +3162,7 @@ document.querySelectorAll('.rankBadge').forEach(b=>{
   b.addEventListener('click', goStats);
   b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); goStats(); }});
 });
-// Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about, 1-8=tabs
+// Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, Ctrl+Shift+Z=redo, ?=about, 1-8=tabs
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;
   const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag) && !document.activeElement.isContentEditable;
@@ -3147,6 +3174,8 @@ document.addEventListener('keydown',e=>{
       e.preventDefault(); doExport();
     } else if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey && notField){
       e.preventDefault(); doUndo();
+    } else if ((e.ctrlKey||e.metaKey) && e.key==='Z' && e.shiftKey && notField){
+      e.preventDefault(); doRedo();
     } else if ((e.ctrlKey||e.metaKey) && e.key==='P' && e.shiftKey && notField){
       e.preventDefault(); doScreenshot();
     }

@@ -60,12 +60,22 @@ function loadState(){
     exprMix = HINA.sanitizeExprMix(j.exprMix);
   }catch(e){}
 }
-// Single-level undo (Ctrl+Z) — captures state before user-initiated changes
-let _undoSnap = null, _undoAt = 0, _undoHintTimer = null;
+// Multi-level undo/redo (Ctrl+Z / Ctrl+Shift+Z, Round 481) — bounded stacks capture state before
+// user-initiated changes. MAX_UNDO caps memory (each entry is a small structuredClone of
+// params/meta/exprMix, not geometry/images, so 20 entries is cheap regardless of avatar complexity).
+const MAX_UNDO = 20;
+let _undoStack = [], _redoStack = [], _undoAt = 0, _undoHintTimer = null;
+function _snapState(){ return { p: structuredClone(params), m: structuredClone(meta), aid: activePresetId, seed: lastGachaSeed, emx: structuredClone(exprMix) }; }
+function _restoreState(s){ params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed; exprMix = s.emx; }
 function captureUndo(){
   const now = Date.now();
-  if (!_undoSnap || now - _undoAt > 1500){
-    _undoSnap = { p: structuredClone(params), m: structuredClone(meta), aid: activePresetId, seed: lastGachaSeed, emx: structuredClone(exprMix) };
+  // Debounce grouping preserved exactly as before: rapid successive edits (e.g. re-clicking a
+  // slider within 1.5s) collapse into the ONE stack entry already pushed for this edit session,
+  // rather than pushing a new entry per click — _undoAt only advances when we actually push.
+  if (!_undoStack.length || now - _undoAt > 1500){
+    _undoStack.push(_snapState());
+    if (_undoStack.length > MAX_UNDO) _undoStack.shift();
+    _redoStack = []; // a fresh edit invalidates any pending redo history (standard undo/redo semantics)
     _undoAt = now;
     // Flash hint bar to tell users undo is available (3 s then restore)
     const h = $('hint');
@@ -80,11 +90,13 @@ function captureUndo(){
 function doUndo(){
   const sr=$('srStatus');
   if (_exporting){ showErr(t('btn.exporting')); return; }
-  if (!_undoSnap){ showErr(t('a11y.noUndo')); return; }
-  const s = _undoSnap; _undoSnap = null;
+  if (!_undoStack.length){ showErr(t('a11y.noUndo')); return; }
+  _redoStack.push(_snapState());
+  if (_redoStack.length > MAX_UNDO) _redoStack.shift();
+  const s = _undoStack.pop();
   clearTimeout(_undoHintTimer);
   const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
-  params = s.p; meta = s.m; activePresetId = s.aid; lastGachaSeed = s.seed; exprMix = s.emx;
+  _restoreState(s);
   // rebuild() unconditionally resets the expression preview to neutral (same as every other
   // avatar-altering action), so no extra resync is needed here — the restored exprMix is
   // simply what the next expression-button click will read.
@@ -92,6 +104,21 @@ function doUndo(){
   rebuild(); renderBody(false); saveState();
   if (_undoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
   if(sr) sr.textContent=t('a11y.undone');
+}
+function doRedo(){
+  const sr=$('srStatus');
+  if (_exporting){ showErr(t('btn.exporting')); return; }
+  if (!_redoStack.length){ showErr(t('a11y.noRedo')); return; }
+  _undoStack.push(_snapState());
+  if (_undoStack.length > MAX_UNDO) _undoStack.shift();
+  const s = _redoStack.pop();
+  clearTimeout(_undoHintTimer);
+  const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
+  _restoreState(s);
+  const _redoFocusInPanel = $('tabBody').contains(document.activeElement);
+  rebuild(); renderBody(false); saveState();
+  if (_redoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
+  if(sr) sr.textContent=t('a11y.redone');
 }
 
 let _errTimer = null;
@@ -1569,7 +1596,7 @@ document.querySelectorAll('.rankBadge').forEach(b=>{
   b.addEventListener('click', goStats);
   b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); goStats(); }});
 });
-// Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, ?=about, 1-8=tabs
+// Keyboard shortcuts: Ctrl+S=VRM export, Ctrl+Shift+S=JSON save, Ctrl+Z=undo, Ctrl+Shift+Z=redo, ?=about, 1-8=tabs
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement.tagName;
   const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag) && !document.activeElement.isContentEditable;
@@ -1581,6 +1608,8 @@ document.addEventListener('keydown',e=>{
       e.preventDefault(); doExport();
     } else if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey && notField){
       e.preventDefault(); doUndo();
+    } else if ((e.ctrlKey||e.metaKey) && e.key==='Z' && e.shiftKey && notField){
+      e.preventDefault(); doRedo();
     } else if ((e.ctrlKey||e.metaKey) && e.key==='P' && e.shiftKey && notField){
       e.preventDefault(); doScreenshot();
     }
