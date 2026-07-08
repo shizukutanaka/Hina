@@ -5,8 +5,8 @@
 この文書は、AIコーディングセッション（コミット履歴上「Round 464」〜「Round 477」と呼ぶ14回の改善サイクル）で実施した機能監査の結果を、**前提知識のない後続セッションが読んで作業を引き継げる形**で記録したものである。Round 479 で §3-1 の表情エディタ、Round 481 で複数段Undo/Redoを実装したため、両項目を §2 へ移動済み。
 
 - 「Round N」はコミットメッセージ先頭の通し番号。`git log --oneline` で対応コミットを特定できる
-- 本文書作成時点のテスト数は **1883 passed / 0 failed**（`node tests/run.js`）
-- 次に新しい変更を行う場合の通し番号は **Round 484**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正）
+- 本文書作成時点のテスト数は **1886 passed / 0 failed**（`node tests/run.js`）
+- 次に新しい変更を行う場合の通し番号は **Round 485**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応）
 
 ## 1. プロダクト概要と交渉不可制約
 
@@ -59,7 +59,7 @@
 
 補足: エラー系アナウンスは `showErr(msg)` に統一されている（hint バー赤表示 + srStatus + srAlert への rAF 経由書き込み + 5.5秒後クリア）。エラー経路で `srStatus` に直接書くのは既存方針に反する。
 
-### 機能追加（9件）
+### 機能追加（10件）
 
 | Round | 内容 | アンカー |
 |-------|------|---------|
@@ -72,6 +72,7 @@
 | 481 | 複数段Undo/Redo（Ctrl+Z / Ctrl+Shift+Z）。単一スナップショット `_undoSnap` を最大20段の `_undoStack`/`_redoStack` 配列に一般化。1.5秒以内の連続編集を1操作にまとめる既存デバウンス挙動は完全維持。新規編集で `_redoStack` をクリア（標準的なUndo/Redoの意味論）。設計判断（段数上限20・メモリ方針=params/meta/exprMixの軽量structuredCloneのみでジオメトリ非依存）は本ラウンドで確定済み | `build/20-app.js` の `_undoStack`/`_redoStack`/`_snapState()`/`doUndo()`/`doRedo()` |
 | 482 | Round 481の自己レビューで発見: undo/redo実行後、直前の編集の捕捉タイムスタンプから1.5秒以内に**新規**編集を行うと、デバウンス判定が誤って「同一セッションの続き」と扱いプッシュをスキップし、結果として `_redoStack` がクリアされず古い未来状態が残存（後で redo すると無関係な状態にジャンプしてしまう）。`doUndo()`/`doRedo()` が状態復元後に `_undoAt = 0` をセットし、次の `captureUndo()` を強制的に新規セッション扱いにすることで解消 | `build/20-app.js` の `doUndo()`/`doRedo()` 内 `_undoAt = 0` |
 | 483 | Round 481のRedo（Ctrl+Shift+Z）に発見可能性ギャップ（ボタン無し・キーボードのみで、Undo実行後にRedoが使えることを示すUI要素が皆無）を Round 474→475（`?seed=`共有URL→Copy Linkボタン）と同型の追跡で発見。`doUndo()` は末尾で新規i18nキー `hint.redoReady`（「Ctrl+Shift+Z → やり直す」）をヒントバーに3秒フラッシュ、`doRedo()` は対称的に既存の `hint.undoReady` を再フラッシュ（Redo後はUndoが再び使える、という事実をそのまま流用）。両者とも既存の `_undoHintTimer` を共有再利用（新規タイマー変数なし） | `build/10-core-a.js` の `hint.redoReady` / `build/20-app.js` の `doUndo()`/`doRedo()` 末尾のフラッシュ処理 |
+| 484 | Round 483の自己レビューで発見: 新設のヒントバーフラッシュは視覚のみ（`h.textContent`）で、`srStatus`には一切反映されなかった。既存の `captureUndo()` は同じメッセージをヒントバーとsrStatusの両方に出す前例があるため、スクリーンリーダーユーザーは「元に戻しました/やり直しました」は聞こえてもRedo/Undoショートカットの存在を一切知る手段がなかった（晴眼ユーザーとの体験差）。`doUndo()`/`doRedo()` の `sr.textContent` を単一の結合メッセージ（例:「元に戻しました — Ctrl+Shift+Z → やり直す」）に変更し、ヒントバーと同じ `noExprActive` 条件で両方をゲート（表情プレビュー中は元々ヒントも出ないため、SR側も出さない一貫性を維持） | `build/20-app.js` の `doUndo()`/`doRedo()` 内 `sr.textContent = noExprActive ? ... : ...` |
 
 ## 3. 未対応の不足（優先順位順）
 

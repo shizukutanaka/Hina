@@ -4522,8 +4522,8 @@ function accData(j, bin, ai){
   // doUndo must announce 'a11y.undone' on success and 'a11y.noUndo' when stack empty
   ok(/a11y\.undone/.test(html), 'a11y.undone key exists in build');
   ok(/a11y\.noUndo/.test(html),  'a11y.noUndo key exists in build');
-  // Window widened in Round 482 for the _undoAt=0 reset + comment added to doUndo()
-  ok(/doUndo[\s\S]{0,1350}a11y\.undone/.test(html),
+  // Window widened in Round 484 for the combined srStatus+hint.redoReady announcement in doUndo()
+  ok(/doUndo[\s\S]{0,2200}a11y\.undone/.test(html),
     'doUndo() announces a11y.undone to SR on success');
   ok(/doUndo[\s\S]{0,200}a11y\.noUndo/.test(html),
     'doUndo() announces a11y.noUndo to SR when nothing to undo');
@@ -6651,6 +6651,29 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 484: undo/redo hint-bar flash reaches screen readers too, not just sighted users ---- */
+{
+  // Self-review of Round 483: the hint.redoReady/hint.undoReady flashes only updated the visual
+  // hint bar (h.textContent) — captureUndo()'s existing undoReady flash pairs the SAME message to
+  // BOTH the hint bar and srStatus, so screen reader users would hear "undone"/"redone" but never
+  // learn the new Ctrl+Shift+Z shortcut exists at all, unlike sighted users watching the hint bar.
+  // Fix: append the hint text to the SAME srStatus announcement (not a separate one) so both
+  // reach AT users together, gated on the identical noExprActive condition the hint bar already
+  // uses (so AT users aren't told about a hint that isn't actually showing for them either).
+  const duIdx4 = html.indexOf('function doUndo(){');
+  const duBlock4 = duIdx4>=0 ? html.slice(duIdx4, duIdx4+2200) : '';
+  ok(/if\(sr\) sr\.textContent = noExprActive \? t\('a11y\.undone'\)\+' — '\+t\('hint\.redoReady'\) : t\('a11y\.undone'\);/.test(duBlock4),
+    'R484: doUndo() combines a11y.undone and hint.redoReady into one srStatus announcement');
+  const drIdx4 = html.indexOf('function doRedo(){');
+  const drBlock4 = drIdx4>=0 ? html.slice(drIdx4, drIdx4+1400) : '';
+  ok(/if\(sr\) sr\.textContent = noExprActive \? t\('a11y\.redone'\)\+' — '\+t\('hint\.undoReady'\) : t\('a11y\.redone'\);/.test(drBlock4),
+    'R484: doRedo() combines a11y.redone and hint.undoReady into one srStatus announcement');
+  // Both functions compute noExprActive once and share it between the hint-bar gate and the
+  // srStatus ternary — not two separate !activeExpr checks that could drift out of sync.
+  ok((duBlock4.match(/noExprActive/g)||[]).length===3 && (drBlock4.match(/noExprActive/g)||[]).length===3,
+    'R484: noExprActive is computed once per function and reused for both the hint bar and srStatus');
+}
+
 /* ---- Round 483: redo shortcut discoverability — hint-bar flash after undo/redo ---- */
 {
   // Round 481 shipped Ctrl+Shift+Z with zero UI surface: nothing ever told users it exists,
@@ -6663,17 +6686,20 @@ function accData(j, bin, ai){
   ok(H.I18N.ja['hint.redoReady']==='Ctrl+Shift+Z / ⌘+Shift+Z → やり直す' && H.I18N.en['hint.redoReady']==='Ctrl+Shift+Z / ⌘+Shift+Z → Redo',
     'R483: hint.redoReady text matches the Ctrl+Shift+Z convention already established for hint.undoReady');
 
+  // Round 484 reordered these functions: the hint-bar flash now runs BEFORE the (combined)
+  // srStatus assignment, so it can feed the same noExprActive gate into both — see Round 484's
+  // own test block above for the combined-srStatus assertions.
   const duIdx3 = html.indexOf('function doUndo(){');
-  const duBlock3 = duIdx3>=0 ? html.slice(duIdx3, duIdx3+1600) : '';
-  ok(/sr\.textContent=t\('a11y\.undone'\);\s*\n\s*\/\/ Flash the new Ctrl\+Shift\+Z shortcut[\s\S]{0,250}h\.textContent = t\('hint\.redoReady'\)/.test(duBlock3),
-    'R483: doUndo() flashes hint.redoReady after announcing a11y.undone');
+  const duBlock3 = duIdx3>=0 ? html.slice(duIdx3, duIdx3+2200) : '';
+  ok(/const h=\$\('hint'\), noExprActive=!activeExpr;\s*\n\s*if \(h && noExprActive\)\{\s*\n\s*h\.textContent = t\('hint\.redoReady'\)/.test(duBlock3),
+    'R483: doUndo() flashes hint.redoReady, gated on the same noExprActive used for srStatus');
   ok(/h\.textContent = t\('hint\.redoReady'\);\s*\n\s*_undoHintTimer = setTimeout/.test(duBlock3),
     'R483: doUndo() reuses the existing _undoHintTimer (no new timer variable)');
 
   const drIdx3 = html.indexOf('function doRedo(){');
-  const drBlock3 = drIdx3>=0 ? html.slice(drIdx3, drIdx3+1200) : '';
-  ok(/sr\.textContent=t\('a11y\.redone'\);\s*\n\s*\/\/ Flash hint\.undoReady again[\s\S]{0,250}h\.textContent = t\('hint\.undoReady'\)/.test(drBlock3),
-    'R483: doRedo() flashes hint.undoReady after announcing a11y.redone');
+  const drBlock3 = drIdx3>=0 ? html.slice(drIdx3, drIdx3+1400) : '';
+  ok(/const h=\$\('hint'\), noExprActive=!activeExpr;\s*\n\s*if \(h && noExprActive\)\{\s*\n\s*h\.textContent = t\('hint\.undoReady'\)/.test(drBlock3),
+    'R483: doRedo() flashes hint.undoReady, gated on the same noExprActive used for srStatus');
   ok(/h\.textContent = t\('hint\.undoReady'\);\s*\n\s*_undoHintTimer = setTimeout/.test(drBlock3),
     'R483: doRedo() reuses the existing _undoHintTimer, mirroring doUndo()');
 }
@@ -6750,7 +6776,8 @@ function accData(j, bin, ai){
   ok(/function doRedo\(\)\{/.test(html), 'R481: doRedo() is defined');
   const drIdx = html.indexOf('function doRedo(){');
   // Window widened in Round 482 for the _undoAt=0 reset + comment added to doRedo()
-  const drBlock = drIdx>=0 ? html.slice(drIdx, drIdx+950) : '';
+  // Window widened in Round 484 for the combined srStatus+hint.undoReady announcement in doRedo()
+  const drBlock = drIdx>=0 ? html.slice(drIdx, drIdx+1400) : '';
   ok(/if \(_exporting\)\{ showErr\(t\('btn\.exporting'\)\); return; \}/.test(drBlock),
     'R481: doRedo() guards against _exporting, same as doUndo()');
   ok(/if \(!_redoStack\.length\)\{ showErr\(t\('a11y\.noRedo'\)\); return; \}/.test(drBlock),
@@ -6759,7 +6786,9 @@ function accData(j, bin, ai){
     'R481: doRedo() pushes the current (pre-redo) state back onto _undoStack');
   ok(/const s = _redoStack\.pop\(\)/.test(drBlock),
     'R481: doRedo() pops the most recent _redoStack entry to restore');
-  ok(/sr\.textContent=t\('a11y\.redone'\)/.test(drBlock),
+  // Round 484 combined this into a conditional (noExprActive ? ... : ...) expression rather than
+  // a plain assignment, so a11y.redone now appears twice (both ternary branches) — check presence.
+  ok(/sr\.textContent = noExprActive \? t\('a11y\.redone'\)/.test(drBlock),
     'R481: doRedo() announces a11y.redone to srStatus on success');
 
   // Keyboard wiring: Ctrl/Cmd+Shift+Z → doRedo() (uppercase 'Z' + shiftKey, mirroring the existing

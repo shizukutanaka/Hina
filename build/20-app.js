@@ -107,14 +107,17 @@ function doUndo(){
   const _undoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_undoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
-  if(sr) sr.textContent=t('a11y.undone');
   // Flash the new Ctrl+Shift+Z shortcut so redo is discoverable (mirrors captureUndo()'s
-  // undoReady flash) — otherwise nothing in the UI ever reveals that redo exists.
-  const h=$('hint');
-  if (h && !activeExpr){
+  // undoReady flash) — otherwise nothing in the UI ever reveals that redo exists. Appended to
+  // the SAME srStatus announcement (not a separate one) so screen reader users learn this too,
+  // not just sighted users watching the hint bar — gated on !activeExpr in both places so AT
+  // users aren't told about a hint that isn't actually showing (hint bar shows expr text instead).
+  const h=$('hint'), noExprActive=!activeExpr;
+  if (h && noExprActive){
     h.textContent = t('hint.redoReady');
     _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
   }
+  if(sr) sr.textContent = noExprActive ? t('a11y.undone')+' — '+t('hint.redoReady') : t('a11y.undone');
 }
 function doRedo(){
   const sr=$('srStatus');
@@ -129,14 +132,15 @@ function doRedo(){
   const _redoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_redoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
-  if(sr) sr.textContent=t('a11y.redone');
   // Flash hint.undoReady again after redoing (mirrors doUndo()'s hint.redoReady flash) — the
-  // redo just made undo available again, and the existing key says exactly that.
-  const h=$('hint');
-  if (h && !activeExpr){
+  // redo just made undo available again, and the existing key says exactly that. Same
+  // combined-srStatus rationale as doUndo(): screen reader users should learn this too.
+  const h=$('hint'), noExprActive=!activeExpr;
+  if (h && noExprActive){
     h.textContent = t('hint.undoReady');
     _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
   }
+  if(sr) sr.textContent = noExprActive ? t('a11y.redone')+' — '+t('hint.undoReady') : t('a11y.redone');
 }
 
 let _errTimer = null;
