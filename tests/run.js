@@ -6651,6 +6651,25 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 485: outline toggle now announces note.outline to screen readers, like springOff does ---- */
+{
+  // onParam() has two structurally similar "toggle bool -> renderBody(false) -> refocus" branches:
+  // springOff (older) already announces its visual note to srStatus so AT users learn the same
+  // Quest-compatibility caveat sighted users see appear; outline (Round 473, newer) had the exact
+  // same shape but never picked up that pattern — the note.outline hint (build/20-app.js ~1123,
+  // shown only when params.outline is true) was visual-only. Fixed to mirror springOff's approach.
+  const opIdx = html.indexOf("if (k==='outline'){");
+  const opBlock = opIdx>=0 ? html.slice(opIdx, opIdx+700) : '';
+  ok(/if \(params\.outline\)\{ const sr=\$\('srStatus'\); if\(sr\) sr\.textContent=t\('note\.outline'\); \}/.test(opBlock),
+    'R485: onParam() outline branch announces note.outline to srStatus when the note becomes visible');
+  // Only announces on the ON-transition (matching exactly when the visual note appears at
+  // activeTab==='color' && params.outline) — no announcement needed when turning it off, since
+  // there's no corresponding "note is now hidden" message and the checkbox's own state already
+  // conveys that.
+  ok(/if \(params\.outline\)\{[\s\S]{0,60}sr\.textContent=t\('note\.outline'\); \}\s*\n\s*return;/.test(opBlock),
+    'R485: the announcement is conditional on params.outline (true), not unconditional');
+}
+
 /* ---- Round 484: undo/redo hint-bar flash reaches screen readers too, not just sighted users ---- */
 {
   // Self-review of Round 483: the hint.redoReady/hint.undoReady flashes only updated the visual

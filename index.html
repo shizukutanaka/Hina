@@ -2446,7 +2446,12 @@ function onParam(k){
   // outline is an export-only material flag — no geometry/atlas/preview impact, so skip the
   // expensive rebuild() (unlike springOff, which does change the live preview and PB counts).
   // renderBody(false) still runs to show/hide the note.outline hint below the checkbox.
-  if (k==='outline'){ saveState(); renderBody(false); const re=document.getElementById('pr-outline'); if(re) re.focus(); return; }
+  if (k==='outline'){ saveState(); renderBody(false); const re=document.getElementById('pr-outline'); if(re) re.focus();
+    // Mirror the springOff branch below: when the visual note.outline hint appears, announce it
+    // to srStatus too — otherwise screen reader users never learn the Quest-incompatibility
+    // caveat that sighted users see appear right below the checkbox.
+    if (params.outline){ const sr=$('srStatus'); if(sr) sr.textContent=t('note.outline'); }
+    return; }
   if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
   lastGachaSeed=null; // structural change: seed no longer reproduces this avatar's geometry
   rebuild();
