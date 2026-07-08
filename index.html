@@ -388,7 +388,7 @@ const I18N = {
     'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物ボーン','st.chains':'揺れ物チェーン','st.tex':'テクスチャ推定',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'rank.tip.Excellent':'全ユーザーにデフォルト表示','rank.tip.Good':'Good以上を許可したユーザーに表示','rank.tip.Medium':'Medium以上を許可したユーザーのみ表示','rank.tip.Poor':'Poor以上を許可したユーザーのみ表示','rank.tip.VeryPoor':'ほぼ全ユーザーに非表示',
-    'hint.exprOff':'クリックで解除','hint.drag':'ドラッグ/矢印キー: 回転 / Shift+↑↓: パン / ホイール・+−: ズーム / ダブルクリック・Home/0: リセット','hint.undoReady':'Ctrl+Z / ⌘+Z → 元に戻す','hint.saved':'✓ 自動保存','hint.sliderReset':'ダブルクリックまたは Delete / Backspace キーでデフォルト値に戻す',
+    'hint.exprOff':'クリックで解除','hint.drag':'ドラッグ/矢印キー: 回転 / Shift+↑↓: パン / ホイール・+−: ズーム / ダブルクリック・Home/0: リセット','hint.undoReady':'Ctrl+Z / ⌘+Z → 元に戻す','hint.redoReady':'Ctrl+Shift+Z / ⌘+Shift+Z → やり直す','hint.saved':'✓ 自動保存','hint.sliderReset':'ダブルクリックまたは Delete / Backspace キーでデフォルト値に戻す',
     'hint.saveFail':'⚠ 保存失敗 — JSONを手動で保存してください','hint.exportCorrupt':'⚠ VRMファイルが破損しています — もう一度書き出してください','hint.dropJson':'または .hina.json ファイルをここにドラッグ＆ドロップ',
     'hint.noGL':'WebGL が使えません — プレビュー無効（書き出しは動作します）',
     'hint.glLost':'WebGL コンテキストが失われました — ページを再読み込みしてください',
@@ -444,7 +444,7 @@ const I18N = {
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring bones','st.chains':'Spring chains','st.tex':'Texture est.',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'rank.tip.Excellent':'Visible to all users by default','rank.tip.Good':'Visible to users allowing Good+','rank.tip.Medium':'Visible only to users allowing Medium+','rank.tip.Poor':'Visible only to users allowing Poor+','rank.tip.VeryPoor':'Hidden for most users',
-    'hint.exprOff':'click to deactivate','hint.drag':'Drag/Arrows: rotate / Shift+↑↓: pan / Wheel · +−: zoom / Double-click · Home/0: reset','hint.undoReady':'Ctrl+Z / ⌘+Z → Undo','hint.saved':'✓ Auto-saved','hint.sliderReset':'Double-click or Delete/Backspace to reset to default',
+    'hint.exprOff':'click to deactivate','hint.drag':'Drag/Arrows: rotate / Shift+↑↓: pan / Wheel · +−: zoom / Double-click · Home/0: reset','hint.undoReady':'Ctrl+Z / ⌘+Z → Undo','hint.redoReady':'Ctrl+Shift+Z / ⌘+Shift+Z → Redo','hint.saved':'✓ Auto-saved','hint.sliderReset':'Double-click or Delete/Backspace to reset to default',
     'hint.saveFail':'⚠ Save failed — export JSON manually to keep your work','hint.exportCorrupt':'⚠ VRM file is corrupt — please export again','hint.dropJson':'or drag & drop a .hina.json file anywhere on the page',
     'hint.noGL':'WebGL unavailable — preview disabled (export still works)',
     'hint.glLost':'WebGL context lost — reload to restore preview',
@@ -1661,7 +1661,6 @@ function doUndo(){
   if (_redoStack.length > MAX_UNDO) _redoStack.shift();
   const s = _undoStack.pop();
   clearTimeout(_undoHintTimer);
-  const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
   _restoreState(s);
   // Force the next captureUndo() to start a fresh debounce session rather than possibly still
   // grouping with whatever edit was captured just before this undo — otherwise a genuinely new
@@ -1675,6 +1674,13 @@ function doUndo(){
   rebuild(); renderBody(false); saveState();
   if (_undoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
   if(sr) sr.textContent=t('a11y.undone');
+  // Flash the new Ctrl+Shift+Z shortcut so redo is discoverable (mirrors captureUndo()'s
+  // undoReady flash) — otherwise nothing in the UI ever reveals that redo exists.
+  const h=$('hint');
+  if (h && !activeExpr){
+    h.textContent = t('hint.redoReady');
+    _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
+  }
 }
 function doRedo(){
   const sr=$('srStatus');
@@ -1684,13 +1690,19 @@ function doRedo(){
   if (_undoStack.length > MAX_UNDO) _undoStack.shift();
   const s = _redoStack.pop();
   clearTimeout(_undoHintTimer);
-  const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
   _restoreState(s);
   _undoAt = 0; // same rationale as doUndo() — start the next edit as a fresh debounce session
   const _redoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_redoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
   if(sr) sr.textContent=t('a11y.redone');
+  // Flash hint.undoReady again after redoing (mirrors doUndo()'s hint.redoReady flash) — the
+  // redo just made undo available again, and the existing key says exactly that.
+  const h=$('hint');
+  if (h && !activeExpr){
+    h.textContent = t('hint.undoReady');
+    _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
+  }
 }
 
 let _errTimer = null;

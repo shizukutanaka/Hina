@@ -4802,9 +4802,12 @@ function accData(j, bin, ai){
   // doesn't outlive the actual undo operation
   ok(/clearTimeout\(_undoHintTimer\)[\s\S]{0,300}rebuild\(\)/.test(html),
     'doUndo() clears _undoHintTimer before rebuilding so stale hint is removed');
-  // doUndo must also reset the hint text to hint.drag (when not in expr mode)
-  ok(/clearTimeout\(_undoHintTimer\)[\s\S]{0,100}_hintDefault\(\)/.test(html),
-    'doUndo() restores hint bar via _hintDefault() after consuming undo');
+  // Round 483: doUndo() no longer resets the hint bar to _hintDefault() immediately — it flashes
+  // hint.redoReady for 3s first (so the new Ctrl+Shift+Z shortcut is discoverable), THEN falls
+  // back to _hintDefault() inside that flash's own setTimeout. Both still happen; only the
+  // immediacy changed. Verify _hintDefault() exists within the redoReady flash's timeout callback.
+  ok(/h\.textContent = t\('hint\.redoReady'\);[\s\S]{0,200}_hintDefault\(\)/.test(html),
+    'doUndo() eventually restores hint bar via _hintDefault() after the hint.redoReady flash times out (Round 483)');
 }
 
 /* ---- Round 243: doScreenshot() calls showErr when canvas toBlob returns null ---- */
@@ -6646,6 +6649,33 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 483: redo shortcut discoverability — hint-bar flash after undo/redo ---- */
+{
+  // Round 481 shipped Ctrl+Shift+Z with zero UI surface: nothing ever told users it exists,
+  // matching the exact gap Round 474->475 fixed for ?seed= sharing. captureUndo() already
+  // flashes hint.undoReady after an edit; doUndo() now flashes the new hint.redoReady after
+  // undoing, and doRedo() flashes hint.undoReady again after redoing (undo is available once
+  // more) — reusing the existing key since that message is exactly correct in both directions.
+  ok(/'hint\.redoReady':/.test(html) && (html.match(/'hint\.redoReady':/g)||[]).length===2,
+    'R483: hint.redoReady i18n key defined in both ja and en');
+  ok(H.I18N.ja['hint.redoReady']==='Ctrl+Shift+Z / ⌘+Shift+Z → やり直す' && H.I18N.en['hint.redoReady']==='Ctrl+Shift+Z / ⌘+Shift+Z → Redo',
+    'R483: hint.redoReady text matches the Ctrl+Shift+Z convention already established for hint.undoReady');
+
+  const duIdx3 = html.indexOf('function doUndo(){');
+  const duBlock3 = duIdx3>=0 ? html.slice(duIdx3, duIdx3+1600) : '';
+  ok(/sr\.textContent=t\('a11y\.undone'\);\s*\n\s*\/\/ Flash the new Ctrl\+Shift\+Z shortcut[\s\S]{0,250}h\.textContent = t\('hint\.redoReady'\)/.test(duBlock3),
+    'R483: doUndo() flashes hint.redoReady after announcing a11y.undone');
+  ok(/h\.textContent = t\('hint\.redoReady'\);\s*\n\s*_undoHintTimer = setTimeout/.test(duBlock3),
+    'R483: doUndo() reuses the existing _undoHintTimer (no new timer variable)');
+
+  const drIdx3 = html.indexOf('function doRedo(){');
+  const drBlock3 = drIdx3>=0 ? html.slice(drIdx3, drIdx3+1200) : '';
+  ok(/sr\.textContent=t\('a11y\.redone'\);\s*\n\s*\/\/ Flash hint\.undoReady again[\s\S]{0,250}h\.textContent = t\('hint\.undoReady'\)/.test(drBlock3),
+    'R483: doRedo() flashes hint.undoReady after announcing a11y.redone');
+  ok(/h\.textContent = t\('hint\.undoReady'\);\s*\n\s*_undoHintTimer = setTimeout/.test(drBlock3),
+    'R483: doRedo() reuses the existing _undoHintTimer, mirroring doUndo()');
 }
 
 /* ---- Round 482: fix stale redo history when an edit follows undo within the debounce window ---- */

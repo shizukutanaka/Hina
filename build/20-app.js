@@ -95,7 +95,6 @@ function doUndo(){
   if (_redoStack.length > MAX_UNDO) _redoStack.shift();
   const s = _undoStack.pop();
   clearTimeout(_undoHintTimer);
-  const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
   _restoreState(s);
   // Force the next captureUndo() to start a fresh debounce session rather than possibly still
   // grouping with whatever edit was captured just before this undo — otherwise a genuinely new
@@ -109,6 +108,13 @@ function doUndo(){
   rebuild(); renderBody(false); saveState();
   if (_undoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
   if(sr) sr.textContent=t('a11y.undone');
+  // Flash the new Ctrl+Shift+Z shortcut so redo is discoverable (mirrors captureUndo()'s
+  // undoReady flash) — otherwise nothing in the UI ever reveals that redo exists.
+  const h=$('hint');
+  if (h && !activeExpr){
+    h.textContent = t('hint.redoReady');
+    _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
+  }
 }
 function doRedo(){
   const sr=$('srStatus');
@@ -118,13 +124,19 @@ function doRedo(){
   if (_undoStack.length > MAX_UNDO) _undoStack.shift();
   const s = _redoStack.pop();
   clearTimeout(_undoHintTimer);
-  const h=$('hint'); if(h&&!activeExpr) h.textContent=_hintDefault();
   _restoreState(s);
   _undoAt = 0; // same rationale as doUndo() — start the next edit as a fresh debounce session
   const _redoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_redoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
   if(sr) sr.textContent=t('a11y.redone');
+  // Flash hint.undoReady again after redoing (mirrors doUndo()'s hint.redoReady flash) — the
+  // redo just made undo available again, and the existing key says exactly that.
+  const h=$('hint');
+  if (h && !activeExpr){
+    h.textContent = t('hint.undoReady');
+    _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
+  }
 }
 
 let _errTimer = null;
