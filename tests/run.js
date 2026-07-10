@@ -3018,7 +3018,10 @@ function accData(j, bin, ai){
 {
   // Exact counts per bangs style (default twin hairStyle). Regression guard for bang-strip geometry.
   // full=5 strips, see=5 narrower strips, center=4 side strips (fewer strips overall).
-  const BANGS_SNAP = {full:{verts:1381,tris:1961}, see:{verts:1371,tris:1955}, center:{verts:1366,tris:1952}};
+  // Round 489: sphereBand() no longer emits the 112 zero-area triangles it produced at every
+  // sphere pole (head/hands/feet/scalp) — tris dropped by exactly 112 in each row; verts
+  // unchanged since the fix only removes degenerate triangle INDICES, not vertices.
+  const BANGS_SNAP = {full:{verts:1381,tris:1849}, see:{verts:1371,tris:1843}, center:{verts:1366,tris:1840}};
   let snapFail = 0;
   for(const [bangs, {verts, tris}] of Object.entries(BANGS_SNAP)){
     const C = H.buildAvatar(Object.assign(H.defaults(), {bangs}));
@@ -3026,7 +3029,7 @@ function accData(j, bin, ai){
     if(C.geom.idx.length/3 !== tris) snapFail++;
   }
   ok(snapFail === 0,
-    'bangs vertex/tris snapshot: full=1381v/1961t, see=1371v/1955t, center=1366v/1952t (regression guard)');
+    'bangs vertex/tris snapshot: full=1381v/1849t, see=1371v/1843t, center=1366v/1840t (regression guard, Round 489)');
 
   // Ordering: full has more verts than see, see more than center (more strips = more geometry)
   ok(BANGS_SNAP.full.verts > BANGS_SNAP.see.verts && BANGS_SNAP.see.verts > BANGS_SNAP.center.verts,
@@ -3222,11 +3225,13 @@ function accData(j, bin, ai){
 {
   // Exact triangle counts per outfit/hairStyle combo. Any geometry change shifts these.
   // All counts must be < 7500 (Quest Excellent tris budget).
+  // Round 489: sphereBand() no longer emits 112 zero-area triangles at sphere poles (head/hands/
+  // feet) — every combo below dropped by exactly 112 (poles are outfit/hairStyle-independent).
   const SNAP = {
-    onepiece: {short:1782, bob:1830, long:1800, twin:1958, pony:1870},
-    sailor:   {short:1785, bob:1833, long:1803, twin:1961, pony:1873},
-    shirts:   {short:1758, bob:1806, long:1776, twin:1934, pony:1846},
-    hoodie:   {short:1822, bob:1870, long:1840, twin:1998, pony:1910},
+    onepiece: {short:1670, bob:1718, long:1688, twin:1846, pony:1758},
+    sailor:   {short:1673, bob:1721, long:1691, twin:1849, pony:1761},
+    shirts:   {short:1646, bob:1694, long:1664, twin:1822, pony:1734},
+    hoodie:   {short:1710, bob:1758, long:1728, twin:1886, pony:1798},
   };
   let snapFail = 0, budgetFail = 0;
   for(const [outfit, hairMap] of Object.entries(SNAP)){
@@ -6651,6 +6656,47 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,1450}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 489: sphereBand() no longer emits zero-area triangles at sphere poles ---- */
+{
+  // Round 131's degenerate-triangle guard only checked for DUPLICATE VERTEX INDICES within a
+  // triangle (a===b || b===c || a===c) — it never checked for duplicate POSITIONS under
+  // different indices, which is exactly this bug's signature: sphereBand() collapses every
+  // vertex in a pole ring (phi=0 or phi=π, where sin(phi)=0 regardless of θ) to the same
+  // position, but each still gets its own distinct vertex index (different skinning/UV context),
+  // so Round 131's check passed while ~5.7% of the model's triangle budget (112 of 1961 in the
+  // default avatar) was invisible, zero-area geometry — reproduced deterministically on every
+  // build regardless of PARAMS (head/hand/foot/scalp poles are hardcoded phi0=0/phi1=π calls).
+  const zeroAreaCount = geom => {
+    const pos=geom.pos, idx=geom.idx; let n=0;
+    for(let t=0;t<idx.length/3;t++){
+      const a=idx[t*3]*3, b=idx[t*3+1]*3, c=idx[t*3+2]*3;
+      const v1x=pos[b]-pos[a], v1y=pos[b+1]-pos[a+1], v1z=pos[b+2]-pos[a+2];
+      const v2x=pos[c]-pos[a], v2y=pos[c+1]-pos[a+1], v2z=pos[c+2]-pos[a+2];
+      const cx=v1y*v2z-v1z*v2y, cy=v1z*v2x-v1x*v2z, cz=v1x*v2y-v1y*v2x;
+      if (cx*cx+cy*cy+cz*cz < 1e-24) n++; // squared cross-product magnitude ~0 -> zero area
+    }
+    return n;
+  };
+  ok(zeroAreaCount(B.geom)===0, 'R489: default avatar has zero zero-area (degenerate-by-position) triangles');
+  let presetZeroAreaBad = 0;
+  for (const pre of H.PRESETS) presetZeroAreaBad += zeroAreaCount(H.buildAvatar(H.presetParams(pre)).geom);
+  ok(presetZeroAreaBad===0, 'R489: zero zero-area triangles across all 6 preset avatars');
+
+  // Exact reduction: default avatar drops from 1961 to 1849 tris (-112), vertex count unchanged
+  // (the fix only removes degenerate triangle INDICES, never vertices).
+  ok(B.geom.pos.length/3===1381 && B.geom.idx.length/3===1849,
+    'R489: default avatar is 1381 verts / 1849 tris (was 1381v/1961t before the pole fix)');
+
+  // The fix in sphereBand(): detect pole rings via sin(phi)~0 and emit only the surviving
+  // (non-degenerate) half of each pole-adjacent quad, unchanged indices/winding otherwise.
+  const sbIdx = html.indexOf('function sphereBand(');
+  const sbBlock = sbIdx>=0 ? html.slice(sbIdx, sbIdx+1400) : '';
+  ok(/const poleAtStart = Math\.abs\(Math\.sin\(phi0\)\) < 1e-9;/.test(sbBlock) && /const poleAtEnd = Math\.abs\(Math\.sin\(phi1\)\) < 1e-9;/.test(sbBlock),
+    'R489: sphereBand() detects pole rings via sin(phi)~0 at both band endpoints');
+  ok(/if \(!\(i===0 && poleAtStart\)\) g\.idx\.push\(a,b,c\);/.test(sbBlock) && /if \(!\(i===rings-1 && poleAtEnd\)\) g\.idx\.push\(a,c,d\);/.test(sbBlock),
+    'R489: each pole-adjacent quad emits only its non-degenerate triangle, unchanged indices/winding');
 }
 
 /* ---- Round 488: expression-mix numeric input now announces clamped/invalid entry, like paramRow's ---- */

@@ -748,8 +748,18 @@ function sphereBand(g, c, r, phi0, phi1, rings, segs, uv, skinFn, deform){
     }
     grid.push(row);
   }
-  for(let i=0;i<rings;i++)for(let j=0;j<segs;j++)
-    quad4(g, grid[i][j],grid[i][j+1],grid[i+1][j+1],grid[i+1][j]);
+  // A ring exactly at a sphere pole (phi=0 or phi=π) collapses every vertex in that ring to the
+  // same position (sin(phi)=0 for all θ) — distinct vertex indices, identical position. The
+  // generic two-triangle quad then always emits one zero-area triangle at a pole row (112 of
+  // them in the default avatar: head/hand/foot/scalp poles). Skip only that half of the quad;
+  // the surviving triangle keeps its original indices/winding unchanged.
+  const poleAtStart = Math.abs(Math.sin(phi0)) < 1e-9;
+  const poleAtEnd = Math.abs(Math.sin(phi1)) < 1e-9;
+  for(let i=0;i<rings;i++)for(let j=0;j<segs;j++){
+    const a=grid[i][j], b=grid[i][j+1], c=grid[i+1][j+1], d=grid[i+1][j];
+    if (!(i===0 && poleAtStart)) g.idx.push(a,b,c);
+    if (!(i===rings-1 && poleAtEnd)) g.idx.push(a,c,d);
+  }
 }
 
 /* elliptic lathe around Y. rings: [{y, rx, rz, skin}] */
