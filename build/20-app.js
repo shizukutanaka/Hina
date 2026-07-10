@@ -1249,6 +1249,11 @@ function renderOut(bd){
   }
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
+      // The accept attribute is only a picker UI hint — most OS file dialogs offer an "All Files"
+      // override that bypasses it, so a non-JSON file can still reach here. Mirror the drag-drop
+      // handler's type check (below) so a large non-JSON file (e.g. a photo) gets the accurate
+      // "wrong format" message instead of a misleading "too large" one when size alone is checked.
+      if (!f.name.endsWith('.json') && f.type!=='application/json'){ showErr(t('err.loadFailed')); e.target.value=''; return; }
       if(f.size>2*1024*1024){ showErr(t('err.loadTooLarge')); e.target.value=''; return; }
       const rd=new FileReader();
       rd.onload=()=>{ const d=HINA.deserialize(String(rd.result));

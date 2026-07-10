@@ -5,8 +5,8 @@
 この文書は、AIコーディングセッション（コミット履歴上「Round 464」〜「Round 477」と呼ぶ14回の改善サイクル）で実施した機能監査の結果を、**前提知識のない後続セッションが読んで作業を引き継げる形**で記録したものである。Round 479 で §3-1 の表情エディタ、Round 481 で複数段Undo/Redoを実装したため、両項目を §2 へ移動済み。
 
 - 「Round N」はコミットメッセージ先頭の通し番号。`git log --oneline` で対応コミットを特定できる
-- 本文書作成時点のテスト数は **1888 passed / 0 failed**（`node tests/run.js`）
-- 次に新しい変更を行う場合の通し番号は **Round 486**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正）
+- 本文書作成時点のテスト数は **1890 passed / 0 failed**（`node tests/run.js`）
+- 次に新しい変更を行う場合の通し番号は **Round 487**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正）
 
 ## 1. プロダクト概要と交渉不可制約
 
@@ -59,7 +59,7 @@
 
 補足: エラー系アナウンスは `showErr(msg)` に統一されている（hint バー赤表示 + srStatus + srAlert への rAF 経由書き込み + 5.5秒後クリア）。エラー経路で `srStatus` に直接書くのは既存方針に反する。
 
-### 機能追加（11件）
+### 機能追加（12件）
 
 | Round | 内容 | アンカー |
 |-------|------|---------|
@@ -74,6 +74,7 @@
 | 483 | Round 481のRedo（Ctrl+Shift+Z）に発見可能性ギャップ（ボタン無し・キーボードのみで、Undo実行後にRedoが使えることを示すUI要素が皆無）を Round 474→475（`?seed=`共有URL→Copy Linkボタン）と同型の追跡で発見。`doUndo()` は末尾で新規i18nキー `hint.redoReady`（「Ctrl+Shift+Z → やり直す」）をヒントバーに3秒フラッシュ、`doRedo()` は対称的に既存の `hint.undoReady` を再フラッシュ（Redo後はUndoが再び使える、という事実をそのまま流用）。両者とも既存の `_undoHintTimer` を共有再利用（新規タイマー変数なし） | `build/10-core-a.js` の `hint.redoReady` / `build/20-app.js` の `doUndo()`/`doRedo()` 末尾のフラッシュ処理 |
 | 484 | Round 483の自己レビューで発見: 新設のヒントバーフラッシュは視覚のみ（`h.textContent`）で、`srStatus`には一切反映されなかった。既存の `captureUndo()` は同じメッセージをヒントバーとsrStatusの両方に出す前例があるため、スクリーンリーダーユーザーは「元に戻しました/やり直しました」は聞こえてもRedo/Undoショートカットの存在を一切知る手段がなかった（晴眼ユーザーとの体験差）。`doUndo()`/`doRedo()` の `sr.textContent` を単一の結合メッセージ（例:「元に戻しました — Ctrl+Shift+Z → やり直す」）に変更し、ヒントバーと同じ `noExprActive` 条件で両方をゲート（表情プレビュー中は元々ヒントも出ないため、SR側も出さない一貫性を維持） | `build/20-app.js` の `doUndo()`/`doRedo()` 内 `sr.textContent = noExprActive ? ... : ...` |
 | 485 | `onParam()` に構造の似た2つの「bool切替→renderBody(false)→再フォーカス」分岐（`springOff`（旧）と`outline`（Round 473・新））があり、`springOff` 側は表示された注記（`note.springOff`/`note.quest`等）をsrStatusにも常に反映する前例が既にあったが、`outline` 側は同じ形をコピーした際にこの反映処理だけ引き継がれていなかった。晴眼ユーザーはチェックボックス直下に「アウトラインはPC限定・Quest非対応」という実用上重要な注記（`note.outline`）を見られるが、スクリーンリーダーユーザーはチェック状態の変化しか聞こえず、この互換性注意事項を一切知る手段がなかった。`params.outline`がtrueになった時（＝注記が可視化される時）にのみ`t('note.outline')`をsrStatusへ反映するよう修正（オフ時は対応するメッセージが存在しないため無反応のまま） | `build/20-app.js` の `onParam()` 内 `k==='outline'` 分岐 |
+| 486 | JSON読込の3経路（貼付・ファイル入力・ドラッグ&ドロップ）を横並び比較して発見: ドラッグ&ドロップは拡張子/MIMEチェックをサイズチェックより先に行い、非JSONファイルには常に正確な`err.loadFailed`を返す。ファイル入力（「パラメータ読込」ボタン）側にはこのチェックが皆無だった。`accept='.json,application/json'`属性はネイティブファイル選択ダイアログの単なるヒントに過ぎず、大半のOSの「すべてのファイル」オプションで簡単に回避されるため、非JSONファイルがそのまま`onchange`まで到達しうる。小さい非JSONファイルは無駄な読込+パース処理の後に失敗し、**より深刻なのは、2MB超の非JSONファイル（例: 写真）が実際にはフォーマットの問題であるにもかかわらず「ファイルが大きすぎます」と誤報される**点（Round 468が`err.loadTooLarge`を新設した趣旨「大きくても正当なファイルはありうる」の逆）。ドラッグ&ドロップと同一の拡張子/MIMEチェックをサイズチェックの前に追加して解消 | `build/20-app.js` のファイル入力 `onchange` ハンドラ |
 
 ## 3. 未対応の不足（優先順位順）
 

@@ -6651,6 +6651,27 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 486: file-input JSON load now type-checks like the drag-drop path already does ---- */
+{
+  // Three JSON-load entry points exist: paste, file-input (Load params button), and drag-drop.
+  // The drag-drop handler validates extension/MIME BEFORE the size check, so a non-JSON file
+  // gets the accurate err.loadFailed message regardless of its size. The file-input handler only
+  // had the size check — the accept='.json,application/json' attribute is just a picker UI hint
+  // that most OS "All Files" overrides bypass, so a non-JSON file could still reach onchange. A
+  // small non-JSON file wasted a read+parse round-trip before failing; worse, a LARGE non-JSON
+  // file (e.g. a photo >2MB) was misreported as "too large" when the real problem was format —
+  // exactly backwards from Round 468's intent (err.loadTooLarge exists because "a large file may
+  // be perfectly valid", i.e. format and size are orthogonal failures deserving distinct messages).
+  const fileIdx = html.indexOf("const file=el('input',{type:'file'");
+  const fileBlock = fileIdx>=0 ? html.slice(fileIdx, fileIdx+900) : '';
+  ok(/if \(!f\.name\.endsWith\('\.json'\) && f\.type!=='application\/json'\)\{ showErr\(t\('err\.loadFailed'\)\); e\.target\.value=''; return; \}/.test(fileBlock),
+    "R486: file-input onchange rejects non-JSON files with err.loadFailed, mirroring the drag-drop handler");
+  // Order matters: the type check must run BEFORE the size check, same as the drag-drop handler,
+  // so a large-and-wrong-format file gets the format error, not the size error.
+  ok(/err\.loadFailed'\)\); e\.target\.value=''; return; \}\s*\n\s*if\(f\.size>2\*1024\*1024\)/.test(fileBlock),
+    'R486: the type check runs before the size check in the file-input handler');
+}
+
 /* ---- Round 485: outline toggle now announces note.outline to screen readers, like springOff does ---- */
 {
   // onParam() has two structurally similar "toggle bool -> renderBody(false) -> refocus" branches:
