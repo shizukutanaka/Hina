@@ -2510,8 +2510,15 @@ function renderExprEditor(bd){
         'aria-label':t('a11y.numIn').replace('{label}',rowLabel), inputmode:'numeric', enterkeyhint:'done',
         onwheel:e=>e.preventDefault(),
         onchange:e=>{ captureUndo(); let n=Math.round(Number(e.target.value));
-          if (!Number.isFinite(n)) n=v;
+          // Mirrors paramRow()'s numIn _announce pattern (build/20-app.js ~line 811) — that
+          // sibling input announces out-of-range/non-numeric entry via aria-invalid+showErr();
+          // this one silently clamped with no announcement at all until this fix.
+          const _announce=(cv)=>{ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srAlert');
+            showErr(t('a11y.clamped').replace('{v}',cv));
+            setTimeout(()=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); },1500); };
+          if (!Number.isFinite(n)){ const cur=exprMix[name][morphKey]||0; _announce(cur); n=cur; }
           const clamped=M.clamp(n,0,100);
+          if (clamped!==n) _announce(clamped);
           e.target.value=String(clamped); r.value=String(clamped); r.setAttribute('aria-valuetext',String(clamped));
           applyValue(clamped); }});
       wrap.append(el('div',{class:'row'}, el('label',{'for':rid}, t('expr.'+morphKey)), r, numEl));

@@ -6653,6 +6653,28 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 488: expression-mix numeric input now announces clamped/invalid entry, like paramRow's ---- */
+{
+  // paramRow()'s detail-mode numeric input (build/20-app.js ~811) announces out-of-range/non-
+  // numeric entry via aria-invalid+aria-errormessage+showErr(a11y.clamped), auto-clearing both
+  // attributes after 1.5s. The structurally identical numeric input in renderExprEditor()
+  // (paired with each expr-mix slider) did the exact same clamp math but never announced it —
+  // a screen reader user typing "500" into a 0-100 weight field got silently corrected to 100
+  // with no indication anything happened, unlike the same-looking field in every other tab.
+  const numElIdx = html.indexOf("numEl = el('input',{type:'number', class:'num numIn'");
+  const numElBlock = numElIdx>=0 ? html.slice(numElIdx, numElIdx+1300) : '';
+  ok(/const _announce=\(cv\)=>\{ e\.target\.setAttribute\('aria-invalid','true'\); e\.target\.setAttribute\('aria-errormessage','srAlert'\);/.test(numElBlock),
+    'R488: expr-mix numEl onchange defines an _announce() helper mirroring paramRow\'s numIn pattern');
+  ok(/showErr\(t\('a11y\.clamped'\)\.replace\('\{v\}',cv\)\);/.test(numElBlock),
+    'R488: _announce() calls showErr() with the existing a11y.clamped i18n key (no new key needed)');
+  ok(/if \(!Number\.isFinite\(n\)\)\{ const cur=exprMix\[name\]\[morphKey\]\|\|0; _announce\(cur\); n=cur; \}/.test(numElBlock),
+    'R488: non-numeric entry announces and falls back to the LIVE current mix value, not a stale closured one');
+  ok(/if \(clamped!==n\) _announce\(clamped\);/.test(numElBlock),
+    'R488: out-of-range (but numeric) entry also announces the clamped value, matching paramRow');
+  ok(/setTimeout\(\(\)=>\{ e\.target\.removeAttribute\('aria-invalid'\); e\.target\.removeAttribute\('aria-errormessage'\); \},1500\);/.test(numElBlock),
+    'R488: aria-invalid/aria-errormessage are cleared 1.5s later, matching paramRow\'s lifecycle');
+}
+
 /* ---- Round 487: saveJson() restores focus after the async save dialog, like its two siblings ---- */
 {
   // doExport() and doScreenshot() both capture "was this button focused?" BEFORE disabling it
