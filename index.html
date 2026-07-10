@@ -3006,8 +3006,14 @@ async function doExport(){
   }
 }
 async function saveJson(){
-  const btn=$('btnSaveJson'); if(btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
-  const _done=()=>{ if(btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); } };
+  const btn=$('btnSaveJson');
+  // Disabling a focused control drops focus to <body> (standard browser behavior) — btn is
+  // disabled below BEFORE the async showSaveFilePicker gap even opens, so without restoring
+  // focus here, keyboard/screen-reader users land on <body> after every save attempt. doExport()
+  // and doScreenshot() already capture+restore focus around their own async gaps; this mirrors it.
+  const _wasFocused = btn && document.activeElement===btn;
+  if(btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
+  const _done=()=>{ if(btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); if(_wasFocused && btn.isConnected) btn.focus(); } };
   const fname=fnameStem()+'.hina.json';
   const bytes=new TextEncoder().encode(HINA.serialize(params,meta,exprMix));
   if (typeof window.showSaveFilePicker==='function'){ try { const h=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Hina JSON',accept:{'application/json':['.json']}}]}); const w=await h.createWritable(); await w.write(new Blob([bytes],{type:'application/json'})); await w.close(); } catch(e){ _done(); if(e.name==='AbortError') return; download(bytes,fname,'application/json'); const sr2=$('srStatus'); if(sr2) sr2.textContent=t('a11y.savedJson').replace('{name}',fname); return; } } else { download(bytes,fname,'application/json'); }

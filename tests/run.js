@@ -4649,7 +4649,8 @@ function accData(j, bin, ai){
     'a11y.savedJson key present in ja locale with {name} placeholder');
   ok(/'a11y\.savedJson':'Saved \{name\}'/.test(html),
     'a11y.savedJson key present in en locale');
-  ok(/function saveJson[\s\S]{0,900}a11y\.savedJson/.test(html),
+  // Window widened in Round 487 for the focus-restoration fix added to saveJson()
+  ok(/function saveJson[\s\S]{0,1550}a11y\.savedJson/.test(html),
     'saveJson() announces a11y.savedJson to SR live region');
 }
 
@@ -5556,8 +5557,8 @@ function accData(j, bin, ai){
   ok(/a11y\.loadedJson/.test(dropBlock),
     'drag-and-drop JSON load announces a11y.loadedJson (not savedJson) to srStatus');
 
-  // saveJson() still uses savedJson
-  ok(/saveJson[\s\S]{0,900}a11y\.savedJson/.test(html),
+  // saveJson() still uses savedJson (window widened in Round 487, see saveJson() focus fix)
+  ok(/saveJson[\s\S]{0,1550}a11y\.savedJson/.test(html),
     'saveJson() still announces a11y.savedJson (not changed to loadedJson)');
 
   // Loaded message differs from saved message in both locales
@@ -6644,11 +6645,36 @@ function accData(j, bin, ai){
   ok(/function saveJson[\s\S]{0,400}showSaveFilePicker/.test(html),
     'saveJson() uses showSaveFilePicker for direct save on Chrome/Edge (consistent with doExport)');
   // AbortError (user cancelled JSON picker) must abort silently (same pattern as doExport)
-  ok(/saveJson[\s\S]{0,750}AbortError[\s\S]{0,30}return/.test(html),
+  // Windows widened in Round 487 for the focus-restoration fix added to saveJson()
+  ok(/saveJson[\s\S]{0,1450}AbortError[\s\S]{0,30}return/.test(html),
     'saveJson() AbortError from showSaveFilePicker returns early without download or SR announce');
   // Falls back to <a download> on unsupported browsers
-  ok(/saveJson[\s\S]{0,750}download\(bytes,fname/.test(html),
+  ok(/saveJson[\s\S]{0,1450}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 487: saveJson() restores focus after the async save dialog, like its two siblings ---- */
+{
+  // doExport() and doScreenshot() both capture "was this button focused?" BEFORE disabling it
+  // (disabling a focused control drops focus to <body> per standard browser behavior) and restore
+  // it in their cleanup path. saveJson() disables btnSaveJson before its own async
+  // showSaveFilePicker gap but never captured or restored focus in ANY of its exit paths (success,
+  // user-cancelled AbortError, or a real write failure falling back to <a download>) — a WCAG
+  // 2.4.3 regression asymmetric with the two visually-identical buttons right next to it.
+  const sjIdx = html.indexOf('async function saveJson(){');
+  const sjBlock = sjIdx>=0 ? html.slice(sjIdx, sjIdx+800) : '';
+  ok(/const _wasFocused = btn && document\.activeElement===btn;/.test(sjBlock),
+    'R487: saveJson() captures _wasFocused before disabling the button, mirroring doExport/doScreenshot');
+  ok(/const _wasFocused = btn && document\.activeElement===btn;\s*\n\s*if\(btn\)\{ btn\.disabled=true;/.test(sjBlock),
+    'R487: focus is captured BEFORE btn.disabled=true (disabling would already have dropped focus otherwise)');
+  ok(/const _done=\(\)=>\{ if\(btn\)\{ btn\.disabled=false; btn\.removeAttribute\('aria-busy'\); if\(_wasFocused && btn\.isConnected\) btn\.focus\(\); \} \};/.test(sjBlock),
+    'R487: _done() restores focus when the button was focused and is still connected to the DOM');
+  // _done() is called from 2 sites but covers all 3 logical exit paths: the success/unsupported-
+  // browser fallthrough (line ~1448), and the shared catch-block call that runs before branching
+  // into AbortError-cancel vs write-failure-fallback — so this single fix covers all three without
+  // needing per-branch changes.
+  ok((html.match(/_done\(\);/g)||[]).length===2,
+    'R487: _done() (which now restores focus) is called from exactly 2 sites, covering all 3 saveJson() exit paths');
 }
 
 /* ---- Round 486: file-input JSON load now type-checks like the drag-drop path already does ---- */
@@ -7590,7 +7616,8 @@ function accData(j, bin, ai){
   // doScreenshot already use this pattern; saveJson was the only async button that didn't.
   ok(/btnSaveJson[\s\S]{0,100}saveJson/.test(html),
     'Save JSON button has id="btnSaveJson" so saveJson() can find and disable it');
-  ok(/function saveJson[\s\S]{0,100}btn\.disabled=true.*btn\.setAttribute\('aria-busy','true'\)/.test(html.replace(/\s+/g,' ')),
+  // Window widened in Round 487 for the _wasFocused capture + comment added before the disable
+  ok(/function saveJson[\s\S]{0,650}btn\.disabled=true.*btn\.setAttribute\('aria-busy','true'\)/.test(html.replace(/\s+/g,' ')),
     'saveJson() disables button and sets aria-busy before any await');
   // AbortError (user cancelled picker) must clear busy state before early return
   ok(/_done\(\); if\(e\.name==='AbortError'\)/.test(html),
