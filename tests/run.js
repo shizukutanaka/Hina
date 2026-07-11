@@ -6658,6 +6658,21 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 490: swatch/checkbox targets meet WCAG 2.2 SC 2.5.8 Target Size (Minimum), AA ---- */
+{
+  // WCAG 2.2 (Oct 2023) added SC 2.5.8 at Level AA: non-inline, non-exempt targets need a
+  // 24x24 CSS px hit area (or the 24px spacing-between-centers exception). The prior audit
+  // (FEATURE_AUDIT.md Round <478) assumed WCAG 2.1, where 24px only existed at AAA (2.5.5,
+  // 44px) — under 2.2 AA this project's stated WCAG AA goal (SPEC.md §7) now covers it.
+  ok(/\.sw\{width:24px;height:24px/.test(html),
+    'color swatch buttons (.sw) are 24x24px, meeting SC 2.5.8 without relying on the spacing exception');
+  ok(/\.row input\[type=checkbox\]\{width:24px;height:24px/.test(html),
+    'row checkboxes are 24x24px, meeting SC 2.5.8 (also fixes gacha-lock checkboxes wrapping at <24px row gap)');
+  // Regression guard: Round 473's coarse-pointer .eBtn bump to 36px must still exceed 24px
+  ok(/\.eBtn\{min-width:30px;min-height:24px/.test(html),
+    '.eBtn keeps its existing 24px min-height (already SC 2.5.8-compliant, unaffected by this round)');
+}
+
 /* ---- Round 489: sphereBand() no longer emits zero-area triangles at sphere poles ---- */
 {
   // Round 131's degenerate-triangle guard only checked for DUPLICATE VERTEX INDICES within a

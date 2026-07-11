@@ -117,7 +117,7 @@ Quest: Triangles 7.5k/10k/15k/20k ・ Bones 75/90/150/150 ・ SkinnedMesh 1/1/2/
 | 通信 | 0リクエスト（fetch/XHR/WS/беacon不使用） |
 | PII | 収集・送信・保存なし（C5）。作者名はユーザーが書出ファイルに自ら記す任意項目 |
 | 性能 | パラメータ変更→プレビュー反映 < 50ms（再生成方式）/ 書き出し < 2s |
-| アクセシビリティ | WCAG AA: フォーカス可視・コントラスト4.5:1・aria-label・reduced-motion |
+| アクセシビリティ | WCAG 2.2 AA: フォーカス可視・コントラスト4.5:1・aria-label・reduced-motion・ターゲットサイズ24px（SC 2.5.8） |
 | ブラウザ | Chrome/Edge/Firefox/Safari 最新2版 |
 
 ## 8. 制約・非対応（明示スコープ外）
