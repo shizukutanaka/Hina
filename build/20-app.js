@@ -937,6 +937,7 @@ function renderExprEditor(bd){
       const r = el('input',{id:rid, type:'range', min:0, max:100, step:1, value:v,
         'aria-label':rowLabel, 'aria-valuetext':String(v),
         onpointerdown:()=>captureUndo(),
+        onkeydown:e=>{ if(/^Arrow/.test(e.key)) captureUndo(); },
         oninput:e=>{ const n=Math.round(Number(e.target.value));
           r.setAttribute('aria-valuetext',String(n)); if(numEl) numEl.value=String(n);
           applyValue(n); }});
@@ -1184,6 +1185,7 @@ function renderOut(bd){
   const licUrlInp=el('input',{id:licUrlId, type:'url', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta.licenseUrl||'',
     ...(meta.license==='Other'?{'aria-required':'true'}:{}),
     placeholder:t('out.license.url.ph'),
+    onfocus:()=>captureUndo(),
     oninput:e=>{ e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); meta.licenseUrl=e.target.value; saveState(); },
     onblur:e=>{ if(e.target.value&&!e.target.validity.valid){ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srAlert'); showErr(t('a11y.licUrlInvalid')); } else { e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage'); } }});
   if (licUrlInp.value && !licUrlInp.validity.valid){ licUrlInp.setAttribute('aria-invalid','true'); licUrlInp.setAttribute('aria-errormessage','srAlert'); }

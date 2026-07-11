@@ -6658,6 +6658,24 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 491: two more captureUndo() gaps found by an "which spots lack it" sweep ---- */
+{
+  // The shared txt() helper (version/author/contact/reference) and the meta.title input both
+  // set onfocus:()=>captureUndo() so the pre-edit metadata state is snapshotted before the first
+  // keystroke. licUrlInp (the license URL field, shown only when license==='Other') had oninput
+  // and onblur validation but no onfocus captureUndo() — editing it as a session's first change
+  // left Ctrl+Z with nothing to undo despite a visible edit.
+  ok(/id:licUrlId, type:'url'[\s\S]{0,260}onfocus:\(\)=>captureUndo\(\)/.test(html),
+    'license URL input calls captureUndo() on focus, matching the other metadata text fields');
+  // Native <input type=range> fires 'input' directly on Arrow-key presses without any pointer
+  // event, so onpointerdown alone never captures a keyboard user's pre-edit state. paramRow()'s
+  // slider (line ~795) already has onkeydown:e=>{ if(/^Arrow/.test(e.key)) captureUndo(); ... }
+  // — the expr-mix slider only had onpointerdown, so keyboard-only/SR users adjusting a mix
+  // weight with arrow keys left no undo snapshot at all.
+  ok(/id:rid, type:'range', min:0, max:100, step:1, value:v[\s\S]{0,220}onkeydown:e=>\{ if\(\/\^Arrow\/\.test\(e\.key\)\) captureUndo\(\); \}/.test(html),
+    'expression-mix range slider calls captureUndo() on Arrow-key input, mirroring paramRow()\'s slider');
+}
+
 /* ---- Round 490: swatch/checkbox targets meet WCAG 2.2 SC 2.5.8 Target Size (Minimum), AA ---- */
 {
   // WCAG 2.2 (Oct 2023) added SC 2.5.8 at Level AA: non-inline, non-exempt targets need a
