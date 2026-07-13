@@ -6674,6 +6674,26 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 499: forced-colors outline added for .eBtn.active and .tab[aria-selected=true] ---- */
+{
+  // Same "selected among siblings, color-only" pattern Round 440 fixed for .preCard.selected
+  // (border-color + rgba background, both silently overridden by Windows High Contrast Mode).
+  // .eBtn.active (expression-preview toggle, background+color only) predates the forced-colors
+  // block entirely (Round 104 vs Round 240) and was never revisited when Round 240/440 added
+  // forced-colors accommodations to its siblings. .tab[aria-selected=true] (color+border-bottom-
+  // color only) has the identical gap since the earliest tracked commit. aria-pressed/
+  // aria-selected already cover screen readers, but sighted HCM users had no visual cue at all.
+  ok(/@media\s*\(forced-colors:active\)[\s\S]{0,1300}eBtn\.active\{outline:2px solid Highlight\}/.test(html),
+    'forced-colors block contains .eBtn.active rule so HCM users see which expression is previewed');
+  ok(/@media\s*\(forced-colors:active\)[\s\S]{0,1300}tab\[aria-selected="true"\]\{outline:2px solid Highlight/.test(html),
+    'forced-colors block contains .tab[aria-selected=true] rule so HCM users see which tab is active');
+  // #tabs has no gap between adjacent tab buttons (flex:1 0 auto with no gap property), so the
+  // tab outline must be inset (negative offset) to avoid visually bleeding into the next tab —
+  // unlike .preCard.selected/.eBtn.active, whose siblings have visible spacing.
+  ok(/tab\[aria-selected="true"\]\{outline:2px solid Highlight;outline-offset:-2px\}/.test(html),
+    'tab forced-colors outline is inset (-2px) so it does not overlap the adjacent tab button');
+}
+
 /* ---- Round 498: gacha seed input actually reaches the numIn styling rules (same bug class as 497) ---- */
 {
   // Same root cause as Round 497: .row input.numIn{...} requires a .row ancestor, but the gacha

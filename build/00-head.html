@@ -142,6 +142,16 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
   .sw{forced-color-adjust:none;outline:2px solid ButtonText}
   .rankBadge .val{forced-color-adjust:none}
   .preCard.selected{outline:2px solid Highlight}
+  /* Round 499: .eBtn.active and .tab[aria-selected=true] are the same "selected among siblings"
+     pattern as .preCard.selected above (color/background/border-color only, no other visual cue)
+     but were never given the same forced-colors treatment when this block was introduced (Round
+     240) or later extended (Round 440) — .eBtn predates the media query entirely (Round 104) and
+     was never revisited. Under Windows High Contrast Mode the author background/color/border-
+     color this state relies on is overridden, making the active expression-preview button and
+     the selected tab visually indistinguishable from their siblings for sighted HCM users
+     (aria-pressed/aria-selected already cover screen readers, but not this audience). */
+  .eBtn.active{outline:2px solid Highlight}
+  .tab[aria-selected="true"]{outline:2px solid Highlight;outline-offset:-2px}
 }
 @media print{
   #stage,#hint,#exprBar,#selftestBox,.hdr-actions,#skipLink{display:none}
