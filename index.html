@@ -2781,7 +2781,7 @@ function renderOut(bd){
   const fnPrev=el('div',{class:'limit', id:'fnPreview'});
   let _fnPrevTimer=null;
   const updateFnPrev=()=>{ const s=fnameStem(); const nxt=t('out.filename')+': '+s+'.vrm';
-    document.title='雛 — '+s;
+    updateTitle();
     if(fnPrev.textContent===nxt) return;
     fnPrev.textContent=nxt;
     clearTimeout(_fnPrevTimer);
@@ -3007,6 +3007,15 @@ function download(bytes, name, type){
 const WIN_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
 function safeName(s, fb){ let v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').slice(0,100); if (WIN_RESERVED.test(v)) v+='_'; return v||fb; }
 function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom')); }
+// Round 500: single source of truth for document.title (and the navigator.share title, which
+// wants the same string). Previously 3 uncoordinated sites raced: rebuild() (Round 33) set a
+// localized-prefix + informative-name title; applyLang() (Round 449) set a localized-but-generic
+// title on every lang/mode toggle; renderOut()'s updateFnPrev() set an informative-but-always-
+// Japanese-prefix title whenever the Output tab rendered. Depending on which tab was open and
+// which of the two later sites ran last, either the filename info or the localization was
+// silently lost — they could never both hold at once. titledStem() is always both.
+function titledStem(){ return (lang==='ja'?'雛':'Hina') + ' — ' + fnameStem(); }
+function updateTitle(){ document.title = titledStem(); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 let _glLost = false;
 const _hintDefault=()=>!GLOK?t('hint.noGL'):_glLost?t('hint.glLost'):t('hint.drag');
@@ -3118,7 +3127,7 @@ function doScreenshot(){
       };
       const sr=$('srStatus');
       if (file && navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
-        navigator.share({files:[file], title:'雛 — '+fnameStem(), text:meta.title||fnameStem()}).then(()=>{
+        navigator.share({files:[file], title:titledStem(), text:meta.title||fnameStem()}).then(()=>{
           if(sr) sr.textContent=t('a11y.screenshotShared');
         }).catch(err=>{
           // AbortError = user cancelled — silently ignore. Other errors → fallback.
@@ -3164,7 +3173,7 @@ function rebuild(){
       btns[ni].focus();
     });
   }
-  document.title='雛 — '+fnameStem();
+  updateTitle();
   updateStats();
   saveState();
 }
@@ -3174,7 +3183,7 @@ function rebuild(){
 if ($('aboutVer')) $('aboutVer').textContent = 'v' + HINA.VERSION;
 function applyLang(){
   document.documentElement.lang = lang;
-  document.title = lang==='ja' ? '雛 — VRMアバターメーカー' : 'Hina — VRM Avatar Maker';
+  updateTitle();
   const mh=$('mainH1'); if(mh) mh.setAttribute('aria-label', lang==='ja' ? '雛 VRMアバターメーカー' : 'Hina — VRM Avatar Maker');
   const bl=$('btnLang'); bl.textContent=lang==='ja'?'EN':'JA';
   bl.title=t('btn.lang.tip'); bl.setAttribute('aria-label', t('btn.lang.tip'));

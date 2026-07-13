@@ -101,7 +101,11 @@ ok(html.includes('_exportBtn') && html.includes("_exportBtn.disabled = true"), '
 ok(html.includes("_exportBtn.textContent = t('btn.exporting')"), 'export button text changes to loading label during export');
 ok(html.includes('META_DEFAULTS') && html.includes('_resetPending'), 'reset button restores meta to defaults via META_DEFAULTS (two-click pattern)');
 ok(html.includes("dataTransfer.types.includes('Files')") && html.includes("dataTransfer.files"), 'drag-and-drop JSON loading wired with file-type guard');
-ok(/document\.title\s*=.*fnameStem/.test(html), 'document.title updated in rebuild() so browser tab reflects loaded title immediately');
+// Round 500: rebuild()/applyLang()/updateFnPrev() used to set document.title independently (and
+// inconsistently — see the Round 500 test block) and are now unified behind updateTitle(), which
+// calls fnameStem() indirectly via titledStem().
+ok(/function rebuild\(\)\{[\s\S]{0,1350}updateTitle\(\);/.test(html) && /function titledStem\(\)\{[\s\S]{0,60}fnameStem\(\)/.test(html),
+  'document.title updated in rebuild() (via updateTitle()->titledStem()->fnameStem()) so the browser tab reflects loaded title immediately');
 ok(html.includes('visibilitychange') && html.includes('_rafPaused'), 'rAF loop pauses on page visibility hidden (saves CPU/battery on mobile)');
 ok((html.includes('runGacha(n)') || html.includes('runGacha(clamped)')) && (html.includes('n>=0') || html.includes('n<0')),
   'gacha seed input accepts seed 0 and validates range before calling runGacha');
@@ -6231,7 +6235,9 @@ function accData(j, bin, ai){
 
 /* ---- Round 405: Web Share payload includes avatar name in title/text for recipient context ---- */
 {
-  ok(/title:'雛 — '\+fnameStem\(\),\s*text:meta\.title\|\|fnameStem\(\)/.test(html),
+  // Round 500: the share title's hardcoded '雛 — '+fnameStem() (always Japanese prefix regardless
+  // of lang) was unified into titledStem(), the same shared helper document.title now uses.
+  ok(/title:titledStem\(\),\s*text:meta\.title\|\|fnameStem\(\)/.test(html),
     'navigator.share() includes the avatar title in its share payload (better recipient context than generic "Hina")');
 }
 
@@ -6672,6 +6678,37 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,1450}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 500: document.title unified behind a single titledStem()/updateTitle() helper ---- */
+{
+  // Milestone round — re-verified this against actual call-order tracing, not just grep hits.
+  // Three sites used to write document.title independently and raced each other:
+  //   - rebuild() (Round 33): '雛 — '+fnameStem() — informative, but always Japanese prefix
+  //   - applyLang() (Round 449): localized generic app name — loses filename/preset/seed info
+  //   - renderOut()'s updateFnPrev(): same hardcoded-Japanese-prefix issue as rebuild()
+  // Boot order is rebuild() then applyLang() (confirmed: applyLang() call follows rebuild() in
+  // source), so applyLang()'s generic title always won on load, discarding rebuild()'s title.
+  // Language/mode toggles and the 'M' shortcut call applyLang() WITHOUT rebuild(), so the
+  // filename info was lost on every toggle — unless the Output tab happened to be active, in
+  // which case applyLang()'s own renderBody() call re-triggered updateFnPrev(), which then
+  // silently re-overwrote the just-set localized title with the hardcoded-Japanese one. The two
+  // fixes (Round 33 informativeness, Round 449 localization) could never both hold at once.
+  ok(/function titledStem\(\)\{ return \(lang==='ja'\?'雛':'Hina'\) \+ ' — ' \+ fnameStem\(\); \}/.test(html),
+    'titledStem() is the single source of truth: localized prefix + informative fnameStem() suffix, always both');
+  ok(html.includes("function updateTitle(){ document.title = titledStem(); }"),
+    'updateTitle() is the only place that writes document.title');
+  // All three original write sites now go through it — count guards against a future round
+  // reintroducing a fourth uncoordinated `document.title = ` site without updating this test.
+  const directWrites = (html.match(/document\.title\s*=(?!\s*titledStem)/g) || []);
+  ok(directWrites.length === 0,
+    'no remaining direct document.title assignments outside updateTitle() (all routed through the shared helper)');
+  ok((html.match(/updateTitle\(\);/g) || []).length >= 3,
+    'updateTitle() is called from at least the 3 original sites (rebuild, applyLang, updateFnPrev)');
+  // Bonus consistency fix: the Web Share title (Round 405) had the same hardcoded-Japanese-prefix
+  // bug as rebuild()/updateFnPrev() and now shares the same helper.
+  ok(html.includes('title:titledStem(),'),
+    'navigator.share() title also uses titledStem() (was hardcoded Japanese prefix, ignored lang)');
 }
 
 /* ---- Round 499: forced-colors outline added for .eBtn.active and .tab[aria-selected=true] ---- */
@@ -7917,11 +7954,13 @@ function accData(j, bin, ai){
     '#autoSaveBadge span has no inline transition style — motion preference now takes effect');
   ok(/@media\s*\(prefers-reduced-motion:reduce\)[\s\S]{0,200}#autoSaveBadge[\s\S]{0,80}transition:none/.test(html),
     '#autoSaveBadge is listed in prefers-reduced-motion:reduce rule with transition:none');
-  // document.title update in applyLang() so bookmarks/AT reflect language
-  ok(/function applyLang[\s\S]{0,130}Hina.*VRM Avatar Maker/.test(html),
-    'applyLang() sets document.title to English title when lang is en');
-  ok(/function applyLang[\s\S]{0,110}VRMアバターメーカー/.test(html),
-    'applyLang() sets document.title to Japanese title when lang is ja');
+  // document.title update in applyLang() so bookmarks/AT reflect language. Round 500: the
+  // hardcoded generic-title ternary here used to fight with rebuild()'s and updateFnPrev()'s own
+  // document.title writes (whichever ran last silently discarded the other's language or
+  // filename info). Unified behind updateTitle()/titledStem(), which is always both localized
+  // (reads the live `lang`) and informative (embeds fnameStem()) — see the Round 500 test block.
+  ok(/function applyLang\(\)\{[\s\S]{0,80}updateTitle\(\);/.test(html),
+    "applyLang() sets document.title via the shared updateTitle() helper, not an inline generic-title ternary");
 }
 
 /* ---- Round 448: focus restoration after async clipboard ops — matches doExport/doScreenshot pattern ---- */
