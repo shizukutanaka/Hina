@@ -6680,6 +6680,25 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 501: #skipLink included in the About dialog's inert background scope ---- */
+{
+  // #skipLink is a real focusable <a href> and a sibling of <header>/<main> in body order (not a
+  // descendant of either), so Round 411's _dlgBg() — which only enumerated header+main — left it
+  // fully reachable by an AT virtual cursor while the About dialog was open, exactly the failure
+  // mode inert was added to prevent (Round 411: "screen readers can browse behind aria-modal
+  // dialogs on some AT/browser combinations"). Activating it while the dialog is open would move
+  // focus to #tabBody, behind the modal.
+  ok(/_dlgBg\s*=\s*\(\)\s*=>\{[\s\S]{0,40}\$\('skipLink'\)/.test(html),
+    "_dlgBg() includes $('skipLink') alongside header+main, closing the AT-browse-behind-dialog gap");
+  // Regression guard: the Round 411 shape (openAbout sets inert=true before showModal, close
+  // handler sets inert=false) must still hold — _dlgBg() returning a 3rd element doesn't change
+  // how openAbout()/close iterate the array.
+  ok(/openAbout=\(\)=>\{[\s\S]{0,60}_dlgBg\(\)\.forEach\(el=>\{[\s\S]{0,20}el\.inert=true[\s\S]{0,10}\}\)[\s\S]{0,80}showModal/.test(html),
+    'openAbout() still marks every _dlgBg() element inert before showModal()');
+  ok(/_dlgBg\(\)\.forEach\(el=>\{[^}]*el\.inert=false/.test(html),
+    'dialog close handler still restores every _dlgBg() element');
+}
+
 /* ---- Round 500: document.title unified behind a single titledStem()/updateTitle() helper ---- */
 {
   // Milestone round — re-verified this against actual call-order tracing, not just grep hits.

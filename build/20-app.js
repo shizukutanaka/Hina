@@ -1612,7 +1612,14 @@ $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveStat
 $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; saveState(); applyLang(); const sr=$('srStatus'); if(sr) sr.textContent=mode==='easy'?t('mode.easy.tip'):t('mode.detail.tip'); });
 $('btnScreenshot').addEventListener('click', doScreenshot);
 let _dlgReturnFocus = null;
-const _dlgBg = ()=>{ const h=document.querySelector('header'), m=document.querySelector('main'); return h&&m?[h,m]:[]; };
+// Round 501: #skipLink is a real focusable <a href> sibling of <header>/<main> (not a descendant
+// of either — see build/00-head.html body order), so it was left out of the inert scope entirely.
+// Round 411's own rationale for inert ("screen readers can browse behind aria-modal dialogs on
+// some AT/browser combos") applies to it exactly the same as header/main: off-screen via
+// position:fixed;top:-4rem is not display:none/aria-hidden/inert, so it stayed reachable by an
+// AT virtual cursor while the About dialog was modal, and activating it (href="#tabBody") would
+// move focus behind the open dialog — defeating the modal boundary this feature exists to enforce.
+const _dlgBg = ()=>{ const sl=$('skipLink'), h=document.querySelector('header'), m=document.querySelector('main'); return (sl&&h&&m)?[sl,h,m]:[]; };
 const openAbout=()=>{ _dlgReturnFocus=document.activeElement; _dlgBg().forEach(el=>{ el.inert=true; }); $('btnAbout').setAttribute('aria-expanded','true'); $('aboutDlg').showModal(); };
 $('btnAbout').addEventListener('click', openAbout);
 $('aboutClose').addEventListener('click',()=>$('aboutDlg').close());
