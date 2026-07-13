@@ -366,19 +366,29 @@ function rank(stats, platform){
 }
 
 /* ---------- serialization ---------- */
-function serialize(p, meta){ return JSON.stringify({app:'hina', version:VERSION, params:p, meta:meta||{}}, null, 1); }
 // Whitelist of meta keys mirrors the app's META_DEFAULTS shape — every value is a string.
 // A raw Object.assign(meta, j.meta) would let pasted/loaded JSON carry a "__proto__" key that,
 // via [[Set]] during the merge, reassigns the meta object's own prototype (Annex B legacy accessor).
 // Building a fresh object from a fixed key list — never indexed by attacker-supplied key names —
 // makes that impossible, matching the whitelist approach sanitize() already uses for params.
 const META_KEYS = ['title','version','author','contact','reference','allowed','violent','sexual','commercial','license','licenseUrl'];
+// Single source of truth for the enum-typed meta fields. The UI <select>s and exportVRM()'s
+// pick() guard both reference these lists, so option lists, load-time validation, and
+// export-time fallback can never drift apart. Values are the VRM 0.x meta vocabulary.
+const META_ENUMS = {
+  allowed: ['OnlyAuthor','ExplicitlyLicensedPerson','Everyone'],
+  violent: ['Disallow','Allow'], sexual: ['Disallow','Allow'], commercial: ['Disallow','Allow'],
+  license: ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
+};
 function sanitizeMeta(m){
   const o = {};
   if (!m || typeof m!=='object') return o;
   for (const k of META_KEYS){
     const v = m[k];
-    if (typeof v==='string') o[k]=v;
+    // Enum-typed fields additionally require a whitelisted value (mirrors sanitize()'s
+    // s.opts.includes(v) check for enum PARAMS). An invalid value drops the key entirely —
+    // same semantics as a missing key, so the merge target keeps its current valid value.
+    if (typeof v==='string' && (!META_ENUMS[k] || META_ENUMS[k].includes(v))) o[k]=v;
   }
   return o;
 }
@@ -410,7 +420,10 @@ function sanitizeExprMix(x){
   }
   return o;
 }
-function serialize(p, meta, exprMix){ return JSON.stringify({app:'hina', version:VERSION, params:p, meta:meta||{}, exprMix:sanitizeExprMix(exprMix)}, null, 1); }
+// meta gets the same defense-in-depth sanitizeMeta() applies on load — exprMix already did
+// (sanitizeExprMix below); before this, a meta value corrupted in memory was written back out
+// verbatim even though the UI <select> could no longer display it.
+function serialize(p, meta, exprMix){ return JSON.stringify({app:'hina', version:VERSION, params:p, meta:sanitizeMeta(meta), exprMix:sanitizeExprMix(exprMix)}, null, 1); }
 function deserialize(text){
   // Strip UTF-8 BOM (U+FEFF) — common when JSON is edited in Notepad on Windows;
   // JSON.parse does not treat BOM as whitespace and would throw SyntaxError.

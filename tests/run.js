@@ -6658,6 +6658,37 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 492: sanitizeMeta() validates enum-typed meta values (mirrors sanitize()'s enum check) ---- */
+{
+  // Round 469 whitelisted meta KEYS but never checked enum VALUES: allowed/violent/sexual/
+  // commercial/license accepted any string. sanitize() has validated enum PARAMS against
+  // s.opts since the beginning, and exportVRM() has its own pick() fallback — only the
+  // load/save layer let garbage through, so a hand-edited JSON's invalid license survived
+  // load→resave cycles while the UI <select> silently displayed something else.
+  ok(!!H.META_ENUMS && Array.isArray(H.META_ENUMS.license) && H.META_ENUMS.license.includes('CC0'),
+    'META_ENUMS exported with the license whitelist');
+  // Behavioral: invalid enum values are dropped (key absent — same semantics as a missing key)
+  const tampered = H.deserialize(H.serialize(H.defaults(),
+    {allowed:'NotARealEnumValue', violent:'Maybe', sexual:'Disallow', license:'NotARealLicense', title:'x'},
+    H.defaultExprMix()));
+  ok(!('allowed' in tampered.meta) && !('violent' in tampered.meta) && !('license' in tampered.meta),
+    'serialize→deserialize drops invalid enum meta values (defense on both write and read)');
+  ok(tampered.meta.sexual==='Disallow' && tampered.meta.title==='x',
+    'valid enum values and free-text meta fields still pass through unchanged');
+  // deserialize alone (attacker-controlled JSON, bypassing serialize) must also reject them
+  const direct = H.deserialize('{"app":"hina","meta":{"license":"garbage","commercial":"Allow"}}');
+  ok(!('license' in direct.meta) && direct.meta.commercial==='Allow',
+    'deserialize drops invalid enum meta values from hand-crafted JSON');
+  // Single source of truth: UI <select>s and exportVRM()'s pick() reference META_ENUMS, and the
+  // Round 479 leftover duplicate serialize() declaration (shadowed, dead) is gone.
+  ok(/selRow\('out\.allowed','allowed',HINA\.META_ENUMS\.allowed/.test(html),
+    'UI metadata selects build their options from HINA.META_ENUMS (no drift possible)');
+  ok(/pick\(meta\.allowed,META_ENUMS\.allowed/.test(html),
+    "exportVRM()'s pick() guard references META_ENUMS instead of an inline copy");
+  ok((html.match(/function serialize\(/g)||[]).length === 1,
+    'exactly one serialize() declaration (Round 479 dead duplicate removed)');
+}
+
 /* ---- Round 491: two more captureUndo() gaps found by an "which spots lack it" sweep ---- */
 {
   // The shared txt() helper (version/author/contact/reference) and the meta.title input both

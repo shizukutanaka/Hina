@@ -1176,10 +1176,10 @@ function renderOut(bd){
       tp?t(tp+'.'+o):o));
     bd.append(el('div',{class:'row'}, el('label',{'for':id},t(key)), sel));
   };
-  selRow('out.allowed','allowed',['OnlyAuthor','ExplicitlyLicensedPerson','Everyone'],'allowed');
-  selRow('out.violent','violent',['Disallow','Allow'],'usage');
-  selRow('out.sexual','sexual',['Disallow','Allow'],'usage');
-  selRow('out.commercial','commercial',['Disallow','Allow'],'usage');
+  selRow('out.allowed','allowed',HINA.META_ENUMS.allowed,'allowed');
+  selRow('out.violent','violent',HINA.META_ENUMS.violent,'usage');
+  selRow('out.sexual','sexual',HINA.META_ENUMS.sexual,'usage');
+  selRow('out.commercial','commercial',HINA.META_ENUMS.commercial,'usage');
   const licUrlId='meta-licenseUrl';
   const licUrlRow=el('div',{class:'row', style: meta.license==='Other' ? '' : 'display:none'});
   const licUrlInp=el('input',{id:licUrlId, type:'url', maxlength:'256', autocomplete:'off', spellcheck:'false', autocorrect:'off', autocapitalize:'none', enterkeyhint:'done', value:meta.licenseUrl||'',
@@ -1191,7 +1191,7 @@ function renderOut(bd){
   if (licUrlInp.value && !licUrlInp.validity.valid){ licUrlInp.setAttribute('aria-invalid','true'); licUrlInp.setAttribute('aria-errormessage','srAlert'); }
   licUrlRow.append(el('label',{'for':licUrlId}, t('out.license.url')), licUrlInp);
   selRow('out.license','license',
-    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
+    HINA.META_ENUMS.license,
     'license', v=>{
       const focusWasInUrl = licUrlRow.contains(document.activeElement);
       licUrlRow.style.display=v==='Other'?'':'none';

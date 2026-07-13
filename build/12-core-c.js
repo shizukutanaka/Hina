@@ -146,15 +146,13 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
     contactInformation: str(meta.contact,''),
     reference: str(meta.reference,''),
     texture: metaTexture,
-    allowedUserName: pick(meta.allowed,['OnlyAuthor','ExplicitlyLicensedPerson','Everyone'],'OnlyAuthor'),
-    violentUssageName: pick(meta.violent,['Disallow','Allow'],'Disallow'),
-    sexualUssageName: pick(meta.sexual,['Disallow','Allow'],'Disallow'),
-    commercialUssageName: pick(meta.commercial,['Disallow','Allow'],'Disallow'),
+    allowedUserName: pick(meta.allowed,META_ENUMS.allowed,'OnlyAuthor'),
+    violentUssageName: pick(meta.violent,META_ENUMS.violent,'Disallow'),
+    sexualUssageName: pick(meta.sexual,META_ENUMS.sexual,'Disallow'),
+    commercialUssageName: pick(meta.commercial,META_ENUMS.commercial,'Disallow'),
     otherPermissionUrl: '',
   };
-  vrmMeta.licenseName = pick(meta.license,
-    ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'],
-    'Redistribution_Prohibited');
+  vrmMeta.licenseName = pick(meta.license, META_ENUMS.license, 'Redistribution_Prohibited');
   vrmMeta.otherLicenseUrl = vrmMeta.licenseName==='Other' ? str(meta.licenseUrl,'') : '';
 
   const humanBones = HB.map(hb=>({bone:hb, node:nodeOf(build.humanoid[hb]), useDefaultValues:true}));
@@ -400,7 +398,7 @@ return {
   PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams,
   I18N, TEX, ATLAS, uvBlock, uvRect,
   RANKS, RANK_NAMES, estimate, rank,
-  serialize, deserialize, PNG1, b64ToBytes,
+  serialize, deserialize, META_ENUMS, PNG1, b64ToBytes,
   EXPR_EDITABLE, EXPR_INGREDIENTS, defaultExprMix, sanitizeExprMix,
   HB, buildSkeleton, buildAvatar, BinWriter, exportVRM, selfTest,
 };
