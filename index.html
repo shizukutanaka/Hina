@@ -66,7 +66,11 @@ input.numIn:hover{border-color:var(--accent)}
 .row:focus-within{background:rgba(0,196,204,.04);border-radius:6px}
 .row:has([aria-invalid="true"]){background:rgba(224,90,90,.06);border-radius:6px}
 .limit{display:block;font-size:10px;color:var(--text-faint);margin-top:3px;line-height:1.4}
-.row select,.row input[type=text]{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font:inherit;font-size:12px}
+/* Round 502: was .row input[type=text] only, so it silently stopped matching licUrlInp when
+   Round 433 changed that field from type='text' to type='url' (for the native URL keyboard/
+   validity API) — the only input[type=url] in the app, always .row-wrapped (licUrlRow), so
+   adding it here is safe and covers it uniformly with its sibling text fields. */
+.row select,.row input[type=text],.row input[type=url]{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font:inherit;font-size:12px}
 input::placeholder{color:var(--text-dim);opacity:1}
 .row input[type=color]{flex:0 0 40px;height:28px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);padding:2px;cursor:pointer}
 .row .swatches{display:flex;gap:5px;flex-wrap:wrap;flex:1}
@@ -126,8 +130,9 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
   #panel{width:100%;flex:1;border-left:none;border-top:1px solid var(--line)}
   /* iOS Safari auto-zooms focused inputs whose font-size is below 16px and does not zoom back.
      Bumping touch-device inputs to 16px keeps the layout viewport unchanged on focus.
-     input.numIn is unscoped (Round 498) so this still reaches the .row-less gacha seed input. */
-  .row select,.row input[type=text],input.numIn{font-size:16px}
+     input.numIn is unscoped (Round 498) so this still reaches the .row-less gacha seed input.
+     input[type=url] added (Round 502) so the license-URL field gets the same anti-zoom bump. */
+  .row select,.row input[type=text],.row input[type=url],input.numIn{font-size:16px}
 }
 #skipLink{transition:top .1s}
 #skipLink:focus-visible{top:8px}

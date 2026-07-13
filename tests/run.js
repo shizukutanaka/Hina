@@ -6213,10 +6213,11 @@ function accData(j, bin, ai){
 
 /* ---- Round 407: mobile inputs use 16px font-size to prevent iOS Safari auto-zoom on focus ---- */
 {
-  // Media query bumps select/text/numIn font-size to 16px so iOS does not zoom in on focus.
+  // Media query bumps select/text/url/numIn font-size to 16px so iOS does not zoom in on focus.
   // Pattern: the rule lives inside the existing (max-width:760px) media block.
   // Round 498 un-scoped the numIn portion from .row (select/text stay .row-scoped, unaffected).
-  ok(/@media \(max-width:760px\)\{[\s\S]{0,550}\.row select,\.row input\[type=text\],input\.numIn\{font-size:16px\}/.test(html),
+  // Round 502 added .row input[type=url] (the license-URL field) to the same rule.
+  ok(/@media \(max-width:760px\)\{[\s\S]{0,600}\.row select,\.row input\[type=text\],\.row input\[type=url\],input\.numIn\{font-size:16px\}/.test(html),
     'mobile media block (≤760px) sets input font-size to 16px so iOS Safari does not auto-zoom on focus');
 }
 
@@ -6680,6 +6681,25 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 502: .row input[type=url] (license-URL field) reaches the text-input styling rules ---- */
+{
+  // Same "hollow verification" class as Round 497/498/501: .row select,.row input[type=text]
+  // assumed every text-entry input in a .row has type=text, but Round 433 changed licUrlInp
+  // (the license URL field) from type='text' to type='url' for the native URL keyboard/validity
+  // API. Neither the base styling rule nor the mobile anti-zoom rule was updated, so licUrlInp
+  // silently lost its themed background/border/padding/font-size and — on touch devices — the
+  // 16px anti-zoom bump (the same iOS Safari auto-zoom class of regression Round 407/498 fixed
+  // elsewhere), for the entire 464-501 audit series despite many other rounds touching this field.
+  const urlIdx = html.indexOf("const licUrlInp=el('input',{id:licUrlId, type:'url'");
+  ok(urlIdx>=0, 'license-URL input (licUrlInp) construction found in source');
+  ok(html.includes("const licUrlRow=el('div',{class:'row',"),
+    'licUrlRow genuinely has class:\'row\' (confirms licUrlInp is a .row descendant, so un-scoping was never required — only the [type=url] selector was missing)');
+  ok(/\.row select,\.row input\[type=text\],\.row input\[type=url\]\{flex:1;background:var\(--surface2\)/.test(html),
+    'base text-input styling rule now includes .row input[type=url]');
+  ok(/\.row select,\.row input\[type=text\],\.row input\[type=url\],input\.numIn\{font-size:16px\}/.test(html),
+    'mobile anti-zoom rule now includes .row input[type=url]');
+}
+
 /* ---- Round 501: #skipLink included in the About dialog's inert background scope ---- */
 {
   // #skipLink is a real focusable <a href> and a sibling of <header>/<main> in body order (not a
@@ -6773,8 +6793,8 @@ function accData(j, bin, ai){
     'input.numIn spin-button-hide rule is NOT .row-scoped');
   ok(/(?<!\.row )input\.numIn:hover\{border-color:var\(--accent\)\}/.test(html),
     'input.numIn :hover rule is NOT .row-scoped');
-  ok(/\.row select,\.row input\[type=text\],input\.numIn\{font-size:16px\}/.test(html),
-    'mobile 16px anti-zoom rule keeps select/text .row-scoped but numIn un-scoped (only numIn had the gap)');
+  ok(/\.row select,\.row input\[type=text\],\.row input\[type=url\],input\.numIn\{font-size:16px\}/.test(html),
+    'mobile 16px anti-zoom rule keeps select/text/url .row-scoped but numIn un-scoped (only numIn had the gap)');
   // Regression guard: the two already-.row-wrapped numIn siblings must remain unaffected.
   ok(html.includes("return el('div',{class:'row'}, el('label',{'for':pid},label), r, valEl);"),
     "paramRow()'s numIn (valEl) remains .row-wrapped (still covered, unscoping only widens the rule)");
