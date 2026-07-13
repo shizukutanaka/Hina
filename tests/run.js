@@ -6211,7 +6211,8 @@ function accData(j, bin, ai){
 {
   // Media query bumps select/text/numIn font-size to 16px so iOS does not zoom in on focus.
   // Pattern: the rule lives inside the existing (max-width:760px) media block.
-  ok(/@media \(max-width:760px\)\{[\s\S]{0,400}\.row select,\.row input\[type=text\],\.row input\.numIn\{font-size:16px\}/.test(html),
+  // Round 498 un-scoped the numIn portion from .row (select/text stay .row-scoped, unaffected).
+  ok(/@media \(max-width:760px\)\{[\s\S]{0,550}\.row select,\.row input\[type=text\],input\.numIn\{font-size:16px\}/.test(html),
     'mobile media block (≤760px) sets input font-size to 16px so iOS Safari does not auto-zoom on focus');
 }
 
@@ -6671,6 +6672,38 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,1450}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 498: gacha seed input actually reaches the numIn styling rules (same bug class as 497) ---- */
+{
+  // Same root cause as Round 497: .row input.numIn{...} requires a .row ancestor, but the gacha
+  // seed <input class="num numIn"> (seedIn, appended to seedRow -> gDiv -> #tabBody) has no
+  // .row anywhere in its ancestor chain — unlike the other 2 numIn instances (paramRow()'s
+  // valEl, renderExprEditor()'s numEl), both of which ARE wrapped in el('div',{class:'row'},...).
+  // Without this fix seedIn rendered as an unstyled native number input: no themed background/
+  // border/height, native spinner arrows visible (unlike every sibling numIn, Round 251), no
+  // :hover accent border, and no 16px mobile font bump (so iOS Safari's auto-zoom-on-focus,
+  // which that rule exists to prevent, still fired for this one field on touch devices).
+  const seedIdx = html.indexOf("const seedIn=el('input',{type:'number',class:'num numIn'");
+  ok(seedIdx>=0, 'gacha seed input (seedIn) construction found in source');
+  const seedRowIdx = html.lastIndexOf("const seedRow=el('div',{style:", seedIdx);
+  const chunk = html.slice(seedRowIdx, seedIdx+50);
+  ok(seedRowIdx>=0 && !/class:'row'/.test(chunk),
+    "seedRow/gDiv genuinely have no class:'row' (confirms this was a real, not hypothetical, gap)");
+  // The fix: numIn rules are no longer .row-scoped, so they reach seedIn with no markup change.
+  ok(/(?<!\.row )input\.numIn\{font-size:11px;background:var\(--surface2\)/.test(html),
+    'input.numIn base style rule is NOT .row-scoped, so it reaches the gacha seed input');
+  ok(/(?<!\.row )input\.numIn::-webkit-inner-spin-button/.test(html),
+    'input.numIn spin-button-hide rule is NOT .row-scoped');
+  ok(/(?<!\.row )input\.numIn:hover\{border-color:var\(--accent\)\}/.test(html),
+    'input.numIn :hover rule is NOT .row-scoped');
+  ok(/\.row select,\.row input\[type=text\],input\.numIn\{font-size:16px\}/.test(html),
+    'mobile 16px anti-zoom rule keeps select/text .row-scoped but numIn un-scoped (only numIn had the gap)');
+  // Regression guard: the two already-.row-wrapped numIn siblings must remain unaffected.
+  ok(html.includes("return el('div',{class:'row'}, el('label',{'for':pid},label), r, valEl);"),
+    "paramRow()'s numIn (valEl) remains .row-wrapped (still covered, unscoping only widens the rule)");
+  ok(/wrap\.append\(el\('div',\{class:'row'\}, el\('label',\{'for':rid\}, t\('expr\.'\+morphKey\)\), r, numEl\)\);/.test(html),
+    "renderExprEditor()'s numIn (numEl) remains .row-wrapped (still covered, unscoping only widens the rule)");
 }
 
 /* ---- Round 497: gacha-lock checkboxes actually reach the 24px WCAG 2.2 SC 2.5.8 rule ---- */

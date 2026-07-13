@@ -5,8 +5,8 @@
 この文書は、AIコーディングセッション（コミット履歴上「Round 464」〜「Round 477」と呼ぶ14回の改善サイクル）で実施した機能監査の結果を、**前提知識のない後続セッションが読んで作業を引き継げる形**で記録したものである。Round 479 で §3-1 の表情エディタ、Round 481 で複数段Undo/Redoを実装したため、両項目を §2 へ移動済み。Round 490 で §5-8（当時「対応不要」と判定したチェックボックスのタッチターゲット）が WCAG 2.2 の新設基準により再判定・対応済みとなったため、同項目も §2 へ移動済み。
 
 - 「Round N」はコミットメッセージ先頭の通し番号。`git log --oneline` で対応コミットを特定できる
-- 本文書更新時点のテスト数は **1948 passed / 0 failed**（`node tests/run.js`）
-- 次に新しい変更を行う場合の通し番号は **Round 498**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加、Round 494 = RANKSテーブルにRaycastsカテゴリ追加（外部一次ソース照合で発見）、Round 495 = loadState()のmetaマージがsanitizeMeta()を経由していなかったprototype pollution修正、Round 496 = スライダーのHome/End/PageUp/PageDownがcaptureUndo()を呼んでいなかった不具合修正、Round 497 = Round 490の.rowスコープ付きチェックボックスCSSがガチャロックに一度も適用されていなかった不具合の訂正）
+- 本文書更新時点のテスト数は **1956 passed / 0 failed**（`node tests/run.js`）
+- 次に新しい変更を行う場合の通し番号は **Round 499**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加、Round 494 = RANKSテーブルにRaycastsカテゴリ追加（外部一次ソース照合で発見）、Round 495 = loadState()のmetaマージがsanitizeMeta()を経由していなかったprototype pollution修正、Round 496 = スライダーのHome/End/PageUp/PageDownがcaptureUndo()を呼んでいなかった不具合修正、Round 497 = Round 490の.rowスコープ付きチェックボックスCSSがガチャロックに一度も適用されていなかった不具合の訂正、Round 498 = 同根の.rowスコープ付きnumIn CSSがガチャシード入力に一度も適用されていなかった不具合修正）
 
 ## 1. プロダクト概要と交渉不可制約
 
@@ -75,6 +75,15 @@
 | ~~490~~→497 | **訂正**: Round 490の「ガチャロックのチェックボックスも24×24pxへ拡大した」という記述は誤りだった。修正したCSSルール`.row input[type=checkbox]`は`.row`クラスを持つ祖先が必要な子孫セレクタだが、`lockWrap`/各`<label>`（`build/20-app.js`のガチャロックUI）は`style:`属性のみで`class:'row'`を一度も持たない（`el()`ヘルパーは`class`キーを明示的に渡した時だけ`className`を設定する実装のため）。つまりこのルールはRound 476の実装当初から**一度もガチャロックの5個のチェックボックスに適用されたことがなく**、Round 490時点でも18pxではなくブラウザ既定サイズ（多くの環境で13-16px程度）のまま出荷され続けていた。当時のRound 490テストも「CSSルールのテキストがファイル中に存在するか」しか検査しておらず、実際にこの対象マークアップへ適用されるかは未検証（Round 496のstale-literal発見と同種の「検証していない主張」型の空検証）。修正: `.row`スコープを外し`input[type=checkbox]{width:24px;height:24px;...}`へ変更（アプリ全体でチェックボックスはこの2箇所のみと確認済みのため、スコープを外しても安全）。テストもマークアップ実体（`lockWrap`が`class:'row'`を持たないこと自体・ルールが`.row`プレフィックス無しであること）を直接検証する形に強化 | `build/00-head.html` の `input[type=checkbox]` |
 
 補足: エラー系アナウンスは `showErr(msg)` に統一されている（hint バー赤表示 + srStatus + srAlert への rAF 経由書き込み + 5.5秒後クリア）。エラー経路で `srStatus` に直接書くのは既存方針に反する。
+
+### CSSセレクタスコープの不整合（2件・Round 497, 498）
+
+本セッションで新たに発見したバグの型: `build/00-head.html` の一部CSSルールが `.row 子孫` のような祖先クラス依存の子孫セレクタで書かれているが、`build/20-app.js` 側の対象マークアップが実際には一度もその祖先クラスを持ったことがなく、ルールが**構文上有効なまま一度も対象要素に適用されていない**というパターン。`el()` ヘルパーは `class` キーを明示的に渡した時だけ `className` を設定する実装のため、見た目上は「対応するCSSルールがある」ように見えて実際には無関係、という静的検査でしか見つからない類のバグ。旧テストはCSSルールの**文字列がファイル中に存在するか**しか検査しておらず、対象マークアップへの到達性は未検証だった（空検証）。
+
+| Round | 内容 | アンカー |
+|-------|------|---------|
+| 497 | `.row input[type=checkbox]`（Round 490）がガチャロックの5個のチェックボックスに一度も適用されていなかった。詳細は上表「アクセシビリティ」Round 497行参照 | `build/00-head.html` の `input[type=checkbox]` |
+| 498 | Round 497と同根: `.row input.numIn`（基本スタイル・スピンボタン非表示・hover・iOS自動ズーム防止の計4ルール）はガチャシード入力（`seedIn`、`build/20-app.js`）に一度も適用されていなかった。`seedIn`の祖先チェーン（`seedRow`→`gDiv`→`#tabBody`）はどこにも`class:'row'`を持たない一方、他の2つの`numIn`インスタンス（`paramRow()`の`valEl`・`renderExprEditor()`の`numEl`）はいずれも`.row`でラップ済み。実害: シード欄だけ非テーマ背景・枠なし・高さ不揃いの素のnumber inputとして表示され、スピンボタンも他の全numIn欄（Round 251で非表示化済み）と異なり表示されたまま、hoverでのアクセントボーダーも出ず、モバイルではiOS Safariのフォーカス時自動ズーム防止（16px指定、Round 407）も効かない。記録上追跡可能な最古のcommit（`19b5901`）時点で既にこの不整合が存在しており、後発の回帰ではなく実装当初からの不具合。修正: `.numIn`関連4ルール全てを`.row`スコープから外す（`numIn`はこの3箇所にしか使われないため安全）。テストもマークアップ実体（`seedRow`が`class:'row'`を持たないこと自体）を直接検証する形に強化 | `build/00-head.html` の `input.numIn` |
 
 ### 機能追加（14件）
 
