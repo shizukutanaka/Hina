@@ -424,7 +424,7 @@ const I18N = {
     'enum.bangs.full':'フル','enum.bangs.see':'シースルー','enum.bangs.center':'センター分け',
     'enum.outfit.onepiece':'ワンピース','enum.outfit.sailor':'セーラー','enum.outfit.shirts':'シャツ','enum.outfit.hoodie':'パーカー',
     'enum.sleeves.long':'長袖','enum.sleeves.short':'半袖',
-    'cat.tris':'三角形','cat.bones':'ボーン','cat.skinned':'スキンメッシュ','cat.mesh':'メッシュ','cat.mat':'マテリアル','cat.pbComp':'揺れ物部品','cat.pbTrans':'揺れ物ボーン','cat.pbCol':'コライダ','cat.pbCheck':'衝突判定','cat.texMB':'テクスチャ',
+    'cat.tris':'三角形','cat.bones':'ボーン','cat.skinned':'スキンメッシュ','cat.mesh':'メッシュ','cat.mat':'マテリアル','cat.pbComp':'揺れ物部品','cat.pbTrans':'揺れ物ボーン','cat.pbCol':'コライダ','cat.pbCheck':'衝突判定','cat.texMB':'テクスチャ','cat.raycasts':'レイキャスト',
     'st.vrm':'VRMサイズ推定',
     'note.upload':'VRChatへは Unity + VRM Converter for VRChat 経由でアップロード。以下の手順を参照。',
     'expr.neutral':'ニュートラル','expr.a':'あ','expr.i':'い','expr.u':'う','expr.e':'え','expr.o':'お',
@@ -480,7 +480,7 @@ const I18N = {
     'enum.bangs.full':'Full','enum.bangs.see':'See-through','enum.bangs.center':'Center part',
     'enum.outfit.onepiece':'One-piece','enum.outfit.sailor':'Sailor','enum.outfit.shirts':'Shirt','enum.outfit.hoodie':'Hoodie',
     'enum.sleeves.long':'Long','enum.sleeves.short':'Short',
-    'cat.tris':'Triangles','cat.bones':'Bones','cat.skinned':'Skinned meshes','cat.mesh':'Meshes','cat.mat':'Materials','cat.pbComp':'PhysBones','cat.pbTrans':'PB transforms','cat.pbCol':'Colliders','cat.pbCheck':'Collision checks','cat.texMB':'Texture memory',
+    'cat.tris':'Triangles','cat.bones':'Bones','cat.skinned':'Skinned meshes','cat.mesh':'Meshes','cat.mat':'Materials','cat.pbComp':'PhysBones','cat.pbTrans':'PB transforms','cat.pbCol':'Colliders','cat.pbCheck':'Collision checks','cat.texMB':'Texture memory','cat.raycasts':'Raycasts',
     'st.vrm':'VRM size est.',
     'note.upload':'Upload to VRChat via Unity + VRM Converter for VRChat. Follow the steps below.',
     'expr.neutral':'Neutral','expr.a':'A','expr.i':'I','expr.u':'U','expr.e':'E','expr.o':'O',
@@ -507,17 +507,21 @@ const uvBlock = name => { const b=ATLAS[name]; const u=(b[0]+32)/TEX, v=(b[1]+32
 const uvRect  = name => { const r=ATLAS[name]; return [r[0]/TEX, r[1]/TEX, r[2]/TEX, r[3]/TEX]; };
 
 /* ---------- VRChat Performance Rank tables ----------
-   Source: creators.vrchat.com "Performance Ranks" (2026-04-21). [E,G,M,P]; above P = Very Poor. */
+   Source: creators.vrchat.com "Performance Ranks" (2026-04-21). [E,G,M,P]; above P = Very Poor.
+   raycasts added Round 494: a "Raycasts" category was added to the upstream table in the same
+   2026-04-21 sync (VRChat 2026.2.1) but was missing here. Hina never emits VRC Raycast
+   components, so estimate() always reports 0 — this can never be the limiting factor for any
+   preset, but the table is pinned to match the source exactly per CLAUDE.md's update rule. */
 const RANKS = {
   pc: {
     tris:[32000,70000,70000,70000], bones:[75,150,256,400], skinned:[1,2,8,16], mesh:[4,8,16,24],
     mat:[4,8,16,32], pbComp:[4,8,16,32], pbTrans:[16,64,128,256], pbCol:[4,8,16,32], pbCheck:[32,128,256,512],
-    texMB:[40,75,110,150],
+    texMB:[40,75,110,150], raycasts:[1,4,8,15],
   },
   quest: {
     tris:[7500,10000,15000,20000], bones:[75,90,150,150], skinned:[1,1,2,2], mesh:[1,1,2,2],
     mat:[1,1,2,4], pbComp:[0,4,6,8], pbTrans:[0,16,32,64], pbCol:[0,4,8,16], pbCheck:[0,16,32,64],
-    texMB:[10,18,25,40],
+    texMB:[10,18,25,40], raycasts:[1,2,4,8],
   }
 };
 const RANK_NAMES = ['Excellent','Good','Medium','Poor','VeryPoor'];
@@ -537,6 +541,7 @@ function estimate(build, p){
     tris, bones, skinned:1, mesh:0, mat:1,
     pbComp: chains, pbTrans: springBones, pbCol: colliders, pbCheck: springBones*colliders,
     texMB: Math.round(TEX*TEX*4*1.33/1048576*10)/10,
+    raycasts: 0, // Hina never emits VRC Raycast components (Round 494)
     approxBytes,
   };
 }

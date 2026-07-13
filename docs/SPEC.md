@@ -104,8 +104,10 @@ title/version/author/contactInformation/reference/texture(サムネイル)/allow
 
 出典: creators.vrchat.com「Performance Ranks」2026-04-21版。**値の改定はコアRANKSテーブルのみ更新**。
 
-PC: Triangles 32k/70k/70k/70k ・ Bones 75/150/256/400 ・ SkinnedMesh 1/2/8/16 ・ Mesh 4/8/16/24 ・ Material 4/8/16/32 ・ PB部品 4/8/16/32 ・ PB変換 16/64/128/256 ・ PBコライダ 4/8/16/32 ・ PB衝突 32/128/256/512 ・ TexMem 40/75/110/150MB（E/G/M/P。超過=Very Poor）
-Quest: Triangles 7.5k/10k/15k/20k ・ Bones 75/90/150/150 ・ SkinnedMesh 1/1/2/2 ・ Mesh 1/1/2/2 ・ Material 1/1/2/4 ・ PB部品 0/4/6/8 ・ PB変換 0/16/32/64 ・ PBコライダ 0/4/8/16 ・ PB衝突 0/16/32/64 ・ TexMem 10/18/25/40MB
+PC: Triangles 32k/70k/70k/70k ・ Bones 75/150/256/400 ・ SkinnedMesh 1/2/8/16 ・ Mesh 4/8/16/24 ・ Material 4/8/16/32 ・ PB部品 4/8/16/32 ・ PB変換 16/64/128/256 ・ PBコライダ 4/8/16/32 ・ PB衝突 32/128/256/512 ・ TexMem 40/75/110/150MB ・ Raycasts 1/4/8/15（E/G/M/P。超過=Very Poor）
+Quest: Triangles 7.5k/10k/15k/20k ・ Bones 75/90/150/150 ・ SkinnedMesh 1/1/2/2 ・ Mesh 1/1/2/2 ・ Material 1/1/2/4 ・ PB部品 0/4/6/8 ・ PB変換 0/16/32/64 ・ PBコライダ 0/4/8/16 ・ PB衝突 0/16/32/64 ・ TexMem 10/18/25/40MB ・ Raycasts 1/2/4/8
+
+Raycasts は2026-04-21同期で追加された項目（Round 494で推定器テーブルへ反映）。雛はVRC Raycastコンポーネントを一切出力しないため常時0で、両プラットフォームとも律速要因になり得ない。
 
 判定: 全項目の最悪ランク。Questは「揺れ物ON→Good上限 / OFF→Excellent」が本ツールの設計帰結であり、UIで明示する。
 

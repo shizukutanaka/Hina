@@ -5,8 +5,8 @@
 この文書は、AIコーディングセッション（コミット履歴上「Round 464」〜「Round 477」と呼ぶ14回の改善サイクル）で実施した機能監査の結果を、**前提知識のない後続セッションが読んで作業を引き継げる形**で記録したものである。Round 479 で §3-1 の表情エディタ、Round 481 で複数段Undo/Redoを実装したため、両項目を §2 へ移動済み。Round 490 で §5-8（当時「対応不要」と判定したチェックボックスのタッチターゲット）が WCAG 2.2 の新設基準により再判定・対応済みとなったため、同項目も §2 へ移動済み。
 
 - 「Round N」はコミットメッセージ先頭の通し番号。`git log --oneline` で対応コミットを特定できる
-- 本文書更新時点のテスト数は **1920 passed / 0 failed**（`node tests/run.js`）
-- 次に新しい変更を行う場合の通し番号は **Round 494**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加）
+- 本文書更新時点のテスト数は **1935 passed / 0 failed**（`node tests/run.js`）
+- 次に新しい変更を行う場合の通し番号は **Round 495**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加、Round 494 = RANKSテーブルにRaycastsカテゴリ追加（外部一次ソース照合で発見））
 
 ## 1. プロダクト概要と交渉不可制約
 
@@ -56,6 +56,12 @@
 | Round | 内容 | アンカー |
 |-------|------|---------|
 | 489 | Round 464-488はほぼ全て`build/20-app.js`（UI層）対象だったため、core層（`build/10-core-a.js`/`11-core-b.js`/`12-core-c.js`）へ監査対象をシフトして発見。`sphereBand()`（頭部/手/足/頭皮キャップに使う球面プリミティブ）は極（phi=0またはπ、sin(phi)=0）に位置するリングの全頂点が同一座標に潰れる（頂点インデックスは別々だが位置が完全一致）にもかかわらず、汎用の2三角形クアッド分割ロジックがそのまま適用され、極に接する三角形が常に**面積ゼロの縮退三角形**として出力されていた。既存のRound 131「縮退三角形なし」テストは頂点**インデックス**の重複のみ検査しており頂点**位置**の重複は検査していなかったため、デフォルトアバターの全1961三角形中112枚（約5.7%）が不可視の無駄な三角形として本番コードに常時存在していた（全PARAMS組み合わせで決定論的に再現、乱数20,000サンプルで確認）。**視覚的リスクなし**（面積ゼロの三角形は除去しても描画結果が変わりようがないため、このAI実行環境のWebGL検証限界と無関係に安全な修正）。`sphereBand()`内で極リングを`sin(phi)<1e-9`判定し、縮退する側の三角形のみをスキップ（生存する三角形のインデックス・巻き順は完全に不変）。Round 131のテストも位置ベースの外積面積チェックに強化し、この種のバグが再発しても検知できるようにした。全プリセット・全outfit×hairStyle組み合わせで一律-112 tris（頂点数は不変） | `build/11-core-b.js` の `sphereBand()` |
+
+### ランク基準値の正確性（1件・外部一次ソース照合）
+
+| Round | 内容 | アンカー |
+|-------|------|---------|
+| 494 | 本セッションで初めて外部リサーチ（WebFetch）による一次ソース照合を実施。`RANKS`テーブルの出典日として明記済みの2026-04-21版を creators.vrchat.com「Performance Ranks」で再取得したところ、既存の全カテゴリ（Triangles/Bones/SkinnedMesh/Mesh/Material/PB部品/PB変換/PBコライダ/PB衝突/TexMem、PC・Quest両方）は数値完全一致（乖離ゼロ）を確認したが、同じ2026-04-21同期（VRChat 2026.2.1）で追加されていた「Raycasts」カテゴリ（PC 1/4/8/15・Quest 1/2/4/8）が`RANKS`テーブルに欠落していた。CLAUDE.mdの「改定時はcoreのRANKSテーブルのみ更新」という規約に該当する構造的乖離（値の改定ではなく行の追加）。雛はVRC Raycastコンポーネントを一切出力しないため`estimate()`は常にraycasts:0を返し、両プラットフォームとも常にExcellent圏（律速要因になり得ない）で、既定6プリセットのランク保証への実害はなし。`RANKS.pc/quest.raycasts`・`estimate()`の`raycasts:0`・`cat.raycasts`のja/en i18nラベルを追加し、`docs/SPEC.md`§6の基準値一覧も同期。既存の`rank()`が`for(const cat in T)`で全カテゴリを走査する実装だったため、テストコード側で手組みしていた複数の合成statsオブジェクト（`raycasts`キー欠落）がrank()に「undefined <= 閾値」として最悪ランク扱いされ壊れたが、これはテスト側の不備であり本体コードの不具合ではない（`base`オブジェクトに`raycasts:1`を追加して解消） | `build/10-core-a.js` の `RANKS` / `estimate()` / `I18N.cat.raycasts` |
 
 ### アクセシビリティ（4件）
 

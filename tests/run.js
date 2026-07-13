@@ -503,7 +503,9 @@ const B = H.buildAvatar(P);
 
 /* ---- rank boundaries (synthetic stats) ---- */
 {
-  const base = { tris: 1, bones: 1, skinned: 1, mesh: 0, mat: 1, pbComp: 0, pbTrans: 0, pbCol: 0, pbCheck: 0, texMB: 1 };
+  // raycasts:1 added Round 494 (RANKS gained a Raycasts category) — 1 is within Excellent on
+  // both platforms ([1,4,8,15] PC / [1,2,4,8] Quest) so it doesn't shift any boundary below.
+  const base = { tris: 1, bones: 1, skinned: 1, mesh: 0, mat: 1, pbComp: 0, pbTrans: 0, pbCol: 0, pbCheck: 0, texMB: 1, raycasts: 1 };
   ok(H.rank(Object.assign({}, base, { tris: 7500 }), 'quest').rank === 'Excellent', 'quest tris 7500 = Excellent');
   ok(H.rank(Object.assign({}, base, { tris: 7501 }), 'quest').rank === 'Good', 'quest tris 7501 = Good');
   ok(H.rank(Object.assign({}, base, { bones: 76 }), 'quest').rank === 'Good', 'quest bones 76 = Good');
@@ -1204,7 +1206,9 @@ function accData(j, bin, ai){
 
 /* ---- Round 97: rank category boundaries for mat/skinned/mesh/texMB ---- */
 {
-  const base = { tris: 1, bones: 1, skinned: 1, mesh: 0, mat: 1, pbComp: 0, pbTrans: 0, pbCol: 0, pbCheck: 0, texMB: 1 };
+  // raycasts:1 added Round 494 (RANKS gained a Raycasts category) — 1 is within Excellent on
+  // both platforms ([1,4,8,15] PC / [1,2,4,8] Quest) so it doesn't shift any boundary below.
+  const base = { tris: 1, bones: 1, skinned: 1, mesh: 0, mat: 1, pbComp: 0, pbTrans: 0, pbCol: 0, pbCheck: 0, texMB: 1, raycasts: 1 };
 
   // Quest mat: Excellent=1, Good=1 (same), Medium=2 — but quest mat[E]=1, mat[G]=1 so >1 → Medium
   ok(H.rank(Object.assign({}, base, { mat: 1 }), 'quest').rank === 'Excellent', 'quest mat=1 → Excellent');
@@ -6664,6 +6668,32 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,1450}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 494: RANKS table gains a Raycasts category (added upstream in the pinned 2026-04-21 sync) ---- */
+{
+  // Verified directly against creators.vrchat.com's "Performance Ranks" doc (2026-04-21 sync,
+  // VRChat 2026.2.1): a "Raycasts" row exists with PC [1,4,8,15] and Quest/Mobile [1,2,4,8],
+  // matching CLAUDE.md's pinned source version but absent from RANKS until now. All other
+  // existing categories were independently re-verified against the same source and are
+  // byte-for-byte unchanged (no drift beyond this one missing row).
+  ok(JSON.stringify(H.RANKS.pc.raycasts)==='[1,4,8,15]', 'RANKS.pc.raycasts matches creators.vrchat.com PC thresholds');
+  ok(JSON.stringify(H.RANKS.quest.raycasts)==='[1,2,4,8]', 'RANKS.quest.raycasts matches creators.vrchat.com Quest thresholds');
+  // Hina never emits VRC Raycast components, so estimate() must report 0 for every build —
+  // otherwise rank() (which iterates "for (const cat in T)") would throw on undefined arithmetic
+  // or, worse, silently misrank an avatar on a category the generator can't actually produce.
+  const B0 = H.buildAvatar(H.defaults());
+  const est0 = H.estimate(B0, H.defaults());
+  ok(est0.raycasts===0, 'estimate() reports raycasts:0 (Hina generates no VRC Raycast components)');
+  // Existing "all 6 presets stay Quest Excellent (spring off) / Good-or-better (spring on)"
+  // invariant must survive the new category unaffected, since 0 is always within Excellent range.
+  for(const pre of H.PRESETS){
+    const pOn = H.presetParams(pre), pOff = Object.assign({}, pOn, {springOff:true});
+    const bOn = H.buildAvatar(pOn), bOff = H.buildAvatar(pOff);
+    const rOn = H.rank(H.estimate(bOn,pOn),'quest'), rOff = H.rank(H.estimate(bOff,pOff),'quest');
+    ok(rOn.idx<=1, `preset ${pre.id} (spring on) stays Quest Good-or-better with raycasts category present`);
+    ok(rOff.idx===0, `preset ${pre.id} (spring off) stays Quest Excellent with raycasts category present`);
+  }
 }
 
 /* ---- Round 493: loadState() restores lastGachaSeed through the same guard its siblings use ---- */
