@@ -10,6 +10,10 @@ _rmMQ.addEventListener('change', e => { reduceMotion = e.matches; });
 /* ---------- state ---------- */
 let lang = 'ja', mode = 'easy', activeTab = 'preset';
 let activePresetId = null, lastGachaSeed = null;
+// Canonical [0, 4294967295] range a gacha seed must satisfy (rng()'s mulberry32 domain).
+// Shared by loadState(), the ?seed= URL parser, and the manual seed <input> (Round 493) so the
+// three sites that assign lastGachaSeed can't drift out of sync on what counts as valid.
+function clampSeed(v){ const n=Math.round(Number(v)); return (Number.isFinite(n)&&n>=0) ? Math.min(n,4294967295) : null; }
 // Round 476: gacha category locks — full reroll only ever replaced everything; users who liked
 // 90% of a result had no way to keep it. Locked categories are excluded from the reroll.
 const GACHA_LOCK_TABS = ['body','face','hair','outfit','color'];
@@ -54,7 +58,7 @@ function loadState(){
     if (j.mode==='detail') mode = 'detail';
     if (j.activeTab && TABS.includes(j.activeTab)) activeTab = j.activeTab;
     if (j.activePresetId && HINA.PRESETS.some(p=>p.id===j.activePresetId)) activePresetId = j.activePresetId;
-    if (Number.isFinite(j.lastGachaSeed)) lastGachaSeed = j.lastGachaSeed;
+    { const s = clampSeed(j.lastGachaSeed); if (s!==null) lastGachaSeed = s; }
     if (j.gachaLocks && typeof j.gachaLocks==='object')
       for(const k of GACHA_LOCK_TABS) gachaLocks[k] = !!j.gachaLocks[k];
     exprMix = HINA.sanitizeExprMix(j.exprMix);
@@ -1065,8 +1069,9 @@ function renderBody(scrollReset=true){
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
       onwheel:e=>e.preventDefault(),
       onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); },
-      onchange:e=>{ let n=Math.round(Number(e.target.value));
-        if (!Number.isFinite(n)||n<0){
+      onchange:e=>{ const n=Math.round(Number(e.target.value));
+        const clamped=clampSeed(e.target.value);
+        if (clamped===null){
           e.target.setAttribute('aria-invalid','true');
           e.target.setAttribute('aria-errormessage','srAlert');
           showErr(t('a11y.seedInvalid'));
@@ -1074,7 +1079,6 @@ function renderBody(scrollReset=true){
           return;
         }
         e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-errormessage');
-        const clamped=Math.min(n,4294967295);
         if(clamped!==n){ e.target.value=String(clamped); showErr(t('a11y.clamped').replace('{v}',clamped)); }
         runGacha(clamped); }});
     const cpBtn=el('button',{type:'button', class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
@@ -1613,9 +1617,8 @@ loadState();
 {
   const qSeed = new URLSearchParams(location.search).get('seed');
   if (qSeed !== null){
-    const n = Math.round(Number(qSeed));
-    if (Number.isFinite(n) && n>=0){
-      const clamped = Math.min(n, 4294967295);
+    const clamped = clampSeed(qSeed);
+    if (clamped !== null){
       lastGachaSeed = clamped;
       params = HINA.randomParams(clamped);
       activePresetId = null;

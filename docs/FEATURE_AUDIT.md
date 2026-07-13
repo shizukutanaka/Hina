@@ -5,8 +5,8 @@
 この文書は、AIコーディングセッション（コミット履歴上「Round 464」〜「Round 477」と呼ぶ14回の改善サイクル）で実施した機能監査の結果を、**前提知識のない後続セッションが読んで作業を引き継げる形**で記録したものである。Round 479 で §3-1 の表情エディタ、Round 481 で複数段Undo/Redoを実装したため、両項目を §2 へ移動済み。Round 490 で §5-8（当時「対応不要」と判定したチェックボックスのタッチターゲット）が WCAG 2.2 の新設基準により再判定・対応済みとなったため、同項目も §2 へ移動済み。
 
 - 「Round N」はコミットメッセージ先頭の通し番号。`git log --oneline` で対応コミットを特定できる
-- 本文書更新時点のテスト数は **1916 passed / 0 failed**（`node tests/run.js`）
-- 次に新しい変更を行う場合の通し番号は **Round 493**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加）
+- 本文書更新時点のテスト数は **1920 passed / 0 failed**（`node tests/run.js`）
+- 次に新しい変更を行う場合の通し番号は **Round 494**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加）
 
 ## 1. プロダクト概要と交渉不可制約
 
@@ -36,12 +36,13 @@
 | 470 | クリップボード貼り付けのDoS対策。ファイル読込・ドラッグ&ドロップにある2MB上限が貼り付け経路になく、巨大文字列で `JSON.parse` がハングし得た。同じ2MBガードを追加 | `build/20-app.js` の `pstj` ボタンonclick内 `text.length > 2*1024*1024` |
 | 492 | Round 469の`sanitizeMeta()`はキー名のホワイトリスト化のみで**値の検証が皆無**だった。enum型5フィールド（allowed/violent/sexual/commercial/license）に任意文字列が素通りする一方、兄弟の`sanitize()`はPARAMSのenumを`s.opts.includes(v)`で検証済み・書き出し側`exportVRM()`も独自`pick()`ガード持ちで、中間層だけ無防備。実害: 不正enum入りJSONを読み込むと`<select>`は先頭項目を表示するが内部stateは不正値のままで、「パラメータ保存」で`serialize()`が無検証のまま書き戻し（同じ行でexprMixには`sanitizeExprMix()`適用済みという非対称）、load→resaveのたび破損が永続する「表示と保存の食い違い」。修正: enum一覧を`META_ENUMS`として単一情報源化し、(1)`sanitizeMeta()`が不正値をキーごと落とす（=キー欠落と同じ意味論。マージ先はMETA_DEFAULTS起点なので状態は常に有効）、(2)`serialize()`が`meta:sanitizeMeta(meta)`で対称防御、(3)`exportVRM()`の`pick()`4箇所とUIの`selRow`5箇所のインライン配列を`META_ENUMS`参照へ置換（選択肢と検証リストの乖離を構造的に不可能に）。副次: Round 479時の消し忘れだった旧`serialize(p,meta)`デッドコード（後勝ち宣言で隠蔽されていた）も削除 | `build/10-core-a.js` の `META_ENUMS` / `sanitizeMeta()` / `serialize()` |
 
-### 堅牢性（2件）
+### 堅牢性（3件）
 
 | Round | 内容 | アンカー |
 |-------|------|---------|
 | 465 | 破損VRMのサイレントダウンロード防止。書き出し直前にGLBヘッダ（マジック `0x46546C67`・version=2・長さフィールド）を検証し、不正なら `hint.exportCorrupt` を表示して中断 | `build/20-app.js` の `doExport()` 内、`HINA.exportVRM()` 呼び出し直後 |
 | 472 | Windows予約デバイス名対策。タイトルが `CON`/`PRN`/`AUX`/`NUL`/`COM1-9`/`LPT1-9` にサニタイズされるとWindowsで保存不能（拡張子付きでも不可）。該当時は末尾に `_` を付加 | `build/20-app.js` の `WIN_RESERVED` 正規表現 / `safeName()` |
+| 493 | `lastGachaSeed` を書き込む3箇所（手動シード入力onchange・`?seed=`URLパーサー・`loadState()`）のうち、前者2つは`round→負値拒否→[0,4294967295]クランプ`を一貫して行うのに`loadState()`だけ`Number.isFinite()`のみで負値・非整数・オーバーフローを素通りさせていた。Round 474の「共有リンクが嘘をつかないため」という不変条件があるにもかかわらず、localStorageや貼付JSON経由で汚染された`lastGachaSeed`がシード欄の表示・共有リンク（`?seed=-5`等、再読込時にURLパーサー自身の`n>=0`チェックで弾かれ嘘リンク化）・書き出しファイル名に伝播しうる状態だった。Round 492の`META_ENUMS`と同型の単一情報源化として`clampSeed()`ヘルパーを新設し、3箇所すべてがこれを参照するよう統一 | `build/20-app.js` の `clampSeed()` / `loadState()` / seedIn `onchange` / `?seed=`URLパーサー |
 
 ### エラーメッセージの正確性（2件）
 

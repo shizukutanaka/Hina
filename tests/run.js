@@ -88,7 +88,10 @@ ok(html.includes("_rmMQ.addEventListener('change'"), 'prefers-reduced-motion Med
 ok(html.includes('name="theme-color"') && html.includes('#0F1216'), 'theme-color meta present for mobile browser theming');
 ok(html.includes('apple-mobile-web-app-capable'), 'apple-mobile-web-app-capable meta for iOS home screen');
 ok(html.includes('activePresetId, lastGachaSeed'), 'activePresetId and lastGachaSeed saved to localStorage');
-ok(html.includes('Number.isFinite(j.lastGachaSeed)'), 'lastGachaSeed restored safely handling 0 value');
+// Round 493: loadState() now shares clampSeed() with the manual seed input and ?seed= URL parser
+// instead of a bare Number.isFinite() check (which let negative/non-integer/overflow values through).
+ok(html.includes('const s = clampSeed(j.lastGachaSeed); if (s!==null) lastGachaSeed = s;'),
+  'lastGachaSeed restored via clampSeed(), rejecting negative/non-integer/overflow values (not just NaN)');
 ok(html.includes("addEventListener('pagehide'") && html.includes('clearTimeout(_saveTimer)'), 'pagehide (not beforeunload) flushes debounced saveState — pagehide is bfcache-compatible');
 ok(/deserialize[\s\S]{0,120}activePresetId=null/.test(html), 'JSON load clears stale activePresetId so preset highlight resets');
 ok(H.I18N.ja['err.exportFailed'] && H.I18N.en['err.exportFailed'], 'export error message i18n in both languages');
@@ -5800,7 +5803,10 @@ function accData(j, bin, ai){
 {
   ok(H.I18N.ja['a11y.seedInvalid'] && H.I18N.en['a11y.seedInvalid'],
     'a11y.seedInvalid key present in both locales');
-  ok((()=>{ const si=html.indexOf("placeholder:t('gacha.seed.ph')"); const chunk=html.slice(si, si+700); return /!Number\.isFinite\(n\)\|\|n<0[\s\S]{0,80}aria-invalid[\s\S]{0,200}seedInvalid/.test(chunk); })(),
+  // Round 493: the inline "!Number.isFinite(n)||n<0" check moved into the shared clampSeed()
+  // helper (also used by loadState() and the ?seed= URL parser) — onchange now branches on
+  // clampSeed()'s null return instead of re-deriving the same condition locally.
+  ok((()=>{ const si=html.indexOf("placeholder:t('gacha.seed.ph')"); const chunk=html.slice(si, si+700); return /clamped===null[\s\S]{0,80}aria-invalid[\s\S]{0,200}seedInvalid/.test(chunk); })(),
     'seed input sets aria-invalid and announces a11y.seedInvalid on invalid value (NaN or negative)');
   ok(/seedInvalid[\s\S]{0,100}removeAttribute\('aria-invalid'\)/.test(html),
     'seed input clears aria-invalid after timeout');
@@ -6040,8 +6046,10 @@ function accData(j, bin, ai){
 
 /* ---- Round 372: seed input announces a11y.clamped when value exceeds 4294967295 (consistent with numIn) ---- */
 {
-  ok(html.includes("const clamped=Math.min(n,4294967295);"),
-    'seed input stores clamped value in a variable for comparison');
+  // Round 493: Math.min(n,4294967295) moved into clampSeed(), shared with loadState() and the
+  // ?seed= URL parser; the local variable now holds clampSeed()'s result directly.
+  ok(html.includes("const clamped=clampSeed(e.target.value);"),
+    'seed input stores clamped value (via shared clampSeed()) in a variable for comparison');
   ok(/clamped!==n[\s\S]{0,120}a11y\.clamped/.test(html),
     'seed input announces a11y.clamped via srStatus when value is clamped (consistent with numIn behavior)');
 }
@@ -6658,6 +6666,28 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 493: loadState() restores lastGachaSeed through the same guard its siblings use ---- */
+{
+  // Three sites assign lastGachaSeed: the manual seed <input>'s onchange, the ?seed= URL
+  // parser (Round 474 — whose own stated invariant is "共有リンクが嘘をつかないため", the share
+  // link must never lie), and loadState(). Only loadState() skipped the round/reject-negative/
+  // clamp-to-4294967295 guard the other two have always had, accepting any finite number
+  // (negative, non-integer, or >2^32-1) straight from localStorage/a pasted save file. A
+  // corrupted lastGachaSeed then flowed into the seed <input>'s displayed value, the Copy Link
+  // share URL, and export filenames — and a resulting "?seed=-5" link would fail the URL
+  // parser's own n>=0 check on reload, exactly the "lying share link" Round 474 aimed to prevent.
+  ok(/function clampSeed\(v\)\{ const n=Math\.round\(Number\(v\)\); return \(Number\.isFinite\(n\)&&n>=0\) \? Math\.min\(n,4294967295\) : null; \}/.test(html),
+    'clampSeed() helper defines the canonical [0, 4294967295] seed range once');
+  ok(/const s = clampSeed\(j\.lastGachaSeed\); if \(s!==null\) lastGachaSeed = s;/.test(html),
+    'loadState() restores lastGachaSeed via clampSeed(), matching the other two assignment sites');
+  // Behavioral: simulate loadState()'s guard directly (same expression the built file uses)
+  const clampSeed = v => { const n=Math.round(Number(v)); return (Number.isFinite(n)&&n>=0) ? Math.min(n,4294967295) : null; };
+  ok(clampSeed(-5)===null && clampSeed(NaN)===null && clampSeed(Infinity)===null,
+    'clampSeed() rejects negative, NaN, and Infinity');
+  ok(clampSeed(1.5)===2 && clampSeed(0)===0 && clampSeed(4294967296)===4294967295,
+    'clampSeed() rounds fractional input, keeps 0 (falsy-but-valid), and clamps overflow to 2^32-1');
+}
+
 /* ---- Round 492: sanitizeMeta() validates enum-typed meta values (mirrors sanitize()'s enum check) ---- */
 {
   // Round 469 whitelisted meta KEYS but never checked enum VALUES: allowed/violent/sexual/
@@ -7267,10 +7297,12 @@ function accData(j, bin, ai){
     'R474: URL-seed parsing runs after loadState() and before the first rebuild()');
   // Same clamp bounds as the manual seed input (0..4294967295) — invalid/negative/non-numeric
   // values are silently ignored rather than erroring, since a malformed link isn't the user's fault.
-  ok(/Math\.min\(n, 4294967295\)/.test(html),
-    'R474: URL seed is clamped to the same [0, 4294967295] range as the manual seed input');
-  ok(/Number\.isFinite\(n\)\s*&&\s*n>=0/.test(html),
-    'R474: non-numeric or negative seed query params are rejected (fall back to local state)');
+  // Round 493: the inline round/reject-negative/Math.min(n,4294967295) logic moved into the
+  // shared clampSeed() helper (also used by loadState() and the seed <input>'s onchange).
+  ok(/const clamped = clampSeed\(qSeed\);/.test(html),
+    'R474: URL seed is clamped via the shared clampSeed() helper, same [0, 4294967295] range as the manual seed input');
+  ok(/if \(clamped !== null\)\{/.test(html),
+    'R474: non-numeric or negative seed query params are rejected (clampSeed() returns null, falls back to local state)');
   ok(/lastGachaSeed = clamped;\s*\n\s*params = HINA\.randomParams\(clamped\);\s*\n\s*activePresetId = null;/.test(html),
     'R474: a valid URL seed sets lastGachaSeed, regenerates params via randomParams(), and clears activePresetId');
 
@@ -7612,9 +7644,11 @@ function accData(j, bin, ai){
     'numIn _announce: aria-errormessage points to assertive srAlert region (not polite srStatus)');
   ok(/_announce=\(v\)[\s\S]{0,130}showErr\(t\('a11y\.clamped'\)/.test(html.replace(/\s+/g,' ')),
     'numIn _announce: calls showErr() so clamped value is announced assertively via srAlert and persistently via srStatus');
-  ok(/Number\.isFinite\(n\)\|\|n<0[\s\S]{0,120}aria-errormessage','srAlert'/.test(html.replace(/\s+/g,' ')),
+  // Round 493: seedIn's inline "Number.isFinite(n)||n<0" moved into the shared clampSeed()
+  // helper — the onchange handler now branches on "clamped===null" instead.
+  ok(/clamped===null[\s\S]{0,120}aria-errormessage','srAlert'/.test(html.replace(/\s+/g,' ')),
     'seedIn validation: aria-errormessage points to assertive srAlert region');
-  ok(/Number\.isFinite\(n\)\|\|n<0[\s\S]{0,150}showErr\(t\('a11y\.seedInvalid'\)\)/.test(html.replace(/\s+/g,' ')),
+  ok(/clamped===null[\s\S]{0,150}showErr\(t\('a11y\.seedInvalid'\)\)/.test(html.replace(/\s+/g,' ')),
     'seedIn validation: calls showErr() so invalid seed is announced assertively and persistently');
 
   // When the license select changes to "Other", a URL input row appears (licUrlRow) and focus moves
