@@ -5301,7 +5301,9 @@ function accData(j, bin, ai){
 
 /* ---- Round 320: doScreenshot wraps cv.toBlob() in try-catch so SecurityError doesn't leave btn disabled ---- */
 {
-  ok(/doScreenshot[\s\S]{0,2200}catch\s*\(e\)[\s\S]{0,20}_scrDone\(\)/.test(html),
+  // Window widened in Round 505 for the scrFname/scrTitle/scrText synchronous snapshot added
+  // before the try block (closes an undo/redo-during-async-gap filename/title mismatch).
+  ok(/doScreenshot[\s\S]{0,2750}catch\s*\(e\)[\s\S]{0,20}_scrDone\(\)/.test(html),
     'doScreenshot() has try-catch around cv.toBlob() to re-enable button via _scrDone if canvas throws (e.g. SecurityError)');
 }
 
@@ -6054,7 +6056,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 369: screenshot download anchor also gets aria-hidden=true (same as download() helper) ---- */
 {
-  ok(/doScreenshot[\s\S]{0,1800}a\.setAttribute\('aria-hidden','true'\)[\s\S]{0,60}document\.body\.append\(a\)/.test(html),
+  // Window widened in Round 505 for the scrFname/scrTitle/scrText synchronous snapshot.
+  ok(/doScreenshot[\s\S]{0,2000}a\.setAttribute\('aria-hidden','true'\)[\s\S]{0,60}document\.body\.append\(a\)/.test(html),
     'doScreenshot anchor sets aria-hidden=true before appending (consistent with download() helper)');
 }
 
@@ -6254,7 +6257,9 @@ function accData(j, bin, ai){
 {
   // Round 500: the share title's hardcoded '雛 — '+fnameStem() (always Japanese prefix regardless
   // of lang) was unified into titledStem(), the same shared helper document.title now uses.
-  ok(/title:titledStem\(\),\s*text:meta\.title\|\|fnameStem\(\)/.test(html),
+  // Round 505: title/text are now read into scrTitle/scrText synchronously before cv.toBlob()'s
+  // async gap (see the Round 505 test block), so the share call itself just references them.
+  ok(/title:scrTitle,\s*text:scrText/.test(html),
     'navigator.share() includes the avatar title in its share payload (better recipient context than generic "Hina")');
 }
 
@@ -6699,6 +6704,35 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 505: doExport() snapshots the shared atlas canvas; doScreenshot() snapshots fname/title ---- */
+{
+  // PRIMARY finding: doExport()'s own comment says "Snapshot all mutable state so slider/meta
+  // changes during async awaits don't affect the export" — but the shared, module-level `atlas`
+  // canvas (repainted in place by drawAtlas(), called from onParam()'s color branch AND
+  // rebuild() — neither checks _exporting) was read live via canvasBlob(atlas) AFTER two async
+  // gaps (showSaveFilePicker, canvasBlob(tc)). A color-swatch click (or gacha reroll, preset
+  // revert, JSON load — anything that calls rebuild()) during an in-flight export repainted the
+  // atlas with a different params generation than exportParams/exportBuild, producing a
+  // structurally valid but semantically corrupt GLB (texture colors not matching the exported
+  // geometry/meta). Fixed by copying the atlas into an offscreen canvas synchronously, right
+  // alongside the existing params/meta/exprMix snapshots, mirroring the thumbnail's own `tc`
+  // pattern a few lines below.
+  ok(/const exportAtlas = document\.createElement\('canvas'\);\s*\n\s*exportAtlas\.width = atlas\.width; exportAtlas\.height = atlas\.height;\s*\n\s*exportAtlas\.getContext\('2d'\)\.drawImage\(atlas, 0, 0\);/.test(html),
+    'doExport() copies the live atlas into exportAtlas synchronously, before any async gap');
+  ok(/const exportAtlas[\s\S]{0,1050}canvasBlob\(exportAtlas\)/.test(html),
+    'doExport() reads the frozen exportAtlas snapshot, not the live shared atlas canvas, when encoding the export texture');
+  ok(!/await canvasBlob\(atlas\)/.test(html),
+    'no remaining "await canvasBlob(atlas)" call reads the live shared canvas directly (all routed through the snapshot)');
+
+  // SECONDARY finding, same investigation: cv.toBlob()'s pixel capture is frozen at call time,
+  // but fnameStem()/meta.title were re-read live INSIDE the async toBlob callback — an undo/redo
+  // landing in that gap could hand out a filename/share-title from a different generation than
+  // the pixels actually captured. Lower severity than the atlas bug (cosmetic filename mismatch,
+  // not baked-texture data corruption) but same root cause and fixed the same way.
+  ok(/const scrFname = fnameStem\(\)\+'\.png';\s*\n\s*const scrTitle = titledStem\(\);\s*\n\s*const scrText = meta\.title\|\|fnameStem\(\);\s*\n\s*try\{\s*\n\s*renderFrame/.test(html),
+    'doScreenshot() snapshots fname/title/text synchronously before renderFrame()/cv.toBlob(), closing the undo-during-async-gap mismatch');
+}
+
 /* ---- Round 504: saveJson() gets a _savingJson reentrancy guard, matching doExport/doScreenshot ---- */
 {
   // doExport() checks _exporting and doScreenshot() checks _screenshotting synchronously before
@@ -6780,9 +6814,10 @@ function accData(j, bin, ai){
   ok((html.match(/updateTitle\(\);/g) || []).length >= 3,
     'updateTitle() is called from at least the 3 original sites (rebuild, applyLang, updateFnPrev)');
   // Bonus consistency fix: the Web Share title (Round 405) had the same hardcoded-Japanese-prefix
-  // bug as rebuild()/updateFnPrev() and now shares the same helper.
-  ok(html.includes('title:titledStem(),'),
-    'navigator.share() title also uses titledStem() (was hardcoded Japanese prefix, ignored lang)');
+  // bug as rebuild()/updateFnPrev() and now shares the same helper (indirectly, via scrTitle —
+  // see the Round 505 test block for the direct source-level check).
+  ok(html.includes('const scrTitle = titledStem();'),
+    'navigator.share() title still derives from titledStem() (was hardcoded Japanese prefix, ignored lang)');
 }
 
 /* ---- Round 499: forced-colors outline added for .eBtn.active and .tab[aria-selected=true] ---- */

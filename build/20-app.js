@@ -1429,6 +1429,18 @@ async function doExport(){
   const exportParams = structuredClone(params);
   const exportMeta = structuredClone(meta);
   const exportExprMix = structuredClone(exprMix);
+  // Round 505: the shared `atlas` canvas (module-level, repainted in place by drawAtlas() from
+  // both onParam()'s color branch and rebuild() — neither checks _exporting) was read live via
+  // canvasBlob(atlas) below, AFTER the two async gaps above/below this point. A color edit (or
+  // any rebuild-triggering change: gacha reroll, preset revert, undo/redo, JSON load) landing in
+  // that window repainted the atlas with a DIFFERENT params state than exportParams/exportBuild,
+  // producing a structurally valid but semantically corrupt GLB — colors baked into the atlas
+  // wouldn't match the geometry/meta actually exported. Copying into an offscreen canvas here,
+  // synchronously (no await between this line and the snapshots above), freezes it exactly like
+  // the thumbnail below already does with `tc`.
+  const exportAtlas = document.createElement('canvas');
+  exportAtlas.width = atlas.width; exportAtlas.height = atlas.height;
+  exportAtlas.getContext('2d').drawImage(atlas, 0, 0);
   const _exportFocusWasBtn = document.activeElement === _exportBtn;
   if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.setAttribute('aria-busy','true'); _exportBtn.textContent = t('btn.exporting'); }
   { const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); }
@@ -1443,7 +1455,7 @@ async function doExport(){
       const tb = await canvasBlob(tc);
       if (tb) thumbBytes = new Uint8Array(await tb.arrayBuffer());
     }
-    const atlasBlob = await canvasBlob(atlas);
+    const atlasBlob = await canvasBlob(exportAtlas);
     if (!atlasBlob) throw new Error('atlas toBlob returned null');
     const ab = await atlasBlob.arrayBuffer();
     const {bytes} = HINA.exportVRM(exportBuild, exportParams, exportMeta, new Uint8Array(ab), thumbBytes, exportExprMix);
@@ -1508,12 +1520,21 @@ function doScreenshot(){
   const _scrFocusWasBtn = document.activeElement === btn;
   if (btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
   const _scrDone=()=>{ _screenshotting=false; if (btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); if (_scrFocusWasBtn) btn.focus(); } };
+  // Round 505: cv.toBlob()'s pixel capture is frozen at call time (browser spec), but
+  // fnameStem()/meta.title were previously re-read live INSIDE the async callback below — an
+  // undo/redo (or any rebuild-triggering edit) landing in that gap could hand out a filename/
+  // share-title from a different generation than the pixels actually captured. Snapshot
+  // synchronously here, mirroring how doExport() snapshots params/meta/exprMix before its own
+  // async gaps.
+  const scrFname = fnameStem()+'.png';
+  const scrTitle = titledStem();
+  const scrText = meta.title||fnameStem();
   try{
     renderFrame(performance.now()); // render into buffer before browser flushes it
     cv.toBlob(blob=>{
       _scrDone();
       if (!blob){ showErr(t('err.screenshotFailed')); return; }
-      const fname = fnameStem()+'.png';
+      const fname = scrFname;
       // Web Share API on mobile: native share sheet (send to chat, save to photos, etc.) is more
       // useful than a Downloads-folder file. Falls back to <a download> when share unavailable or
       // user cancels. canShare check guards against browsers that have navigator.share but not file support.
@@ -1527,7 +1548,7 @@ function doScreenshot(){
       };
       const sr=$('srStatus');
       if (file && navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
-        navigator.share({files:[file], title:titledStem(), text:meta.title||fnameStem()}).then(()=>{
+        navigator.share({files:[file], title:scrTitle, text:scrText}).then(()=>{
           if(sr) sr.textContent=t('a11y.screenshotShared');
         }).catch(err=>{
           // AbortError = user cancelled — silently ignore. Other errors → fallback.
