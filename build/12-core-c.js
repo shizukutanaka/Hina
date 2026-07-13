@@ -398,7 +398,7 @@ return {
   PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams,
   I18N, TEX, ATLAS, uvBlock, uvRect,
   RANKS, RANK_NAMES, estimate, rank,
-  serialize, deserialize, META_ENUMS, PNG1, b64ToBytes,
+  serialize, deserialize, sanitizeMeta, META_ENUMS, PNG1, b64ToBytes,
   EXPR_EDITABLE, EXPR_INGREDIENTS, defaultExprMix, sanitizeExprMix,
   HB, buildSkeleton, buildAvatar, BinWriter, exportVRM, selfTest,
 };

@@ -5,8 +5,8 @@
 この文書は、AIコーディングセッション（コミット履歴上「Round 464」〜「Round 477」と呼ぶ14回の改善サイクル）で実施した機能監査の結果を、**前提知識のない後続セッションが読んで作業を引き継げる形**で記録したものである。Round 479 で §3-1 の表情エディタ、Round 481 で複数段Undo/Redoを実装したため、両項目を §2 へ移動済み。Round 490 で §5-8（当時「対応不要」と判定したチェックボックスのタッチターゲット）が WCAG 2.2 の新設基準により再判定・対応済みとなったため、同項目も §2 へ移動済み。
 
 - 「Round N」はコミットメッセージ先頭の通し番号。`git log --oneline` で対応コミットを特定できる
-- 本文書更新時点のテスト数は **1935 passed / 0 failed**（`node tests/run.js`）
-- 次に新しい変更を行う場合の通し番号は **Round 495**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加、Round 494 = RANKSテーブルにRaycastsカテゴリ追加（外部一次ソース照合で発見））
+- 本文書更新時点のテスト数は **1939 passed / 0 failed**（`node tests/run.js`）
+- 次に新しい変更を行う場合の通し番号は **Round 496**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加、Round 494 = RANKSテーブルにRaycastsカテゴリ追加（外部一次ソース照合で発見）、Round 495 = loadState()のmetaマージがsanitizeMeta()を経由していなかったprototype pollution修正）
 
 ## 1. プロダクト概要と交渉不可制約
 
@@ -28,13 +28,14 @@
 
 すべて実装・テスト・コミット済み。**再実装は不要**。挙動を変更する際は各アンカーのテストブロック（`tests/run.js` 内の `Round N` コメントで検索可能）を必ず更新すること。
 
-### セキュリティ（3件）
+### セキュリティ（4件）
 
 | Round | 内容 | アンカー |
 |-------|------|---------|
 | 469 | JSON読込のprototype pollution対策。`deserialize()` が meta を無検証で返し、アプリ側の `Object.assign(meta, d.meta)` で `__proto__` キーがプロトタイプを書き換え得た。ホワイトリスト方式の `sanitizeMeta()` を追加 | `build/10-core-a.js` の `META_KEYS` / `sanitizeMeta()` / `deserialize()` |
 | 470 | クリップボード貼り付けのDoS対策。ファイル読込・ドラッグ&ドロップにある2MB上限が貼り付け経路になく、巨大文字列で `JSON.parse` がハングし得た。同じ2MBガードを追加 | `build/20-app.js` の `pstj` ボタンonclick内 `text.length > 2*1024*1024` |
 | 492 | Round 469の`sanitizeMeta()`はキー名のホワイトリスト化のみで**値の検証が皆無**だった。enum型5フィールド（allowed/violent/sexual/commercial/license）に任意文字列が素通りする一方、兄弟の`sanitize()`はPARAMSのenumを`s.opts.includes(v)`で検証済み・書き出し側`exportVRM()`も独自`pick()`ガード持ちで、中間層だけ無防備。実害: 不正enum入りJSONを読み込むと`<select>`は先頭項目を表示するが内部stateは不正値のままで、「パラメータ保存」で`serialize()`が無検証のまま書き戻し（同じ行でexprMixには`sanitizeExprMix()`適用済みという非対称）、load→resaveのたび破損が永続する「表示と保存の食い違い」。修正: enum一覧を`META_ENUMS`として単一情報源化し、(1)`sanitizeMeta()`が不正値をキーごと落とす（=キー欠落と同じ意味論。マージ先はMETA_DEFAULTS起点なので状態は常に有効）、(2)`serialize()`が`meta:sanitizeMeta(meta)`で対称防御、(3)`exportVRM()`の`pick()`4箇所とUIの`selRow`5箇所のインライン配列を`META_ENUMS`参照へ置換（選択肢と検証リストの乖離を構造的に不可能に）。副次: Round 479時の消し忘れだった旧`serialize(p,meta)`デッドコード（後勝ち宣言で隠蔽されていた）も削除 | `build/10-core-a.js` の `META_ENUMS` / `sanitizeMeta()` / `serialize()` |
+| 495 | Round 469が防いだのと**全く同じ攻撃パターン**が`loadState()`に残っていた。`loadState()`は`params`（`HINA.sanitize()`）と`exprMix`（`HINA.sanitizeExprMix()`）の間で`meta`だけ`if (j.meta && typeof j.meta==='object') Object.assign(meta, j.meta)`という無検証マージを行っており、`j`はlocalStorageから`JSON.parse`した信頼できない起源のデータ（不正拡張機能・DevTools手動編集・同一オリジンの別ページによる汚染等で改竄されうる）。`JSON.parse('{"__proto__":{"polluted":"yes"}}')`は`__proto__`という**自己所有プロパティ**を生成し、`Object.assign`の`[[Set]]`操作がAnnex Bのアクセサ経由でターゲットのプロトタイプそのものを書き換えることをNode実行で実証済み（`Object.getPrototypeOf(target)===Object.prototype`が`false`になる）。`deserialize()`経由の貼付・ファイル読込・ドラッグ&ドロップの3経路はRound 469で対策済みだったが、**ページ読み込みのたび無条件実行される`loadState()`だけ**が唯一の無防備な経路として残っていた（4経路中最も実行頻度が高い）。修正: `Object.assign(meta, HINA.sanitizeMeta(j.meta))`に変更（`sanitizeMeta()`は非object/null入力を`{}`として扱うため`typeof`ガードは冗長化し削除、`params`/`exprMix`と同じ形に統一）。`sanitizeMeta`をHINAの公開エクスポートに追加（従来`serialize()`/`deserialize()`内部専用だった） | `build/20-app.js` の `loadState()` / `build/12-core-c.js` のHINAエクスポート |
 
 ### 堅牢性（3件）
 

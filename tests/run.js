@@ -6670,6 +6670,31 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 495: loadState()'s meta merge now goes through sanitizeMeta() like its siblings ---- */
+{
+  // loadState() sits between two sibling lines that already sanitize untrusted localStorage
+  // data (params via HINA.sanitize(), exprMix via HINA.sanitizeExprMix() a few lines below) but
+  // merged meta raw: `if (j.meta && typeof j.meta==='object') Object.assign(meta, j.meta)`.
+  // j.meta is JSON.parse output from localStorage — untrusted-origin data that could be tampered
+  // by a rogue extension, DevTools, or a prior same-origin page. This is exactly the class of bug
+  // Round 469 fixed for deserialize()'s paste/file-load/drag-drop paths: JSON.parse gives an
+  // object an own "__proto__" key when the source text has one, and Object.assign's [[Set]]
+  // then reassigns the target's prototype via the Annex B accessor.
+  ok(/Object\.assign\(meta, HINA\.sanitizeMeta\(j\.meta\)\);/.test(html),
+    "loadState() sanitizes j.meta through HINA.sanitizeMeta() before merging, matching params/exprMix");
+  ok(html.includes('sanitizeMeta,') && /return \{[\s\S]{0,400}sanitizeMeta,/.test(html),
+    'sanitizeMeta is exported on the HINA object so build/20-app.js can call it');
+  // Behavioral repro: confirm the exact Round 469-class attack is now inert end-to-end through
+  // loadState()'s own code path (HINA.sanitizeMeta, not just deserialize()).
+  const evil = JSON.parse('{"__proto__":{"polluted":"yes"},"title":"hi"}');
+  const cleaned = H.sanitizeMeta(evil);
+  const target = {};
+  Object.assign(target, cleaned);
+  ok(target.polluted===undefined && Object.getPrototypeOf(target)===Object.prototype,
+    "sanitizeMeta() strips an own '__proto__' key so Object.assign can't repoint the target's prototype");
+  ok(cleaned.title==='hi', 'sanitizeMeta() still passes through legitimate whitelisted keys');
+}
+
 /* ---- Round 494: RANKS table gains a Raycasts category (added upstream in the pinned 2026-04-21 sync) ---- */
 {
   // Verified directly against creators.vrchat.com's "Performance Ranks" doc (2026-04-21 sync,

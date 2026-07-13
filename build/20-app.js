@@ -53,7 +53,13 @@ function loadState(){
       return;
     }
     params = HINA.sanitize(j.params);
-    if (j.meta && typeof j.meta==='object') Object.assign(meta, j.meta);
+    // Round 495: must go through sanitizeMeta() like params/exprMix below — j.meta is raw,
+    // untrusted-origin data (localStorage can be tampered by a rogue extension, DevTools, or a
+    // prior same-origin page) and Object.assign(meta, j.meta) with an own "__proto__" key from
+    // JSON.parse reassigns meta's prototype via the Annex B [[Set]] accessor, the exact class of
+    // bug Round 469 fixed for deserialize()'s paste/file-load/drag-drop paths — this was the one
+    // remaining site still doing a raw merge.
+    Object.assign(meta, HINA.sanitizeMeta(j.meta));
     if (j.lang==='en' || j.lang==='ja') lang = j.lang;
     if (j.mode==='detail') mode = 'detail';
     if (j.activeTab && TABS.includes(j.activeTab)) activeTab = j.activeTab;
