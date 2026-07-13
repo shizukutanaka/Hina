@@ -5,8 +5,8 @@
 この文書は、AIコーディングセッション（コミット履歴上「Round 464」〜「Round 477」と呼ぶ14回の改善サイクル）で実施した機能監査の結果を、**前提知識のない後続セッションが読んで作業を引き継げる形**で記録したものである。Round 479 で §3-1 の表情エディタ、Round 481 で複数段Undo/Redoを実装したため、両項目を §2 へ移動済み。Round 490 で §5-8（当時「対応不要」と判定したチェックボックスのタッチターゲット）が WCAG 2.2 の新設基準により再判定・対応済みとなったため、同項目も §2 へ移動済み。
 
 - 「Round N」はコミットメッセージ先頭の通し番号。`git log --oneline` で対応コミットを特定できる
-- 本文書更新時点のテスト数は **1939 passed / 0 failed**（`node tests/run.js`）
-- 次に新しい変更を行う場合の通し番号は **Round 496**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加、Round 494 = RANKSテーブルにRaycastsカテゴリ追加（外部一次ソース照合で発見）、Round 495 = loadState()のmetaマージがsanitizeMeta()を経由していなかったprototype pollution修正）
+- 本文書更新時点のテスト数は **1944 passed / 0 failed**（`node tests/run.js`）
+- 次に新しい変更を行う場合の通し番号は **Round 497**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加、Round 494 = RANKSテーブルにRaycastsカテゴリ追加（外部一次ソース照合で発見）、Round 495 = loadState()のmetaマージがsanitizeMeta()を経由していなかったprototype pollution修正、Round 496 = スライダーのHome/End/PageUp/PageDownがcaptureUndo()を呼んでいなかった不具合修正）
 
 ## 1. プロダクト概要と交渉不可制約
 
@@ -94,14 +94,15 @@
 | 487 | 3つの非同期ボタン（doExport/doScreenshot/saveJson）を比較して発見: doExport・doScreenshotはいずれも非同期ギャップの前に「ボタンがフォーカスされていたか」を記録し、完了後にフォーカスを復元する（無効化されたコントロールはフォーカスを`<body>`へ落とすブラウザの標準挙動への対策）。saveJson()も同じく非同期の`showSaveFilePicker`前にボタンを無効化するが、フォーカスの記録・復元が一切なかった（成功・ユーザーによるキャンセル(AbortError)・書込失敗時の`<a download>`フォールバックの全経路で未対応）。キーボード/スクリーンリーダーユーザーは「パラメータ保存」を押すたびにフォーカスを失い、隣接する見た目がほぼ同じ「VRM書き出し」「PNG」ボタンとの体験差があった（WCAG 2.4.3）。`_wasFocused`をボタン無効化前に記録し、共有クリーンアップ関数`_done()`（2箇所の呼び出しで3つの終了経路すべてをカバー）でフォーカスを復元するよう修正 | `build/20-app.js` の `saveJson()` 内 `_wasFocused` / `_done()` |
 | 488 | `paramRow()`の詳細モード数値入力（`onchange`）は範囲外/非数値入力を`aria-invalid`+`aria-errormessage`+`showErr(a11y.clamped)`で常にアナウンスし1.5秒後に自動クリアするが、表情エディタ（Round 479）の同型の数値入力（各ミックススライダーに併設）は全く同じクランプ処理をしながらアナウンスが一切なかった。スクリーンリーダーユーザーが0-100の重み欄に「500」と入力すると無音で100に補正され、他タブの見た目が同一のフィールドとの体験差があった。`paramRow`と同一の`_announce()`パターンを移植（新規i18nキー不要、既存の`a11y.clamped`を再利用）。非数値入力時のフォールバック値は、レンダリング時にクロージャされた古い値ではなく`exprMix[name][morphKey]`から都度読む現在値に修正（`paramRow`が`params[k]`という生きた状態を読む方式と一致） | `build/20-app.js` の `renderExprEditor()` 内 `numEl` の `onchange` |
 
-### Undo取りこぼし（2件・Round 491）
+### Undo取りこぼし（3件・Round 491, 496）
 
-「captureUndo()が既にある同型フィールド群の中で、1つだけ抜けている箇所」を横並び比較で探す監査を行い、同一パターンの取りこぼしを2箇所発見。まとめて1ラウンドで修正（Round 461/463の前例と同型: 同一修正パターンを複数箇所へ適用）。
+「captureUndo()が既にある同型フィールド群の中で、1つだけ抜けている箇所」を横並び比較で探す監査を行い、同一パターンの取りこぼしを複数発見。まとめて1ラウンドで修正（Round 461/463の前例と同型: 同一修正パターンを複数箇所へ適用）。
 
-| 内容 | アンカー |
-|------|---------|
-| 出力タブのメタデータテキスト入力を横並び比較して発見: 共通ヘルパー`txt()`（バージョン/作者/連絡先/参考URL）と手書きの`meta.title`入力はいずれも`onfocus:()=>captureUndo()`で編集前状態をスナップショットするが、ライセンスURL欄（`licUrlInp`、license==='Other'選択時のみ表示）だけ`oninput`と`onblur`検証はあるのに`onfocus`のcaptureUndo()が皆無だった。セッション最初の編集としてライセンスURLを書き換えると、見た目上は変更されているのにCtrl+Zが「元に戻す対象なし」を報告する（またはセッション後半では無関係な古い状態へ復元してしまう）。5つの兄弟フィールドと同じ`onfocus:()=>captureUndo()`を追加 | `build/20-app.js` の `licUrlInp` |
-| ネイティブ`<input type=range>`は矢印キー操作時に`pointerdown`を一切発火せず直接`input`イベントのみ発火するため、`onpointerdown`だけでキー操作の編集前スナップショットは取れない。`paramRow()`の数値スライダーは`onkeydown`で矢印キーを検知し`captureUndo()`を呼ぶ対策済みだが、表情エディタ（Round 479）の各ミックス重みスライダーは`onpointerdown`のみで`onkeydown`が皆無だった。キーボード専用/スクリーンリーダーユーザーが矢印キーで重みを調整すると編集前状態が一切保存されず、直後のCtrl+Zが機能しない。`paramRow`と同じ`onkeydown:e=>{ if(/^Arrow/.test(e.key)) captureUndo(); }`を追加（`paramRow`側にある同キーでのデフォルト値リセット機能は、表情ミックスに「デフォルト値」という概念自体が存在しないため移植対象外） | `build/20-app.js` の `renderExprEditor()` 内 `r`（範囲スライダー） |
+| Round | 内容 | アンカー |
+|-------|------|---------|
+| 491 | 出力タブのメタデータテキスト入力を横並び比較して発見: 共通ヘルパー`txt()`（バージョン/作者/連絡先/参考URL）と手書きの`meta.title`入力はいずれも`onfocus:()=>captureUndo()`で編集前状態をスナップショットするが、ライセンスURL欄（`licUrlInp`、license==='Other'選択時のみ表示）だけ`oninput`と`onblur`検証はあるのに`onfocus`のcaptureUndo()が皆無だった。セッション最初の編集としてライセンスURLを書き換えると、見た目上は変更されているのにCtrl+Zが「元に戻す対象なし」を報告する（またはセッション後半では無関係な古い状態へ復元してしまう）。5つの兄弟フィールドと同じ`onfocus:()=>captureUndo()`を追加 | `build/20-app.js` の `licUrlInp` |
+| 491 | ネイティブ`<input type=range>`は矢印キー操作時に`pointerdown`を一切発火せず直接`input`イベントのみ発火するため、`onpointerdown`だけでキー操作の編集前スナップショットは取れない。`paramRow()`の数値スライダーは`onkeydown`で矢印キーを検知し`captureUndo()`を呼ぶ対策済みだが、表情エディタ（Round 479）の各ミックス重みスライダーは`onpointerdown`のみで`onkeydown`が皆無だった。キーボード専用/スクリーンリーダーユーザーが矢印キーで重みを調整すると編集前状態が一切保存されず、直後のCtrl+Zが機能しない。`paramRow`と同じ`onkeydown:e=>{ if(/^Arrow/.test(e.key)) captureUndo(); }`を追加（`paramRow`側にある同キーでのデフォルト値リセット機能は、表情ミックスに「デフォルト値」という概念自体が存在しないため移植対象外） | `build/20-app.js` の `renderExprEditor()` 内 `r`（範囲スライダー） |
+| 496 | Round 491は「ネイティブrange inputはキー操作でpointerdownを発火しない」という正しい診断をしたが、対象を`/^Arrow/`（矢印キーのみ）に限定していた。ネイティブ`<input type=range>`はHome（最小値へジャンプ）・End（最大値へジャンプ）・PageUp/PageDown（大きい単位でステップ）でも同様に`pointerdown`なしで`input`を直接発火する——矢印キーと全く同じ抜け穴のクラスだが対象キー集合が違うだけで、Round 491時点の`paramRow()`側の元実装・表情ミックス側の修正のどちらにも存在しなかった。キーボード/スクリーンリーダーユーザーがEndキーでスライダーを最大値へジャンプさせると編集前状態が一切保存されず、直後のCtrl+Zが機能しない、または無関係な古い状態へ復元する。矢印4種+Home/End/PageUp/PageDownの8キーを`RANGE_JUMP_KEYS`という単一情報源のSetへまとめ（Round 492/493と同型のパターン）、`paramRow()`・表情ミックス双方のスライダーの`onkeydown`がこれを参照するよう統一 | `build/20-app.js` の `RANGE_JUMP_KEYS` / `paramRow()` / `renderExprEditor()` |
 
 ## 3. 未対応の不足（優先順位順）
 

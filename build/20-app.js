@@ -14,6 +14,12 @@ let activePresetId = null, lastGachaSeed = null;
 // Shared by loadState(), the ?seed= URL parser, and the manual seed <input> (Round 493) so the
 // three sites that assign lastGachaSeed can't drift out of sync on what counts as valid.
 function clampSeed(v){ const n=Math.round(Number(v)); return (Number.isFinite(n)&&n>=0) ? Math.min(n,4294967295) : null; }
+// Native <input type=range> mutates its value (firing 'input' directly, with no preceding
+// 'pointerdown') on Arrow keys AND Home/End/PageUp/PageDown — all five are "jump" keys, not just
+// Arrow*. Round 491 added onkeydown captureUndo() for Arrow keys on both sliders below but missed
+// Home/End/PageUp/PageDown, the same class of gap under a different key set (Round 496). Shared
+// here so both sliders can't drift on which keys count as an edit needing a pre-edit snapshot.
+const RANGE_JUMP_KEYS = new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown']);
 // Round 476: gacha category locks — full reroll only ever replaced everything; users who liked
 // 90% of a result had no way to keep it. Locked categories are excluded from the reroll.
 const GACHA_LOCK_TABS = ['body','face','hair','outfit','color'];
@@ -802,7 +808,7 @@ function paramRow(k){
         if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
         onParam(k);
         const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.sliderReset').replace('{label}',label).replace('{v}',s.def); },
-      onkeydown:e=>{ if(/^Arrow/.test(e.key)){ captureUndo(); return; }
+      onkeydown:e=>{ if(RANGE_JUMP_KEYS.has(e.key)){ captureUndo(); return; }
         if(e.key!=='Delete'&&e.key!=='Backspace') return; e.preventDefault();
         captureUndo(); params[k]=s.def; r.value=String(s.def);
         r.setAttribute('aria-valuetext',String(s.def));
@@ -947,7 +953,7 @@ function renderExprEditor(bd){
       const r = el('input',{id:rid, type:'range', min:0, max:100, step:1, value:v,
         'aria-label':rowLabel, 'aria-valuetext':String(v),
         onpointerdown:()=>captureUndo(),
-        onkeydown:e=>{ if(/^Arrow/.test(e.key)) captureUndo(); },
+        onkeydown:e=>{ if(RANGE_JUMP_KEYS.has(e.key)) captureUndo(); },
         oninput:e=>{ const n=Math.round(Number(e.target.value));
           r.setAttribute('aria-valuetext',String(n)); if(numEl) numEl.value=String(n);
           applyValue(n); }});

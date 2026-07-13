@@ -5671,17 +5671,20 @@ function accData(j, bin, ai){
 
 /* ---- Round 329: range slider arrow-key presses capture undo (keyboard-only path) ---- */
 {
-  // The range slider's onkeydown should call captureUndo() for Arrow keys, not just Delete/Backspace
-  ok(/Arrow.*captureUndo\(\)|\/\^Arrow\/.*captureUndo/.test(html),
-    'range slider onkeydown calls captureUndo() on arrow keys (keyboard-only undo capture)');
+  // Round 496 generalized the key check from a bare /^Arrow/ regex to the shared RANGE_JUMP_KEYS
+  // set (Arrow* plus Home/End/PageUp/PageDown, all of which mutate a native range input without
+  // a preceding pointerdown) — updated this test's literal string search accordingly so it isn't
+  // silently vacuous now that '/^Arrow/' no longer appears in the source.
+  ok(/RANGE_JUMP_KEYS\.has\(e\.key\)\)\{ captureUndo\(\); return; \}/.test(html),
+    'range slider onkeydown calls captureUndo() on jump keys (keyboard-only undo capture)');
 
-  // Arrow key handler must NOT call e.preventDefault() (allow native slider movement)
+  // Jump-key handler must NOT call e.preventDefault() (allow native slider movement)
   const arrowBlock = (() => {
-    const idx = html.indexOf('/^Arrow/');
+    const idx = html.indexOf('RANGE_JUMP_KEYS.has(e.key)){ captureUndo(); return; }');
     return idx >= 0 ? html.slice(idx, idx + 80) : '';
   })();
-  ok(!arrowBlock.includes('preventDefault()'),
-    'arrow key captureUndo branch does NOT call preventDefault (native slider movement must work)');
+  ok(arrowBlock!=='' && !arrowBlock.includes('preventDefault()'),
+    'jump-key captureUndo branch does NOT call preventDefault (native slider movement must work)');
 }
 
 /* ---- Round 330: language toggle announces new lang context to srStatus ---- */
@@ -6670,6 +6673,28 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 496: slider Home/End/PageUp/PageDown now capture undo too, not just Arrow keys ---- */
+{
+  // Native <input type=range> jumps to min/max on Home/End and takes a larger step on
+  // PageUp/PageDown — all fire 'input' directly with no preceding 'pointerdown', the exact same
+  // keyboard-bypasses-pointerdown class of gap Round 491 fixed for Arrow keys specifically.
+  // Round 491's fix (and the original paramRow() reference implementation before it) only ever
+  // checked /^Arrow/, so Home/End/PageUp/PageDown slipped through on both sliders.
+  ok(html.includes("const RANGE_JUMP_KEYS = new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown']);"),
+    'RANGE_JUMP_KEYS defines the full native range-input jump key set once, shared by both sliders');
+  ok(/onkeydown:e=>\{ if\(RANGE_JUMP_KEYS\.has\(e\.key\)\)\{ captureUndo\(\); return; \}/.test(html),
+    "paramRow()'s slider captures undo for the full jump-key set, not just Arrow*");
+  ok(/onkeydown:e=>\{ if\(RANGE_JUMP_KEYS\.has\(e\.key\)\) captureUndo\(\); \}/.test(html),
+    "expression-mix slider captures undo for the full jump-key set, not just Arrow*");
+  // Behavioral: the actual Set instance recognizes every native range-input jump key and nothing
+  // unrelated (e.g. a plain letter key shouldn't false-positive and spam captureUndo()).
+  const RANGE_JUMP_KEYS = new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown']);
+  ok(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'].every(k=>RANGE_JUMP_KEYS.has(k)),
+    'RANGE_JUMP_KEYS recognizes every native range-input jump key');
+  ok(!RANGE_JUMP_KEYS.has('a') && !RANGE_JUMP_KEYS.has('Tab') && !RANGE_JUMP_KEYS.has('Enter'),
+    'RANGE_JUMP_KEYS does not false-positive on unrelated keys (Tab/Enter must not trigger captureUndo spam)');
+}
+
 /* ---- Round 495: loadState()'s meta merge now goes through sanitizeMeta() like its siblings ---- */
 {
   // loadState() sits between two sibling lines that already sanitize untrusted localStorage
@@ -6785,11 +6810,12 @@ function accData(j, bin, ai){
     'license URL input calls captureUndo() on focus, matching the other metadata text fields');
   // Native <input type=range> fires 'input' directly on Arrow-key presses without any pointer
   // event, so onpointerdown alone never captures a keyboard user's pre-edit state. paramRow()'s
-  // slider (line ~795) already has onkeydown:e=>{ if(/^Arrow/.test(e.key)) captureUndo(); ... }
-  // — the expr-mix slider only had onpointerdown, so keyboard-only/SR users adjusting a mix
-  // weight with arrow keys left no undo snapshot at all.
-  ok(/id:rid, type:'range', min:0, max:100, step:1, value:v[\s\S]{0,220}onkeydown:e=>\{ if\(\/\^Arrow\/\.test\(e\.key\)\) captureUndo\(\); \}/.test(html),
-    'expression-mix range slider calls captureUndo() on Arrow-key input, mirroring paramRow()\'s slider');
+  // slider already has onkeydown Arrow-key handling — the expr-mix slider only had onpointerdown,
+  // so keyboard-only/SR users adjusting a mix weight with arrow keys left no undo snapshot at all.
+  // Round 496 further generalized both sliders' key checks to RANGE_JUMP_KEYS (also covers
+  // Home/End/PageUp/PageDown, which Round 491 didn't yet account for); regex updated to match.
+  ok(/id:rid, type:'range', min:0, max:100, step:1, value:v[\s\S]{0,220}onkeydown:e=>\{ if\(RANGE_JUMP_KEYS\.has\(e\.key\)\) captureUndo\(\); \}/.test(html),
+    'expression-mix range slider calls captureUndo() on jump-key input, mirroring paramRow()\'s slider');
 }
 
 /* ---- Round 490: swatch/checkbox targets meet WCAG 2.2 SC 2.5.8 Target Size (Minimum), AA ---- */
