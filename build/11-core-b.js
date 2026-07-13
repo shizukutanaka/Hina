@@ -281,7 +281,6 @@ function buildAvatar(p){
 
   /* outfit */
   const skirtTop=hipsY+0.035*H, skirtLenW = (0.10+0.10*p.skirtLen)*H;
-  const hasSkirt = p.outfit==='onepiece' || p.outfit==='sailor';
   const topUv = p.outfit==='shirts' ? uC2 : uC;
   // top shell
   latheY(g, [
@@ -293,7 +292,7 @@ function buildAvatar(p){
     if (i===1 && Math.sin(th)<-0.25) pos[2] -= p.bust*0.05*H*(-Math.sin(th)-0.25);
     return {p:pos};
   });
-  if (hasSkirt){
+  if (hasSkirt(p.outfit)){
     latheY(g, [
       {y:skirtTop, rx:hipR*1.10, rz:hipR*0.92, skin:[[idx.hips,1]]},
       {y:skirtTop-skirtLenW*0.5, rx:hipR*1.35, rz:hipR*1.15, skin:[[idx.hips,1]]},

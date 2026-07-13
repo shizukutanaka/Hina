@@ -395,7 +395,7 @@ function selfTest(){
 
 return {
   VERSION, M, hex2rgb, shade, HEXRE, PAL, PAL_NAMES,
-  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams,
+  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams, SKIRT_OUTFITS, hasSkirt,
   I18N, TEX, ATLAS, uvBlock, uvRect,
   RANKS, RANK_NAMES, estimate, rank,
   serialize, deserialize, sanitizeMeta, META_ENUMS, PNG1, b64ToBytes,

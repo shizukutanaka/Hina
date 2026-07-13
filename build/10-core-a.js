@@ -140,6 +140,14 @@ const PARAMS = {
   hairDrag:  {k:'num', min:0, max:1, def:0.4, step:0.01, tab:'phys', ja:'減衰', en:'Drag'},
 };
 
+// Round 503: single source of truth for "which outfits render a skirt mesh". Previously
+// build/11-core-b.js's hasSkirt (geometry: does this outfit get the skirt latheY()) and
+// build/20-app.js's skirtLen-row visibility check were two independently hand-written literals
+// that happened to agree today but had nothing forcing them to stay in sync — the only existing
+// test (tests/run.js, pre-Round-503) checked that the substrings 'skirtLen'/'onepiece'/'sailor'
+// merely appeared in the file, not that the two lists were actually equal to each other.
+const SKIRT_OUTFITS = ['onepiece','sailor'];
+const hasSkirt = outfit => SKIRT_OUTFITS.includes(outfit);
 function defaults(){ const p={}; for(const k in PARAMS) p[k]=PARAMS[k].def; return p; }
 
 function sanitize(p){

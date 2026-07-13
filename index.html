@@ -351,6 +351,14 @@ const PARAMS = {
   hairDrag:  {k:'num', min:0, max:1, def:0.4, step:0.01, tab:'phys', ja:'減衰', en:'Drag'},
 };
 
+// Round 503: single source of truth for "which outfits render a skirt mesh". Previously
+// build/11-core-b.js's hasSkirt (geometry: does this outfit get the skirt latheY()) and
+// build/20-app.js's skirtLen-row visibility check were two independently hand-written literals
+// that happened to agree today but had nothing forcing them to stay in sync — the only existing
+// test (tests/run.js, pre-Round-503) checked that the substrings 'skirtLen'/'onepiece'/'sailor'
+// merely appeared in the file, not that the two lists were actually equal to each other.
+const SKIRT_OUTFITS = ['onepiece','sailor'];
+const hasSkirt = outfit => SKIRT_OUTFITS.includes(outfit);
 function defaults(){ const p={}; for(const k in PARAMS) p[k]=PARAMS[k].def; return p; }
 
 function sanitize(p){
@@ -941,7 +949,6 @@ function buildAvatar(p){
 
   /* outfit */
   const skirtTop=hipsY+0.035*H, skirtLenW = (0.10+0.10*p.skirtLen)*H;
-  const hasSkirt = p.outfit==='onepiece' || p.outfit==='sailor';
   const topUv = p.outfit==='shirts' ? uC2 : uC;
   // top shell
   latheY(g, [
@@ -953,7 +960,7 @@ function buildAvatar(p){
     if (i===1 && Math.sin(th)<-0.25) pos[2] -= p.bust*0.05*H*(-Math.sin(th)-0.25);
     return {p:pos};
   });
-  if (hasSkirt){
+  if (hasSkirt(p.outfit)){
     latheY(g, [
       {y:skirtTop, rx:hipR*1.10, rz:hipR*0.92, skin:[[idx.hips,1]]},
       {y:skirtTop-skirtLenW*0.5, rx:hipR*1.35, rz:hipR*1.15, skin:[[idx.hips,1]]},
@@ -1604,7 +1611,7 @@ function selfTest(){
 
 return {
   VERSION, M, hex2rgb, shade, HEXRE, PAL, PAL_NAMES,
-  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams,
+  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams, SKIRT_OUTFITS, hasSkirt,
   I18N, TEX, ATLAS, uvBlock, uvRect,
   RANKS, RANK_NAMES, estimate, rank,
   serialize, deserialize, sanitizeMeta, META_ENUMS, PNG1, b64ToBytes,
@@ -2754,7 +2761,7 @@ function renderBody(scrollReset=true){
     const s=PARAMS[k];
     if (s.tab!==activeTab) continue;
     if (mode==='easy' && s.adv) continue;
-    if (k==='skirtLen' && !['onepiece','sailor'].includes(params.outfit)) continue;
+    if (k==='skirtLen' && !HINA.hasSkirt(params.outfit)) continue;
     if (['hairStiff','hairGrav','hairDrag'].includes(k) && params.springOff) continue;
     bd.append(paramRow(k));
   }

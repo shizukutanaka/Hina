@@ -230,9 +230,24 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   ok(H.I18N.ja['st.chains'] && H.I18N.en['st.chains'], 'st.chains (pbComp) label in both languages');
   ok(html.includes("'st.chains','pbComp'") || html.includes('"st.chains","pbComp"'),
     'stat table has st.chains row wired to pbComp so users can see why Quest rank drops with springs');
-  // skirtLen must be hidden for non-skirt outfits (shirts / hoodie have no skirt)
-  ok(/k\s*===\s*['"]skirtLen['"]/.test(html) && /onepiece.*sailor|sailor.*onepiece/.test(html),
-    'skirtLen hidden when outfit has no skirt (shirts/hoodie)');
+  // skirtLen must be hidden for non-skirt outfits (shirts / hoodie have no skirt).
+  // Round 503: this used to only check that 'skirtLen'/'onepiece'/'sailor' substrings appeared
+  // in the file — a hollow verification that couldn't tell the UI-visibility list and the
+  // geometry's hasSkirt() had actually drifted apart (they were two independently hand-written
+  // literals that happened to agree). Now checks the UI condition calls the shared HINA.hasSkirt()
+  // helper, AND behaviorally verifies every PARAMS.outfit.opts value against skirt geometry
+  // presence — the real ground truth — so a future outfit addition can't silently desync the two.
+  ok(/k===\s*'skirtLen'\s*&&\s*!HINA\.hasSkirt\(params\.outfit\)/.test(html),
+    "skirtLen row visibility check calls the shared HINA.hasSkirt() helper, not an independent literal list");
+  for (const outfit of H.PARAMS.outfit.opts){
+    // skirtLen only shifts the skirt ring Y-positions (topology/triangle count is fixed either
+    // way), so compare vertex POSITIONS — not triangle count — between the slider's extremes.
+    const posLo = H.buildAvatar(Object.assign(H.defaults(), {outfit, skirtLen:0.6})).geom.pos;
+    const posHi = H.buildAvatar(Object.assign(H.defaults(), {outfit, skirtLen:1.6})).geom.pos;
+    const differs = posLo.length!==posHi.length || posLo.some((v,i)=>v!==posHi[i]);
+    ok(H.hasSkirt(outfit) === differs,
+      `HINA.hasSkirt('${outfit}') matches whether skirtLen actually affects geometry (vertex positions change with skirtLen only when a skirt is present)`);
+  }
   // every license option has a user-readable localized label (not raw technical id)
   const licenseOpts = ['Redistribution_Prohibited','CC0','CC_BY','CC_BY_NC','CC_BY_SA','CC_BY_NC_SA','CC_BY_ND','CC_BY_NC_ND','Other'];
   ok(licenseOpts.every(l => H.I18N.ja['license.'+l] && H.I18N.en['license.'+l]), 'all license options have ja+en labels');
