@@ -3097,7 +3097,19 @@ async function doExport(){
       if (_exportFocusWasBtn && _exportBtn.isConnected) _exportBtn.focus(); }
   }
 }
+let _savingJson = false;
 async function saveJson(){
+  // Round 504: doExport()/doScreenshot() both self-guard against re-entry (_exporting/
+  // _screenshotting) before doing anything — saveJson() didn't. btn.disabled only blocks a
+  // second mouse click (browsers suppress click on disabled controls); it does nothing against
+  // the Ctrl+Shift+S keyboard shortcut, which fires from document regardless of the button's
+  // state. A user double-pressing the shortcut (or clicking then pressing it) between
+  // showSaveFilePicker() resolving and w.close() resolving could launch two independent
+  // serialize+write sequences targeting the same suggested filename; whichever close() resolves
+  // last wins with no ordering guarantee, so a *staler* snapshot could silently overwrite a
+  // newer one while the SR announcement from the later call falsely reports success.
+  if (_savingJson) return;
+  _savingJson = true;
   const btn=$('btnSaveJson');
   // Disabling a focused control drops focus to <body> (standard browser behavior) — btn is
   // disabled below BEFORE the async showSaveFilePicker gap even opens, so without restoring
@@ -3105,7 +3117,7 @@ async function saveJson(){
   // and doScreenshot() already capture+restore focus around their own async gaps; this mirrors it.
   const _wasFocused = btn && document.activeElement===btn;
   if(btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
-  const _done=()=>{ if(btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); if(_wasFocused && btn.isConnected) btn.focus(); } };
+  const _done=()=>{ _savingJson=false; if(btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); if(_wasFocused && btn.isConnected) btn.focus(); } };
   const fname=fnameStem()+'.hina.json';
   const bytes=new TextEncoder().encode(HINA.serialize(params,meta,exprMix));
   if (typeof window.showSaveFilePicker==='function'){ try { const h=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Hina JSON',accept:{'application/json':['.json']}}]}); const w=await h.createWritable(); await w.write(new Blob([bytes],{type:'application/json'})); await w.close(); } catch(e){ _done(); if(e.name==='AbortError') return; download(bytes,fname,'application/json'); const sr2=$('srStatus'); if(sr2) sr2.textContent=t('a11y.savedJson').replace('{name}',fname); return; } } else { download(bytes,fname,'application/json'); }
