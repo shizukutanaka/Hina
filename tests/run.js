@@ -6673,6 +6673,33 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 497: gacha-lock checkboxes actually reach the 24px WCAG 2.2 SC 2.5.8 rule ---- */
+{
+  // Round 490 believed ".row input[type=checkbox]{width:24px;height:24px}" covered every
+  // checkbox in the app, including the gacha-lock checkboxes (Round 476). It didn't: lockWrap
+  // and the per-lock <label> only ever carry a `style:` attribute, never `class:'row'` — el()
+  // (defined above) only sets className when a 'class' key is explicitly passed, so a .row
+  // *descendant* selector structurally cannot match markup with no .row ancestor anywhere in
+  // its chain. These 5 checkboxes rendered at the browser's native default size (well under
+  // 24px) on every build from Round 476 onward, undetected because the old test only checked
+  // that the CSS rule text existed somewhere in the file, never that it actually applied to
+  // this markup — a vacuous test in the same spirit as Round 496's stale-literal finding.
+  const lockIdx = html.indexOf("const lockWrap=el('div',{style:'margin-top:6px");
+  ok(lockIdx>=0, 'gacha-lock lockWrap construction found in source');
+  const lockChunk = html.slice(lockIdx, lockIdx+700);
+  ok(!/class:'row'/.test(lockChunk),
+    'lockWrap/label genuinely have no class:\'row\' (confirms this was a real, not hypothetical, gap)');
+  // The fix: the CSS rule is no longer .row-scoped, so it applies to input[type=checkbox]
+  // anywhere in the document — including this un-classed markup — without needing lockWrap or
+  // the label to carry any class at all.
+  ok(/(?<!\.row )input\[type=checkbox\]\{width:24px;height:24px;accent-color:var\(--accent\)\}/.test(html),
+    'checkbox 24px rule is NOT .row-scoped, so it reaches the gacha-lock checkboxes with no markup change needed');
+  // Regression guard: the .row-wrapped bool PARAMS checkbox (paramRow(), the only other checkbox
+  // in the app) must still be sized correctly now that the rule is broader, not narrower.
+  ok(/if \(s\.k==='bool'\)\{[\s\S]{0,200}type:'checkbox'/.test(html),
+    'the sibling bool-param checkbox (paramRow()) still exists and remains covered by the un-scoped rule');
+}
+
 /* ---- Round 496: slider Home/End/PageUp/PageDown now capture undo too, not just Arrow keys ---- */
 {
   // Native <input type=range> jumps to min/max on Home/End and takes a larger step on
@@ -6826,8 +6853,13 @@ function accData(j, bin, ai){
   // 44px) — under 2.2 AA this project's stated WCAG AA goal (SPEC.md §7) now covers it.
   ok(/\.sw\{width:24px;height:24px/.test(html),
     'color swatch buttons (.sw) are 24x24px, meeting SC 2.5.8 without relying on the spacing exception');
-  ok(/\.row input\[type=checkbox\]\{width:24px;height:24px/.test(html),
-    'row checkboxes are 24x24px, meeting SC 2.5.8 (also fixes gacha-lock checkboxes wrapping at <24px row gap)');
+  // Round 497: this rule was originally .row-scoped and never actually reached the gacha-lock
+  // checkboxes (see the Round 497 test block below) — the claim in this test's own description
+  // was unverified by the assertion itself (a vacuous test in the same spirit as Round 496's
+  // stale-literal finding, just via an unchecked claim rather than a refactored-away string).
+  // Un-scoped in Round 497; kept as a plain assertion that the declaration exists at all.
+  ok(/(?<!\.row )input\[type=checkbox\]\{width:24px;height:24px/.test(html),
+    'checkboxes are 24x24px, meeting SC 2.5.8 (not .row-scoped — see Round 497)');
   // Regression guard: Round 473's coarse-pointer .eBtn bump to 36px must still exceed 24px
   ok(/\.eBtn\{min-width:30px;min-height:24px/.test(html),
     '.eBtn keeps its existing 24px min-height (already SC 2.5.8-compliant, unaffected by this round)');
