@@ -1713,15 +1713,23 @@ document.addEventListener('keydown',e=>{
   const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag) && !document.activeElement.isContentEditable;
   const dlgOpen = $('aboutDlg').open;
   if (!dlgOpen){
-    if ((e.ctrlKey||e.metaKey) && e.key==='S' && e.shiftKey && notField){
+    // Round 507: KeyboardEvent.key reflects Caps Lock state for letter keys — e.g. the 's' key
+    // reports as 'S' with Caps Lock on and no Shift, and back to 's' with Caps Lock + Shift
+    // together (the two invert-case effects cancel out). Comparing against a fixed-case literal
+    // made every shortcut below silently no-op whenever Caps Lock was on, in EITHER Shift state,
+    // since neither branch's case-sensitive key check could ever match. Lowercasing letter keys
+    // and using e.shiftKey as the sole (case-independent) discriminator fixes every one of them
+    // at once — the same pattern the 'm'/'M' mode-toggle shortcut a few lines below already used.
+    const key = e.key.length===1 ? e.key.toLowerCase() : e.key;
+    if ((e.ctrlKey||e.metaKey) && key==='s' && e.shiftKey && notField){
       e.preventDefault(); saveJson();
-    } else if ((e.ctrlKey||e.metaKey) && e.key==='s' && !e.shiftKey && notField){
+    } else if ((e.ctrlKey||e.metaKey) && key==='s' && !e.shiftKey && notField){
       e.preventDefault(); doExport();
-    } else if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey && notField){
+    } else if ((e.ctrlKey||e.metaKey) && key==='z' && !e.shiftKey && notField){
       e.preventDefault(); doUndo();
-    } else if ((e.ctrlKey||e.metaKey) && e.key==='Z' && e.shiftKey && notField){
+    } else if ((e.ctrlKey||e.metaKey) && key==='z' && e.shiftKey && notField){
       e.preventDefault(); doRedo();
-    } else if ((e.ctrlKey||e.metaKey) && e.key==='P' && e.shiftKey && notField){
+    } else if ((e.ctrlKey||e.metaKey) && key==='p' && e.shiftKey && notField){
       e.preventDefault(); doScreenshot();
     }
     if (e.key==='?' && !e.ctrlKey && !e.metaKey && notField){

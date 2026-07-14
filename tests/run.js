@@ -60,7 +60,10 @@ ok(H.I18N.ja['out.contact'] && H.I18N.en['out.contact'], 'VRM contact field labe
 ok(H.I18N.ja['out.reference'] && H.I18N.en['out.reference'], 'VRM reference field label in both languages');
 ok(H.I18N.ja['out.filename'] && H.I18N.en['out.filename'], 'out.filename label in both languages');
 ok(html.includes('--text-faint:#7a868f'), 'text-faint color meets WCAG AA contrast ratio on dark bg');
-ok(html.includes("ctrlKey||e.metaKey") && html.includes("e.key==='s'"), 'Ctrl/Cmd+S shortcut wired to export');
+// Round 507: e.key was compared directly; now normalized into a local `key` (lowercased) so the
+// shortcut isn't broken by Caps Lock (KeyboardEvent.key reflects Caps Lock's case inversion for
+// letter keys, which a fixed-case literal comparison can never match in either Shift state).
+ok(html.includes("ctrlKey||e.metaKey") && html.includes("key==='s'"), 'Ctrl/Cmd+S shortcut wired to export');
 ok(html.includes("'for':id") || html.includes('"for":id'), 'Export tab labels have for attribute (WCAG 1.3.1)');
 ok(html.includes("'meta-title'") || html.includes('"meta-title"'), 'title input has id for label association');
 ok(H.I18N.ja['hint.ctrlS'] && H.I18N.en['hint.ctrlS'], 'Ctrl+S hint label in both languages');
@@ -1470,8 +1473,8 @@ function accData(j, bin, ai){
   ok(html.includes('function doUndo()') || html.includes('doUndo=function'),
     'doUndo() function defined in app source');
 
-  // Ctrl+Z triggers doUndo
-  ok(/e\.key==='z'[\s\S]{0,80}doUndo/.test(html),
+  // Ctrl+Z triggers doUndo (Round 507: key is the Caps-Lock-normalized local, not e.key directly)
+  ok(/key==='z'[\s\S]{0,80}doUndo/.test(html),
     'Ctrl+Z key handler calls doUndo()');
 
   // Slider onpointerdown captures undo
@@ -1505,8 +1508,10 @@ function accData(j, bin, ai){
   ok(outerM && parseFloat(outerM[1]) * 1.5 < 0.5,
     'mouth outer ellipse at mouthW=1.5 stays within atlas half-width (< 0.5*w)');
 
-  // Ctrl+Shift+S keyboard shortcut for JSON save
-  ok(/e\.key==='S'.*e\.shiftKey.*saveJson|shiftKey.*e\.key==='S'.*saveJson/.test(html.replace(/\s+/g,' ')),
+  // Ctrl+Shift+S keyboard shortcut for JSON save. Round 507: the branch now reads key==='s' (the
+  // Caps-Lock-normalized local, lowercased) && e.shiftKey — was e.key==='S' (fixed uppercase),
+  // which silently no-op'd whenever Caps Lock was on.
+  ok(/key==='s'.*e\.shiftKey.*saveJson|shiftKey.*key==='s'.*saveJson/.test(html.replace(/\s+/g,' ')),
     'Ctrl+Shift+S keyboard shortcut calls saveJson() (JSON parameter save)');
 
   // verify VRM Ctrl+S shortcut guards: !e.shiftKey appears before doExport call
@@ -4235,8 +4240,9 @@ function accData(j, bin, ai){
   ok(/function doScreenshot/.test(html), 'doScreenshot function present');
   ok(/cv\.toBlob/.test(html), 'doScreenshot uses canvas.toBlob() for PNG capture');
 
-  // Ctrl+Shift+P keyboard shortcut wired (not Ctrl+P which conflicts with Print)
-  ok(/ctrlKey.*&&.*key.*===.*'P'.*&&.*shiftKey/.test(html) || /shiftKey.*&&.*key.*===.*'P'.*&&.*ctrlKey/.test(html),
+  // Ctrl+Shift+P keyboard shortcut wired (not Ctrl+P which conflicts with Print). Round 507:
+  // key==='p' is now lowercase (the Caps-Lock-normalized local) — was e.key==='P' fixed uppercase.
+  ok(/ctrlKey.*&&.*key.*===.*'p'.*&&.*shiftKey/.test(html) || /shiftKey.*&&.*key.*===.*'p'.*&&.*ctrlKey/.test(html),
     'Ctrl+Shift+P keyboard shortcut triggers doScreenshot (avoids browser Print conflict)');
 
   // hint.ctrlS updated to include screenshot shortcut
@@ -6735,6 +6741,31 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 507: Ctrl(+Shift)+S/Z/P shortcuts no longer break when Caps Lock is on ---- */
+{
+  // KeyboardEvent.key reflects Caps Lock's case inversion for letter keys: e.g. pressing 's' with
+  // Caps Lock on and no Shift reports e.key as 'S', and pressing it with Caps Lock + Shift
+  // together reports 's' again (the two case-inversions cancel out). All 5 Ctrl(+Shift)+letter
+  // shortcuts (S/Shift+S/Z/Shift+Z/Shift+P) compared e.key against a single fixed-case literal,
+  // so every one of them silently no-op'd whenever Caps Lock was on, in EITHER Shift state — and
+  // since none of the conditions matched, e.preventDefault() was never called either, so e.g.
+  // Ctrl+S would fall through to the browser's native page-save dialog instead of exporting.
+  // Fixed by normalizing letter keys to lowercase once and using e.shiftKey as the sole
+  // case-independent discriminator — the same approach the 'm'/'M' mode-toggle shortcut a few
+  // lines below already used (checking both cases explicitly), generalized via normalization
+  // instead of duplicated branches.
+  ok(/const key = e\.key\.length===1 \? e\.key\.toLowerCase\(\) : e\.key;/.test(html),
+    'keydown handler normalizes single-character keys to lowercase before shortcut comparisons');
+  // All 5 shortcut branches must use the normalized `key`, not raw e.key, and none may compare
+  // against an uppercase letter literal (which would defeat the normalization).
+  const kdIdx = html.indexOf("document.addEventListener('keydown',e=>{");
+  const kdBlock = kdIdx>=0 ? html.slice(kdIdx, kdIdx+1600) : '';
+  ok(kdBlock.includes("key==='s'") && kdBlock.includes("key==='z'") && kdBlock.includes("key==='p'"),
+    "shortcut branches compare against lowercase key==='s'/'z'/'p' (not e.key, not uppercase)");
+  ok(!/key==='S'|key==='Z'|key==='P'/.test(kdBlock),
+    'no shortcut branch compares the normalized key against an uppercase letter literal');
+}
+
 /* ---- Round 505: doExport() snapshots the shared atlas canvas; doScreenshot() snapshots fname/title ---- */
 {
   // PRIMARY finding: doExport()'s own comment says "Snapshot all mutable state so slider/meta
@@ -7365,10 +7396,11 @@ function accData(j, bin, ai){
   ok(/sr\.textContent = noExprActive \? t\('a11y\.redone'\)/.test(drBlock),
     'R481: doRedo() announces a11y.redone to srStatus on success');
 
-  // Keyboard wiring: Ctrl/Cmd+Shift+Z → doRedo() (uppercase 'Z' + shiftKey, mirroring the existing
-  // Ctrl/Cmd+Shift+S pattern for saveJson — Shift+z produces the string 'Z' in KeyboardEvent.key)
-  ok(/\(e\.ctrlKey\|\|e\.metaKey\) && e\.key==='Z' && e\.shiftKey && notField\)\{\s*\n\s*e\.preventDefault\(\); doRedo\(\);/.test(html),
-    'R481: Ctrl/Cmd+Shift+Z triggers doRedo() (uppercase Z + shiftKey, not the lowercase undo branch)');
+  // Keyboard wiring: Ctrl/Cmd+Shift+Z → doRedo(). Round 507: was e.key==='Z' (fixed uppercase,
+  // silently no-op'd with Caps Lock on) — now key==='z' (the Caps-Lock-normalized local,
+  // lowercased) && e.shiftKey, mirroring the Ctrl/Cmd+Shift+S pattern for saveJson.
+  ok(/\(e\.ctrlKey\|\|e\.metaKey\) && key==='z' && e\.shiftKey && notField\)\{\s*\n\s*e\.preventDefault\(\); doRedo\(\);/.test(html),
+    'R481: Ctrl/Cmd+Shift+Z triggers doRedo() (lowercase-normalized z + shiftKey, not the undo branch)');
 
   // i18n: new keys in both languages, and the two existing shortcut-list strings updated
   for (const k of ['a11y.redone','a11y.noRedo']){
