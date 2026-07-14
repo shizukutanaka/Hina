@@ -1451,8 +1451,9 @@ function accData(j, bin, ai){
   ok(/captureUndo\(\);[\s\S]{0,30}params=d\.params/.test(html),
     'file-button JSON load calls captureUndo() before applying params');
 
-  // captureUndo wired to drag-and-drop load
-  const dropSection = html.slice(html.indexOf('addEventListener(\'drop\''), html.indexOf('addEventListener(\'drop\'')+600);
+  // captureUndo wired to drag-and-drop load (window widened in Round 509 for the activeExpr hint
+  // ternary added to the drop handler's opening lines)
+  const dropSection = html.slice(html.indexOf('addEventListener(\'drop\''), html.indexOf('addEventListener(\'drop\'')+1300);
   ok(/captureUndo/.test(dropSection),
     'drag-and-drop JSON load calls captureUndo() before applying params');
 
@@ -5625,9 +5626,9 @@ function accData(j, bin, ai){
   ok(/rd\.onload[\s\S]{0,380}a11y\.loadedJson/.test(html),
     'file-picker JSON load announces a11y.loadedJson (not savedJson) to srStatus');
 
-  // Drag-and-drop load path uses loadedJson
+  // Drag-and-drop load path uses loadedJson (window widened in Round 509, see above)
   const dropIdx = html.lastIndexOf("addEventListener('drop'");
-  const dropBlock = html.slice(dropIdx, dropIdx + 900);
+  const dropBlock = html.slice(dropIdx, dropIdx + 1600);
   ok(/a11y\.loadedJson/.test(dropBlock),
     'drag-and-drop JSON load announces a11y.loadedJson (not savedJson) to srStatus');
 
@@ -5780,9 +5781,9 @@ function accData(j, bin, ai){
      /rd\.onload[\s\S]{0,500}tabBody[\s\S]{0,30}\.focus\(\)/.test(html),
     'file-picker JSON load refocuses tabBody after renderBody (WCAG 2.4.3)');
 
-  // drag-and-drop load success: tabBody.focus() after renderBody
+  // drag-and-drop load success: tabBody.focus() after renderBody (window widened in Round 509)
   const dropIdx = html.lastIndexOf("addEventListener('drop'");
-  const dropBlock = html.slice(dropIdx, dropIdx + 900);
+  const dropBlock = html.slice(dropIdx, dropIdx + 1600);
   ok(/tabBody[\s\S]{0,30}\.focus\(\)/.test(dropBlock),
     'drag-and-drop JSON load refocuses tabBody after renderBody (WCAG 2.4.3)');
 }
@@ -6743,6 +6744,21 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,2200}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 509: drop handler restores the activeExpr hint ternary, matching dragleave/Escape ---- */
+{
+  // Low severity / mostly cosmetic — noted honestly. dragleave and the Escape handler both
+  // restore "expression preview active" hint text via activeExpr?...:_hintDefault(); the drop
+  // handler's opening lines always used the unconditional _hintDefault(), dropping that context.
+  // Harmless on a successful load (rebuild() resets activeExpr=null anyway, so _hintDefault() is
+  // correct by the time anyone reads it), but a dropped file with a valid .json name/type that
+  // fails deserialize() (FileReader.readAsText is genuinely async, not a microtask) could briefly
+  // show the wrong hint until showErr() supersedes it moments later.
+  const dropIdx = html.lastIndexOf("addEventListener('drop'");
+  const dropBlock = html.slice(dropIdx, dropIdx+900);
+  ok(/activeExpr\?t\('expr\.'\+activeExpr\)\+' — '\+t\('hint\.exprOff'\):_hintDefault\(\)/.test(dropBlock),
+    'drop handler restores the activeExpr ternary hint, matching dragleave/Escape instead of always using _hintDefault()');
 }
 
 /* ---- Round 508: paramRow() display text (aria-valuetext, easy-mode span) rounds to step precision ---- */

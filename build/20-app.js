@@ -1787,7 +1787,13 @@ document.body.addEventListener('dragleave',e=>{
 });
 document.body.addEventListener('drop',e=>{
   document.body.classList.remove('drag-over');
-  const h=$('hint'); if(h){ h.style.color=''; h.textContent=_hintDefault(); }
+  // Round 509: dragleave and the Escape handler both restore the activeExpr ternary (show the
+  // expression-preview hint if one is active, not the generic default) — drop dropped the
+  // ternary and always used _hintDefault(). Harmless on a successful load (rebuild() resets
+  // activeExpr=null anyway, making _hintDefault() correct by the time anyone reads it), but a
+  // dropped file with a valid .json name/type that fails deserialize() (FileReader.readAsText is
+  // genuinely async) briefly shows the wrong hint until showErr() supersedes it moments later.
+  const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }
   if (!e.dataTransfer.files.length) return;
   e.preventDefault();
   const f=e.dataTransfer.files[0];
