@@ -5830,7 +5830,9 @@ function accData(j, bin, ai){
 {
   ok(/const _exportFocusWasBtn\s*=\s*document\.activeElement\s*===\s*_exportBtn/.test(html),
     'doExport captures whether export button had focus before disabling it');
-  ok(/_exportFocusWasBtn[\s\S]{0,30}_exportBtn\.focus\(\)/.test(html),
+  // Window widened in Round 510 for the _exportBtn===_exportBtnAtStart identity guard inserted
+  // between _exportFocusWasBtn and .focus().
+  ok(/_exportFocusWasBtn[\s\S]{0,90}_exportBtn\.focus\(\)/.test(html),
     'doExport restores focus to export button in finally block when it had focus before export');
 }
 
@@ -5925,8 +5927,12 @@ function accData(j, bin, ai){
 
 /* ---- Round 348: doExport focus restore guards isConnected to avoid stranding focus when user navigates away during async export ---- */
 {
-  ok(html.includes('_exportFocusWasBtn && _exportBtn.isConnected'),
-    'doExport focus restore checks isConnected before calling focus()');
+  // Round 510: isConnected alone wasn't sufficient — a tab-away-and-back during the export
+  // creates a fresh, CONNECTED replacement button (_exportBtn is reassigned every renderOut(),
+  // unlike the static btnScreenshot/btnSaveJson). Added an identity check against the pinned
+  // _exportBtnAtStart so focus is only restored to the exact instance the user actually clicked.
+  ok(html.includes('_exportFocusWasBtn && _exportBtn===_exportBtnAtStart && _exportBtn.isConnected'),
+    'doExport focus restore checks isConnected AND that _exportBtn is still the original clicked instance before calling focus()');
 }
 
 /* ---- Round 349: aboutDlg close handler guards isConnected before restoring focus (detached trigger after DOM rebuild) ---- */
@@ -6746,6 +6752,23 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 510: doExport() pins the exact button instance before restoring focus ---- */
+{
+  // _exportBtn is a module-level var reassigned every renderOut() (the Export button lives
+  // inside tabBody, destroyed/recreated on tab switches) — unlike btnScreenshot/btnSaveJson,
+  // which are static header buttons doScreenshot()/saveJson() capture once via a local
+  // `const btn=$('...')`. Without pinning, a user who clicks Export, switches away and back to
+  // the Output tab mid-export (fully reachable — tab switching has no _exporting guard), then
+  // focuses something else, would have focus yanked onto the FRESH replacement button (which
+  // passes isConnected despite never having been clicked) when the export resolves.
+  ok(html.includes('const _exportBtnAtStart = _exportBtn;'),
+    'doExport() pins the exact button instance (_exportBtnAtStart) at the moment focus is captured');
+  ok(/const _exportBtnAtStart = _exportBtn;\s*\n\s*const _exportFocusWasBtn = document\.activeElement === _exportBtn;/.test(html),
+    '_exportBtnAtStart is captured in the same breath as _exportFocusWasBtn, before _exportBtn can be reassigned by any later renderOut()');
+  ok(html.includes('_exportFocusWasBtn && _exportBtn===_exportBtnAtStart && _exportBtn.isConnected'),
+    'focus restore requires _exportBtn to still be the pinned original instance, not just any connected button');
+}
+
 /* ---- Round 509: drop handler restores the activeExpr hint ternary, matching dragleave/Escape ---- */
 {
   // Low severity / mostly cosmetic — noted honestly. dragleave and the Escape handler both
@@ -6837,7 +6860,9 @@ function accData(j, bin, ai){
   // pattern a few lines below.
   ok(/const exportAtlas = document\.createElement\('canvas'\);\s*\n\s*exportAtlas\.width = atlas\.width; exportAtlas\.height = atlas\.height;\s*\n\s*exportAtlas\.getContext\('2d'\)\.drawImage\(atlas, 0, 0\);/.test(html),
     'doExport() copies the live atlas into exportAtlas synchronously, before any async gap');
-  ok(/const exportAtlas[\s\S]{0,1050}canvasBlob\(exportAtlas\)/.test(html),
+  // Window widened in Round 510 for the _exportBtnAtStart focus-identity guard inserted between
+  // the snapshot and its use.
+  ok(/const exportAtlas[\s\S]{0,2000}canvasBlob\(exportAtlas\)/.test(html),
     'doExport() reads the frozen exportAtlas snapshot, not the live shared atlas canvas, when encoding the export texture');
   ok(!/await canvasBlob\(atlas\)/.test(html),
     'no remaining "await canvasBlob(atlas)" call reads the live shared canvas directly (all routed through the snapshot)');

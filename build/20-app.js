@@ -1453,6 +1453,15 @@ async function doExport(){
   const exportAtlas = document.createElement('canvas');
   exportAtlas.width = atlas.width; exportAtlas.height = atlas.height;
   exportAtlas.getContext('2d').drawImage(atlas, 0, 0);
+  // Round 510: _exportBtn is a module-level var reassigned every renderOut() (unlike btnScreenshot/
+  // btnSaveJson, which are static header buttons — see doScreenshot()/saveJson()'s local `const
+  // btn=$('...')`). If the user switches away from the Output tab and back while an export is
+  // in-flight, renderOut() creates a brand-new button and reassigns _exportBtn to it. Without
+  // pinning the exact instance here, the finally block's focus-restore below would read whatever
+  // _exportBtn CURRENTLY is at that point — a fresh button the user never actually clicked — and
+  // steal focus onto it from wherever the user has since moved on to (e.g. mid-typing in another
+  // field), even though _exportFocusWasBtn only ever answered "was the ORIGINAL button focused?".
+  const _exportBtnAtStart = _exportBtn;
   const _exportFocusWasBtn = document.activeElement === _exportBtn;
   if (_exportBtn){ _exportBtn.disabled = true; _exportBtn.setAttribute('aria-busy','true'); _exportBtn.textContent = t('btn.exporting'); }
   { const sr=$('srStatus'); if(sr) sr.textContent=t('btn.exporting'); }
@@ -1494,7 +1503,10 @@ async function doExport(){
     if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.removeAttribute('aria-busy');
       // Ensure button text always resets — catch branch sets showErr but doesn't touch textContent
       if (_exportBtn.textContent===t('btn.exporting')) _exportBtn.textContent=t('btn.export');
-      if (_exportFocusWasBtn && _exportBtn.isConnected) _exportBtn.focus(); }
+      // Only restore focus if _exportBtn still refers to the exact button instance the user
+      // clicked (not a later renderOut() replacement) — otherwise silently no-op, same as the
+      // already-detached case isConnected already guards against.
+      if (_exportFocusWasBtn && _exportBtn===_exportBtnAtStart && _exportBtn.isConnected) _exportBtn.focus(); }
   }
 }
 let _savingJson = false;
