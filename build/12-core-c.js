@@ -82,21 +82,29 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
     // glTF sparse requires ascending index order
     const sorted = entries.slice().sort((a,b)=>a[0]-b[0]);
     const sc = sorted.length;
-    // min/max must include implicit zeros from non-sparse entries
-    let mnx=0,mny=0,mnz=0,mxx=0,mxy=0,mxz=0;
-    for(const e of sorted){
-      if(e[1]<mnx)mnx=e[1]; if(e[1]>mxx)mxx=e[1];
-      if(e[2]<mny)mny=e[2]; if(e[2]>mxy)mxy=e[2];
-      if(e[3]<mnz)mnz=e[3]; if(e[3]>mxz)mxz=e[3];
-    }
-    const acc={componentType:5126,count:nV,type:'VEC3',min:[mnx,mny,mnz],max:[mxx,mxy,mxz]};
+    const acc={componentType:5126,count:nV,type:'VEC3'};
+    // min/max must be computed from the SAME bytes actually serialized (Round 506): the sparse
+    // values are stored as float32 (valBuf below), which rounds the float64 deltas in `sorted` —
+    // computing min/max from the pre-rounding float64 values instead produced a declared min/max
+    // that byte-mismatched the accessor's own data on every export (glTF spec requires exact
+    // equality; the Khronos glTF-Validator flags this as ACCESSOR_MIN/MAX_MISMATCH, Error
+    // severity). Mirrors how the main POSITION accessor above already gets its min/max from
+    // minMax3(fPos) — the rounded Float32Array, not pre-rounding source data.
+    let mnx=0,mny=0,mnz=0,mxx=0,mxy=0,mxz=0; // implicit zeros from non-sparse entries
     if(sc>0){
       const idxBuf=new Uint16Array(sc), valBuf=new Float32Array(sc*3);
       sorted.forEach((e,i)=>{ idxBuf[i]=e[0]; valBuf[i*3]=e[1]; valBuf[i*3+1]=e[2]; valBuf[i*3+2]=e[3]; });
+      for(let i=0;i<sc;i++){
+        const x=valBuf[i*3], y=valBuf[i*3+1], z=valBuf[i*3+2];
+        if(x<mnx)mnx=x; if(x>mxx)mxx=x;
+        if(y<mny)mny=y; if(y>mxy)mxy=y;
+        if(z<mnz)mnz=z; if(z>mxz)mxz=z;
+      }
       const idxView=addView(bw.push(idxBuf),idxBuf.byteLength);
       const valView=addView(bw.push(valBuf),valBuf.byteLength);
       acc.sparse={count:sc,indices:{bufferView:idxView,componentType:5123},values:{bufferView:valView}};
     }
+    acc.min=[mnx,mny,mnz]; acc.max=[mxx,mxy,mxz];
     accessors.push(acc);
     return {POSITION: accessors.length-1};
   });

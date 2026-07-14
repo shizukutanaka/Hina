@@ -769,6 +769,37 @@ function accData(j, bin, ai){
     const a = j.accessors[t.POSITION];
     return a.min.every(v => v <= 0) && a.max.every(v => v >= 0);
   }), 'all morph accessor min[k]≤0≤max[k] (sparse implicit zeros within bounds)');
+  // Round 506: the check above is necessary but not sufficient — glTF 2.0 requires accessor
+  // min/max to be the EXACT double-precision representation of the actual (float32-rounded)
+  // buffer data, not merely "bounds that happen to contain the data". Before Round 506,
+  // min/max were computed from pre-rounding float64 deltas while the sparse values buffer stored
+  // the float32-rounded versions — a mismatch on effectively every export (Khronos glTF-Validator
+  // flags this as ACCESSOR_MIN_MISMATCH/ACCESSOR_MAX_MISMATCH, Error severity). Read back the
+  // actual serialized float32 bytes (same pattern as the sparse-indices check above) and recompute
+  // true min/max from them, then assert byte-exact equality with the declared values.
+  {
+    let exactOK = true, checked = 0;
+    for (const tgt of prim.targets){
+      const a = j.accessors[tgt.POSITION];
+      let mnx=0,mny=0,mnz=0,mxx=0,mxy=0,mxz=0; // implicit zeros, same as the writer
+      if (a.sparse && a.sparse.count){
+        const vv = j.bufferViews[a.sparse.values.bufferView];
+        const off = G.bin.byteOffset + (vv.byteOffset || 0);
+        const valArr = new Float32Array(G.bin.buffer, off, a.sparse.count * 3);
+        for (let i=0; i<a.sparse.count; i++){
+          const x=valArr[i*3], y=valArr[i*3+1], z=valArr[i*3+2];
+          if(x<mnx)mnx=x; if(x>mxx)mxx=x;
+          if(y<mny)mny=y; if(y>mxy)mxy=y;
+          if(z<mnz)mnz=z; if(z>mxz)mxz=z;
+        }
+      }
+      checked++;
+      const actual=[mnx,mny,mnz,mxx,mxy,mxz], declared=a.min.concat(a.max);
+      if (declared.some((v,i)=>v!==actual[i])) exactOK = false;
+    }
+    ok(checked === 12 && exactOK,
+      'every morph accessor min/max exactly matches its own serialized float32 buffer data (glTF 2.0 spec exact-equality requirement, not just bounds-containment)');
+  }
   // all morph accessors have count === nV and type === VEC3
   ok(prim.targets.every(t => {
     const a = j.accessors[t.POSITION];
