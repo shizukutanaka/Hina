@@ -2425,6 +2425,18 @@ function renderTabs(){
   $('tabBody').setAttribute('aria-labelledby','tab-'+activeTab);
 }
 
+// Round 508: a JSON-loaded (paste/file/drag-drop) num-type PARAMS value can carry arbitrary
+// decimal precision — sanitize() clamps to [min,max] but intentionally does not round to `step`
+// (FEATURE_AUDIT §5: no correctness impact on file size/determinism/export, so left alone there).
+// But paramRow()'s purely-textual displays (aria-valuetext, the easy-mode read-only span) used
+// String(params[k]) directly, so a value like 1.033333333333333 was announced/shown with all 16
+// digits — precision a real slider drag could never produce (native range inputs always snap to
+// `step`), and inconsistent with the numeric-entry field's own onchange clamp path, which stores
+// whatever the user typed verbatim rather than reformatting it. Does NOT touch the range/numIn
+// inputs' own `value` (still the exact stored number — detail-mode numIn is the precise-entry
+// field, showing full precision there is correct) — only the two read-only text surfaces.
+const stepDecimals = step => { const s=String(step), i=s.indexOf('.'); return i<0?0:s.length-i-1; };
+const fmtNum = (v,step) => (+v).toFixed(stepDecimals(step));
 function paramRow(k){
   const s=PARAMS[k];
   const label = lang==='ja'?s.ja:s.en;
@@ -2433,23 +2445,23 @@ function paramRow(k){
     // detail mode exposes a direct numeric entry (SPEC §2); easy mode shows a read-only value
     let valEl;
     const r=el('input',{id:pid, type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
-      'aria-label':label, 'aria-valuetext':String(params[k]), 'aria-describedby':'sliderDesc', title:t('hint.sliderReset'),
+      'aria-label':label, 'aria-valuetext':fmtNum(params[k],s.step), 'aria-describedby':'sliderDesc', title:t('hint.sliderReset'),
       onpointerdown:()=>captureUndo(),
       ondblclick:()=>{ captureUndo(); params[k]=s.def; r.value=String(s.def);
-        r.setAttribute('aria-valuetext',String(s.def));
-        if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
+        r.setAttribute('aria-valuetext',fmtNum(s.def,s.step));
+        if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=fmtNum(s.def,s.step));
         onParam(k);
         const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.sliderReset').replace('{label}',label).replace('{v}',s.def); },
       onkeydown:e=>{ if(RANGE_JUMP_KEYS.has(e.key)){ captureUndo(); return; }
         if(e.key!=='Delete'&&e.key!=='Backspace') return; e.preventDefault();
         captureUndo(); params[k]=s.def; r.value=String(s.def);
-        r.setAttribute('aria-valuetext',String(s.def));
-        if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=String(s.def));
+        r.setAttribute('aria-valuetext',fmtNum(s.def,s.step));
+        if (valEl) valEl.tagName==='INPUT' ? valEl.value=String(s.def) : (valEl.textContent=fmtNum(s.def,s.step));
         onParam(k);
         const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.sliderReset').replace('{label}',label).replace('{v}',s.def); },
       oninput:e=>{ params[k]=parseFloat(e.target.value);
-        r.setAttribute('aria-valuetext',String(params[k]));
-        if (valEl.tagName==='INPUT') valEl.value=String(params[k]); else valEl.textContent=String(params[k]);
+        r.setAttribute('aria-valuetext',fmtNum(params[k],s.step));
+        if (valEl.tagName==='INPUT') valEl.value=String(params[k]); else valEl.textContent=fmtNum(params[k],s.step);
         onParam(k); }});
     if (mode==='detail'){
       valEl=el('input',{type:'number',class:'num numIn',min:s.min,max:s.max,step:s.step,value:params[k],
@@ -2462,11 +2474,11 @@ function paramRow(k){
           if (!Number.isFinite(n)){ _announce(params[k]); n=params[k]; }
           const clamped=M.clamp(n,s.min,s.max);
           if (clamped!==n) _announce(clamped);
-          params[k]=clamped; e.target.value=String(clamped); r.value=String(clamped); r.setAttribute('aria-valuetext',String(clamped)); onParam(k); }});
+          params[k]=clamped; e.target.value=String(clamped); r.value=String(clamped); r.setAttribute('aria-valuetext',fmtNum(clamped,s.step)); onParam(k); }});
       // Prevent accidental value changes when wheel-scrolling the panel over a focused numIn
       valEl.addEventListener('wheel', e=>{ if(document.activeElement===valEl) e.preventDefault(); },{passive:false});
     } else {
-      valEl=el('span',{class:'num'}, String(params[k]));
+      valEl=el('span',{class:'num'}, fmtNum(params[k],s.step));
     }
     return el('div',{class:'row'}, el('label',{'for':pid},label), r, valEl);
   }

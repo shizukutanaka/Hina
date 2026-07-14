@@ -5440,9 +5440,12 @@ function accData(j, bin, ai){
 
 /* ---- Round 307: range slider has aria-valuetext to keep AT announcement in sync with displayed value ---- */
 {
-  ok(html.includes("'aria-valuetext':String(params[k])"),
+  // Round 508: aria-valuetext now goes through fmtNum() (step-derived decimal rounding) instead
+  // of raw String(params[k]), so a JSON-loaded non-step-aligned value isn't announced with
+  // arbitrary float precision (e.g. 16 digits) a real slider drag could never produce.
+  ok(html.includes("'aria-valuetext':fmtNum(params[k],s.step)"),
     'range slider initializes aria-valuetext to match displayed value');
-  ok(html.includes("r.setAttribute('aria-valuetext',String(params[k]))"),
+  ok(html.includes("r.setAttribute('aria-valuetext',fmtNum(params[k],s.step))"),
     'range slider oninput updates aria-valuetext to keep AT announcement in sync with display');
 }
 
@@ -6123,7 +6126,8 @@ function accData(j, bin, ai){
 
 /* ---- Round 373: numIn onchange updates r.setAttribute('aria-valuetext') so range slider stays current after direct entry ---- */
 {
-  ok(html.includes("r.value=String(clamped); r.setAttribute('aria-valuetext',String(clamped)); onParam(k);"),
+  // Round 508: aria-valuetext formatted via fmtNum() — see Round 508 test block.
+  ok(html.includes("r.value=String(clamped); r.setAttribute('aria-valuetext',fmtNum(clamped,s.step)); onParam(k);"),
     'numIn onchange updates range aria-valuetext after accepting a typed value');
 }
 
@@ -6739,6 +6743,42 @@ function accData(j, bin, ai){
   // Falls back to <a download> on unsupported browsers
   ok(/saveJson[\s\S]{0,2200}download\(bytes,fname/.test(html),
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
+}
+
+/* ---- Round 508: paramRow() display text (aria-valuetext, easy-mode span) rounds to step precision ---- */
+{
+  // sanitize() intentionally clamps num-type PARAMS to [min,max] without rounding to `step`
+  // (FEATURE_AUDIT §5: no correctness impact on file size/determinism/export). But a JSON-loaded
+  // (paste/file/drag-drop) value with excess decimal precision — e.g. 1.033333333333333 — was
+  // announced via aria-valuetext and shown in the easy-mode read-only span with all its raw
+  // digits: precision a real slider drag could never produce (native range inputs always snap to
+  // `step`). Fixed with a step-derived toFixed() formatter, applied only to the two purely-
+  // textual/announcement surfaces — NOT to the range/numIn inputs' own `value` (still the exact
+  // stored number; detail-mode numIn is the precise-entry field, where showing full precision is
+  // correct, not a bug).
+  ok(html.includes("const stepDecimals = step => { const s=String(step), i=s.indexOf('.'); return i<0?0:s.length-i-1; };"),
+    'stepDecimals() derives decimal-place count from a PARAMS field\'s step value');
+  ok(html.includes("const fmtNum = (v,step) => (+v).toFixed(stepDecimals(step));"),
+    'fmtNum() formats a display value to its step\'s decimal precision');
+  // Behavioral: every step value actually used by num-type PARAMS must round-trip through
+  // stepDecimals/fmtNum without throwing and without losing precision beyond what toFixed implies.
+  const stepDecimals = step => { const s=String(step), i=s.indexOf('.'); return i<0?0:s.length-i-1; };
+  const usedSteps = [...new Set(Object.values(H.PARAMS).filter(s=>s.k==='num').map(s=>s.step))];
+  ok(usedSteps.length>0 && usedSteps.every(step => Number.isInteger(stepDecimals(step)) && stepDecimals(step)>=0),
+    'stepDecimals() returns a sane non-negative integer for every step value actually used by PARAMS');
+  ok((+(1.033333333333333).toFixed(stepDecimals(0.01))) === 1.03,
+    'fmtNum()-style rounding collapses excess JSON-loaded precision to the field\'s step precision (e.g. 1.033333333333333 -> "1.03" for step=0.01)');
+  // Easy-mode span and the ondblclick/onkeydown reset-to-default paths must also use fmtNum, not
+  // raw String(), for full consistency (a reset shouldn't reintroduce unformatted text).
+  ok(html.includes("valEl=el('span',{class:'num'}, fmtNum(params[k],s.step));"),
+    'easy-mode read-only span formats its display via fmtNum(), not raw String(params[k])');
+  ok(html.includes("r.setAttribute('aria-valuetext',fmtNum(s.def,s.step));"),
+    'reset-to-default paths (dblclick/Delete/Backspace) also format aria-valuetext via fmtNum()');
+  // Regression guard: the actual stored/functional values are untouched — only display text.
+  ok(html.includes("const r=el('input',{id:pid, type:'range',min:s.min,max:s.max,step:s.step,value:params[k],"),
+    "range input's own value attribute remains the exact stored params[k] (unformatted)");
+  ok(html.includes("valEl=el('input',{type:'number',class:'num numIn',min:s.min,max:s.max,step:s.step,value:params[k],"),
+    "numIn input's own value attribute remains the exact stored params[k] (unformatted) — detail mode is the precise-entry field");
 }
 
 /* ---- Round 507: Ctrl(+Shift)+S/Z/P shortcuts no longer break when Caps Lock is on ---- */
