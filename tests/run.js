@@ -212,6 +212,20 @@ ok(H.I18N.ja['about.close'] && H.I18N.en['about.close'], 'about.close button lab
   const ja = Object.keys(H.I18N.ja).sort(), en = Object.keys(H.I18N.en).sort();
   ok(ja.length === en.length && ja.every((k, i) => k === en[i]), 'i18n ja/en key parity');
   ok(ja.every(k => H.I18N.ja[k] && H.I18N.en[k]), 'i18n no empty values');
+  // Round 511: the key-parity check above verifies both locales have the SAME keys, but not that
+  // a given key's {placeholder} tokens match across locales. Many strings are consumed via
+  // t(key).replace('{name}',x)/.replace('{v}',x) etc — if a future key shipped e.g. '{v}' in ja
+  // but omitted it in en (an easy mistake when adding a param, which CLAUDE.md mandates in both
+  // languages), the English screen-reader announcement would silently drop that value, undetected
+  // by the existing tests. This is the same drift-risk / empty-verification class as Round 503:
+  // no shipping bug today (all 14 placeholder-bearing keys are currently in parity), but nothing
+  // guarded against it. Tolerant {..} matcher so future digit/underscore tokens are covered too.
+  {
+    const ph = s => new Set((String(s).match(/\{[^}]+\}/g) || []).sort());
+    const eqSet = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
+    ok(ja.every(k => eqSet(ph(H.I18N.ja[k]), ph(H.I18N.en[k]))),
+      'i18n ja/en {placeholder} parity — both locales of every key carry the same interpolation tokens');
+  }
   // every enum option carries a localized label in both languages (UI never shows raw ids)
   const enumOpts = [];
   for (const k in H.PARAMS) if (H.PARAMS[k].k === 'enum')
