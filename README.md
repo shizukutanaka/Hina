@@ -1,4 +1,8 @@
+<a id="japanese"></a>
+
 # 雛 — Hina
+
+**日本語** · [English](#english)
 
 **ブラウザだけでVRChat向けアバター(VRM)を作れる単一HTMLツール。3Dモデリング知識・インストール・外部送信、すべて不要。**
 
@@ -57,3 +61,71 @@ VRChatへのアップロードはVRChat公式SDK（Unity）経由のみ許可さ
 ## License
 
 [MIT](LICENSE) — 雛で**生成したアバターの権利は生成したユーザーに帰属**します。商用利用・改変・再配布の可否はVRM書き出し時にメタ情報としてあなた自身が設定できます。
+
+---
+
+<a id="english"></a>
+
+# Hina (English)
+
+[日本語](#japanese) · **English**
+
+**A single-file HTML tool for making VRChat avatars (VRM) in your browser alone. No 3D-modeling knowledge, no installation, no data ever leaves your machine.**
+
+Owning "your own avatar" in VRChat has traditionally meant learning heavyweight tools like Blender or VRoid Studio. Hina generates a VRM 0.x avatar — with swaying hair, facial expressions, and lip-sync support — just by moving sliders. Every built-in preset is designed to stay within **Quest Excellent** rank (with spring bones off), and the exported VRM uploads to VRChat directly via Unity + VRM Converter for VRChat.
+
+> The UI is fully bilingual (Japanese / English) — toggle the language in-app with the header button or the `M`-adjacent language switch.
+
+## Features
+
+- **Parametric generation** — 30+ parameters (body, face, hair, outfit, colors) and 6 presets. A "gacha" button rolls a random avatar, with a shareable seed.
+- **Genuine VRM 0.x export** — 21 humanoid bones (including eye bones), 17 blend shapes (A/I/U/E/O vowels, blink, and joy/anger/sorrow/fun), spring bones (hair sway), and an MToon material — all built in pure JavaScript.
+- **Performance Rank estimator** — real-time PC/Quest rank against VRChat's official thresholds (all categories, April 2026 revision). One-tap "Quest Excellent mode" toggle.
+- **Live preview** — WebGL toon rendering with breathing, blinking, eye tracking, and hair physics, so you can check everything before export.
+- **Fully local** — one `index.html`. No server, no network requests, no account. The avatars you make are yours alone.
+
+## Installation
+
+```
+1. Download index.html
+2. Open it in a browser (latest Chrome / Edge / Firefox / Safari)
+```
+
+That's it. No build step, no npm.
+
+## Usage
+
+```
+1. Pick a preset on the "Easy" tab (or roll the gacha)
+2. Adjust body / face / hair / outfit / colors with the sliders (open all fields in "Detail" mode)
+3. On the "Output" tab, enter a name and click "Export VRM"
+4. Follow docs/UPLOAD_GUIDE.md to upload to VRChat
+```
+
+VRChat only permits uploads through the official VRChat SDK (Unity). To stay compliant, Hina never uploads on your behalf — it exports a VRM that loads straight into Unity. See [docs/UPLOAD_GUIDE.md](docs/UPLOAD_GUIDE.md) (Japanese) for the step-by-step.
+
+## Configuration
+
+There are no config files or environment variables. Save parameters as JSON with the "Save" button and restore them with "Load" (they also auto-save to the browser's localStorage).
+
+## Documents
+
+| File | Contents |
+|------|----------|
+| [docs/SPEC.md](docs/SPEC.md) | Specification (parameter tables, VRM output spec, rank thresholds) |
+| [docs/FAQ.md](docs/FAQ.md) | Frequently asked questions |
+| [docs/UPLOAD_GUIDE.md](docs/UPLOAD_GUIDE.md) | Getting into VRChat (beginner-friendly) |
+| [docs/adr/](docs/adr/) | Architecture decision records |
+
+> Documentation is currently written in Japanese; the in-app UI is bilingual.
+
+## Donation
+
+Hina is free to use. If you'd like to support development:
+
+- $1/month (Stripe): coming soon
+- Bitcoin: `bc1qjaet6jgpk08la46jelmlpgsz84luc4lc0tnwr5`
+
+## License
+
+[MIT](LICENSE) — **the rights to avatars you create with Hina belong to you, the creator.** You set the commercial-use / modification / redistribution permissions yourself, as metadata, at VRM export time.
