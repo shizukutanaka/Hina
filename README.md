@@ -102,7 +102,7 @@ That's it. No build step, no npm.
 4. Follow docs/UPLOAD_GUIDE.md to upload to VRChat
 ```
 
-VRChat only permits uploads through the official VRChat SDK (Unity). To stay compliant, Hina never uploads on your behalf — it exports a VRM that loads straight into Unity. See [docs/UPLOAD_GUIDE.md](docs/UPLOAD_GUIDE.md) (Japanese) for the step-by-step.
+VRChat only permits uploads through the official VRChat SDK (Unity). To stay compliant, Hina never uploads on your behalf — it exports a VRM that loads straight into Unity. See [docs/UPLOAD_GUIDE.md#english](docs/UPLOAD_GUIDE.md#english) for the step-by-step (English + Japanese).
 
 ## Configuration
 
@@ -114,10 +114,10 @@ There are no config files or environment variables. Save parameters as JSON with
 |------|----------|
 | [docs/SPEC.md](docs/SPEC.md) | Specification (parameter tables, VRM output spec, rank thresholds) |
 | [docs/FAQ.md](docs/FAQ.md) | Frequently asked questions |
-| [docs/UPLOAD_GUIDE.md](docs/UPLOAD_GUIDE.md) | Getting into VRChat (beginner-friendly) |
+| [docs/UPLOAD_GUIDE.md#english](docs/UPLOAD_GUIDE.md#english) | Getting into VRChat (beginner-friendly, English + Japanese) |
 | [docs/adr/](docs/adr/) | Architecture decision records |
 
-> Documentation is currently written in Japanese; the in-app UI is bilingual.
+> The upload guide is bilingual; the remaining docs are Japanese for now. The in-app UI is fully bilingual.
 
 ## Donation
 
