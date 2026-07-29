@@ -6766,6 +6766,51 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 513: one-tap "Make it Quest Excellent" where the bad rank is actually read ---- */
+{
+  ok(H.I18N.ja['btn.questFix'] && H.I18N.en['btn.questFix']
+     && H.I18N.ja['btn.questFix.tip'] && H.I18N.en['btn.questFix.tip']
+     && H.I18N.ja['a11y.questFixed'] && H.I18N.en['a11y.questFixed'],
+    'Quest-fix button label, tooltip and SR announcement all exist in ja+en');
+  // The tooltip must disclose the tradeoff (hair sway is lost) and that it is undoable —
+  // this button silently changes the avatar's appearance, so it must not be a mystery action.
+  ok(/Ctrl\+Z/.test(H.I18N.ja['btn.questFix.tip']) && /Ctrl\+Z/.test(H.I18N.en['btn.questFix.tip']),
+    'Quest-fix tooltip tells the user the change is undoable with Ctrl+Z');
+  // BEHAVIORAL — this is the button's whole justification. If a future change ever makes
+  // springOff insufficient to reach Quest Excellent, the button becomes a lie and this fails.
+  let limited = 0, fixedAll = true;
+  const sample = [...H.PRESETS.map(p => H.presetParams(p)),
+                  ...Array.from({length: 30}, (_, s) => H.randomParams(s))];
+  for (const p of sample){
+    const on = Object.assign({}, p, {springOff: false});
+    const off = Object.assign({}, p, {springOff: true});
+    const rOn = H.rank(H.estimate(H.buildAvatar(on), on), 'quest');
+    const rOff = H.rank(H.estimate(H.buildAvatar(off), off), 'quest');
+    if (rOn.idx > 0){
+      limited++;
+      // every limiter that springs cause must be a spring-bone category — if some *other*
+      // category ever became the bottleneck, one tap on springOff would not fix it.
+      if (!rOn.worst.every(c => ['pbComp','pbTrans','pbCol','pbCheck'].includes(c))) fixedAll = false;
+    }
+    if (rOff.idx !== 0) fixedAll = false;   // springOff must always reach Excellent
+  }
+  ok(limited > 0, 'sample actually contains avatars that are not Quest Excellent (test is not vacuous)');
+  ok(fixedAll,
+    'across presets+gacha, every non-Excellent Quest rank is limited only by spring-bone categories, and springOff always reaches Excellent — so one tap genuinely fixes it');
+  // The button renders only when it can help: rank is below Excellent AND springs are still on.
+  ok(/if \(q\.idx>0 && !params\.springOff\)\{/.test(html),
+    'Quest-fix button renders only when the rank is below Excellent and springs are still on');
+  // It must reuse the checkbox's own path so behavior cannot drift between the two entry points.
+  ok(/captureUndo\(\);\s*\n\s*params\.springOff=true;\s*\n\s*onParam\('springOff'\);/.test(html),
+    'Quest-fix routes through captureUndo() + onParam(springOff), identical to the Physics-tab checkbox');
+  // renderBody() destroys the button, so focus must be parked rather than dropped to <body>.
+  ok(/onParam\('springOff'\);[\s\S]{0,400}\$\('tabBody'\); if\(tb\) tb\.focus\(\);/.test(html),
+    'focus is parked on tabBody after the button destroys itself (not left on <body>)');
+  // onParam announces note.springOff ("sliders hidden") which is wrong for this entry point.
+  ok(/onParam\('springOff'\);[\s\S]{0,600}t\('a11y\.questFixed'\)/.test(html),
+    'SR hears the rank outcome, overriding onParam()\'s Physics-tab-specific slider message');
+}
+
 /* ---- Round 512: in-app upload guide is self-sufficient (single-file distribution) ---- */
 {
   // The distribution artifact is one index.html — a user who followed the README ("download

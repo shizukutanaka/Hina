@@ -245,6 +245,9 @@ const I18N = {
     'guide.dl':'入手先（URLを選択してコピー）','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRM（VRM 0.x 系の .unitypackage）','guide.dl.conv':'VRM Converter for VRChat',
     'guide.tr':'つまずいたら','guide.tr1':'アップロードボタンが押せない → Trust Rank が Visitor。数日プレイして New User になるのを待つ','guide.tr2':'Quest で「Very Poor」警告 → 物理タブの「揺れ物オフ」で再書き出し（PC版のみなら警告のまま進めても可）','guide.tr3':'モデルがピンク色になる → シェーダー未導入。UniVRM を先に入れてから .vrm を取り込む','guide.tr4':'他のビューアで後ろを向く → VRM 0.x 仕様（Z-向き）。Unity / VRChat では正常',
     'guide.ver':'手順は2026年7月時点。各ツールのUIは更新されるため、相違があれば公式ドキュメントを正とする。',
+    // Round 513: the rank estimator diagnosed but could not act — the sole remedy for a
+    // non-Excellent Quest rank is springOff, which lives on the Physics tab.
+    'btn.questFix':'Quest Excellent にする','btn.questFix.tip':'髪の揺れをオフにして Quest Excellent にします（Ctrl+Z で取り消せます）','a11y.questFixed':'揺れ物をオフにしました — Quest Excellent になりました',
     'rank.limit':'律速',
     'enum.eyeShape.round':'丸','enum.eyeShape.tare':'たれ目','enum.eyeShape.tsuri':'つり目','enum.eyeShape.jito':'じと目',
     'enum.browType.soft':'やわらか','enum.browType.straight':'まっすぐ','enum.browType.arch':'アーチ',
@@ -305,6 +308,7 @@ const I18N = {
     'guide.dl':'Where to get them (select a URL to copy)','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRM (the VRM 0.x .unitypackage)','guide.dl.conv':'VRM Converter for VRChat',
     'guide.tr':'Troubleshooting','guide.tr1':'Upload button is greyed out → Trust Rank is Visitor. Play a few days until you reach New User','guide.tr2':'"Very Poor" warning on Quest → re-export with "no spring bones" on the Physics tab (or proceed as-is if PC-only)','guide.tr3':'Model turns pink → shader not installed. Import UniVRM before importing the .vrm','guide.tr4':'Faces backward in other viewers → that is the VRM 0.x spec (Z-forward). Correct in Unity / VRChat',
     'guide.ver':'Steps verified as of July 2026. Tool UIs change — if your screen differs, treat the official docs of each tool as authoritative.',
+    'btn.questFix':'Make it Quest Excellent','btn.questFix.tip':'Turns off hair sway to reach Quest Excellent (Ctrl+Z to undo)','a11y.questFixed':'Spring bones turned off — now Quest Excellent',
     'rank.limit':'Limited by',
     'enum.eyeShape.round':'Round','enum.eyeShape.tare':'Drooping','enum.eyeShape.tsuri':'Sharp','enum.eyeShape.jito':'Half-lidded',
     'enum.browType.soft':'Soft','enum.browType.straight':'Straight','enum.browType.arch':'Arched',

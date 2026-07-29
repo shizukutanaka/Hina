@@ -1421,6 +1421,30 @@ function updateStats(){
       if (lim) wrap.append(el('span',{class:'limit'}, lim));
       return wrap; };
     statEls.rkPC.append(badge(pc)); statEls.rkQ.append(badge(q));
+    // Round 513: the estimator diagnosed the bottleneck but offered no way to act on it. Measured
+    // across all 6 presets and 300 gacha rolls, the ONLY reachable Quest limiter is the spring-bone
+    // group (pbComp/pbTrans/pbCol/pbCheck) — tris/bones/mat/skinned/texMB are held clear of the
+    // thresholds by design — and its sole remedy is springOff, buried on the Physics tab. With
+    // springOff the Quest rank is Excellent in every one of those 306 cases. README already
+    // promises a "one-tap Quest Excellent mode"; this is that tap, placed where the user actually
+    // reads the bad rank. Routes through onParam('springOff') so it behaves exactly like the
+    // checkbox (same rebuild, same captureUndo semantics, same activePresetId reset).
+    if (q.idx>0 && !params.springOff){
+      statEls.rkQ.append(el('button',{type:'button', class:'btn',
+        style:'display:block;margin-top:6px;padding:3px 8px;font-size:11px',
+        title:t('btn.questFix.tip'), 'aria-label':t('btn.questFix')+' — '+t('btn.questFix.tip'),
+        onclick:()=>{
+          captureUndo();
+          params.springOff=true;
+          onParam('springOff');   // rebuild + renderBody(false); destroys this button
+          // renderBody() replaced the panel, so this button is gone — park focus on the panel
+          // rather than letting it fall to <body> (same pattern as doUndo()).
+          const tb=$('tabBody'); if(tb) tb.focus();
+          // onParam announced note.springOff ("sliders are hidden"), which is the right message
+          // on the Physics tab but not here — the user's intent was the rank, so say that instead.
+          const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.questFixed');
+        }}, t('btn.questFix')));
+    }
   }
 }
 
