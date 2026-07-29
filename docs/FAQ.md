@@ -1,4 +1,8 @@
+<a id="japanese"></a>
+
 # 雛 FAQ
+
+**日本語** · [English](#english)
 
 ### Q. 作ったアバターをVRChatで使うには？
 A. VRChatの規約上、アップロードは公式SDK（Unity）経由のみ。雛が書き出したVRMを **UniVRM + VRM Converter for VRChat** でUnityに取り込み、SDKでアップロードする。全手順は [UPLOAD_GUIDE.md](UPLOAD_GUIDE.md)。所要15〜30分・無料。
@@ -45,3 +49,57 @@ A. パラメータのみブラウザのlocalStorage（端末内）。「保存�
 
 ### Q. スマホで使える？
 A. 編集UIはタッチ対応済み。ただし書き出し後のUnity作業はPC必須。
+
+---
+
+<a id="english"></a>
+
+# Hina FAQ (English)
+
+[日本語](#japanese) · **English**
+
+### Q. How do I use my avatar in VRChat?
+A. Per VRChat's terms, uploads only go through the official SDK (Unity). Import the VRM Hina exports into Unity with **UniVRM + VRM Converter for VRChat**, then upload via the SDK. Full steps: [UPLOAD_GUIDE.md#english](UPLOAD_GUIDE.md#english). About 15–30 minutes, free.
+
+### Q. Does it support Quest (Android / mobile)?
+A. Yes. Built-in presets are designed for <7,500 triangles, 1 material, 1 skinned mesh.
+- Spring bones ON: Quest **Good** (Quest Excellent requires PhysBones = 0)
+- "No spring bones" on the Physics tab: Quest **Excellent**
+PC is always in Excellent range. The in-app rank display uses the official April 2026 thresholds.
+
+### Q. Why VRM 0.x and not 1.0?
+A. Because VRM Converter for VRChat — the de-facto standard route into VRChat — assumes 0.x. VRM 1.0 export is planned for v1.0 (you can also migrate 0.x→1.0 with UniVRM in Unity).
+
+### Q. Can I use it commercially? Who owns the avatars I make?
+A. The tool itself is MIT. **Rights to generated avatars belong to their creator.** You set redistribution / commercial / violent / sexual permissions yourself as VRM metadata at export time (the default is the most conservative: author-only / all Disallow / no redistribution).
+
+### Q. Any network, account, or payment?
+A. None. It runs fully locally and sends zero requests. The tool is free; donations are optional (see README).
+
+### Q. Can I put BOOTH clothing or existing models on it?
+A. Not in v0.1 (out of scope). Hina is a "build one from scratch" tool; editing existing models is Blender/Unity territory.
+
+### Q. Do expressions and lip-sync work?
+A. Yes. A/I/U/E/O (for lip-sync), blink, and joy/anger/sorrow/fun are exported as standard VRM blend shapes, which VRM Converter for VRChat maps automatically to VRChat's visemes/expressions. Eye tracking is supported via bones.
+There's also an **expression editor** to tune joy/anger/sorrow/fun as a 0–100 weighted mix of the existing morphs (A–O, blink, the four emotions). If you leave it untouched, the exported VRM is byte-identical to before.
+
+### Q. I made a mistake / want to undo
+A. **Ctrl+Z to undo, Ctrl+Shift+Z to redo** (up to 20 steps). Sliders, presets, gacha, JSON loads, and metadata edits are all covered.
+
+### Q. I want to reproduce or share a gacha result I liked
+A. Each gacha roll has a **seed number**. Enter the same number in the seed field to reproduce the exact avatar. The "Copy Link" button copies a `?seed=N` URL — opening that link reproduces the same result for anyone. You can also **lock categories** (body / face / hair / outfit / colors) to re-roll while keeping the parts you like.
+
+### Q. I want to save the preview as an image
+A. The screenshot button in the header (or Ctrl+Shift+P) saves the current preview as a PNG. On mobile you can send it straight from the share sheet.
+
+### Q. My exported VRM faces backward in other tools
+A. It correctly follows the VRM 0.x spec (Z-forward). VRM 1.0-based viewers may show it rotated 180°, but it's correct in UniVRM / the VRChat conversion.
+
+### Q. The fingers don't move
+A. v0.1 uses mitten hands (no finger bones). In VRChat this is a minor limitation, since hand gestures use humanoid muscles rather than finger animation. Finger bones are planned for v0.2.
+
+### Q. Where is my data stored?
+A. Only parameters, in the browser's localStorage (on your device). The "Save" button also exports them as a JSON file. The model itself is only the `.vrm` you export.
+
+### Q. Can I use it on a phone?
+A. The editing UI is touch-ready. But the post-export Unity work requires a PC.
