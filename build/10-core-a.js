@@ -239,6 +239,12 @@ const I18N = {
     'err.screenshotFailed':'スクリーンショットの保存に失敗しました',
     'err.unexpected':'予期しないエラーが発生しました',
     'guide.t':'VRChat導入手順','guide.s1':'1. Unity Hub + VCC でアバタープロジェクト作成','guide.s2':'2. UniVRM (v0.x) をインポート','guide.s3':'3. VRM Converter for VRChat をインポート','guide.s4':'4. .vrm をドラッグ →「VRChatアバターに変換」','guide.s5':'5. VRChat SDK でビルド & アップロード',
+    // Round 512: the app ships as a single index.html, so a user who downloaded only that file
+    // does NOT have docs/UPLOAD_GUIDE.md. These make the in-app guide self-sufficient.
+    'guide.pre':'用意するもの','guide.pre1':'VRChatアカウント（Trust Rank が New User 以上。Visitor はアップロード不可。数日プレイで昇格）','guide.pre2':'Windows PC（Unity作業に必要。アバターの設計だけならスマホでも可）',
+    'guide.dl':'入手先（URLを選択してコピー）','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRM（VRM 0.x 系の .unitypackage）','guide.dl.conv':'VRM Converter for VRChat',
+    'guide.tr':'つまずいたら','guide.tr1':'アップロードボタンが押せない → Trust Rank が Visitor。数日プレイして New User になるのを待つ','guide.tr2':'Quest で「Very Poor」警告 → 物理タブの「揺れ物オフ」で再書き出し（PC版のみなら警告のまま進めても可）','guide.tr3':'モデルがピンク色になる → シェーダー未導入。UniVRM を先に入れてから .vrm を取り込む','guide.tr4':'他のビューアで後ろを向く → VRM 0.x 仕様（Z-向き）。Unity / VRChat では正常',
+    'guide.ver':'手順は2026年7月時点。各ツールのUIは更新されるため、相違があれば公式ドキュメントを正とする。',
     'rank.limit':'律速',
     'enum.eyeShape.round':'丸','enum.eyeShape.tare':'たれ目','enum.eyeShape.tsuri':'つり目','enum.eyeShape.jito':'じと目',
     'enum.browType.soft':'やわらか','enum.browType.straight':'まっすぐ','enum.browType.arch':'アーチ',
@@ -295,6 +301,10 @@ const I18N = {
     'err.screenshotFailed':'Screenshot failed',
     'err.unexpected':'An unexpected error occurred',
     'guide.t':'VRChat upload steps','guide.s1':'1. Create an avatar project with Unity Hub + VCC','guide.s2':'2. Import UniVRM (v0.x)','guide.s3':'3. Import VRM Converter for VRChat','guide.s4':'4. Drag the .vrm in → "Convert to VRChat avatar"','guide.s5':'5. Build & upload with the VRChat SDK',
+    'guide.pre':'What you need','guide.pre1':'A VRChat account with Trust Rank New User or above (Visitors cannot upload; a few days of playing raises it)','guide.pre2':'A Windows PC (required for the Unity step; designing the avatar works on any device)',
+    'guide.dl':'Where to get them (select a URL to copy)','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRM (the VRM 0.x .unitypackage)','guide.dl.conv':'VRM Converter for VRChat',
+    'guide.tr':'Troubleshooting','guide.tr1':'Upload button is greyed out → Trust Rank is Visitor. Play a few days until you reach New User','guide.tr2':'"Very Poor" warning on Quest → re-export with "no spring bones" on the Physics tab (or proceed as-is if PC-only)','guide.tr3':'Model turns pink → shader not installed. Import UniVRM before importing the .vrm','guide.tr4':'Faces backward in other viewers → that is the VRM 0.x spec (Z-forward). Correct in Unity / VRChat',
+    'guide.ver':'Steps verified as of July 2026. Tool UIs change — if your screen differs, treat the official docs of each tool as authoritative.',
     'rank.limit':'Limited by',
     'enum.eyeShape.round':'Round','enum.eyeShape.tare':'Drooping','enum.eyeShape.tsuri':'Sharp','enum.eyeShape.jito':'Half-lidded',
     'enum.browType.soft':'Soft','enum.browType.straight':'Straight','enum.browType.arch':'Arched',

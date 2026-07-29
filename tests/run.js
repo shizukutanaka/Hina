@@ -6766,6 +6766,50 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 512: in-app upload guide is self-sufficient (single-file distribution) ---- */
+{
+  // The distribution artifact is one index.html — a user who followed the README ("download
+  // index.html, open it") does NOT have docs/UPLOAD_GUIDE.md. The in-app guide was five
+  // one-liners (guide.s1-s5) with no prerequisites, no download locations and no
+  // troubleshooting, leaving beginners unaided across exactly the install→convert→upload
+  // stretch where they are guaranteed to be on their own.
+  const need = ['guide.pre','guide.pre1','guide.pre2','guide.dl','guide.dl.vcc','guide.dl.univrm',
+                'guide.dl.conv','guide.tr','guide.tr1','guide.tr2','guide.tr3','guide.tr4','guide.ver'];
+  ok(need.every(k => H.I18N.ja[k] && H.I18N.en[k]),
+    'every new upload-guide key (prerequisites / downloads / troubleshooting / version note) exists in ja+en');
+  // Prerequisites must name the two things that silently block a beginner at the very end:
+  // the Trust Rank gate and the PC/Unity requirement.
+  ok(/New User/.test(H.I18N.ja['guide.pre1']) && /New User/.test(H.I18N.en['guide.pre1']),
+    'prerequisite mentions the New User trust rank (Visitors cannot upload at all)');
+  ok(/PC/.test(H.I18N.ja['guide.pre2']) && /PC/.test(H.I18N.en['guide.pre2']),
+    'prerequisite mentions the PC requirement for the Unity step');
+  // Troubleshooting must cover the four failure modes documented in UPLOAD_GUIDE.md.
+  ok(/Visitor/.test(H.I18N.en['guide.tr1']) && /Very Poor/.test(H.I18N.en['guide.tr2'])
+     && /pink/i.test(H.I18N.en['guide.tr3']) && /backward/i.test(H.I18N.en['guide.tr4']),
+    'troubleshooting covers all four UPLOAD_GUIDE failure modes (trust rank / Very Poor / pink / backward)');
+  // The three download URLs are present, defined once (language-independent), and rendered.
+  ok(/const GUIDE_URLS = \[/.test(html)
+     && html.includes("'https://vrchat.com/home/download'")
+     && html.includes("'https://github.com/vrm-c/UniVRM/releases'")
+     && html.includes("'https://github.com/esperecyan/VRMConverterForVRChat'"),
+    'GUIDE_URLS defines the three download locations once, outside i18n (no ja/en drift possible)');
+  ok(/for\(const \[lk,url\] of GUIDE_URLS\)/.test(html),
+    'the guide renders every GUIDE_URLS entry');
+  // Zero-network posture: URLs must stay plain selectable text. The app contains no external
+  // navigation targets at all, and this feature must not be the one that introduces them.
+  ok(!/<a[^>]+href=["']https?:/i.test(html),
+    'no external <a href> anywhere in the built app (URLs are plain selectable text)');
+  ok(!/href:\s*['"]https?:/.test(html),
+    'no el() call builds an external href attribute either');
+  // Structure: prerequisites and download blocks render, troubleshooting is collapsed in <details>.
+  ok(/t\('guide\.pre'\)/.test(html) && /t\('guide\.dl'\)/.test(html),
+    'guide renders the prerequisites and downloads headings');
+  ok(/trd=el\('details'[\s\S]{0,200}t\('guide\.tr'\)/.test(html),
+    'troubleshooting is a collapsed <details> so it does not bury the main steps');
+  ok(/t\('guide\.ver'\)/.test(html) && /2026/.test(H.I18N.ja['guide.ver']),
+    'guide carries a dated "verified as of" note so staleness is visible to the reader');
+}
+
 /* ---- Round 510: doExport() pins the exact button instance before restoring focus ---- */
 {
   // _exportBtn is a module-level var reassigned every renderOut() (the Export button lives

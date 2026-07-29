@@ -24,6 +24,14 @@ const RANGE_JUMP_KEYS = new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',
 // 90% of a result had no way to keep it. Locked categories are excluded from the reroll.
 const GACHA_LOCK_TABS = ['body','face','hair','outfit','color'];
 let gachaLocks = {body:false, face:false, hair:false, outfit:false, color:false};
+// Round 512: download locations for the in-app upload guide. URLs live here (not in i18n) because
+// they are language-independent — duplicating them per locale would just invite ja/en drift.
+// They intentionally mirror docs/UPLOAD_GUIDE.md; if that doc's URLs change, update both.
+const GUIDE_URLS = [
+  ['guide.dl.vcc', 'https://vrchat.com/home/download'],
+  ['guide.dl.univrm', 'https://github.com/vrm-c/UniVRM/releases'],
+  ['guide.dl.conv', 'https://github.com/esperecyan/VRMConverterForVRChat'],
+];
 let params = HINA.defaults();
 const META_DEFAULTS = {title:'', version:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
 let meta = Object.assign({}, META_DEFAULTS);
@@ -1323,10 +1331,33 @@ function renderOut(bd){
   bd.append(el('div',{class:'note'}, t('note.upload')));
   bd.append(el('div',{class:'sect', role:'heading','aria-level':'3'}, t('guide.t')));
   const gd=el('div',{class:'note'});
+  // Round 512: the distribution artifact is a single index.html, so a user who followed the
+  // README ("download index.html, open it") does NOT have docs/UPLOAD_GUIDE.md. The in-app guide
+  // was five one-liners with no prerequisites, no download locations and no troubleshooting —
+  // i.e. no help at all across exactly the stretch (install → convert → upload) where a
+  // 3D-illiterate beginner is guaranteed to be on their own. Ported from UPLOAD_GUIDE.md.
+  gd.append(el('div',{style:'font-weight:700;margin-bottom:2px'}, t('guide.pre')));
+  const pul=el('ul',{style:'margin:0 0 10px 16px;line-height:1.8'});
+  for(const k of ['guide.pre1','guide.pre2']) pul.append(el('li',{}, t(k)));
+  gd.append(pul);
   const ol=el('ol',{style:'margin:6px 0 0 16px;line-height:1.9'});
   for(const k of ['guide.s1','guide.s2','guide.s3','guide.s4','guide.s5'])
     ol.append(el('li',{}, t(k)));
-  gd.append(ol); bd.append(gd);
+  gd.append(ol);
+  // URLs are rendered as plain selectable text, never <a href> — the app deliberately contains
+  // zero external navigation targets so the "fully local / auditable" posture stays unambiguous.
+  gd.append(el('div',{style:'font-weight:700;margin:10px 0 2px'}, t('guide.dl')));
+  const dul=el('ul',{style:'margin:0 0 0 16px;line-height:1.8'});
+  for(const [lk,url] of GUIDE_URLS)
+    dul.append(el('li',{}, t(lk)+': ', el('span',{style:'word-break:break-all;color:var(--text)'}, url)));
+  gd.append(dul);
+  const trd=el('details',{style:'margin-top:10px'});
+  trd.append(el('summary',{style:'cursor:pointer'}, t('guide.tr')));
+  const tul=el('ul',{style:'margin:6px 0 0 16px;line-height:1.8'});
+  for(const k of ['guide.tr1','guide.tr2','guide.tr3','guide.tr4']) tul.append(el('li',{}, t(k)));
+  trd.append(tul); gd.append(trd);
+  gd.append(el('div',{style:'margin-top:8px;opacity:.75'}, t('guide.ver')));
+  bd.append(gd);
   updateStats();
 }
 
