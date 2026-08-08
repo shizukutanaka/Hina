@@ -7,7 +7,7 @@
 - 「Round N」はコミットメッセージ先頭の通し番号。`git log --oneline` で対応コミットを特定できる
 - 後続セッションは [SWOT.md](SWOT.md)（現状評価と優先度付き改善案）と、モデル別の作業指示書 [INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) も参照すること
 - 本文書更新時点のテスト数は **2036 passed / 0 failed**（`node tests/run.js`）
-- 次に新しい変更を行う場合の通し番号は **Round 518**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加、Round 494 = RANKSテーブルにRaycastsカテゴリ追加（外部一次ソース照合で発見）、Round 495 = loadState()のmetaマージがsanitizeMeta()を経由していなかったprototype pollution修正、Round 496 = スライダーのHome/End/PageUp/PageDownがcaptureUndo()を呼んでいなかった不具合修正、Round 497 = Round 490の.rowスコープ付きチェックボックスCSSがガチャロックに一度も適用されていなかった不具合の訂正、Round 498 = 同根の.rowスコープ付きnumIn CSSがガチャシード入力に一度も適用されていなかった不具合修正、Round 499 = .eBtn.active/.tab[aria-selected]のforced-colors対応漏れ修正、Round 500 = document.title書込み3箇所の競合をtitledStem()/updateTitle()に統一、Round 501 = Aboutダイアログのinert背景化が#skipLinkを対象範囲から漏らしていた不具合修正、Round 502 = .row input[type=text]がtype=urlに変更されたライセンスURL欄に一度も適用されていなかった不具合修正、Round 503 = hasSkirt判定の重複リストをSKIRT_OUTFITS/hasSkirt()に単一情報源化（予防的修正）、Round 504 = saveJson()に_savingJson再入防止ガードを追加、Round 505 = doExport()のテクスチャアトラスがスナップショット漏れでデータ破損しうる不具合修正、Round 506 = モーフターゲットaccessorのmin/maxがglTF仕様の厳密一致要件に違反していた不具合修正、Round 507 = Caps Lock有効時にCtrl(+Shift)+S/Z/Pショートカットが無反応になる不具合修正、Round 508 = JSON読込された非step整合値がaria-valuetext/easy-mode表示で生の精度のまま出ていた表示不整合修正、Round 509 = drop時のヒント復元が表情プレビュー中の文脈を落としていた軽微な不整合修正、Round 510 = doExport()完了時に無関係な新規ボタンへフォーカスが奪われる不具合修正、Round 511 = i18nプレースホルダのja/en整合性テスト追加（予防的・本体コード変更なし。CHANGELOGのRound 510までの反映もこの監査で並行実施＝docsコミット）、Round 512 = アプリ内VRChat導入ガイドの自己完結化（単一HTML配布ではUPLOAD_GUIDE.mdが手元に無い問題／第一原理ギャップ分析で発見）、Round 513 = ランクバッジ横に「Quest Excellentにする」ワンタップ修正ボタンを追加（診断のみで行動不能だった問題）、Round 514 = Khronos公式バリデータのチェック一覧照合でJOINTS/WEIGHTS規則違反3箇所を発見・修正（変形不変を実証）、Round 515 = glTF/VRM仕様適合スイートをテストへ制度化（変異テストで有効性を実証）、Round 516 = ViewPosition（VR一人称カメラ）の体格全域での正確性検証を追加（二重管理定数のドリフトガード。変異テストで実証）、Round 517 = 三角形品質（最小内角2°）の恒久ガードを追加（凍結中のv0.2作業への客観的品質ゲート。変異テストで実証）、Round 464-517でテスト1907→2036件）
+- 次に新しい変更を行う場合の通し番号は **Round 519**（Round 478 = 本文書の追加、Round 479 = 表情エディタ実装、Round 480 = 表情エディタのSRスパム修正、Round 481 = 複数段Undo/Redo実装、Round 482 = Undo/Redoのdebounceウィンドウ境界バグ修正、Round 483 = Redoショートカットの発見可能性修正、Round 484 = Undo/Redoヒントのスクリーンリーダー対応、Round 485 = outlineトグルのSRアナウンス漏れ修正、Round 486 = ファイル入力JSON読込のMIME/拡張子チェック漏れ修正、Round 487 = saveJson()のフォーカス復帰漏れ修正、Round 488 = 表情ミックス数値入力のクランプ未アナウンス修正、Round 489 = sphereBand()のポール零面積三角形修正、Round 490 = カラースウォッチ/チェックボックスをWCAG 2.2 SC 2.5.8準拠の24pxへ拡大、Round 491 = メタデータ入力2箇所のcaptureUndo()漏れ修正、Round 492 = sanitizeMeta()のenum値検証追加、Round 493 = loadState()のlastGachaSeed復元にclampSeed()ガード追加、Round 494 = RANKSテーブルにRaycastsカテゴリ追加（外部一次ソース照合で発見）、Round 495 = loadState()のmetaマージがsanitizeMeta()を経由していなかったprototype pollution修正、Round 496 = スライダーのHome/End/PageUp/PageDownがcaptureUndo()を呼んでいなかった不具合修正、Round 497 = Round 490の.rowスコープ付きチェックボックスCSSがガチャロックに一度も適用されていなかった不具合の訂正、Round 498 = 同根の.rowスコープ付きnumIn CSSがガチャシード入力に一度も適用されていなかった不具合修正、Round 499 = .eBtn.active/.tab[aria-selected]のforced-colors対応漏れ修正、Round 500 = document.title書込み3箇所の競合をtitledStem()/updateTitle()に統一、Round 501 = Aboutダイアログのinert背景化が#skipLinkを対象範囲から漏らしていた不具合修正、Round 502 = .row input[type=text]がtype=urlに変更されたライセンスURL欄に一度も適用されていなかった不具合修正、Round 503 = hasSkirt判定の重複リストをSKIRT_OUTFITS/hasSkirt()に単一情報源化（予防的修正）、Round 504 = saveJson()に_savingJson再入防止ガードを追加、Round 505 = doExport()のテクスチャアトラスがスナップショット漏れでデータ破損しうる不具合修正、Round 506 = モーフターゲットaccessorのmin/maxがglTF仕様の厳密一致要件に違反していた不具合修正、Round 507 = Caps Lock有効時にCtrl(+Shift)+S/Z/Pショートカットが無反応になる不具合修正、Round 508 = JSON読込された非step整合値がaria-valuetext/easy-mode表示で生の精度のまま出ていた表示不整合修正、Round 509 = drop時のヒント復元が表情プレビュー中の文脈を落としていた軽微な不整合修正、Round 510 = doExport()完了時に無関係な新規ボタンへフォーカスが奪われる不具合修正、Round 511 = i18nプレースホルダのja/en整合性テスト追加（予防的・本体コード変更なし。CHANGELOGのRound 510までの反映もこの監査で並行実施＝docsコミット）、Round 512 = アプリ内VRChat導入ガイドの自己完結化（単一HTML配布ではUPLOAD_GUIDE.mdが手元に無い問題／第一原理ギャップ分析で発見）、Round 513 = ランクバッジ横に「Quest Excellentにする」ワンタップ修正ボタンを追加（診断のみで行動不能だった問題）、Round 514 = Khronos公式バリデータのチェック一覧照合でJOINTS/WEIGHTS規則違反3箇所を発見・修正（変形不変を実証）、Round 515 = glTF/VRM仕様適合スイートをテストへ制度化（変異テストで有効性を実証）、Round 516 = ViewPosition（VR一人称カメラ）の体格全域での正確性検証を追加（二重管理定数のドリフトガード。変異テストで実証）、Round 517 = 三角形品質（最小内角2°）の恒久ガードを追加（凍結中のv0.2作業への客観的品質ゲート。変異テストで実証）、Round 518 = ヘッドレスChromiumでの視覚検証がジオメトリ限定で可能と実証（SWOT最大の障壁を部分的に解消）＋巻き順混在を計測し未解決項目として記録、Round 464-518でテスト1907→2036件）
 
 ## 1. プロダクト概要と交渉不可制約
 
@@ -173,6 +173,16 @@ Round 464–511 の比較監査とは異なる手法——「このプロダク�
 
 `CLAUDE.md` の「VRM 0.x固定」制約により当面凍結。制約自体の変更はユーザー判断事項。
 
+### 3-5. 三角形の巻き順が混在している（Round 518で計測・影響は未確定）
+
+**計測事実**: 頂点法線（外向きであることを頭部球面221/225で独立確認済み）に対し、三角形の幾何法線 `cross(B-A, C-A)` が逆を向くものが **67.5%**（デフォルトアバターで1240/1849）。dot値の分布は **±1 に完全な二峰性**（中間はほぼ皆無）で、測定ノイズではなく実際に巻き順が2種類混在している。glTF は CCW を表面と定義するため、大半が規約と逆。
+
+**影響が未確定な理由**: `doubleSided:true`（§5-15で必須と確認済み）のためメインパスでは背面カリングが無効で、通常の描画には影響しない。プレビューのアウトラインパスは `gl.cullFace(gl.FRONT)` を使う反転ハル方式で、これは巻き順に依存するため理屈上は影響しうる。しかし**本環境では検証できなかった**——テクスチャが空になりメインパスが discard で消えるため（§5-16）、アウトラインが正しく背後に回っているかを目視で判定できない。
+
+**注意（自己訂正）**: 当初この巻き順混在がプレビューの黒シルエットの原因だと疑ったが、**それは誤り**だった。黒くなるのはテクスチャdiscardが原因で、アウトラインを無効化しても（巻き順に触れなくても）何も描画されないことを確認済み。
+
+**次にやるべきこと**: 実GPUでプレビューを描画できる環境（人間の実機ブラウザ）で、(a) アウトラインが正常に見えているか、(b) `cullFace(BACK)` に変えると改善するか、を確認する。実害が確認できた場合のみ修正に進む。巻き順の反転自体は頂点位置・法線を変えずインデックス順のみを変える操作なので、修正するとしても変形不変で安全。
+
 ### 3-4. 既知の軽微な問題（修正保留）
 
 - 3Dプレビューのマルチタッチ: 回転ドラッグ中に2本目の指が触れると視点が一瞬跳ぶことがある（`build/20-app.js` のポインタ処理。camDistのクランプで被害は限定的）。深刻度低・発生頻度低のため保留
@@ -191,7 +201,7 @@ Round 464–511 の比較監査とは異なる手法——「このプロダク�
 | 6 | 共有リンクへのプレビュー画像同梱 | スコープ外の複雑化。スクリーンショット機能（Ctrl+Shift+P）で代替可能 |
 | 7 | 「初期化」ボタンでガチャロックもクリア | ロックは `lang`/`mode` と同じ「ツール設定」区分（アバターデータではない）。初期化が消さないのが既存挙動と一貫 |
 
-## 5. 検証済み・問題なし（15件）
+## 5. 検証済み・問題なし（16件）
 
 以下は監査で調査し**問題なしと確認済み**。再調査は時間の無駄なので省くこと（コードを変更した場合は別）。
 
@@ -212,6 +222,8 @@ Round 464–511 の比較監査とは異なる手法——「このプロダク�
 12. **頂点キャッシュ順（GPU post-transform cache）**: 公開アルゴリズム（Forsyth法／Tipsify）による三角形並べ替えは**インデックス順のみを変えるため変形不変**で、視覚検証不能な本環境でも適用できる数少ない最適化だが、実測すると**すでにほぼ最適**だった——ATVR(cache32)=1.167（理論最良1.0、頂点1つあたり平均1.167回だけ頂点シェーダが走る＝無駄は約14%）、ACMR16=1.109。`sphereBand`/`latheY`/`tube` がリング・ストリップ順に生成するため自然にキャッシュ局所性が高い。1,849三角形という規模では並べ替えの絶対的削減量が無視できるため**実装しない**と判断
 13. **テクスチャメモリ推定（texMB=5.3MB）の妥当性**: VRChat公式ドキュメントは Texture Memory を「推定値」としか定義しておらず、圧縮形式・mipmapの扱いを明記していない。実際のVRAM使用量は**ユーザーがUnity側で選ぶインポート設定**（Quest既定ならASTC圧縮で約1/10）に依存し、雛からは決定できない。現在の式 `TEX²×4×1.33` は**非圧縮RGBA32+mipmapの最悪ケース**であり、保守的側に倒れているためランク判定を誤って甘くすることがない（5.3 < Quest Excellent閾値10MB なので判定自体は不変）。**設計として妥当・変更不要**
 14. **マテリアルの `alphaMode:MASK` は必須**: モバイル（タイルベース）GPUではalpha testがearly-Zを阻害しコストが高いため、不要なら`OPAQUE`にする価値があるが、**雛では必要**。`drawAtlas()` は `clearRect` 後に瞳などを `ax.ellipse()` で描くため、矩形UV（`uvRect`）の**四隅が透明のまま残る**。`OPAQUE`にすると目・眉・口の板ポリが不透明な長方形として描画される。**変更不可**
+16. **視覚検証は「ジオメトリのみ」なら可能（Round 518で実証）**: 本環境には Chromium と playwright（グローバル: `/opt/node22/lib/node_modules/playwright`）が入っており、`--enable-unsafe-swiftshader --use-gl=angle --use-angle=swiftshader` で `file:///home/user/Hina/index.html` を開けばアプリは実際に動作する（WebGL 1.0 / ANGLE+SwiftShader）。シェーダは4本すべてコンパイル・2本ともリンク成功、GLエラーゼロ、描画コールも正常発行（outline 5487 + main 5547 インデックス）。**検証できるもの**: ジオメトリ・シルエット・プロポーション・ポーズ・スキニング・カメラ・UI全般。**検証できないもの**: 色／テクスチャ／顔パーツ。理由はSwiftShaderのcanvas→テクスチャ経路が空テクスチャを返すことで、メインFS冒頭の `if(c.a<0.5)discard;` が全フラグメントを破棄するため（アトラスcanvasはアップロード時点で正常＝不透明10.4%、`UNPACK_FLIP_Y_WEBGL`も正しくtrue、つまり**製品コードは正しい**。ImageData経由のアップロードに差し替える回避も無効だった）。**形状を見るための手順**: `if(c.a<0.5)discard;` を削除した複製HTMLを作って開く。これでアバターのシルエットが正しく描画される（頭・ツインテール・腕・スカート・脚が判別可能）。§3-1/3-2 の凍結作業のうち**形状の妥当性**はこの方法で部分的に検証できる
+
 15. **マテリアルの `doubleSided:true` は必須**: 背面カリングを無効化するためモバイルではフラグメント負荷が増えるが、スカート等の `latheY` はリング間をクアッドで繋ぐだけの**開いた面（キャップなし）**であり、内側や下方から見ると背面が露出する。カリングを有効化するとそれらの面が消える。1マテリアル制約（CLAUDE.md）のため部分適用も不可。**変更不可**
 
 このほか、doExport の finally によるフラグ復帰、devicePixelRatio/リサイズ処理（RAFループで毎フレーム検出）、ガチャシードの決定性（mulberry32・隠れエントロピーなし）も検証済みで問題なし。
