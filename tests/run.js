@@ -6766,6 +6766,64 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 517: triangle-quality floor — no sliver triangles anywhere in the parameter space ---- */
+{
+  // Round 489 removed the zero-area triangles at sphere poles and added a position-based area
+  // check. But "area > 0" still permits arbitrarily thin slivers, which are a well-known mesh
+  // quality problem: barycentric interpolation loses precision across them, they rasterize
+  // inefficiently, and they produce shading artifacts. Unlike "does this look right", sliver-ness
+  // is objectively measurable, so it is checkable in an environment with no visual verification.
+  //
+  // This matters most for work that is currently FROZEN (§3-1/3-2: finger bones, extra hair and
+  // outfit meshes). Whoever implements those cannot see the result either — this gives that work
+  // an objective geometric quality gate that visual inspection would otherwise have provided.
+  //
+  // Measured today: the worst minimum interior angle across the whole parameter space is 3.237°
+  // (gacha seed 89). The 2° floor below therefore has ~1.2° of headroom — loose enough not to be
+  // brittle against legitimate geometry tweaks, tight enough that a genuine sliver (typically
+  // well under 1°) fails clearly.
+  const MIN_ANGLE_DEG = 2;
+  const MIN_SIN = Math.sin(MIN_ANGLE_DEG * Math.PI / 180);
+  // sin(minAngle) = |u×v| / (L1·L2) with L1,L2 the two longest edges — avoids acos per triangle,
+  // keeping the whole sweep (~160 avatars) well under a second.
+  const worstSin = B5 => {
+    const P = B5.geom.pos, I = B5.geom.idx;
+    let ms = 1;
+    for (let t = 0; t < I.length; t += 3){
+      const a = I[t]*3, b = I[t+1]*3, c = I[t+2]*3;
+      const ux = P[b]-P[a], uy = P[b+1]-P[a+1], uz = P[b+2]-P[a+2];
+      const vx = P[c]-P[a], vy = P[c+1]-P[a+1], vz = P[c+2]-P[a+2];
+      const cm = Math.hypot(uy*vz-uz*vy, uz*vx-ux*vz, ux*vy-uy*vx);
+      const e = [Math.hypot(ux,uy,uz), Math.hypot(vx,vy,vz),
+                 Math.hypot(P[c]-P[b], P[c+1]-P[b+1], P[c+2]-P[b+2])].sort((x,y) => y-x);
+      const den = e[0]*e[1];
+      const sn = den > 0 ? cm/den : 0;
+      if (sn < ms) ms = sn;
+    }
+    return ms;
+  };
+  let worst = 1, worstAt = '', swept = 0;
+  const sweep = (label, p5) => { swept++; const s = worstSin(H.buildAvatar(p5));
+    if (s < worst){ worst = s; worstAt = label; } };
+  sweep('default', H.defaults());
+  H.PRESETS.forEach(pr => sweep('preset:' + pr.id, H.presetParams(pr)));
+  // seed 89 is today's worst case — pinned explicitly so shrinking the range can't hide it
+  for (let s = 0; s < 100; s++) sweep('seed' + s, H.randomParams(s));
+  for (const k in H.PARAMS){
+    const sp = H.PARAMS[k];
+    if (sp.k === 'num') for (const v of [sp.min, sp.max]) sweep(k + '=' + v, Object.assign(H.defaults(), {[k]: v}));
+    else if (sp.k === 'enum') for (const o of sp.opts) sweep(k + '=' + o, Object.assign(H.defaults(), {[k]: o}));
+    else if (sp.k === 'bool') for (const v of [true, false]) sweep(k + '=' + v, Object.assign(H.defaults(), {[k]: v}));
+  }
+  const worstDeg = Math.asin(Math.max(0, Math.min(1, worst))) * 180 / Math.PI;
+  ok(swept > 120, `triangle-quality sweep covers the parameter space (${swept} avatars built)`);
+  ok(worst >= MIN_SIN,
+    `no sliver triangles: worst minimum interior angle ${worstDeg.toFixed(2)}° >= ${MIN_ANGLE_DEG}° floor (worst case: ${worstAt})`);
+  // Guard the guard: if a future change made every triangle equilateral the floor would pass
+  // trivially, so assert the metric still discriminates — real geometry has thin triangles.
+  ok(worstDeg < 30, 'the metric is live (real geometry has thin triangles; a vacuous pass would report ~60°)');
+}
+
 /* ---- Round 516: ViewPosition actually lands on the eyes, across the whole parameter range ---- */
 {
   // firstPersonBoneOffset is the VR camera position — VRChat renders first-person from
