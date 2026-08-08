@@ -988,9 +988,14 @@ function buildAvatar(p){
       const vi=start+k, ring=(k/(15))|0, t=ring/2;
       const x=g.pos[vi*3], cx=x/(hipR*1.6);
       const wl=Math.max(0,-cx)*0.5*t, wr=Math.max(0,cx)*0.5*t, wh=1-wl-wr;
+      // Round 514: a joint index paired with weight 0 is a glTF spec violation
+      // (ACCESSOR_JOINTS_USED_ZERO_WEIGHT — the index MUST be 0 when the weight is 0). The top
+      // skirt ring has t=0 so both leg weights are 0, and any vertex off-centre has one of
+      // wl/wr at 0, yet both leg joints were written unconditionally. Writing 0 instead is
+      // deformation-neutral: a zero-weight influence contributes nothing either way.
       g.jnt[vi*4]=idx.hips; g.wgt[vi*4]=wh;
-      g.jnt[vi*4+1]=idx.lUL; g.wgt[vi*4+1]=wl;
-      g.jnt[vi*4+2]=idx.rUL; g.wgt[vi*4+2]=wr;
+      g.jnt[vi*4+1]=wl>0?idx.lUL:0; g.wgt[vi*4+1]=wl;
+      g.jnt[vi*4+2]=wr>0?idx.rUL:0; g.wgt[vi*4+2]=wr;
       g.jnt[vi*4+3]=0; g.wgt[vi*4+3]=0;
     }
   } else {
@@ -1013,7 +1018,10 @@ function buildAvatar(p){
       const x0=s*shX*0.9, x1=s*(shX+(wristX-shX)*tEnd);
       tube(g, [
         {pos:[x0,shoulderY,0], r:armR*1.55, skin:[[idx.chest,0.4],[ua,0.6]]},
-        {pos:[s*(shX+(wristX-shX)*tEnd*0.5),shoulderY,0], r:armR*1.30, skin:[[ua,tEnd>0.5?0.6:1],[la,tEnd>0.5?0.4:0]]},
+        // Round 514: the short-sleeve branch used to emit [[ua,1],[la,0]] — a joint index paired
+        // with weight 0, which glTF forbids (ACCESSOR_JOINTS_USED_ZERO_WEIGHT). Dropping the
+        // dead influence entirely is deformation-neutral and reads clearer than nested ternaries.
+        {pos:[s*(shX+(wristX-shX)*tEnd*0.5),shoulderY,0], r:armR*1.30, skin: tEnd>0.5?[[ua,0.6],[la,0.4]]:[[ua,1]]},
         {pos:[x1,shoulderY,0], r:armR*1.12, skin: tEnd>0.5?[[la,1]]:[[ua,1]]},
       ], 8, sUv);
     }
@@ -1110,7 +1118,11 @@ function buildAvatar(p){
         const t=i/(path.length-1);
         const bi=sp.boneIdxs[Math.min(i, sp.boneIdxs.length-1)];
         const bp=sp.boneIdxs[Math.max(0,Math.min(i, sp.boneIdxs.length-1)-1)];
-        return {pos, r:r0*(1-t*0.92)+0.004, skin:[[bi,0.75],[bp,0.25]]};
+        // Round 514: at the chain root (i=0) bi===bp, which emitted [[X,0.75],[X,0.25]] — the
+        // same joint twice (glTF ACCESSOR_JOINTS_INDEX_DUPLICATE) burning two of the four
+        // influence slots on one bone. Collapsing to a single full-weight influence is exactly
+        // equivalent (0.75·M·p + 0.25·M·p == 1.0·M·p) and frees a slot.
+        return {pos, r:r0*(1-t*0.92)+0.004, skin: bi===bp ? [[bi,1]] : [[bi,0.75],[bp,0.25]]};
       });
       tube(g, rings, 8, tailUv);
       cap(g, M.add(path[path.length-1],[0,-0.005,0]), [0,-1,0], g.pos.length/3-9, 8);

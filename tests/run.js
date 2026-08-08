@@ -6766,6 +6766,54 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 514: skinning obeys glTF's JOINTS/WEIGHTS rules (zero-weight + duplicate joints) ---- */
+{
+  // Sourced from the Khronos glTF-Validator's own issue list (ISSUES.md), the same way Round 506
+  // was found. Two Error-severity checks were violated by every export:
+  //   ACCESSOR_JOINTS_USED_ZERO_WEIGHT — a joint index MUST be 0 when its weight is 0
+  //   ACCESSOR_JOINTS_INDEX_DUPLICATE  — the same joint MUST NOT appear twice on one vertex
+  // Three producers: the skirt re-skin wrote both leg joints even where their weight was 0; the
+  // spring-bone chain root emitted [[X,0.75],[X,0.25]] (bi===bp) burning two influence slots on
+  // one bone; the short-sleeve branch emitted [[ua,1],[la,0]]. All three fixes are provably
+  // deformation-neutral (a zero weight contributes nothing; 0.75·M·p + 0.25·M·p == 1.0·M·p),
+  // which is why they are safe despite this environment having no visual verification.
+  const sample = [H.defaults(),
+                  ...[1, 7, 42, 99, 2026].map(s => H.randomParams(s)),
+                  ...H.PRESETS.map(p => H.presetParams(p))];
+  let zeroWeightJoint = 0, dupJoint = 0, badSum = 0, oob = 0, checked = 0;
+  for (const p of sample){
+    const b = H.buildAvatar(p);
+    const nJ = b.bones.length, nV = b.geom.pos.length / 3;
+    for (let v = 0; v < nV; v++){
+      checked++;
+      const seen = new Set();
+      let sum = 0;
+      for (let k = 0; k < 4; k++){
+        const ji = b.geom.jnt[v*4+k], w = b.geom.wgt[v*4+k];
+        if (w === 0 && ji !== 0) zeroWeightJoint++;
+        if (ji >= nJ) oob++;
+        if (w !== 0){ if (seen.has(ji)) dupJoint++; seen.add(ji); }
+        sum += w;
+      }
+      if (Math.abs(sum - 1) > 1e-5) badSum++;
+    }
+  }
+  ok(checked > 10000, `skinning sweep actually ran over every vertex of ${sample.length} avatars (${checked} vertices)`);
+  ok(zeroWeightJoint === 0,
+    'no vertex pairs a non-zero joint index with a zero weight (glTF ACCESSOR_JOINTS_USED_ZERO_WEIGHT)');
+  ok(dupJoint === 0,
+    'no vertex lists the same joint twice among its non-zero influences (glTF ACCESSOR_JOINTS_INDEX_DUPLICATE)');
+  ok(oob === 0, 'every joint index is within the skin joint count (glTF ACCESSOR_JOINTS_INDEX_OOB)');
+  ok(badSum === 0, 'every vertex weight set sums to 1 (glTF ACCESSOR_WEIGHTS_NON_NORMALIZED)');
+  // Guard the specific call sites so a future edit cannot silently reintroduce either pattern.
+  ok(/skin: bi===bp \? \[\[bi,1\]\] : \[\[bi,0\.75\],\[bp,0\.25\]\]/.test(html),
+    'spring-bone chain collapses the root ring to a single full-weight influence when bi===bp');
+  ok(/skin: tEnd>0\.5\?\[\[ua,0\.6\],\[la,0\.4\]\]:\[\[ua,1\]\]/.test(html),
+    'short-sleeve branch drops the dead zero-weight lower-arm influence entirely');
+  ok(/g\.jnt\[vi\*4\+1\]=wl>0\?idx\.lUL:0;/.test(html) && /g\.jnt\[vi\*4\+2\]=wr>0\?idx\.rUL:0;/.test(html),
+    'skirt re-skin writes joint 0 wherever the corresponding leg weight is 0');
+}
+
 /* ---- Round 513: one-tap "Make it Quest Excellent" where the bad rank is actually read ---- */
 {
   ok(H.I18N.ja['btn.questFix'] && H.I18N.en['btn.questFix']
