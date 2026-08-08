@@ -6766,6 +6766,154 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 515: permanent spec-conformance suite (Khronos glTF-Validator + VRM 0.x schemas) ---- */
+{
+  // Rounds 506 and 514 each found real, every-export spec violations by fetching a primary
+  // source (the glTF-Validator's ISSUES.md; the VRM 0.x JSON schemas) and sweeping actual
+  // exported binaries. Both sweeps lived in throwaway scratch scripts, so nothing would catch a
+  // regression — or a NEW violation of a rule neither round happened to hit. This institutionalizes
+  // them: the rules below are transcribed from those primary sources, and would have caught both
+  // earlier bugs automatically.
+  const VRM_BONES = ["hips","leftUpperLeg","rightUpperLeg","leftLowerLeg","rightLowerLeg","leftFoot",
+    "rightFoot","spine","chest","neck","head","leftShoulder","rightShoulder","leftUpperArm",
+    "rightUpperArm","leftLowerArm","rightLowerArm","leftHand","rightHand","leftToes","rightToes",
+    "leftEye","rightEye","jaw","leftThumbProximal","leftThumbIntermediate","leftThumbDistal",
+    "leftIndexProximal","leftIndexIntermediate","leftIndexDistal","leftMiddleProximal",
+    "leftMiddleIntermediate","leftMiddleDistal","leftRingProximal","leftRingIntermediate",
+    "leftRingDistal","leftLittleProximal","leftLittleIntermediate","leftLittleDistal",
+    "rightThumbProximal","rightThumbIntermediate","rightThumbDistal","rightIndexProximal",
+    "rightIndexIntermediate","rightIndexDistal","rightMiddleProximal","rightMiddleIntermediate",
+    "rightMiddleDistal","rightRingProximal","rightRingIntermediate","rightRingDistal",
+    "rightLittleProximal","rightLittleIntermediate","rightLittleDistal","upperChest"];
+  const VRM_PRESETS = ["unknown","neutral","a","i","u","e","o","blink","joy","angry","sorrow","fun",
+    "lookup","lookdown","lookleft","lookright","blink_l","blink_r"];
+  // Unity's Humanoid rig will not resolve without these.
+  const VRM_REQUIRED_BONES = ["hips","spine","head","leftUpperArm","rightUpperArm","leftLowerArm",
+    "rightLowerArm","leftHand","rightHand","leftUpperLeg","rightUpperLeg","leftLowerLeg",
+    "rightLowerLeg","leftFoot","rightFoot"];
+
+  const problems = [];
+  const bad = (code, label) => problems.push(code + ' @' + label);
+  const png1 = H.b64ToBytes(H.PNG1);
+  const confCases = [['default', H.defaults()],
+                     ['seed42', H.randomParams(42)],
+                     ['seed2026', H.randomParams(2026)],
+                     ...H.PRESETS.slice(0, 3).map(p => ['preset:' + p.id, H.presetParams(p)])];
+
+  for (const [label, p] of confCases){
+    const B2 = H.buildAvatar(p);
+    const G2 = parseGLB(H.exportVRM(B2, p, {title:'t'}, png1).bytes);
+    const j2 = G2.json, nN = j2.nodes.length;
+    const prim2 = j2.meshes[0].primitives[0];
+    const vertAcc = new Set(Object.values(prim2.attributes));
+    const ibmAcc = j2.skins[0].inverseBindMatrices;
+    const nV2 = j2.accessors[prim2.attributes.POSITION].count;
+
+    /* --- glTF layer (codes from the Khronos glTF-Validator issue list) --- */
+    j2.accessors.forEach((a, ai) => {
+      if (a.bufferView === undefined) return;
+      const bv = j2.bufferViews[a.bufferView];
+      // BUFFER_VIEW_TARGET_MISSING: vertex data must declare ARRAY_BUFFER, indices ELEMENT_ARRAY_BUFFER
+      if (vertAcc.has(ai) && bv.target !== 34962) bad('BUFFER_VIEW_TARGET_MISSING(vertex)', label);
+      if (ai === prim2.indices && bv.target !== 34963) bad('BUFFER_VIEW_TARGET_MISSING(index)', label);
+      // IBM and sparse data are not vertex attributes — they must NOT carry a target or byteStride
+      if (ai === ibmAcc && (bv.target !== undefined || bv.byteStride !== undefined)) bad('SKIN_IBM_BUFFERVIEW_INVALID', label);
+      // ACCESSOR_TOTAL_OFFSET_ALIGNMENT: total offset must be a multiple of the component size
+      const csz = {5126:4, 5123:2, 5121:1}[a.componentType];
+      if ((((bv.byteOffset||0) + (a.byteOffset||0)) % csz) !== 0) bad('ACCESSOR_TOTAL_OFFSET_ALIGNMENT', label);
+    });
+    j2.accessors.forEach(a => {
+      if (!a.sparse) return;
+      if (a.sparse.count > a.count) bad('ACCESSOR_SPARSE_COUNT_OUT_OF_RANGE', label);
+      for (const bvi of [a.sparse.indices.bufferView, a.sparse.values.bufferView])
+        if (j2.bufferViews[bvi].target !== undefined) bad('SPARSE_BUFFERVIEW_HAS_TARGET', label);
+    });
+    j2.bufferViews.forEach(v => { if (((v.byteOffset||0) % 4) !== 0) bad('BUFFERVIEW_OFFSET_ALIGNMENT', label); });
+    // every index must address a real vertex
+    const idx2 = accData(j2, G2.bin, prim2.indices);
+    for (let i = 0; i < idx2.length; i++) if (idx2[i] >= nV2) { bad('ACCESSOR_INDEX_OOB', label); break; }
+    // UNUSED_OBJECT: nothing dangling in the file the user downloads
+    const usedAcc = new Set([...vertAcc, prim2.indices, ibmAcc]);
+    prim2.targets.forEach(t => usedAcc.add(t.POSITION));
+    j2.accessors.forEach((_, ai) => { if (!usedAcc.has(ai)) bad('UNUSED_ACCESSOR', label); });
+    const usedBV = new Set();
+    j2.accessors.forEach(a => { if (a.bufferView !== undefined) usedBV.add(a.bufferView);
+      if (a.sparse){ usedBV.add(a.sparse.indices.bufferView); usedBV.add(a.sparse.values.bufferView); } });
+    (j2.images||[]).forEach(im => { if (im.bufferView !== undefined) usedBV.add(im.bufferView); });
+    j2.bufferViews.forEach((_, bi) => { if (!usedBV.has(bi)) bad('UNUSED_BUFFERVIEW', label); });
+    // NODE_SKINNED_MESH_LOCAL_TRANSFORMS: local transforms on a skinned mesh node are ignored by
+    // renderers, so carrying one would silently mean something different than it looks.
+    const mn = j2.nodes.find(n => n.skin !== undefined);
+    if (mn && (mn.translation || mn.rotation || mn.scale || mn.matrix)) bad('NODE_SKINNED_MESH_LOCAL_TRANSFORMS', label);
+    // IMAGE_NPOT_DIMENSIONS: read width/height straight out of each PNG's IHDR
+    (j2.images||[]).forEach(im => {
+      if (im.bufferView === undefined) return;
+      const bv = j2.bufferViews[im.bufferView];
+      const dv = new DataView(G2.bin.buffer, G2.bin.byteOffset + (bv.byteOffset||0), bv.byteLength);
+      const w = dv.getUint32(16), hgt = dv.getUint32(20);
+      if ((w & (w-1)) !== 0 || (hgt & (hgt-1)) !== 0) bad('IMAGE_NPOT_DIMENSIONS', label);
+    });
+
+    /* --- VRM 0.x layer (rules from the official vrm-specification JSON schemas) --- */
+    const V = j2.extensions && j2.extensions.VRM;
+    if (!V){ bad('VRM_EXTENSION_MISSING', label); continue; }
+    if (V.specVersion === undefined) bad('VRM_SPECVERSION_MISSING', label);
+    const boneSeen = new Set();
+    ((V.humanoid && V.humanoid.humanBones) || []).forEach(b => {
+      if (!VRM_BONES.includes(b.bone)) bad('HUMANOID_BONE_NAME_INVALID:' + b.bone, label);
+      if (!(Number.isInteger(b.node) && b.node >= 0 && b.node < nN)) bad('HUMANOID_NODE_OOB', label);
+      if (boneSeen.has(b.bone)) bad('HUMANOID_BONE_DUPLICATE:' + b.bone, label);
+      boneSeen.add(b.bone);
+    });
+    VRM_REQUIRED_BONES.forEach(r => { if (!boneSeen.has(r)) bad('HUMANOID_REQUIRED_BONE_MISSING:' + r, label); });
+    const nTargets = (prim2.targets || []).length;
+    const presetSeen = new Set();
+    ((V.blendShapeMaster && V.blendShapeMaster.blendShapeGroups) || []).forEach(g => {
+      // presetName is a lowercase enum — 'Blink_L' would be rejected while 'blink_l' is correct
+      if (g.presetName !== undefined && !VRM_PRESETS.includes(g.presetName))
+        bad('BLENDSHAPE_PRESETNAME_INVALID:' + g.presetName, label);
+      if (g.presetName && g.presetName !== 'unknown'){
+        if (presetSeen.has(g.presetName)) bad('BLENDSHAPE_PRESET_DUPLICATE:' + g.presetName, label);
+        presetSeen.add(g.presetName);
+      }
+      if (typeof g.name !== 'string' || !g.name) bad('BLENDSHAPE_NAME_MISSING', label);
+      (g.binds || []).forEach(b => {
+        if (!(Number.isInteger(b.mesh) && b.mesh >= 0 && b.mesh < j2.meshes.length)) bad('BIND_MESH_OOB', label);
+        if (!(Number.isInteger(b.index) && b.index >= 0 && b.index < nTargets)) bad('BIND_INDEX_OOB', label);
+        if (!(typeof b.weight === 'number' && b.weight >= 0 && b.weight <= 100)) bad('BIND_WEIGHT_RANGE', label);
+      });
+    });
+    const fp = V.firstPerson || {};
+    if (fp.firstPersonBone !== undefined && !(fp.firstPersonBone >= 0 && fp.firstPersonBone < nN))
+      bad('FIRSTPERSON_BONE_OOB', label);
+    (fp.meshAnnotations || []).forEach(a => {
+      if (!(a.mesh >= 0 && a.mesh < j2.meshes.length)) bad('FP_MESHANNOTATION_OOB', label); });
+    const sa = V.secondaryAnimation || {};
+    (sa.boneGroups || []).forEach(g => {
+      (g.bones || []).forEach(n => { if (!(n >= 0 && n < nN)) bad('SPRING_BONE_NODE_OOB', label); });
+      (g.colliderGroups || []).forEach(ci => {
+        if (!(ci >= 0 && ci < (sa.colliderGroups || []).length)) bad('SPRING_COLLIDERGROUP_REF_OOB', label); });
+      if (g.dragForce !== undefined && !(g.dragForce >= 0 && g.dragForce <= 1)) bad('SPRING_DRAGFORCE_RANGE', label);
+      if (g.stiffiness !== undefined && !(g.stiffiness >= 0)) bad('SPRING_STIFFINESS_RANGE', label);
+      if (g.hitRadius !== undefined && !(g.hitRadius >= 0)) bad('SPRING_HITRADIUS_RANGE', label);
+    });
+    (sa.colliderGroups || []).forEach(cg => {
+      if (!(cg.node >= 0 && cg.node < nN)) bad('COLLIDERGROUP_NODE_OOB', label);
+      (cg.colliders || []).forEach(c => { if (!(c.radius > 0)) bad('COLLIDER_RADIUS_RANGE', label); });
+    });
+  }
+  ok(confCases.length >= 6, 'spec-conformance sweep covers default + gacha + presets');
+  ok(problems.length === 0,
+    'exported VRMs satisfy every transcribed glTF-Validator and VRM 0.x schema rule' +
+    (problems.length ? ' — violations: ' + [...new Set(problems)].slice(0, 6).join('; ') : ''));
+  // The rule tables must stay faithful to the specs they were transcribed from.
+  ok(VRM_BONES.length === 55 && VRM_PRESETS.length === 18,
+    'transcribed VRM enums match the official schemas (55 humanoid bones, 18 blend-shape presets)');
+  // Guard against the sweep silently becoming a no-op if the export shape ever changes.
+  ok(VRM_REQUIRED_BONES.every(b => H.HB.includes(b)),
+    "every Unity-required humanoid bone is in Hina's own HB export list (sweep cannot pass vacuously)");
+}
+
 /* ---- Round 514: skinning obeys glTF's JOINTS/WEIGHTS rules (zero-weight + duplicate joints) ---- */
 {
   // Sourced from the Khronos glTF-Validator's own issue list (ISSUES.md), the same way Round 506
