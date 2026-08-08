@@ -6766,6 +6766,73 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 516: ViewPosition actually lands on the eyes, across the whole parameter range ---- */
+{
+  // firstPersonBoneOffset is the VR camera position — VRChat renders first-person from
+  // headBone + this offset. If it drifts off the eyes, the wearer's eye height and forward
+  // depth are wrong, the mismatch VR literature ties to distance misperception and discomfort,
+  // and it is invisible to every kind of testing available here except arithmetic: you would
+  // only notice it inside a headset.
+  //
+  // What was already covered (do not duplicate): two tests verify fp.y numerically against
+  // dims.eyeWY - headBone.y, one to 2e-3 and one to 1e-9. Both run on the DEFAULT avatar only,
+  // and fp.z was only sign-checked (z < 0). This block adds the three things they don't do:
+  //   1. proportion extremes and corners — a formula can be exact at default and drift at the
+  //      ends of height / headRatio / eyeY, which is precisely the "体格非依存で正確" claim;
+  //   2. compares against the eye BONES' accumulated world positions rather than re-evaluating
+  //      the exporter's own expression, so a bug in bone placement or parent accumulation
+  //      shows up instead of cancelling out;
+  //   3. checks fp.z's magnitude. The exporter writes -headR*0.7 and buildSkeleton places the
+  //      eye bones at -headR*0.7 independently — the same constant maintained in two files with
+  //      nothing tying them together. This is the drift guard for that pair (Round 503 class).
+  const png3 = H.b64ToBytes(H.PNG1);
+  const fpCases = [
+    ['default', {}],
+    ['shortest', {height: H.PARAMS.height.min}],
+    ['tallest', {height: H.PARAMS.height.max}],
+    ['smallest head', {headRatio: H.PARAMS.headRatio.min}],
+    ['largest head', {headRatio: H.PARAMS.headRatio.max}],
+    ['eyes lowest', {eyeY: H.PARAMS.eyeY.min}],
+    ['eyes highest', {eyeY: H.PARAMS.eyeY.max}],
+    // corners: the combinations most likely to break a proportion-dependent formula
+    ['tall + big head', {height: H.PARAMS.height.max, headRatio: H.PARAMS.headRatio.max}],
+    ['short + small head', {height: H.PARAMS.height.min, headRatio: H.PARAMS.headRatio.min}],
+  ];
+  let worstY = 0, worstZ = 0, aheadOfHead = 0;
+  for (const [label, ov] of fpCases){
+    const p3 = Object.assign(H.defaults(), ov);
+    const B3 = H.buildAvatar(p3);
+    const G3 = parseGLB(H.exportVRM(B3, p3, {title:'t'}, png3).bytes);
+    const off = G3.json.extensions.VRM.firstPerson.firstPersonBoneOffset;
+    // The offset is relative to the head bone, so compare against the eye bones' own world
+    // positions — the ground truth for "where the eyes are" — not against the same dims value
+    // the exporter used (which would be circular).
+    const head = B3.bones[B3.idx.head].w;
+    const le = B3.bones[B3.humanoid.leftEye].w, re = B3.bones[B3.humanoid.rightEye].w;
+    worstY = Math.max(worstY, Math.abs(off.y - ((le[1] + re[1]) / 2 - head[1])));
+    worstZ = Math.max(worstZ, Math.abs(off.z - ((le[2] + re[2]) / 2 - head[2])));
+    // VRM0 faces Z-: the viewpoint must sit forward of the head bone, never behind it.
+    if (!(off.z < 0)) aheadOfHead++;
+    if (off.x !== 0) aheadOfHead++;   // eyes straddle the centre line, so the midpoint is x=0
+  }
+  // The exporter rounds to millimetres (r3), so 1 mm plus a hair is the tightest honest bound.
+  ok(worstY < 0.0015,
+    `ViewPosition height matches the eye bones at every proportion extreme (worst ${(worstY*1000).toFixed(2)} mm)`);
+  ok(worstZ < 0.0015,
+    `ViewPosition depth matches the eye bones at every proportion extreme (worst ${(worstZ*1000).toFixed(2)} mm)`);
+  ok(aheadOfHead === 0, 'ViewPosition is centred (x=0) and forward of the head bone (z<0) in every case');
+  // Guard against the sweep going vacuous: the offset must genuinely vary with proportions,
+  // otherwise a hardcoded constant could satisfy the checks above.
+  const offOf = ov => {
+    const p4 = Object.assign(H.defaults(), ov);
+    return parseGLB(H.exportVRM(H.buildAvatar(p4), p4, {title:'t'}, png3).bytes)
+             .json.extensions.VRM.firstPerson.firstPersonBoneOffset;
+  };
+  const lo = offOf({height: H.PARAMS.height.min}), hi = offOf({height: H.PARAMS.height.max});
+  ok(hi.y > lo.y * 1.5 && Math.abs(hi.z) > Math.abs(lo.z) * 1.5,
+    'ViewPosition scales with the avatar (not a hardcoded constant that would pass vacuously)');
+}
+
 /* ---- Round 515: permanent spec-conformance suite (Khronos glTF-Validator + VRM 0.x schemas) ---- */
 {
   // Rounds 506 and 514 each found real, every-export spec violations by fetching a primary
