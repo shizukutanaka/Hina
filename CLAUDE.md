@@ -22,6 +22,8 @@
 - パラメータ追加は PARAMS スキーマ＋I18N（ja/en両方）必須。テストがパリティ検証
 
 ## Workflows
-- 結合: `cat build/00-head.html build/10-core-a.js build/11-core-b.js build/12-core-c.js build/20-app.js > index.html`
+- 結合: build/ は LF 改行で統一すること（CRLF だと tests/run.js の LF 前提 regex が誤判定する）。
+  `cat build/00-head.html build/10-core-a.js build/11-core-b.js build/12-core-c.js build/20-app.js | sed 's/\r$//' > index.html`
+  または事前に `for f in build/*; do sed -i 's/\r$//' "$f"; done` で LF 化してから cat する。
 - テスト: `node tests/run.js`
 - 動作確認: index.html をブラウザで開く（`?selftest` で自己診断表示）→ 書出 → UniVRMで読込確認

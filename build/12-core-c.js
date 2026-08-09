@@ -34,7 +34,7 @@ function utf8(str){
 /* ---------- VRM 0.x export ----------
    GLB container (glTF 2.0) + extensions.VRM (specVersion "0.0").
    Spec notes (vrm.dev): Y-up right-handed, model faces Z-, T-pose with identity
-   rotations (translations only) → IBM = translate(-worldPos).
+   rotations (translations only) â IBM = translate(-worldPos).
    Field names keep official VRM0 typos: "stiffiness", "*UssageName". */
 function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
   p = sanitize(p);
@@ -75,7 +75,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
   const aWgt=addAcc(addView(bw.push(fWgt),fWgt.byteLength,34962),5126,nV,'VEC4');
   const aIdx=addAcc(addView(bw.push(uIdx),uIdx.byteLength,34963),5123,uIdx.length,'SCALAR');
 
-  /* morph targets — glTF sparse accessor (only non-zero delta verts; SPEC §5.3) */
+  /* morph targets â glTF sparse accessor (only non-zero delta verts; SPEC Â§5.3) */
   const targetNames = build.morphs.names.slice();
   const targets = targetNames.map(name=>{
     const entries = build.morphs.sparse[name];
@@ -84,12 +84,12 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
     const sc = sorted.length;
     const acc={componentType:5126,count:nV,type:'VEC3'};
     // min/max must be computed from the SAME bytes actually serialized (Round 506): the sparse
-    // values are stored as float32 (valBuf below), which rounds the float64 deltas in `sorted` —
+    // values are stored as float32 (valBuf below), which rounds the float64 deltas in `sorted` â
     // computing min/max from the pre-rounding float64 values instead produced a declared min/max
     // that byte-mismatched the accessor's own data on every export (glTF spec requires exact
     // equality; the Khronos glTF-Validator flags this as ACCESSOR_MIN/MAX_MISMATCH, Error
     // severity). Mirrors how the main POSITION accessor above already gets its min/max from
-    // minMax3(fPos) — the rounded Float32Array, not pre-rounding source data.
+    // minMax3(fPos) â the rounded Float32Array, not pre-rounding source data.
     let mnx=0,mny=0,mnz=0,mxx=0,mxy=0,mxz=0; // implicit zeros from non-sparse entries
     if(sc>0){
       const idxBuf=new Uint16Array(sc), valBuf=new Float32Array(sc*3);
@@ -130,7 +130,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
     metaTexture=1;
   }
 
-  /* nodes: 0=Root, bones → i+1, mesh node last */
+  /* nodes: 0=Root, bones â i+1, mesh node last */
   const nodeOf=i=>i+1;
   const meshNode=bones.length+1;
   const childMap={};

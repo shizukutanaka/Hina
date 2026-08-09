@@ -15,17 +15,17 @@ let activePresetId = null, lastGachaSeed = null;
 // three sites that assign lastGachaSeed can't drift out of sync on what counts as valid.
 function clampSeed(v){ const n=Math.round(Number(v)); return (Number.isFinite(n)&&n>=0) ? Math.min(n,4294967295) : null; }
 // Native <input type=range> mutates its value (firing 'input' directly, with no preceding
-// 'pointerdown') on Arrow keys AND Home/End/PageUp/PageDown — all five are "jump" keys, not just
+// 'pointerdown') on Arrow keys AND Home/End/PageUp/PageDown â all five are "jump" keys, not just
 // Arrow*. Round 491 added onkeydown captureUndo() for Arrow keys on both sliders below but missed
 // Home/End/PageUp/PageDown, the same class of gap under a different key set (Round 496). Shared
 // here so both sliders can't drift on which keys count as an edit needing a pre-edit snapshot.
 const RANGE_JUMP_KEYS = new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown']);
-// Round 476: gacha category locks — full reroll only ever replaced everything; users who liked
+// Round 476: gacha category locks â full reroll only ever replaced everything; users who liked
 // 90% of a result had no way to keep it. Locked categories are excluded from the reroll.
 const GACHA_LOCK_TABS = ['body','face','hair','outfit','color'];
 let gachaLocks = {body:false, face:false, hair:false, outfit:false, color:false};
 // Round 512: download locations for the in-app upload guide. URLs live here (not in i18n) because
-// they are language-independent — duplicating them per locale would just invite ja/en drift.
+// they are language-independent â duplicating them per locale would just invite ja/en drift.
 // They intentionally mirror docs/UPLOAD_GUIDE.md; if that doc's URLs change, update both.
 const GUIDE_URLS = [
   ['guide.dl.vcc', 'https://vrchat.com/home/download'],
@@ -36,9 +36,9 @@ let params = HINA.defaults();
 const META_DEFAULTS = {title:'', version:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
 let meta = Object.assign({}, META_DEFAULTS);
 // Round 479: expression editor. exprMix is avatar data (like meta), unlike gachaLocks which is a
-// tool preference — it changes what the exported VRM looks like, so it's part of undo/persistence.
+// tool preference â it changes what the exported VRM looks like, so it's part of undo/persistence.
 let exprMix = HINA.defaultExprMix();
-// <details> open-state per emotion — transient (not persisted), reset by renderBody() rebuilds,
+// <details> open-state per emotion â transient (not persisted), reset by renderBody() rebuilds,
 // same rationale as the Round 477 gachaLocks disclosure fix.
 let exprEdOpen = {joy:false, angry:false, sorrow:false, fun:false};
 let build = null;
@@ -46,7 +46,7 @@ const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
 
 const LS = 'hina.v1';
 // Safari Private mode allows setItem but writes don't persist. Verify with a roundtrip
-// (set probe → read back → delete). If readback fails, persistence is broken — surface this
+// (set probe â read back â delete). If readback fails, persistence is broken â surface this
 // once at startup so users export JSON before they lose work.
 let _lsBroken = false;
 (function _probeLS(){
@@ -67,11 +67,11 @@ function loadState(){
       return;
     }
     params = HINA.sanitize(j.params);
-    // Round 495: must go through sanitizeMeta() like params/exprMix below — j.meta is raw,
+    // Round 495: must go through sanitizeMeta() like params/exprMix below â j.meta is raw,
     // untrusted-origin data (localStorage can be tampered by a rogue extension, DevTools, or a
     // prior same-origin page) and Object.assign(meta, j.meta) with an own "__proto__" key from
     // JSON.parse reassigns meta's prototype via the Annex B [[Set]] accessor, the exact class of
-    // bug Round 469 fixed for deserialize()'s paste/file-load/drag-drop paths — this was the one
+    // bug Round 469 fixed for deserialize()'s paste/file-load/drag-drop paths â this was the one
     // remaining site still doing a raw merge.
     Object.assign(meta, HINA.sanitizeMeta(j.meta));
     if (j.lang==='en' || j.lang==='ja') lang = j.lang;
@@ -84,7 +84,7 @@ function loadState(){
     exprMix = HINA.sanitizeExprMix(j.exprMix);
   }catch(e){}
 }
-// Multi-level undo/redo (Ctrl+Z / Ctrl+Shift+Z, Round 481) — bounded stacks capture state before
+// Multi-level undo/redo (Ctrl+Z / Ctrl+Shift+Z, Round 481) â bounded stacks capture state before
 // user-initiated changes. MAX_UNDO caps memory (each entry is a small structuredClone of
 // params/meta/exprMix, not geometry/images, so 20 entries is cheap regardless of avatar complexity).
 const MAX_UNDO = 20;
@@ -95,7 +95,7 @@ function captureUndo(){
   const now = Date.now();
   // Debounce grouping preserved exactly as before: rapid successive edits (e.g. re-clicking a
   // slider within 1.5s) collapse into the ONE stack entry already pushed for this edit session,
-  // rather than pushing a new entry per click — _undoAt only advances when we actually push.
+  // rather than pushing a new entry per click â _undoAt only advances when we actually push.
   if (!_undoStack.length || now - _undoAt > 1500){
     _undoStack.push(_snapState());
     if (_undoStack.length > MAX_UNDO) _undoStack.shift();
@@ -121,27 +121,27 @@ function doUndo(){
   clearTimeout(_undoHintTimer);
   _restoreState(s);
   // Force the next captureUndo() to start a fresh debounce session rather than possibly still
-  // grouping with whatever edit was captured just before this undo — otherwise a genuinely new
+  // grouping with whatever edit was captured just before this undo â otherwise a genuinely new
   // edit made within 1.5s of that PRE-undo capture would be silently skipped (never pushed) while
   // leaving _redoStack stale, so a later Ctrl+Shift+Z would jump to a now-irrelevant future state.
   _undoAt = 0;
   // rebuild() unconditionally resets the expression preview to neutral (same as every other
-  // avatar-altering action), so no extra resync is needed here — the restored exprMix is
+  // avatar-altering action), so no extra resync is needed here â the restored exprMix is
   // simply what the next expression-button click will read.
   const _undoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_undoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
   // Flash the new Ctrl+Shift+Z shortcut so redo is discoverable (mirrors captureUndo()'s
-  // undoReady flash) — otherwise nothing in the UI ever reveals that redo exists. Appended to
+  // undoReady flash) â otherwise nothing in the UI ever reveals that redo exists. Appended to
   // the SAME srStatus announcement (not a separate one) so screen reader users learn this too,
-  // not just sighted users watching the hint bar — gated on !activeExpr in both places so AT
+  // not just sighted users watching the hint bar â gated on !activeExpr in both places so AT
   // users aren't told about a hint that isn't actually showing (hint bar shows expr text instead).
   const h=$('hint'), noExprActive=!activeExpr;
   if (h && noExprActive){
     h.textContent = t('hint.redoReady');
     _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
   }
-  if(sr) sr.textContent = noExprActive ? t('a11y.undone')+' — '+t('hint.redoReady') : t('a11y.undone');
+  if(sr) sr.textContent = noExprActive ? t('a11y.undone')+' â '+t('hint.redoReady') : t('a11y.undone');
 }
 function doRedo(){
   const sr=$('srStatus');
@@ -152,11 +152,11 @@ function doRedo(){
   const s = _redoStack.pop();
   clearTimeout(_undoHintTimer);
   _restoreState(s);
-  _undoAt = 0; // same rationale as doUndo() — start the next edit as a fresh debounce session
+  _undoAt = 0; // same rationale as doUndo() â start the next edit as a fresh debounce session
   const _redoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_redoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
-  // Flash hint.undoReady again after redoing (mirrors doUndo()'s hint.redoReady flash) — the
+  // Flash hint.undoReady again after redoing (mirrors doUndo()'s hint.redoReady flash) â the
   // redo just made undo available again, and the existing key says exactly that. Same
   // combined-srStatus rationale as doUndo(): screen reader users should learn this too.
   const h=$('hint'), noExprActive=!activeExpr;
@@ -164,7 +164,7 @@ function doRedo(){
     h.textContent = t('hint.undoReady');
     _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
   }
-  if(sr) sr.textContent = noExprActive ? t('a11y.redone')+' — '+t('hint.undoReady') : t('a11y.redone');
+  if(sr) sr.textContent = noExprActive ? t('a11y.redone')+' â '+t('hint.undoReady') : t('a11y.redone');
 }
 
 let _errTimer = null;
@@ -174,10 +174,10 @@ function showErr(msg){
   const sa=$('srAlert'); if(sa){ clearTimeout(_srAlertTimer); sa.textContent=''; requestAnimationFrame(()=>{ const a=$('srAlert'); if(a) a.textContent=msg; _srAlertTimer=setTimeout(()=>{ const a2=$('srAlert'); if(a2) a2.textContent=''; },5500); }); }
   const h=$('hint'); if(h){ clearTimeout(_errTimer); h.textContent=msg; h.style.color='var(--err)';
     _errTimer=setTimeout(()=>{ if($('hint')){ $('hint').style.color='';
-      $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }},4500); }
+      $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' â '+t('hint.exprOff'):_hintDefault(); }},4500); }
 }
 // Safely extract a human-readable message from any thrown value (Error, string, null, plain object, etc.)
-// — avoids "Error: undefined" in the hint bar when non-Error values are thrown.
+// â avoids "Error: undefined" in the hint bar when non-Error values are thrown.
 const _errMsg = e => { try{ return (e && typeof e.message==='string' && e.message) || String(e); }catch(_){ return 'unknown error'; } };
 let _saveTimer = null, _saveBadgeTimer = null;
 function saveState(){
@@ -194,7 +194,7 @@ function saveState(){
       }
     }catch(e){
       clearTimeout(_saveBadgeTimer);
-      // localStorage broken (private browsing/quota) — showErr() once per transition only.
+      // localStorage broken (private browsing/quota) â showErr() once per transition only.
       const wasBroken=_lsBroken; _lsBroken=true;
       const b=$('autoSaveBadge');
       if (b){ b.removeAttribute('aria-hidden'); b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
@@ -203,7 +203,7 @@ function saveState(){
   }, 500);
 }
 
-/* ---------- texture atlas (2D canvas → WebGL + PNG export) ---------- */
+/* ---------- texture atlas (2D canvas â WebGL + PNG export) ---------- */
 const atlas = document.createElement('canvas');
 atlas.width = atlas.height = TEXSZ;
 const ax = atlas.getContext('2d');
@@ -277,14 +277,14 @@ function drawAtlas(p){
   block('hairHi', HINA.shade(p.hairColor,1.4));
   // face parts
   drawEye(ATLAS.eyeL, p);
-  // mirror eyeL → eyeR
+  // mirror eyeL â eyeR
   const eL=ATLAS.eyeL, eR=ATLAS.eyeR;
   ax.save(); ax.translate(eR[0]+(eR[2]-eR[0]), eR[1]); ax.scale(-1,1);
   ax.drawImage(atlas, eL[0],eL[1],eL[2]-eL[0],eL[3]-eL[1], 0,0,eR[2]-eR[0],eR[3]-eR[1]);
   ax.restore();
   drawBrow(ATLAS.browL, p, false);
   drawBrow(ATLAS.browR, p, true);
-  // mouth — rx scales with mouthW so texture matches 3D ellipse (max w*0.47 stays within atlas half-width)
+  // mouth â rx scales with mouthW so texture matches 3D ellipse (max w*0.47 stays within atlas half-width)
   { const r=ATLAS.mouth, w=r[2]-r[0], h=r[3]-r[1];
     ax.save(); ax.translate(r[0]+w/2, r[1]+h/2);
     const g = ax.createLinearGradient(0,-h*0.3,0,h*0.36);
@@ -294,7 +294,7 @@ function drawAtlas(p){
     ax.fillStyle='rgba(60,20,28,0.85)';
     ax.beginPath(); ax.ellipse(0,-h*0.06,w*0.20*p.mouthW,h*0.16,0,0,Math.PI*2); ax.fill();
     ax.restore(); }
-  // blush (alpha < 0.5 discarded by MASK → radius scales with intensity)
+  // blush (alpha < 0.5 discarded by MASK â radius scales with intensity)
   { const r=ATLAS.blush, w=r[2]-r[0];
     if (p.blush>0.02){
       const cx=r[0]+w/2, cy=r[1]+w/2;
@@ -454,7 +454,7 @@ function setExpr(name){
   morphDirty = true;
   const hintEl = $('hint');
   if (hintEl) hintEl.textContent = activeExpr
-    ? t('expr.'+activeExpr) + ' — ' + t('hint.exprOff')
+    ? t('expr.'+activeExpr) + ' â ' + t('hint.exprOff')
     : _hintDefault();
   const srEl = $('srStatus');
   if (srEl) srEl.textContent = activeExpr
@@ -517,7 +517,7 @@ function poseAndSkin(time){
     for(let i=0;i<n;i++){ localQ.push(M.qid()); worldMats.push(M.mId()); skinMats.push(M.mId()); } }
   for(let i=0;i<n;i++) localQ[i]=M.qid();
   const breath = reduceMotion ? 0 : Math.sin(time*0.0014);
-  // relaxed A-pose (preview only — export stays T-pose)
+  // relaxed A-pose (preview only â export stays T-pose)
   localQ[idx.lUA] = M.qAxis([0,0,1],  0.96 + breath*0.015);
   localQ[idx.rUA] = M.qAxis([0,0,1], -0.96 - breath*0.015);
   localQ[idx.lLA] = M.qAxis([0,0,1],  0.10);
@@ -620,7 +620,7 @@ function resize(){
 function renderFrame(time){
   if (!build || !GLOK || _glLost) return;
   resize();
-  // blink — suppressed when an expression is locked via the preview bar
+  // blink â suppressed when an expression is locked via the preview bar
   if (!activeExpr && !reduceMotion){
     blinkT -= 1/60;
     if (blinkT<=0 && blinkPhase<0){ blinkPhase=0; }
@@ -720,7 +720,7 @@ function renderFrame(time){
       const newMidY=(cur[0][1]+cur[1][1])/2;
       const d1=Math.hypot(cur[0][0]-cur[1][0], cur[0][1]-cur[1][1]);
       if (d0>0) camDist=M.clamp(camDist*d0/d1, 0.6, 8);
-      // Two-finger vertical drag pans camTarget (same as Shift+↑↓ on desktop)
+      // Two-finger vertical drag pans camTarget (same as Shift+ââ on desktop)
       const H0=build?build.dims.H:1.45;
       const dy=(newMidY-oldMidY)/cv.getBoundingClientRect().height;
       camTarget[1]=M.clamp(camTarget[1]-dy*H0*1.5, 0, H0*1.1);
@@ -738,7 +738,7 @@ function renderFrame(time){
   cv.addEventListener('dblclick',()=>{ const H0=build?build.dims.H:1.45;
     camYaw=Math.PI; camPitch=0.10; camDist=H0*1.85; camTarget=[0,H0*0.55,0];
     const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.viewReset'); });
-  // keyboard camera control (WCAG 2.1.1 — preview must be operable without a pointer)
+  // keyboard camera control (WCAG 2.1.1 â preview must be operable without a pointer)
   cv.addEventListener('keydown',e=>{
     const rot=0.18, zoom=0.12; let used=true;
     const H0=build?build.dims.H:1.45;
@@ -747,7 +747,7 @@ function renderFrame(time){
       case 'ArrowLeft':  camYaw += rot; break;
       case 'ArrowRight': camYaw -= rot; break;
       case 'ArrowUp':
-        // Shift+↑ pans the camera target up (inspect face); plain ↑ orbits upward
+        // Shift+â pans the camera target up (inspect face); plain â orbits upward
         if (e.shiftKey) camTarget[1]=M.clamp(camTarget[1]+0.08*H0, 0, H0*1.1);
         else camPitch=M.clamp(camPitch+rot, -0.5, 1.25); break;
       case 'ArrowDown':
@@ -802,15 +802,15 @@ function renderTabs(){
 }
 
 // Round 508: a JSON-loaded (paste/file/drag-drop) num-type PARAMS value can carry arbitrary
-// decimal precision — sanitize() clamps to [min,max] but intentionally does not round to `step`
-// (FEATURE_AUDIT §5: no correctness impact on file size/determinism/export, so left alone there).
+// decimal precision â sanitize() clamps to [min,max] but intentionally does not round to `step`
+// (FEATURE_AUDIT Â§5: no correctness impact on file size/determinism/export, so left alone there).
 // But paramRow()'s purely-textual displays (aria-valuetext, the easy-mode read-only span) used
 // String(params[k]) directly, so a value like 1.033333333333333 was announced/shown with all 16
-// digits — precision a real slider drag could never produce (native range inputs always snap to
+// digits â precision a real slider drag could never produce (native range inputs always snap to
 // `step`), and inconsistent with the numeric-entry field's own onchange clamp path, which stores
 // whatever the user typed verbatim rather than reformatting it. Does NOT touch the range/numIn
-// inputs' own `value` (still the exact stored number — detail-mode numIn is the precise-entry
-// field, showing full precision there is correct) — only the two read-only text surfaces.
+// inputs' own `value` (still the exact stored number â detail-mode numIn is the precise-entry
+// field, showing full precision there is correct) â only the two read-only text surfaces.
 const stepDecimals = step => { const s=String(step), i=s.indexOf('.'); return i<0?0:s.length-i-1; };
 const fmtNum = (v,step) => (+v).toFixed(stepDecimals(step));
 function paramRow(k){
@@ -818,7 +818,7 @@ function paramRow(k){
   const label = lang==='ja'?s.ja:s.en;
   const pid='pr-'+k;
   if (s.k==='num'){
-    // detail mode exposes a direct numeric entry (SPEC §2); easy mode shows a read-only value
+    // detail mode exposes a direct numeric entry (SPEC Â§2); easy mode shows a read-only value
     let valEl;
     const r=el('input',{id:pid, type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
       'aria-label':label, 'aria-valuetext':fmtNum(params[k],s.step), 'aria-describedby':'sliderDesc', title:t('hint.sliderReset'),
@@ -886,7 +886,7 @@ function paramRow(k){
     const isActive=params[k]===c;
     const cname=(HINA.PAL_NAMES[c]||{})[lang]||c;
     const btn=el('button',{type:'button', class:'sw', style:'background:'+c,
-      'aria-label':label+' — '+cname, 'aria-pressed':String(isActive),
+      'aria-label':label+' â '+cname, 'aria-pressed':String(isActive),
       tabindex:isActive?'0':'-1',
       title:cname+' '+c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);
         setSwTab(swBtns.indexOf(btn)); updateSwPressedState();}});
@@ -913,20 +913,20 @@ function onParam(k){
   activePresetId=null;
   const s=PARAMS[k];
   if (s.k==='color'){ drawAtlas(params); uploadTexture(); saveState(); return; }
-  // outline is an export-only material flag — no geometry/atlas/preview impact, so skip the
+  // outline is an export-only material flag â no geometry/atlas/preview impact, so skip the
   // expensive rebuild() (unlike springOff, which does change the live preview and PB counts).
   // renderBody(false) still runs to show/hide the note.outline hint below the checkbox.
   if (k==='outline'){ saveState(); renderBody(false); const re=document.getElementById('pr-outline'); if(re) re.focus();
     // Mirror the springOff branch below: when the visual note.outline hint appears, announce it
-    // to srStatus too — otherwise screen reader users never learn the Quest-incompatibility
+    // to srStatus too â otherwise screen reader users never learn the Quest-incompatibility
     // caveat that sighted users see appear right below the checkbox.
     if (params.outline){ const sr=$('srStatus'); if(sr) sr.textContent=t('note.outline'); }
     return; }
   if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
   lastGachaSeed=null; // structural change: seed no longer reproduces this avatar's geometry
   rebuild();
-  // Only re-render panel when the param changes row structure (skirtLen↔outfit, spring sliders↔springOff).
-  // All other params leave the panel layout unchanged — skipping renderBody() prevents the
+  // Only re-render panel when the param changes row structure (skirtLenâoutfit, spring slidersâspringOff).
+  // All other params leave the panel layout unchanged â skipping renderBody() prevents the
   // panel from jumping back to scrollTop=0 on every slider tick.
   // scrollReset=false: preserve scroll position so toggling springOff doesn't snap the panel top.
   if (k==='outfit' || k==='springOff'){ renderBody(false); const re=document.getElementById('pr-'+k); if(re) re.focus();
@@ -934,7 +934,7 @@ function onParam(k){
       const sr=$('srStatus'); if(sr) sr.textContent=params.springOff?t('note.springOff'):(hasS?t('note.quest'):t('note.quest.nospring')); } }
 }
 
-// Round 479: expression editor — face tab, detail mode only. Lets users blend the 10 user-facing
+// Round 479: expression editor â face tab, detail mode only. Lets users blend the 10 user-facing
 // morphs (5 vowels + blink + 4 emotions) into the 4 emotion expressions; vowels/blink themselves
 // stay fixed (VRChat lip-sync/auto-blink). One <details> per emotion, collapsed by default.
 function renderExprEditor(bd){
@@ -950,7 +950,7 @@ function renderExprEditor(bd){
     if (!isDefault) summary.append(el('span',{
       style:'color:var(--accent);font-size:9px;vertical-align:super;margin-left:4px',
       role:'img', 'aria-label':t('expr.customized')
-    }, '●'));
+    }, 'â'));
     det.append(summary);
     const wrap = el('div',{style:'margin-top:6px'});
     for (const morphKey of HINA.EXPR_INGREDIENTS){
@@ -958,7 +958,7 @@ function renderExprEditor(bd){
       const rid = 'exprMix-'+name+'-'+morphKey;
       const rowLabel = t('a11y.exprMix').replace('{expr}',t('expr.'+name)).replace('{morph}',t('expr.'+morphKey));
       let numEl;
-      // setExpr(name) does more than sync morphW — it also re-announces srStatus, rewrites the
+      // setExpr(name) does more than sync morphW â it also re-announces srStatus, rewrites the
       // hint bar, and re-highlights every expression-bar button. Calling it on every oninput tick
       // during a drag (which can fire dozens of times per second) would spam all three needlessly,
       // since the active expression itself never changes mid-drag, only its weight. Only take the
@@ -981,7 +981,7 @@ function renderExprEditor(bd){
         'aria-label':t('a11y.numIn').replace('{label}',rowLabel), inputmode:'numeric', enterkeyhint:'done',
         onwheel:e=>e.preventDefault(),
         onchange:e=>{ captureUndo(); let n=Math.round(Number(e.target.value));
-          // Mirrors paramRow()'s numIn _announce pattern (build/20-app.js ~line 811) — that
+          // Mirrors paramRow()'s numIn _announce pattern (build/20-app.js ~line 811) â that
           // sibling input announces out-of-range/non-numeric entry via aria-invalid+showErr();
           // this one silently clamped with no announcement at all until this fix.
           const _announce=(cv)=>{ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srAlert');
@@ -1025,9 +1025,9 @@ function renderBody(scrollReset=true){
       const nmDiv=el('div',{class:'nm', title:preLabel2}, preLabel2);
       if (isModified) nmDiv.append(el('span',{
         style:'color:var(--accent);font-size:9px;vertical-align:super;margin-left:3px',
-        title:lang==='ja'?'プリセットから変更中':'Modified from preset',
-        role:'img', 'aria-label':lang==='ja'?'プリセットから変更中':'Modified from preset'
-      }, '●'));
+        title:lang==='ja'?'ããªã»ããããå¤æ´ä¸­':'Modified from preset',
+        role:'img', 'aria-label':lang==='ja'?'ããªã»ããããå¤æ´ä¸­':'Modified from preset'
+      }, 'â'));
       grid.append(el('button',{type:'button', class:'preCard'+(isSelected?' selected':''),
         'aria-pressed':String(isSelected),
         tabindex: (isSelected || (!hasSelected && _firstCard)) ? '0' : '-1',
@@ -1069,7 +1069,7 @@ function renderBody(scrollReset=true){
       const anyLock=GACHA_LOCK_TABS.some(tk=>gachaLocks[tk]);
       if (anyLock) for(const k in HINA.PARAMS) if (gachaLocks[HINA.PARAMS[k].tab]) rolled[k]=params[k];
       // A locked reroll is no longer fully determined by the seed alone, so it can't be reproduced
-      // by re-entering that seed — clearing it keeps the "same seed = same avatar" promise honest
+      // by re-entering that seed â clearing it keeps the "same seed = same avatar" promise honest
       // for the seed input, Copy/Copy Link buttons, and the ?seed=N sharing feature (Rounds 474-475).
       lastGachaSeed=anyLock?null:seed;
       params=rolled;
@@ -1079,10 +1079,10 @@ function renderBody(scrollReset=true){
       const gb=$('gachaBtn'); if(gb) gb.focus();
     };
     gDiv.append(el('button',{type:'button', id:'gachaBtn', class:'btn wide', onclick:()=>runGacha(crypto.getRandomValues(new Uint32Array(1))[0])}, t('btn.gacha')));
-    // Round 476: category locks — collapsed by default so the default 3-click flow (SPEC §2) stays
+    // Round 476: category locks â collapsed by default so the default 3-click flow (SPEC Â§2) stays
     // uncluttered; discoverable via disclosure, same pattern as the About dialog's shortcut list.
     // Round 477: renderBody() recreates this <details> on every gacha click (runGacha calls it),
-    // which would otherwise snap the disclosure shut even while locks are active — auto-open it
+    // which would otherwise snap the disclosure shut even while locks are active â auto-open it
     // whenever any lock is set so users can always see/manage their active locks without re-expanding.
     const lockDet=el('details',{style:'margin-top:8px', ...(GACHA_LOCK_TABS.some(tk=>gachaLocks[tk])?{open:''}:{})});
     lockDet.append(el('summary',{style:'font-size:12px;color:var(--text-dim);cursor:pointer'}, t('gacha.lock')));
@@ -1128,7 +1128,7 @@ function renderBody(scrollReset=true){
         }).catch(()=>{ cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); if(_cpBF) cpBtn.focus(); cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); showErr(t('btn.copySeed.err')); });
       }
     }, t('btn.copySeed'));
-    // Round 475: makes the ?seed=N sharing added in Round 474 discoverable — that feature had
+    // Round 475: makes the ?seed=N sharing added in Round 474 discoverable â that feature had
     // zero UI surface before this (only reachable by manually editing the address bar).
     const cpLinkBtn=el('button',{type:'button', class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       ...(lastGachaSeed===null?{disabled:''}:{}),
@@ -1174,7 +1174,7 @@ function renderBody(scrollReset=true){
 
 let statEls={};
 function renderOut(bd){
-  // Primary action at top — the export button is why the user opened this tab
+  // Primary action at top â the export button is why the user opened this tab
   _exportBtn = el('button',{type:'button', class:'btn primary wide', 'aria-keyshortcuts':'Control+S Meta+S', onclick:doExport}, _exporting?t('btn.exporting'):t('btn.export'));
   if (_exporting){ _exportBtn.disabled=true; _exportBtn.setAttribute('aria-busy','true'); }
   bd.append(_exportBtn);
@@ -1274,7 +1274,7 @@ function renderOut(bd){
       pstj.disabled=true; pstj.setAttribute('aria-busy','true');
       navigator.clipboard.readText().then(text=>{
         pstj.disabled=false; pstj.removeAttribute('aria-busy');
-        // Unlike file/drag-drop loads, clipboard text has no browser-enforced size cap — a hostile
+        // Unlike file/drag-drop loads, clipboard text has no browser-enforced size cap â a hostile
         // page's "copy" button could place gigabytes on the clipboard and hang JSON.parse on paste.
         if (text.length > 2*1024*1024){
           pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
@@ -1294,7 +1294,7 @@ function renderOut(bd){
   }
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
-      // The accept attribute is only a picker UI hint — most OS file dialogs offer an "All Files"
+      // The accept attribute is only a picker UI hint â most OS file dialogs offer an "All Files"
       // override that bypasses it, so a non-JSON file can still reach here. Mirror the drag-drop
       // handler's type check (below) so a large non-JSON file (e.g. a photo) gets the accurate
       // "wrong format" message instead of a misleading "too large" one when size alone is checked.
@@ -1333,8 +1333,8 @@ function renderOut(bd){
   const gd=el('div',{class:'note'});
   // Round 512: the distribution artifact is a single index.html, so a user who followed the
   // README ("download index.html, open it") does NOT have docs/UPLOAD_GUIDE.md. The in-app guide
-  // was five one-liners with no prerequisites, no download locations and no troubleshooting —
-  // i.e. no help at all across exactly the stretch (install → convert → upload) where a
+  // was five one-liners with no prerequisites, no download locations and no troubleshooting â
+  // i.e. no help at all across exactly the stretch (install â convert â upload) where a
   // 3D-illiterate beginner is guaranteed to be on their own. Ported from UPLOAD_GUIDE.md.
   gd.append(el('div',{style:'font-weight:700;margin-bottom:2px'}, t('guide.pre')));
   const pul=el('ul',{style:'margin:0 0 10px 16px;line-height:1.8'});
@@ -1344,7 +1344,7 @@ function renderOut(bd){
   for(const k of ['guide.s1','guide.s2','guide.s3','guide.s4','guide.s5'])
     ol.append(el('li',{}, t(k)));
   gd.append(ol);
-  // URLs are rendered as plain selectable text, never <a href> — the app deliberately contains
+  // URLs are rendered as plain selectable text, never <a href> â the app deliberately contains
   // zero external navigation targets so the "fully local / auditable" posture stays unambiguous.
   gd.append(el('div',{style:'font-weight:700;margin:10px 0 2px'}, t('guide.dl')));
   const dul=el('ul',{style:'margin:0 0 0 16px;line-height:1.8'});
@@ -1362,12 +1362,12 @@ function renderOut(bd){
 }
 
 const RANKCOLOR=['var(--r-e)','var(--r-g)','var(--r-m)','var(--r-p)','var(--r-vp)'];
-// the bottleneck categories that hold a rank back (SPEC F-010: 律速項目を明示)
+// the bottleneck categories that hold a rank back (SPEC F-010: å¾éé ç®ãæç¤º)
 function limitText(r){
   if (r.idx===0 || !r.worst || !r.worst.length) return '';
   return t('rank.limit')+': '+r.worst.map(c=>t('cat.'+c)).join(' / ');
 }
-// WCAG 4.1.3 — announce rank changes to assistive tech, but only when the
+// WCAG 4.1.3 â announce rank changes to assistive tech, but only when the
 // label actually changes (slider ticks must not spam the live region).
 let lastRankKey='';
 function announceRank(pc, q){
@@ -1385,37 +1385,37 @@ function updateStats(){
   const pc=HINA.rank(est,'pc'), q=HINA.rank(est,'quest');
   const set=(elm,r)=>{ const lim=limitText(r);
     elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx];
-    const tip=t('rank.tip.'+r.rank)+(lim?' — '+lim:'');
+    const tip=t('rank.tip.'+r.rank)+(lim?' â '+lim:'');
     elm.title=tip; elm.parentElement.title=tip;
-    // Keep aria-label on rankBadge button in sync with current rank so SR reads "PC: Excellent — click…"
+    // Keep aria-label on rankBadge button in sync with current rank so SR reads "PC: Excellent â clickâ¦"
     const lbl=elm.parentElement.querySelector('.lbl');
     if(lbl) elm.parentElement.setAttribute('aria-label',
-      (lbl.textContent+': '+t('rank.'+r.rank)+(lim?' ('+lim+')':'')+' — '+t('a11y.rankBadge'))); };
+      (lbl.textContent+': '+t('rank.'+r.rank)+(lim?' ('+lim+')':'')+' â '+t('a11y.rankBadge'))); };
   set($('rankPC'),pc); set($('rankQ'),q);
   const qlim=$('rankQLim');
   if(qlim) qlim.textContent = (q.worst&&q.worst.length&&q.idx>0) ? '('+t('cat.'+q.worst[0])+')' : '';
   const hv=$('heightVal'); if (hv){ hv.textContent=params.height.toFixed(2)+' m';
     const hb=$('heightBadge');
-    if(hb) hb.setAttribute('aria-label', t('lbl.height')+': '+params.height.toFixed(2)+' m — '+t('a11y.rankBadge')); }
+    if(hb) hb.setAttribute('aria-label', t('lbl.height')+': '+params.height.toFixed(2)+' m â '+t('a11y.rankBadge')); }
   announceRank(pc, q);
   if (statEls.tris){
     // Annotate tris and bones with Quest Excellent threshold so users can see headroom at a glance
     const QE=HINA.RANKS.quest;
-    const ann=(val,lim)=>val+(val>lim?' / '+lim+' ⚠':' / '+lim);
+    const ann=(val,lim)=>val+(val>lim?' / '+lim+' â ':' / '+lim);
     statEls.tris.textContent=ann(est.tris,QE.tris[0]);
     statEls.bones.textContent=ann(est.bones,QE.bones[0]);
     statEls.mat.textContent=est.mat;
     statEls.skinned.textContent=est.skinned;
     statEls.pbComp.textContent=params.springOff?0:est.pbComp;
     statEls.pbTrans.textContent=params.springOff?0:est.pbTrans;
-    // texMB: annotate with QE threshold (10 MB) so users see headroom — pbComp/pbTrans not annotated
-    // because their QE threshold is 0 (springs off), making "/ 0 ⚠" misleading
-    statEls.texMB.textContent='~'+est.texMB+(est.texMB>QE.texMB[0]?' / '+QE.texMB[0]+' ⚠':' / '+QE.texMB[0])+' MB';
+    // texMB: annotate with QE threshold (10 MB) so users see headroom â pbComp/pbTrans not annotated
+    // because their QE threshold is 0 (springs off), making "/ 0 â " misleading
+    statEls.texMB.textContent='~'+est.texMB+(est.texMB>QE.texMB[0]?' / '+QE.texMB[0]+' â ':' / '+QE.texMB[0])+' MB';
     statEls.approxBytes.textContent='~'+Math.round(est.approxBytes/1024)+' KB';
     statEls.rkPC.innerHTML=''; statEls.rkQ.innerHTML='';
     const badge=r=>{ const lim=limitText(r);
-      const tip=t('rank.tip.'+r.rank)+(lim?' — '+lim:'');
-      const b=el('span',{class:'rk', title:tip, 'aria-label':t('rank.'+r.rank)+' — '+t('rank.tip.'+r.rank)}, t('rank.'+r.rank));
+      const tip=t('rank.tip.'+r.rank)+(lim?' â '+lim:'');
+      const b=el('span',{class:'rk', title:tip, 'aria-label':t('rank.'+r.rank)+' â '+t('rank.tip.'+r.rank)}, t('rank.'+r.rank));
       b.style.background=RANKCOLOR[r.idx]; b.style.color='#0c1014';
       const wrap=el('span',{}, b);
       if (lim) wrap.append(el('span',{class:'limit'}, lim));
@@ -1423,8 +1423,8 @@ function updateStats(){
     statEls.rkPC.append(badge(pc)); statEls.rkQ.append(badge(q));
     // Round 513: the estimator diagnosed the bottleneck but offered no way to act on it. Measured
     // across all 6 presets and 300 gacha rolls, the ONLY reachable Quest limiter is the spring-bone
-    // group (pbComp/pbTrans/pbCol/pbCheck) — tris/bones/mat/skinned/texMB are held clear of the
-    // thresholds by design — and its sole remedy is springOff, buried on the Physics tab. With
+    // group (pbComp/pbTrans/pbCol/pbCheck) â tris/bones/mat/skinned/texMB are held clear of the
+    // thresholds by design â and its sole remedy is springOff, buried on the Physics tab. With
     // springOff the Quest rank is Excellent in every one of those 306 cases. README already
     // promises a "one-tap Quest Excellent mode"; this is that tap, placed where the user actually
     // reads the bad rank. Routes through onParam('springOff') so it behaves exactly like the
@@ -1432,16 +1432,16 @@ function updateStats(){
     if (q.idx>0 && !params.springOff){
       statEls.rkQ.append(el('button',{type:'button', class:'btn',
         style:'display:block;margin-top:6px;padding:3px 8px;font-size:11px',
-        title:t('btn.questFix.tip'), 'aria-label':t('btn.questFix')+' — '+t('btn.questFix.tip'),
+        title:t('btn.questFix.tip'), 'aria-label':t('btn.questFix')+' â '+t('btn.questFix.tip'),
         onclick:()=>{
           captureUndo();
           params.springOff=true;
           onParam('springOff');   // rebuild + renderBody(false); destroys this button
-          // renderBody() replaced the panel, so this button is gone — park focus on the panel
+          // renderBody() replaced the panel, so this button is gone â park focus on the panel
           // rather than letting it fall to <body> (same pattern as doUndo()).
           const tb=$('tabBody'); if(tb) tb.focus();
           // onParam announced note.springOff ("sliders are hidden"), which is the right message
-          // on the Physics tab but not here — the user's intent was the rank, so say that instead.
+          // on the Physics tab but not here â the user's intent was the rank, so say that instead.
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.questFixed');
         }}, t('btn.questFix')));
     }
@@ -1456,8 +1456,8 @@ function download(bytes, name, type){
   a.href=u; a.download=name; a.setAttribute('aria-hidden','true'); document.body.append(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(u), 8000);
 }
-// 100-char cap: longest suffix is '.hina.json' (10) → 110 chars total, well under OS limits (255 bytes)
-// Windows reserves these device names for ANY extension (CON.vrm is blocked same as bare CON) —
+// 100-char cap: longest suffix is '.hina.json' (10) â 110 chars total, well under OS limits (255 bytes)
+// Windows reserves these device names for ANY extension (CON.vrm is blocked same as bare CON) â
 // a title that sanitizes down to one of them would make the exported file unsaveable on Windows.
 const WIN_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
 function safeName(s, fb){ let v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').slice(0,100); if (WIN_RESERVED.test(v)) v+='_'; return v||fb; }
@@ -1468,8 +1468,8 @@ function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_g
 // title on every lang/mode toggle; renderOut()'s updateFnPrev() set an informative-but-always-
 // Japanese-prefix title whenever the Output tab rendered. Depending on which tab was open and
 // which of the two later sites ran last, either the filename info or the localization was
-// silently lost — they could never both hold at once. titledStem() is always both.
-function titledStem(){ return (lang==='ja'?'雛':'Hina') + ' — ' + fnameStem(); }
+// silently lost â they could never both hold at once. titledStem() is always both.
+function titledStem(){ return (lang==='ja'?'é':'Hina') + ' â ' + fnameStem(); }
 function updateTitle(){ document.title = titledStem(); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 let _glLost = false;
@@ -1479,8 +1479,8 @@ let _exporting = false, _exportBtn = null, _exportedRevertTimer = null;
 async function doExport(){
   if (_exporting){ showErr(t('btn.exporting')); return; }
   if (!build) return;
-  // Cancel any pending "Exported ✓ → Export VRM" revert from a previous export so it doesn't
-  // overwrite the "Exporting…" label of THIS export (Ctrl+S re-press within 2s of completion).
+  // Cancel any pending "Exported â â Export VRM" revert from a previous export so it doesn't
+  // overwrite the "Exportingâ¦" label of THIS export (Ctrl+S re-press within 2s of completion).
   clearTimeout(_exportedRevertTimer);
   _exportedRevertTimer = null;
   _exporting = true;
@@ -1488,7 +1488,7 @@ async function doExport(){
   const fname = safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom'))+'.vrm';
   // Progressive enhancement: File System Access API (Chrome/Edge) lets users choose where to save
   // instead of always sending to the default Downloads folder. Called before any other await so
-  // user-activation context is still fresh. AbortError = user cancelled → abort silently.
+  // user-activation context is still fresh. AbortError = user cancelled â abort silently.
   let _fsHandle = null;
   if (typeof window.showSaveFilePicker === 'function'){ try { _fsHandle = await window.showSaveFilePicker({ suggestedName: fname, types: [{ description: 'VRM 3D Avatar', accept: { 'application/octet-stream': ['.vrm'] } }] }); } catch(e){ if (e.name === 'AbortError'){ _exporting = false; return; } } }
   // Snapshot all mutable state so slider/meta changes during async awaits don't affect the export
@@ -1497,11 +1497,11 @@ async function doExport(){
   const exportMeta = structuredClone(meta);
   const exportExprMix = structuredClone(exprMix);
   // Round 505: the shared `atlas` canvas (module-level, repainted in place by drawAtlas() from
-  // both onParam()'s color branch and rebuild() — neither checks _exporting) was read live via
+  // both onParam()'s color branch and rebuild() â neither checks _exporting) was read live via
   // canvasBlob(atlas) below, AFTER the two async gaps above/below this point. A color edit (or
   // any rebuild-triggering change: gacha reroll, preset revert, undo/redo, JSON load) landing in
   // that window repainted the atlas with a DIFFERENT params state than exportParams/exportBuild,
-  // producing a structurally valid but semantically corrupt GLB — colors baked into the atlas
+  // producing a structurally valid but semantically corrupt GLB â colors baked into the atlas
   // wouldn't match the geometry/meta actually exported. Copying into an offscreen canvas here,
   // synchronously (no await between this line and the snapshots above), freezes it exactly like
   // the thumbnail below already does with `tc`.
@@ -1509,11 +1509,11 @@ async function doExport(){
   exportAtlas.width = atlas.width; exportAtlas.height = atlas.height;
   exportAtlas.getContext('2d').drawImage(atlas, 0, 0);
   // Round 510: _exportBtn is a module-level var reassigned every renderOut() (unlike btnScreenshot/
-  // btnSaveJson, which are static header buttons — see doScreenshot()/saveJson()'s local `const
+  // btnSaveJson, which are static header buttons â see doScreenshot()/saveJson()'s local `const
   // btn=$('...')`). If the user switches away from the Output tab and back while an export is
   // in-flight, renderOut() creates a brand-new button and reassigns _exportBtn to it. Without
   // pinning the exact instance here, the finally block's focus-restore below would read whatever
-  // _exportBtn CURRENTLY is at that point — a fresh button the user never actually clicked — and
+  // _exportBtn CURRENTLY is at that point â a fresh button the user never actually clicked â and
   // steal focus onto it from wherever the user has since moved on to (e.g. mid-typing in another
   // field), even though _exportFocusWasBtn only ever answered "was the ORIGINAL button focused?".
   const _exportBtnAtStart = _exportBtn;
@@ -1523,7 +1523,7 @@ async function doExport(){
   try{
     let thumbBytes = null;
     if (GLOK && !_glLost){
-      renderFrame(performance.now());            // same task → buffer readable
+      renderFrame(performance.now());            // same task â buffer readable
       const sq = Math.min(cv.width, cv.height);
       const tc = document.createElement('canvas');
       tc.width = tc.height = 256;
@@ -1556,10 +1556,10 @@ async function doExport(){
   finally{
     _exporting = false;
     if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.removeAttribute('aria-busy');
-      // Ensure button text always resets — catch branch sets showErr but doesn't touch textContent
+      // Ensure button text always resets â catch branch sets showErr but doesn't touch textContent
       if (_exportBtn.textContent===t('btn.exporting')) _exportBtn.textContent=t('btn.export');
       // Only restore focus if _exportBtn still refers to the exact button instance the user
-      // clicked (not a later renderOut() replacement) — otherwise silently no-op, same as the
+      // clicked (not a later renderOut() replacement) â otherwise silently no-op, same as the
       // already-detached case isConnected already guards against.
       if (_exportFocusWasBtn && _exportBtn===_exportBtnAtStart && _exportBtn.isConnected) _exportBtn.focus(); }
   }
@@ -1567,7 +1567,7 @@ async function doExport(){
 let _savingJson = false;
 async function saveJson(){
   // Round 504: doExport()/doScreenshot() both self-guard against re-entry (_exporting/
-  // _screenshotting) before doing anything — saveJson() didn't. btn.disabled only blocks a
+  // _screenshotting) before doing anything â saveJson() didn't. btn.disabled only blocks a
   // second mouse click (browsers suppress click on disabled controls); it does nothing against
   // the Ctrl+Shift+S keyboard shortcut, which fires from document regardless of the button's
   // state. A user double-pressing the shortcut (or clicking then pressing it) between
@@ -1578,7 +1578,7 @@ async function saveJson(){
   if (_savingJson) return;
   _savingJson = true;
   const btn=$('btnSaveJson');
-  // Disabling a focused control drops focus to <body> (standard browser behavior) — btn is
+  // Disabling a focused control drops focus to <body> (standard browser behavior) â btn is
   // disabled below BEFORE the async showSaveFilePicker gap even opens, so without restoring
   // focus here, keyboard/screen-reader users land on <body> after every save attempt. doExport()
   // and doScreenshot() already capture+restore focus around their own async gaps; this mirrors it.
@@ -1600,7 +1600,7 @@ function doScreenshot(){
   if (btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
   const _scrDone=()=>{ _screenshotting=false; if (btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); if (_scrFocusWasBtn) btn.focus(); } };
   // Round 505: cv.toBlob()'s pixel capture is frozen at call time (browser spec), but
-  // fnameStem()/meta.title were previously re-read live INSIDE the async callback below — an
+  // fnameStem()/meta.title were previously re-read live INSIDE the async callback below â an
   // undo/redo (or any rebuild-triggering edit) landing in that gap could hand out a filename/
   // share-title from a different generation than the pixels actually captured. Snapshot
   // synchronously here, mirroring how doExport() snapshots params/meta/exprMix before its own
@@ -1630,7 +1630,7 @@ function doScreenshot(){
         navigator.share({files:[file], title:scrTitle, text:scrText}).then(()=>{
           if(sr) sr.textContent=t('a11y.screenshotShared');
         }).catch(err=>{
-          // AbortError = user cancelled — silently ignore. Other errors → fallback.
+          // AbortError = user cancelled â silently ignore. Other errors â fallback.
           if (err && err.name==='AbortError') return;
           _fallbackDownload();
           if(sr) sr.textContent=t('a11y.screenshotDone');
@@ -1679,12 +1679,12 @@ function rebuild(){
 }
 
 /* ---------- header / dialogs / boot ---------- */
-// version from core — single source of truth (HINA.VERSION)
+// version from core â single source of truth (HINA.VERSION)
 if ($('aboutVer')) $('aboutVer').textContent = 'v' + HINA.VERSION;
 function applyLang(){
   document.documentElement.lang = lang;
   updateTitle();
-  const mh=$('mainH1'); if(mh) mh.setAttribute('aria-label', lang==='ja' ? '雛 VRMアバターメーカー' : 'Hina — VRM Avatar Maker');
+  const mh=$('mainH1'); if(mh) mh.setAttribute('aria-label', lang==='ja' ? 'é VRMã¢ãã¿ã¼ã¡ã¼ã«ã¼' : 'Hina â VRM Avatar Maker');
   const bl=$('btnLang'); bl.textContent=lang==='ja'?'EN':'JA';
   bl.title=t('btn.lang.tip'); bl.setAttribute('aria-label', t('btn.lang.tip'));
   const bm=$('btnMode'); bm.textContent=mode==='easy'?t('mode.easy'):t('mode.detail');
@@ -1710,14 +1710,14 @@ function applyLang(){
   if ($('aboutKeys')) $('aboutKeys').textContent = t('about.keyList');
   $('aboutClose').textContent = t('about.close');
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
-  // rankBadge static reset (heightBadge is excluded — it gets a dynamic label in updateStats)
+  // rankBadge static reset (heightBadge is excluded â it gets a dynamic label in updateStats)
   document.querySelectorAll('.rankBadge:not(#heightBadge)').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
   const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.setAttribute('aria-label',t('btn.screenshot.tip')); sc.setAttribute('aria-keyshortcuts','Control+Shift+P Meta+Shift+P'); sc.style.display=(GLOK&&!_glLost)?'':'none'; }
   const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
   const sd=$('sliderDesc'); if(sd) sd.textContent=t('hint.sliderReset');
   const sl=$('skipLink'); if(sl) sl.textContent=t('a11y.skip');
   document.documentElement.lang = lang;
-  // scrollReset=false: user stays on the same tab — preserve their scroll position across lang/mode changes
+  // scrollReset=false: user stays on the same tab â preserve their scroll position across lang/mode changes
   renderTabs(); renderBody(false); buildExprBar(); updateStats();
 }
 $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.lang.tip'); });
@@ -1725,12 +1725,12 @@ $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; 
 $('btnScreenshot').addEventListener('click', doScreenshot);
 let _dlgReturnFocus = null;
 // Round 501: #skipLink is a real focusable <a href> sibling of <header>/<main> (not a descendant
-// of either — see build/00-head.html body order), so it was left out of the inert scope entirely.
+// of either â see build/00-head.html body order), so it was left out of the inert scope entirely.
 // Round 411's own rationale for inert ("screen readers can browse behind aria-modal dialogs on
 // some AT/browser combos") applies to it exactly the same as header/main: off-screen via
 // position:fixed;top:-4rem is not display:none/aria-hidden/inert, so it stayed reachable by an
 // AT virtual cursor while the About dialog was modal, and activating it (href="#tabBody") would
-// move focus behind the open dialog — defeating the modal boundary this feature exists to enforce.
+// move focus behind the open dialog â defeating the modal boundary this feature exists to enforce.
 const _dlgBg = ()=>{ const sl=$('skipLink'), h=document.querySelector('header'), m=document.querySelector('main'); return (sl&&h&&m)?[sl,h,m]:[]; };
 const openAbout=()=>{ _dlgReturnFocus=document.activeElement; _dlgBg().forEach(el=>{ el.inert=true; }); $('btnAbout').setAttribute('aria-expanded','true'); $('aboutDlg').showModal(); };
 $('btnAbout').addEventListener('click', openAbout);
@@ -1741,7 +1741,7 @@ $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('abo
 $('aboutDlg').addEventListener('close',()=>{ _dlgBg().forEach(el=>{ el.inert=false; }); $('btnAbout').setAttribute('aria-expanded','false'); ((_dlgReturnFocus && _dlgReturnFocus.isConnected) ? _dlgReturnFocus : $('btnAbout')).focus(); _dlgReturnFocus=null; });
 
 // When WebGL is unavailable, create a centered overlay on the canvas so the
-// black rectangle doesn't look like a crash — hint bar text alone is easy to miss
+// black rectangle doesn't look like a crash â hint bar text alone is easy to miss
 if (!GLOK){
   const ov=document.createElement('div');
   ov.setAttribute('aria-hidden','true');
@@ -1750,7 +1750,7 @@ if (!GLOK){
   $('stage').appendChild(ov);
 }
 loadState();
-// Shareable seed link: ?seed=N reproduces the exact gacha result — no server round-trip,
+// Shareable seed link: ?seed=N reproduces the exact gacha result â no server round-trip,
 // purely client-side query-string parsing (same "zero communication" posture as ?selftest).
 // Overrides whatever loadState() restored, since an explicit URL seed signals deliberate intent
 // to view that avatar. A malformed/missing param is silently ignored (falls back to local state).
@@ -1770,7 +1770,7 @@ applyLang();
 // Request durable storage so browsers don't LRU-evict auto-saved avatar state under storage pressure.
 // Fire-and-forget: no UI on grant (silent win); no UI on denial (existing behaviour, warn devs only).
 if (!_lsBroken) navigator.storage?.persist?.();
-// Persistent warning when localStorage is broken (Safari Private mode etc.) — surfaces after
+// Persistent warning when localStorage is broken (Safari Private mode etc.) â surfaces after
 // applyLang() so the i18n key resolves correctly. Badge stays permanently; showErr() adds assertive SR.
 if (_lsBroken){
   const b=$('autoSaveBadge');
@@ -1792,13 +1792,13 @@ document.addEventListener('keydown',e=>{
   const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag) && !document.activeElement.isContentEditable;
   const dlgOpen = $('aboutDlg').open;
   if (!dlgOpen){
-    // Round 507: KeyboardEvent.key reflects Caps Lock state for letter keys — e.g. the 's' key
+    // Round 507: KeyboardEvent.key reflects Caps Lock state for letter keys â e.g. the 's' key
     // reports as 'S' with Caps Lock on and no Shift, and back to 's' with Caps Lock + Shift
     // together (the two invert-case effects cancel out). Comparing against a fixed-case literal
     // made every shortcut below silently no-op whenever Caps Lock was on, in EITHER Shift state,
     // since neither branch's case-sensitive key check could ever match. Lowercasing letter keys
     // and using e.shiftKey as the sole (case-independent) discriminator fixes every one of them
-    // at once — the same pattern the 'm'/'M' mode-toggle shortcut a few lines below already used.
+    // at once â the same pattern the 'm'/'M' mode-toggle shortcut a few lines below already used.
     const key = e.key.length===1 ? e.key.toLowerCase() : e.key;
     if ((e.ctrlKey||e.metaKey) && key==='s' && e.shiftKey && notField){
       e.preventDefault(); saveJson();
@@ -1831,7 +1831,7 @@ document.addEventListener('keydown',e=>{
   if (e.key==='Escape' && !$('aboutDlg').open){
     if (document.body.classList.contains('drag-over')){
       document.body.classList.remove('drag-over');
-      const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }
+      const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' â '+t('hint.exprOff'):_hintDefault(); }
     } else if (activeExpr !== null){
       e.preventDefault(); setExpr(null);
     }
@@ -1840,9 +1840,9 @@ document.addEventListener('keydown',e=>{
 const _emergencySave=()=>{ clearTimeout(_saveTimer); try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks, exprMix})); }catch(e){} };
 // pagehide is sufficient and does not prevent bfcache (unlike beforeunload, which blocks it).
 window.addEventListener('pagehide', _emergencySave);
-// Mobile browsers may kill backgrounded tabs without firing pagehide — flush on visibilitychange too.
+// Mobile browsers may kill backgrounded tabs without firing pagehide â flush on visibilitychange too.
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden && _saveTimer) _emergencySave(); });
-// Drag-and-drop JSON loading — complement the file button; 'Files' check avoids conflicts with 3D canvas drag
+// Drag-and-drop JSON loading â complement the file button; 'Files' check avoids conflicts with 3D canvas drag
 document.body.addEventListener('dragover',e=>{
   if (!e.dataTransfer.types.includes('Files')) return;
   e.preventDefault(); document.body.classList.add('drag-over');
@@ -1850,17 +1850,17 @@ document.body.addEventListener('dragover',e=>{
 });
 document.body.addEventListener('dragleave',e=>{
   if(!e.relatedTarget){ document.body.classList.remove('drag-over');
-    const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); } }
+    const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' â '+t('hint.exprOff'):_hintDefault(); } }
 });
 document.body.addEventListener('drop',e=>{
   document.body.classList.remove('drag-over');
   // Round 509: dragleave and the Escape handler both restore the activeExpr ternary (show the
-  // expression-preview hint if one is active, not the generic default) — drop dropped the
+  // expression-preview hint if one is active, not the generic default) â drop dropped the
   // ternary and always used _hintDefault(). Harmless on a successful load (rebuild() resets
   // activeExpr=null anyway, making _hintDefault() correct by the time anyone reads it), but a
   // dropped file with a valid .json name/type that fails deserialize() (FileReader.readAsText is
   // genuinely async) briefly shows the wrong hint until showErr() supersedes it moments later.
-  const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }
+  const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' â '+t('hint.exprOff'):_hintDefault(); }
   if (!e.dataTransfer.files.length) return;
   e.preventDefault();
   const f=e.dataTransfer.files[0];
@@ -1899,10 +1899,10 @@ if (location.search.indexOf('selftest')>=0){
   const pass=st.results.filter(r=>r.ok).length, total=st.results.length;
   const countStr=t('selftest.count').replace('{pass}',pass).replace('{total}',total);
   box.append(el('div',{style:'font-weight:700;margin-bottom:6px;color:'+(st.ok?'var(--ok)':'var(--err)')},
-    (st.ok?t('selftest.ok'):t('selftest.ng'))+' — '+countStr));
+    (st.ok?t('selftest.ok'):t('selftest.ng'))+' â '+countStr));
   for(const r of st.results)
     box.append(el('div',{style:'color:'+(r.ok?'var(--text-dim)':'var(--err)')},
-      (r.ok?'✓ ':'✗ ')+r.name+(r.msg?' — '+r.msg:'')));
+      (r.ok?'â ':'â ')+r.name+(r.msg?' â '+r.msg:'')));
 }
 window.addEventListener('unhandledrejection', e=>{ if(e.reason) showErr(t('err.unexpected')+': '+_errMsg(e.reason)); });
 let _rafPaused = false;

@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<meta name="description" content="雛 (Hina) — ブラウザで作るVRChat用アバター。VRM 0.x書き出し・完全ローカル・依存ゼロ">
+<meta name="description" content="é (Hina) â ãã©ã¦ã¶ã§ä½ãVRChatç¨ã¢ãã¿ã¼ãVRM 0.xæ¸ãåºãã»å®å¨ã­ã¼ã«ã«ã»ä¾å­ã¼ã­">
 <meta name="theme-color" content="#0F1216">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="雛">
+<meta name="apple-mobile-web-app-title" content="é">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="color-scheme" content="dark">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230F1216' rx='5'/%3E%3Ctext x='16' y='24' font-size='20' text-anchor='middle' fill='%2300C4CC' font-family='serif'%3E雛%3C/text%3E%3C/svg%3E">
-<title>雛 — VRM Avatar Maker</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230F1216' rx='5'/%3E%3Ctext x='16' y='24' font-size='20' text-anchor='middle' fill='%2300C4CC' font-family='serif'%3Eé%3C/text%3E%3C/svg%3E">
+<title>é â VRM Avatar Maker</title>
 <style>
 :root{
   color-scheme:dark;
@@ -57,7 +57,7 @@ main{flex:1;display:flex;min-height:0}
 .row input[type=range]{flex:1;accent-color:var(--accent);height:22px}
 .row .num{flex:0 0 56px;font-size:11px;color:var(--text-faint);text-align:right;font-variant-numeric:tabular-nums}
 /* Round 498: was .row-scoped like Round 497's checkbox rule, so it never reached the gacha
-   seed <input class="num numIn"> — seedRow/gDiv (build/20-app.js) carry no class:'row' anywhere
+   seed <input class="num numIn"> â seedRow/gDiv (build/20-app.js) carry no class:'row' anywhere
    in their ancestor chain, unlike the other two numIn instances (paramRow(), renderExprEditor()),
    both of which ARE .row-wrapped. numIn only ever appears on these 3 inputs; un-scoping is safe. */
 input.numIn{font-size:11px;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:3px 5px;height:24px;cursor:text;appearance:textfield;-moz-appearance:textfield}
@@ -68,7 +68,7 @@ input.numIn:hover{border-color:var(--accent)}
 .limit{display:block;font-size:10px;color:var(--text-faint);margin-top:3px;line-height:1.4}
 /* Round 502: was .row input[type=text] only, so it silently stopped matching licUrlInp when
    Round 433 changed that field from type='text' to type='url' (for the native URL keyboard/
-   validity API) — the only input[type=url] in the app, always .row-wrapped (licUrlRow), so
+   validity API) â the only input[type=url] in the app, always .row-wrapped (licUrlRow), so
    adding it here is safe and covers it uniformly with its sibling text fields. */
 .row select,.row input[type=text],.row input[type=url]{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font:inherit;font-size:12px}
 input::placeholder{color:var(--text-dim);opacity:1}
@@ -78,7 +78,7 @@ input::placeholder{color:var(--text-dim);opacity:1}
 .sw:hover{scale:1.15}
 .sw[aria-pressed=true]{outline:2px solid var(--accent);outline-offset:2px}
 /* Round 497: was .row-scoped, so it never matched the gacha-lock checkboxes (Round 476),
-   whose ancestor chain (lockWrap/label) carries no .row class — they rendered at the browser's
+   whose ancestor chain (lockWrap/label) carries no .row class â they rendered at the browser's
    native default size, well under WCAG 2.2 SC 2.5.8's 24px minimum, despite Round 490 believing
    this rule already covered them. There are exactly two checkbox instances in the app (this one
    and the .row-wrapped bool PARAMS checkbox); un-scoping is safe and covers both. */
@@ -150,7 +150,7 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
   /* Round 499: .eBtn.active and .tab[aria-selected=true] are the same "selected among siblings"
      pattern as .preCard.selected above (color/background/border-color only, no other visual cue)
      but were never given the same forced-colors treatment when this block was introduced (Round
-     240) or later extended (Round 440) — .eBtn predates the media query entirely (Round 104) and
+     240) or later extended (Round 440) â .eBtn predates the media query entirely (Round 104) and
      was never revisited. Under Windows High Contrast Mode the author background/color/border-
      color this state relies on is overridden, making the active expression-preview button and
      the selected tab visually indistinguishable from their siblings for sighted HCM users
@@ -169,9 +169,9 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
 </head>
 <body>
 <a id="skipLink" href="#tabBody" style="position:fixed;top:-4rem;left:8px;z-index:9999;padding:8px 14px;background:var(--accent);color:#06282a;border-radius:6px;font-weight:700;text-decoration:none">Skip to content</a>
-<noscript><div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;text-align:center;padding:24px"><div><div style="font-size:32px;margin-bottom:16px">雛</div><p style="margin-bottom:8px">このツールの使用には JavaScript が必要です。</p><p style="color:var(--text-dim)">Hina requires JavaScript to run. Please enable it in your browser settings.</p></div></div></noscript>
+<noscript><div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;text-align:center;padding:24px"><div><div style="font-size:32px;margin-bottom:16px">é</div><p style="margin-bottom:8px">ãã®ãã¼ã«ã®ä½¿ç¨ã«ã¯ JavaScript ãå¿è¦ã§ãã</p><p style="color:var(--text-dim)">Hina requires JavaScript to run. Please enable it in your browser settings.</p></div></div></noscript>
 <header>
-  <h1 class="logo" id="mainH1" aria-label="雛 Hina — VRM Avatar Maker"><b aria-hidden="true">雛</b><span aria-hidden="true">Hina · VRM Avatar Maker</span></h1>
+  <h1 class="logo" id="mainH1" aria-label="é Hina â VRM Avatar Maker"><b aria-hidden="true">é</b><span aria-hidden="true">Hina Â· VRM Avatar Maker</span></h1>
   <div class="hdr-actions">
     <span id="autoSaveBadge" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true" style="font-size:11px;color:var(--ok);opacity:0;pointer-events:none"></span>
     <button type="button" class="hbtn" id="btnScreenshot" title=""></button>
@@ -184,9 +184,9 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
   <section id="stage">
     <canvas id="gl" tabindex="0" role="img" aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Shift+ArrowUp Shift+ArrowDown + - Home 0"></canvas>
     <div id="rankWrap">
-      <div class="rankBadge"><span class="lbl">PC</span><span class="val" id="rankPC">—</span></div>
-      <div class="rankBadge"><span class="lbl">QUEST</span><span class="val" id="rankQ">—</span><span id="rankQLim" style="font-size:9px;color:var(--text-faint);white-space:nowrap"></span></div>
-      <div class="rankBadge" id="heightBadge"><span class="lbl" id="heightLbl">高さ</span><span class="val" id="heightVal">—</span></div>
+      <div class="rankBadge"><span class="lbl">PC</span><span class="val" id="rankPC">â</span></div>
+      <div class="rankBadge"><span class="lbl">QUEST</span><span class="val" id="rankQ">â</span><span id="rankQLim" style="font-size:9px;color:var(--text-faint);white-space:nowrap"></span></div>
+      <div class="rankBadge" id="heightBadge"><span class="lbl" id="heightLbl">é«ã</span><span class="val" id="heightVal">â</span></div>
     </div>
     <div id="exprBar" role="toolbar" aria-orientation="horizontal" aria-label="expression preview"></div>
     <div id="hint"></div>
@@ -201,11 +201,11 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
   </aside>
 </main>
 <dialog id="aboutDlg" aria-labelledby="aboutH2" aria-describedby="aboutTxt" aria-modal="true">
-  <h2 id="aboutH2">雛 (Hina) <span id="aboutVer"></span></h2>
+  <h2 id="aboutH2">é (Hina) <span id="aboutVer"></span></h2>
   <p id="aboutTxt"></p>
   <details style="margin-bottom:12px"><summary id="aboutKeysSumm" style="font-size:12px;color:var(--text-dim);cursor:pointer"></summary>
   <pre id="aboutKeys" style="font-size:11px;color:var(--text-faint);line-height:1.8;margin-top:6px;white-space:pre-wrap"></pre></details>
-  <p style="font-size:11px;color:var(--text-faint)">MIT License · © 2026 shizukutanaka<br>VRM is a registered trademark of the VRM Consortium.</p>
+  <p style="font-size:11px;color:var(--text-faint)">MIT License Â· Â© 2026 shizukutanaka<br>VRM is a registered trademark of the VRM Consortium.</p>
   <button type="button" class="btn" id="aboutClose" autofocus></button>
 </dialog>
 <script id="hina-core">
