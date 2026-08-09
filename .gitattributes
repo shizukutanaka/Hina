@@ -1,0 +1,3 @@
+# Force LF line endings for all text sources so tests/run.js (LF-based regexes)
+# and the cat-built index.html stay byte-stable across platforms.
+* text=auto eol=lf
