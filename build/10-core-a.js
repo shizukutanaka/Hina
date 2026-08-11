@@ -1,5 +1,5 @@
 /*HINA-CORE-START*/
-/* é (Hina) core â pure logic. No DOM / WebGL / Canvas references (tested in Node). */
+/* 雛 (Hina) core — pure logic. No DOM / WebGL / Canvas references (tested in Node). */
 'use strict';
 const HINA = (() => {
 
@@ -29,10 +29,10 @@ const M = {
     const qv=[q[0],q[1],q[2]], uv=M.cross(qv,v), uuv=M.cross(qv,uv);
     return M.add(v, M.add(M.scale(uv,2*q[3]), M.scale(uuv,2)));
   },
-  qFromTo(a,b){ // rotation taking unit a â unit b
+  qFromTo(a,b){ // rotation taking unit a → unit b
     const d=M.dot(a,b);
     if (d>0.999999) return M.qid();
-    if (d<-0.999999){ // 180Â°: pick orthogonal axis
+    if (d<-0.999999){ // 180°: pick orthogonal axis
       let ax=M.cross([1,0,0],a); if (M.len(ax)<1e-6) ax=M.cross([0,1,0],a);
       return M.qAxis(ax,Math.PI);
     }
@@ -74,76 +74,76 @@ const PAL = {
 };
 // Human-readable color names keyed by hex (for aria-label in swatches)
 const PAL_NAMES = {
-  '#ffe3d0':{ja:'ä¹³ç½',en:'Porcelain'},'#ffd6bd':{ja:'ã¯ãªã¼ã ',en:'Cream'},'#f7c5a8':{ja:'ãã¼ã',en:'Peach'},
-  '#eab28e':{ja:'ã¦ã©ã¼ã ãã¼ã¸ã¥',en:'Warm Beige'},'#d49a72':{ja:'ã«ã©ã¡ã«',en:'Caramel'},'#b97f59':{ja:'ãã©ã³ãã¿',en:'Terracotta'},
-  '#96603e':{ja:'ã¢ã³ãã¼',en:'Amber'},'#6f4528':{ja:'ã¨ããã¼',en:'Ebony'},
-  '#3a3a45':{ja:'ãªããã©ãã¯',en:'Off-black'},'#5a4632':{ja:'ãã¼ã¯ãã©ã¦ã³',en:'Dark Brown'},'#8a5a2b':{ja:'ãã§ã³ã¬ã¼ã',en:'Chocolate'},
-  '#b98a4a':{ja:'ã­ã£ã©ã¡ã«',en:'Caramel'},'#d9c08a':{ja:'ã´ã¼ã«ãã³',en:'Golden'},'#e8e0d8':{ja:'ãã©ãã',en:'Platinum'},
-  '#7a3b3b':{ja:'ãã¼ã¬ã³ãã£',en:'Burgundy'},'#a64d6d':{ja:'ã­ã¼ãº',en:'Rose'},'#5d4a7a':{ja:'ãã¼ãã«',en:'Purple'},
-  '#3d5a80':{ja:'ããããã¤ããã«ã¼',en:'Midnight Blue'},'#3f6f5f':{ja:'ãã©ã¬ã¹ã',en:'Forest'},'#c9577a':{ja:'ãã¼ã³ã¿',en:'Magenta'},
-  '#5a3825':{ja:'ãã¼ã¯ãã©ã¦ã³',en:'Dark Brown'},'#7a4a2a':{ja:'ã¢ã³ãã¼',en:'Amber'},
-  '#7a4a8a':{ja:'ãã¤ãªã¬ãã',en:'Violet'},'#a64d4d':{ja:'ã¬ãã',en:'Red'},'#caa84a':{ja:'ã´ã¼ã«ã',en:'Gold'},'#4a4a55':{ja:'ã°ã¬ã¼',en:'Gray'},
-  '#2f3a52':{ja:'ãã¤ãã¼',en:'Navy'},'#8a3b4a':{ja:'ãã¼ã¬ã³ãã£',en:'Burgundy'},'#27496d':{ja:'ã¹ãã¼ã«ãã«ã¼',en:'Steel Blue'},
-  '#7a5230':{ja:'ãã©ã¦ã³',en:'Brown'},'#384048':{ja:'ãã£ã³ã¼ã«',en:'Charcoal'},'#7d3c5e':{ja:'ãã©ã ',en:'Plum'},
-  '#9a8c5a':{ja:'ã«ã¼ã­',en:'Khaki'},'#46627a':{ja:'ã¹ã¬ã¼ã',en:'Slate'},
-  '#f2f2f2':{ja:'ãªããã¯ã¤ã',en:'Off-white'},'#e8c84a':{ja:'ã´ã¼ã«ã',en:'Gold'},'#d9534f':{ja:'ã¬ãã',en:'Red'},
-  '#00c4cc':{ja:'ãã£ã¼ã«',en:'Teal'},'#f0a0b8':{ja:'ãã³ã¯',en:'Pink'},'#ffffff':{ja:'ãã¯ã¤ã',en:'White'},
+  '#ffe3d0':{ja:'乳白',en:'Porcelain'},'#ffd6bd':{ja:'クリーム',en:'Cream'},'#f7c5a8':{ja:'ピーチ',en:'Peach'},
+  '#eab28e':{ja:'ウォームベージュ',en:'Warm Beige'},'#d49a72':{ja:'カラメル',en:'Caramel'},'#b97f59':{ja:'テラコッタ',en:'Terracotta'},
+  '#96603e':{ja:'アンバー',en:'Amber'},'#6f4528':{ja:'エボニー',en:'Ebony'},
+  '#3a3a45':{ja:'オフブラック',en:'Off-black'},'#5a4632':{ja:'ダークブラウン',en:'Dark Brown'},'#8a5a2b':{ja:'チョコレート',en:'Chocolate'},
+  '#b98a4a':{ja:'キャラメル',en:'Caramel'},'#d9c08a':{ja:'ゴールデン',en:'Golden'},'#e8e0d8':{ja:'プラチナ',en:'Platinum'},
+  '#7a3b3b':{ja:'バーガンディ',en:'Burgundy'},'#a64d6d':{ja:'ローズ',en:'Rose'},'#5d4a7a':{ja:'パープル',en:'Purple'},
+  '#3d5a80':{ja:'ミッドナイトブルー',en:'Midnight Blue'},'#3f6f5f':{ja:'フォレスト',en:'Forest'},'#c9577a':{ja:'マゼンタ',en:'Magenta'},
+  '#5a3825':{ja:'ダークブラウン',en:'Dark Brown'},'#7a4a2a':{ja:'アンバー',en:'Amber'},
+  '#7a4a8a':{ja:'バイオレット',en:'Violet'},'#a64d4d':{ja:'レッド',en:'Red'},'#caa84a':{ja:'ゴールド',en:'Gold'},'#4a4a55':{ja:'グレー',en:'Gray'},
+  '#2f3a52':{ja:'ネイビー',en:'Navy'},'#8a3b4a':{ja:'バーガンディ',en:'Burgundy'},'#27496d':{ja:'スチールブルー',en:'Steel Blue'},
+  '#7a5230':{ja:'ブラウン',en:'Brown'},'#384048':{ja:'チャコール',en:'Charcoal'},'#7d3c5e':{ja:'プラム',en:'Plum'},
+  '#9a8c5a':{ja:'カーキ',en:'Khaki'},'#46627a':{ja:'スレート',en:'Slate'},
+  '#f2f2f2':{ja:'オフホワイト',en:'Off-white'},'#e8c84a':{ja:'ゴールド',en:'Gold'},'#d9534f':{ja:'レッド',en:'Red'},
+  '#00c4cc':{ja:'ティール',en:'Teal'},'#f0a0b8':{ja:'ピンク',en:'Pink'},'#ffffff':{ja:'ホワイト',en:'White'},
 };
 
 /* ---------- parameter schema (single source of truth) ----------
    kinds: num {min,max,def,step}, enum {opts,def}, bool {def}, color {def,pal} */
 const PARAMS = {
-  // ä½æ ¼
-  height:    {k:'num', min:0.8, max:2.0, def:1.45, step:0.01, tab:'body', ja:'èº«é· (m)', en:'Height (m)'},
-  headRatio: {k:'num', min:0.18, max:0.36, def:0.24, step:0.005, tab:'body', ja:'é ­ã®æ¯ç', en:'Head ratio'},
-  shoulderW: {k:'num', min:0.14, max:0.34, def:0.21, step:0.005, tab:'body', ja:'è©å¹', en:'Shoulders'},
-  hipW:      {k:'num', min:0.14, max:0.34, def:0.215, step:0.005, tab:'body', ja:'è°å¹', en:'Hips'},
-  bust:      {k:'num', min:0, max:1, def:0.25, step:0.01, tab:'body', ja:'è¸', en:'Bust'},
-  armLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'èã®é·ã', en:'Arm length'},
-  legLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'èã®é·ã', en:'Leg length'},
-  armTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'èã®å¤ªã', en:'Arm width'},
-  legTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'èã®å¤ªã', en:'Leg width'},
-  // é¡
-  eyeSize:   {k:'num', min:0.6, max:1.4, def:1.0, step:0.01, tab:'face', ja:'ç®ã®å¤§ãã', en:'Eye size'},
-  eyeY:      {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'ç®ã®é«ã', en:'Eye height'},
-  eyeGap:    {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'ç®ã®éé', en:'Eye gap'},
-  eyeShape:  {k:'enum', opts:['round','tare','tsuri','jito'], def:'round', tab:'face', ja:'ç®ã®å½¢', en:'Eye shape'},
-  irisSize:  {k:'num', min:0.6, max:1.2, def:0.92, step:0.01, tab:'face', adv:1, ja:'ç³ã®å¤§ãã', en:'Iris size'},
-  browType:  {k:'enum', opts:['soft','straight','arch'], def:'soft', tab:'face', ja:'ç', en:'Brows'},
-  mouthW:    {k:'num', min:0.6, max:1.5, def:1.0, step:0.01, tab:'face', ja:'å£ã®å¹', en:'Mouth width'},
-  blush:     {k:'num', min:0, max:1, def:0.45, step:0.01, tab:'face', ja:'é ¬ç´', en:'Blush'},
-  // é«ª
-  hairStyle: {k:'enum', opts:['short','bob','long','twin','pony'], def:'twin', tab:'hair', ja:'é«ªå', en:'Hair style'},
-  bangs:     {k:'enum', opts:['full','see','center'], def:'full', tab:'hair', ja:'åé«ª', en:'Bangs'},
-  hairLen:   {k:'num', min:0.7, max:1.4, def:1.0, step:0.01, tab:'hair', ja:'é«ªã®é·ã', en:'Hair length'},
-  hairVol:   {k:'num', min:0.8, max:1.3, def:1.0, step:0.01, tab:'hair', ja:'ããªã¥ã¼ã ', en:'Volume'},
-  ahoge:     {k:'bool', def:true, tab:'hair', ja:'ã¢ãæ¯', en:'Ahoge'},
-  // æ
-  outfit:    {k:'enum', opts:['onepiece','sailor','shirts','hoodie'], def:'sailor', tab:'outfit', ja:'è¡£è£', en:'Outfit'},
-  skirtLen:  {k:'num', min:0.6, max:1.6, def:1.0, step:0.01, tab:'outfit', ja:'ã¹ã«ã¼ãä¸', en:'Skirt length'},
-  sleeves:   {k:'enum', opts:['long','short'], def:'long', tab:'outfit', ja:'è¢', en:'Sleeves'},
-  socks:     {k:'bool', def:true, tab:'outfit', adv:1, ja:'ã½ãã¯ã¹', en:'Socks'},
-  // è²
-  skinTone:  {k:'color', def:'#ffd6bd', pal:'skin',  tab:'color', ja:'è', en:'Skin'},
-  hairColor: {k:'color', def:'#5d4a7a', pal:'hair',  tab:'color', ja:'é«ª', en:'Hair'},
-  eyeColor:  {k:'color', def:'#3d5a80', pal:'eye',   tab:'color', ja:'ç³', en:'Eyes'},
-  clothMain: {k:'color', def:'#2f3a52', pal:'cloth', tab:'color', ja:'æã¡ã¤ã³', en:'Cloth main'},
-  clothSub:  {k:'color', def:'#f2f2f2', pal:'accent',tab:'color', ja:'æãµã', en:'Cloth sub'},
-  clothAccent:{k:'color',def:'#d9534f', pal:'accent',tab:'color', ja:'ã¢ã¯ã»ã³ã', en:'Accent'},
-  shoeColor: {k:'color', def:'#384048', pal:'cloth', tab:'color', ja:'é´', en:'Shoes'},
-  // technical toggle (like springOff) â export-only, excluded from gacha randomization
-  outline:   {k:'bool', def:false, tab:'color', adv:1, ja:'ã¢ã¦ãã©ã¤ã³', en:'Outline'},
-  // ç©ç
-  springOff: {k:'bool', def:false, tab:'phys', ja:'æºãç©ãªã (Quest Excellent)', en:'No springs (Quest Excellent)'},
-  hairStiff: {k:'num', min:0, max:1, def:0.65, step:0.01, tab:'phys', ja:'é«ªã®ç¡¬ã', en:'Hair stiffness'},
-  hairGrav:  {k:'num', min:0, max:1, def:0.05, step:0.01, tab:'phys', ja:'éå', en:'Gravity'},
-  hairDrag:  {k:'num', min:0, max:1, def:0.4, step:0.01, tab:'phys', ja:'æ¸è¡°', en:'Drag'},
+  // 体格
+  height:    {k:'num', min:0.8, max:2.0, def:1.45, step:0.01, tab:'body', ja:'身長 (m)', en:'Height (m)'},
+  headRatio: {k:'num', min:0.18, max:0.36, def:0.24, step:0.005, tab:'body', ja:'頭の比率', en:'Head ratio'},
+  shoulderW: {k:'num', min:0.14, max:0.34, def:0.21, step:0.005, tab:'body', ja:'肩幅', en:'Shoulders'},
+  hipW:      {k:'num', min:0.14, max:0.34, def:0.215, step:0.005, tab:'body', ja:'腰幅', en:'Hips'},
+  bust:      {k:'num', min:0, max:1, def:0.25, step:0.01, tab:'body', ja:'胸', en:'Bust'},
+  armLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'腕の長さ', en:'Arm length'},
+  legLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'脚の長さ', en:'Leg length'},
+  armTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'腕の太さ', en:'Arm width'},
+  legTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'脚の太さ', en:'Leg width'},
+  // 顔
+  eyeSize:   {k:'num', min:0.6, max:1.4, def:1.0, step:0.01, tab:'face', ja:'目の大きさ', en:'Eye size'},
+  eyeY:      {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'目の高さ', en:'Eye height'},
+  eyeGap:    {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'目の間隔', en:'Eye gap'},
+  eyeShape:  {k:'enum', opts:['round','tare','tsuri','jito'], def:'round', tab:'face', ja:'目の形', en:'Eye shape'},
+  irisSize:  {k:'num', min:0.6, max:1.2, def:0.92, step:0.01, tab:'face', adv:1, ja:'瞳の大きさ', en:'Iris size'},
+  browType:  {k:'enum', opts:['soft','straight','arch'], def:'soft', tab:'face', ja:'眉', en:'Brows'},
+  mouthW:    {k:'num', min:0.6, max:1.5, def:1.0, step:0.01, tab:'face', ja:'口の幅', en:'Mouth width'},
+  blush:     {k:'num', min:0, max:1, def:0.45, step:0.01, tab:'face', ja:'頬紅', en:'Blush'},
+  // 髪
+  hairStyle: {k:'enum', opts:['short','bob','long','twin','pony'], def:'twin', tab:'hair', ja:'髪型', en:'Hair style'},
+  bangs:     {k:'enum', opts:['full','see','center'], def:'full', tab:'hair', ja:'前髪', en:'Bangs'},
+  hairLen:   {k:'num', min:0.7, max:1.4, def:1.0, step:0.01, tab:'hair', ja:'髪の長さ', en:'Hair length'},
+  hairVol:   {k:'num', min:0.8, max:1.3, def:1.0, step:0.01, tab:'hair', ja:'ボリューム', en:'Volume'},
+  ahoge:     {k:'bool', def:true, tab:'hair', ja:'アホ毛', en:'Ahoge'},
+  // 服
+  outfit:    {k:'enum', opts:['onepiece','sailor','shirts','hoodie'], def:'sailor', tab:'outfit', ja:'衣装', en:'Outfit'},
+  skirtLen:  {k:'num', min:0.6, max:1.6, def:1.0, step:0.01, tab:'outfit', ja:'スカート丈', en:'Skirt length'},
+  sleeves:   {k:'enum', opts:['long','short'], def:'long', tab:'outfit', ja:'袖', en:'Sleeves'},
+  socks:     {k:'bool', def:true, tab:'outfit', adv:1, ja:'ソックス', en:'Socks'},
+  // 色
+  skinTone:  {k:'color', def:'#ffd6bd', pal:'skin',  tab:'color', ja:'肌', en:'Skin'},
+  hairColor: {k:'color', def:'#5d4a7a', pal:'hair',  tab:'color', ja:'髪', en:'Hair'},
+  eyeColor:  {k:'color', def:'#3d5a80', pal:'eye',   tab:'color', ja:'瞳', en:'Eyes'},
+  clothMain: {k:'color', def:'#2f3a52', pal:'cloth', tab:'color', ja:'服メイン', en:'Cloth main'},
+  clothSub:  {k:'color', def:'#f2f2f2', pal:'accent',tab:'color', ja:'服サブ', en:'Cloth sub'},
+  clothAccent:{k:'color',def:'#d9534f', pal:'accent',tab:'color', ja:'アクセント', en:'Accent'},
+  shoeColor: {k:'color', def:'#384048', pal:'cloth', tab:'color', ja:'靴', en:'Shoes'},
+  // technical toggle (like springOff) — export-only, excluded from gacha randomization
+  outline:   {k:'bool', def:false, tab:'color', adv:1, ja:'アウトライン', en:'Outline'},
+  // 物理
+  springOff: {k:'bool', def:false, tab:'phys', ja:'揺れ物オフ (Quest Excellent)', en:'No springs (Quest Excellent)'},
+  hairStiff: {k:'num', min:0, max:1, def:0.65, step:0.01, tab:'phys', ja:'髪の硬さ', en:'Hair stiffness'},
+  hairGrav:  {k:'num', min:0, max:1, def:0.05, step:0.01, tab:'phys', ja:'重力', en:'Gravity'},
+  hairDrag:  {k:'num', min:0, max:1, def:0.4, step:0.01, tab:'phys', ja:'減衰', en:'Drag'},
 };
 
 // Round 503: single source of truth for "which outfits render a skirt mesh". Previously
 // build/11-core-b.js's hasSkirt (geometry: does this outfit get the skirt latheY()) and
 // build/20-app.js's skirtLen-row visibility check were two independently hand-written literals
-// that happened to agree today but had nothing forcing them to stay in sync â the only existing
+// that happened to agree today but had nothing forcing them to stay in sync — the only existing
 // test (tests/run.js, pre-Round-503) checked that the substrings 'skirtLen'/'onepiece'/'sailor'
 // merely appeared in the file, not that the two lists were actually equal to each other.
 const SKIRT_OUTFITS = ['onepiece','sailor'];
@@ -166,12 +166,12 @@ function sanitize(p){
 
 /* ---------- presets ---------- */
 const PRESETS = [
-  {id:'suzume', ja:'ããã', en:'Suzume', p:{}},
-  {id:'kohaku', ja:'ãã¯ã', en:'Kohaku', p:{hairStyle:'bob', outfit:'onepiece', hairColor:'#8a5a2b', eyeColor:'#caa84a', clothMain:'#8a3b4a', clothSub:'#f2f2f2', clothAccent:'#e8c84a', bangs:'see', blush:0.6}},
-  {id:'aoi', ja:'ããã', en:'Aoi', p:{hairStyle:'long', outfit:'shirts', hairColor:'#3a3a45', eyeColor:'#3d5a80', clothMain:'#27496d', clothSub:'#ffffff', clothAccent:'#00c4cc', bangs:'center', eyeShape:'tsuri', blush:0.2}},
-  {id:'tsumugi', ja:'ã¤ãã', en:'Tsumugi', p:{hairStyle:'pony', outfit:'hoodie', hairColor:'#c9577a', eyeColor:'#7a4a8a', clothMain:'#5d4a7a', clothSub:'#f0a0b8', clothAccent:'#f2f2f2', eyeShape:'tare', mouthW:1.1, blush:0.65}},
-  {id:'minato', ja:'ã¿ãªã¨', en:'Minato', p:{hairStyle:'short', outfit:'shirts', bust:0, shoulderW:0.24, hipW:0.19, hairColor:'#3f6f5f', eyeColor:'#4a4a55', clothMain:'#384048', clothSub:'#f2f2f2', clothAccent:'#00c4cc', eyeShape:'jito', blush:0, ahoge:false, skirtLen:0.6}},
-  {id:'chibi', ja:'ã¡ã³', en:'Chibi', p:{height:1.0, headRatio:0.34, outfit:'onepiece', hairColor:'#d9c08a', eyeColor:'#3f6f5f', clothMain:'#3f6f5f', clothSub:'#f2f2f2', clothAccent:'#e8c84a', eyeSize:1.25, blush:0.7, legLen:0.85, armLen:0.9}},
+  {id:'suzume', ja:'すずめ', en:'Suzume', p:{}},
+  {id:'kohaku', ja:'こはく', en:'Kohaku', p:{hairStyle:'bob', outfit:'onepiece', hairColor:'#8a5a2b', eyeColor:'#caa84a', clothMain:'#8a3b4a', clothSub:'#f2f2f2', clothAccent:'#e8c84a', bangs:'see', blush:0.6}},
+  {id:'aoi', ja:'あおい', en:'Aoi', p:{hairStyle:'long', outfit:'shirts', hairColor:'#3a3a45', eyeColor:'#3d5a80', clothMain:'#27496d', clothSub:'#ffffff', clothAccent:'#00c4cc', bangs:'center', eyeShape:'tsuri', blush:0.2}},
+  {id:'tsumugi', ja:'つむぎ', en:'Tsumugi', p:{hairStyle:'pony', outfit:'hoodie', hairColor:'#c9577a', eyeColor:'#7a4a8a', clothMain:'#5d4a7a', clothSub:'#f0a0b8', clothAccent:'#f2f2f2', eyeShape:'tare', mouthW:1.1, blush:0.65}},
+  {id:'minato', ja:'みなと', en:'Minato', p:{hairStyle:'short', outfit:'shirts', bust:0, shoulderW:0.24, hipW:0.19, hairColor:'#3f6f5f', eyeColor:'#4a4a55', clothMain:'#384048', clothSub:'#f2f2f2', clothAccent:'#00c4cc', eyeShape:'jito', blush:0, ahoge:false, skirtLen:0.6}},
+  {id:'chibi', ja:'ちび', en:'Chibi', p:{height:1.0, headRatio:0.34, outfit:'onepiece', hairColor:'#d9c08a', eyeColor:'#3f6f5f', clothMain:'#3f6f5f', clothSub:'#f2f2f2', clothAccent:'#e8c84a', eyeSize:1.25, blush:0.7, legLen:0.85, armLen:0.9}},
 ];
 function presetParams(pre){ return sanitize(Object.assign(defaults(), pre.p)); }
 
@@ -201,73 +201,73 @@ function randomParams(seed){
 /* ---------- i18n ---------- */
 const I18N = {
   ja: {
-    'tab.preset':'ããªã»ãã','tab.body':'ä½æ ¼','tab.face':'é¡','tab.hair':'é«ª','tab.outfit':'æ','tab.color':'è²','tab.phys':'ç©ç','tab.out':'åºå',
-    'btn.gacha':'ã¬ãã£ï¼ã©ã³ãã çæï¼','gacha.lock':'ã­ãã¯å¯¾è±¡','gacha.lock.hint':'ã­ãã¯ããé ç®ã¯åçæã®å¯¾è±¡å¤ã«ãªãã¾ã','a11y.gachaRanPartial':'ã¬ãã£ â ä¸é¨ã®é ç®ãã­ãã¯ãã¦çæãã¾ãã','gacha.seed':'ã·ã¼ã: ','gacha.seed.ph':'ã·ã¼ãçªå·ãå¥åãã¦åå®è¡','btn.copySeed':'ã³ãã¼','btn.copySeed.err':'ã·ã¼ãã®ã³ãã¼ã«å¤±æãã¾ãã','btn.copyLink':'ãªã³ã¯ãã³ãã¼','btn.copyLink.err':'ãªã³ã¯ã®ã³ãã¼ã«å¤±æãã¾ãã','a11y.linkCopied':'å±æãªã³ã¯ãã¯ãªãããã¼ãã«ã³ãã¼ãã¾ãã','btn.copied':'â ã³ãã¼æ¸','btn.export':'VRM æ¸ãåºã','btn.exporting':'æ¸ãåºãä¸­â¦','btn.exported':'â æ¸ãåºãå®äº','btn.saveJson':'ãã©ã¡ã¼ã¿ä¿å­ (.json)','btn.copyJson':'ã¯ãªãããã¼ãã«ã³ãã¼','btn.copyJson.err':'ã¯ãªãããã¼ãã¸ã®ã³ãã¼ã«å¤±æãã¾ãã','btn.copyJsonDone':'â ã³ãã¼æ¸','btn.pasteJson':'ã¯ãªãããã¼ãããè²¼ãä»ã','btn.pasteJson.ok':'â è²¼ãä»ãã¾ãã','btn.pasteJson.err':'ã¯ãªãããã¼ãã®åå®¹ãä¸æ­£ã§ã','btn.loadJson':'ãã©ã¡ã¼ã¿èª­è¾¼','btn.reset':'åæå','btn.reset.confirm':'åæåãã¾ããï¼å¤æ´ã¯å¤±ããã¾ãã','a11y.resetDone':'åæåãã¾ãã','a11y.resetCancelled':'åæåãã­ã£ã³ã»ã«ãã¾ãã','btn.revert':'âº {p} ã«æ»ã','btn.screenshot':'PNG','btn.screenshot.tip':'ã¹ã¯ãªã¼ã³ã·ã§ãããä¿å­ï¼Ctrl/â+Shift+Pï¼','btn.lang.tip':'è¨èªåæ¿ â ã¯ãªãã¯ã§ English ã«åæ¿','hint.ctrlS':'Ctrl/â+S â VRMæ¸ãåºã / Ctrl/â+Shift+S â JSONä¿å­ / Ctrl/â+Z â åã«æ»ã / Ctrl/â+Shift+Z â ããç´ã / Ctrl/â+Shift+P â PNG / M â ãããã/è©³ç´°åæ¿ / ? â ãã«ã / 1ã8 â ã¿ãåæ¿',
-    'mode.easy':'ãããã','mode.detail':'è©³ç´°','mode.easy.tip':'ããããã¢ã¼ã: åºæ¬ãã©ã¡ã¼ã¿ã®ã¿è¡¨ç¤º','mode.detail.tip':'è©³ç´°ã¢ã¼ã: å¨ãã©ã¡ã¼ã¿ãè¡¨ç¤º',
-    'out.meta':'ã¡ã¿æå ±','out.stats':'çµ±è¨','out.title':'ã¿ã¤ãã«','out.version':'ãã¼ã¸ã§ã³','out.author':'ä½è','out.contact':'é£çµ¡å','out.reference':'åç§å','out.filename':'ãã¡ã¤ã«å','out.license':'ã©ã¤ã»ã³ã¹','out.allowed':'ä½¿ç¨è¨±å¯','out.commercial':'åç¨å©ç¨','out.violent':'æ´åè¡¨ç¾','out.sexual':'æ§çè¡¨ç¾',
-    'out.version.ph':'ä¾: 1.0','out.contact.ph':'ä¾: https://example.com','out.reference.ph':'ä¾: ãªãªã¸ãã«ã¢ãã¿ã¼',
-    'out.license.url':'ã©ã¤ã»ã³ã¹ URLï¼Other é¸ææï¼','out.license.url.ph':'ä¾: https://example.com/license',
-    'st.tris':'ä¸è§å½¢','st.bones':'ãã¼ã³','st.mat':'ãããªã¢ã«','st.mesh':'ã¹ã­ã³ã¡ãã·ã¥','st.spring':'æºãç©ãã¼ã³','st.chains':'æºãç©ãã§ã¼ã³','st.tex':'ãã¯ã¹ãã£æ¨å®',
+    'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
+    'btn.gacha':'ガチャ（ランダム生成）','gacha.lock':'ロック対象','gacha.lock.hint':'ロックした項目は再生成の対象外になります','a11y.gachaRanPartial':'ガチャ — 一部の項目をロックして生成しました','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.copySeed.err':'シードのコピーに失敗しました','btn.copyLink':'リンクをコピー','btn.copyLink.err':'リンクのコピーに失敗しました','a11y.linkCopied':'共有リンクをクリップボードにコピーしました','btn.copied':'✓ コピー済','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.exported':'✓ 書き出し完了','btn.saveJson':'パラメータ保存 (.json)','btn.copyJson':'クリップボードにコピー','btn.copyJson.err':'クリップボードへのコピーに失敗しました','btn.copyJsonDone':'✓ コピー済','btn.pasteJson':'クリップボードから貼り付け','btn.pasteJson.ok':'✓ 貼り付けました','btn.pasteJson.err':'クリップボードの内容が不正です','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','a11y.resetDone':'初期化しました','a11y.resetCancelled':'初期化をキャンセルしました','btn.revert':'↺ {p} に戻す','btn.screenshot':'PNG','btn.screenshot.tip':'スクリーンショットを保存（Ctrl/⌘+Shift+P）','btn.lang.tip':'言語切替 — クリックで English に切替','hint.ctrlS':'Ctrl/⌘+S → VRM書き出し / Ctrl/⌘+Shift+S → JSON保存 / Ctrl/⌘+Z → 元に戻す / Ctrl/⌘+Shift+Z → やり直す / Ctrl/⌘+Shift+P → PNG / M → かんたん/詳細切替 / ? → ヘルプ / 1〜8 → タブ切替',
+    'mode.easy':'かんたん','mode.detail':'詳細','mode.easy.tip':'かんたんモード: 基本パラメータのみ表示','mode.detail.tip':'詳細モード: 全パラメータを表示',
+    'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.version':'バージョン','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.filename':'ファイル名','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
+    'out.version.ph':'例: 1.0','out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
+    'out.license.url':'ライセンス URL（Other 選択時）','out.license.url.ph':'例: https://example.com/license',
+    'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物ボーン','st.chains':'揺れ物チェーン','st.tex':'テクスチャ推定',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
-    'rank.tip.Excellent':'å¨ã¦ã¼ã¶ã¼ã«ããã©ã«ãè¡¨ç¤º','rank.tip.Good':'Goodä»¥ä¸ãè¨±å¯ããã¦ã¼ã¶ã¼ã«è¡¨ç¤º','rank.tip.Medium':'Mediumä»¥ä¸ãè¨±å¯ããã¦ã¼ã¶ã¼ã®ã¿è¡¨ç¤º','rank.tip.Poor':'Poorä»¥ä¸ãè¨±å¯ããã¦ã¼ã¶ã¼ã®ã¿è¡¨ç¤º','rank.tip.VeryPoor':'ã»ã¼å¨ã¦ã¼ã¶ã¼ã«éè¡¨ç¤º',
-    'hint.exprOff':'ã¯ãªãã¯ã§è§£é¤','hint.drag':'ãã©ãã°/ç¢å°ã­ã¼: åè»¢ / Shift+ââ: ãã³ / ãã¤ã¼ã«ã»+â: ãºã¼ã  / ããã«ã¯ãªãã¯ã»Home/0: ãªã»ãã','hint.undoReady':'Ctrl+Z / â+Z â åã«æ»ã','hint.redoReady':'Ctrl+Shift+Z / â+Shift+Z â ããç´ã','hint.saved':'â èªåä¿å­','hint.sliderReset':'ããã«ã¯ãªãã¯ã¾ãã¯ Delete / Backspace ã­ã¼ã§ããã©ã«ãå¤ã«æ»ã',
-    'hint.saveFail':'â  ä¿å­å¤±æ â JSONãæåã§ä¿å­ãã¦ãã ãã','hint.exportCorrupt':'â  VRMãã¡ã¤ã«ãç ´æãã¦ãã¾ã â ããä¸åº¦æ¸ãåºãã¦ãã ãã','hint.dropJson':'ã¾ãã¯ .hina.json ãã¡ã¤ã«ãããã«ãã©ãã°ï¼ãã­ãã',
-    'hint.noGL':'WebGL ãä½¿ãã¾ãã â ãã¬ãã¥ã¼ç¡å¹ï¼æ¸ãåºãã¯åä½ãã¾ãï¼',
-    'hint.glLost':'WebGL ã³ã³ãã­ã¹ããå¤±ããã¾ãã â ãã¼ã¸ãåèª­ã¿è¾¼ã¿ãã¦ãã ãã',
-    'a11y.canvas':'ã¢ãã¿ã¼ã®3Dãã¬ãã¥ã¼ãç¢å°ã­ã¼ã§åè»¢ãShift+ââã§ãã³ãï¼ï¼âã§ãºã¼ã ãHomeã¾ãã¯ããã«ã¯ãªãã¯ã§åæä½ç½®ã«æ»ãã¾ãã',
-    'a11y.tabs':'ã¿ãããã²ã¼ã·ã§ã³','a11y.exprBar':'è¡¨æãã¬ãã¥ã¼','a11y.sliderReset':'{label} ãããã©ã«ãå¤ {v} ã«ãªã»ãããã¾ãã','a11y.numIn':'{label}ï¼æ°å¤å¥åï¼',
-    'a11y.stage':'3Dãã¬ãã¥ã¼ã¨ãªã¢','a11y.panel':'ã¢ãã¿ã¼è¨­å®ããã«','a11y.about.btn':'éã«ã¤ãã¦','a11y.canvas.role':'3Dãã¬ãã¥ã¼',
-    'a11y.exprActive':'è¡¨æ: {expr}','a11y.exprNeutral':'ãã¥ã¼ãã©ã«ã«æ»ãã¾ãã',
-    'a11y.rankStatus':'æ§è½ã©ã³ã¯ â PC: {pc} / Quest: {q}',
-    'a11y.rankBadge':'ã©ã³ã¯ããã¸ â ã¯ãªãã¯ã§çµ±è¨ã¿ãã¸','a11y.skip':'ã³ã³ãã³ãã¸ã¹ã­ãã',
-    'a11y.exported':'{name} ãæ¸ãåºãã¾ããï¼ç´{size}ï¼','a11y.screenshotDone':'ã¹ã¯ãªã¼ã³ã·ã§ãããä¿å­ãã¾ãã','a11y.screenshotShared':'ã¹ã¯ãªã¼ã³ã·ã§ãããå±æãã¾ãã','a11y.seedCopied':'ã·ã¼ã {n} ãã¯ãªãããã¼ãã«ã³ãã¼ãã¾ãã','a11y.gachaRan':'ã¬ãã£ â ã·ã¼ã {n} ã§çæãã¾ãã','a11y.undone':'åã«æ»ãã¾ãã','a11y.noUndo':'åã«æ»ãå±¥æ­´ãããã¾ãã','a11y.redone':'ããç´ãã¾ãã','a11y.noRedo':'ããç´ãå±¥æ­´ãããã¾ãã','a11y.savedJson':'{name} ãä¿å­ãã¾ãã','a11y.loadedJson':'{name} ãèª­ã¿è¾¼ã¿ã¾ãã','a11y.clamped':'å¤ã {v} ã«å¶éãã¾ãã','a11y.viewReset':'ãã¬ãã¥ã¼è¦ç¹ããªã»ãããã¾ãã','a11y.viewLimit':'è¦ç¹ã®éçã«éãã¾ãã','a11y.seedInvalid':'ã·ã¼ãã¯0ä»¥ä¸ã®æ´æ°ãå¥åãã¦ãã ãã','a11y.licUrlInvalid':'æå¹ãªURLãå¥åãã¦ãã ããï¼ä¾: https://example.comï¼',
-    'note.quest':'æºãç©ãªãã§ Quest Excellentããªã³ã®å ´åã¯ Quest Goodã','note.quest.nospring':'ãã®é«ªåã§ã¯æºãç©ãã¼ã³ãããã¾ããï¼å¸¸ã« Quest Excellentï¼ã','note.springOff':'æºãç©ãªãä¸­ï¼ã¹ã©ã¤ãã¼ã¯éè¡¨ç¤ºããªã³ã«ããã¨è¡¨ç¤ºããã¾ãã',
-    'note.outline':'ã¢ã¦ãã©ã¤ã³ã¯PCçã§ã®ã¿è¡¨ç¤ºããã¾ãï¼Questã®ã·ã§ã¼ãã¼ã¯éå¯¾å¿ï¼ã',
-    'about':'ãã©ã¦ã¶ã ãã§VRChatç¨ã¢ãã¿ã¼(VRM 0.x)ãä½ããã¼ã«ãå®å¨ã­ã¼ã«ã«åä½ã»å¤é¨éä¿¡ãªãã»ä¾å­ã¼ã­ã','about.close':'éãã',
-    'about.keys':'ã­ã¼ãã¼ãã·ã§ã¼ãã«ãã','about.keyList':'Ctrl/â+S             â VRMæ¸ãåºã\nCtrl/â+Shift+S       â JSONä¿å­\nCtrl/â+Z             â åã«æ»ã\nCtrl/â+Shift+Z       â ããç´ã\nCtrl/â+Shift+P       â ã¹ã¯ãªã¼ã³ã·ã§ãã\n?                    â ãã®ãã¤ã¢ã­ã°\nM                    â ãããã/è©³ç´° åæ¿\n1ã8                 â ã¿ãåæ¿\nEsc                  â è¡¨æãã¬ãã¥ã¼ãè§£é¤\nââââ              â 3Dåè»¢ï¼ãã¬ãã¥ã¼é¸ææï¼\nShift+ââ           â ä¸ä¸ãã³ï¼é¡ã»è¶³ãç¢ºèªï¼\n+/â                 â ãºã¼ã \nHome / 0             â è¦ç¹ãªã»ãã\nããã«ã¯ãªãã¯       â ãã¬ãã¥ã¼: è¦ç¹ãªã»ãã / ã¹ã©ã¤ãã¼: ããã©ã«ãå¤\nDelete / Backspace   â ã¹ã©ã¤ãã¼: ããã©ã«ãå¤ã«ãªã»ãã',
-    'allowed.OnlyAuthor':'ä½èã®ã¿','allowed.ExplicitlyLicensedPerson':'è¨±å¯ãããäºº','allowed.Everyone':'å¨å¡',
-    'usage.Disallow':'ä¸å¯','usage.Allow':'å¯',
-    'license.Redistribution_Prohibited':'åéå¸ç¦æ­¢','license.CC0':'CC0ï¼ãããªãã¯ãã¡ã¤ã³ï¼',
+    'rank.tip.Excellent':'全ユーザーにデフォルト表示','rank.tip.Good':'Good以上を許可したユーザーに表示','rank.tip.Medium':'Medium以上を許可したユーザーのみ表示','rank.tip.Poor':'Poor以上を許可したユーザーのみ表示','rank.tip.VeryPoor':'ほぼ全ユーザーに非表示',
+    'hint.exprOff':'クリックで解除','hint.drag':'ドラッグ/矢印キー: 回転 / Shift+↑↓: パン / ホイール・+−: ズーム / ダブルクリック・Home/0: リセット','hint.undoReady':'Ctrl+Z / ⌘+Z → 元に戻す','hint.redoReady':'Ctrl+Shift+Z / ⌘+Shift+Z → やり直す','hint.saved':'✓ 自動保存','hint.sliderReset':'ダブルクリックまたは Delete / Backspace キーでデフォルト値に戻す',
+    'hint.saveFail':'⚠ 保存失敗 — JSONを手動で保存してください','hint.exportCorrupt':'⚠ VRMファイルが破損しています — もう一度書き出してください','hint.dropJson':'または .hina.json ファイルをここにドラッグ＆ドロップ',
+    'hint.noGL':'WebGL が使えません — プレビュー無効（書き出しは動作します）',
+    'hint.glLost':'WebGL コンテキストが失われました — ページを再読み込みしてください',
+    'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、Shift+↑↓でパン、＋／−でズーム、Homeまたはダブルクリックで初期位置に戻ります。',
+    'a11y.tabs':'タブナビゲーション','a11y.exprBar':'表情プレビュー','a11y.sliderReset':'{label} をデフォルト値 {v} にリセットしました','a11y.numIn':'{label}（数値入力）',
+    'a11y.stage':'3Dプレビューエリア','a11y.panel':'アバター設定パネル','a11y.about.btn':'雛について','a11y.canvas.role':'3Dプレビュー',
+    'a11y.exprActive':'表情: {expr}','a11y.exprNeutral':'ニュートラルに戻りました',
+    'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
+    'a11y.rankBadge':'ランクバッジ — クリックで統計タブへ','a11y.skip':'コンテンツへスキップ',
+    'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.screenshotShared':'スクリーンショットを共有しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました','a11y.gachaRan':'ガチャ — シード {n} で生成しました','a11y.undone':'元に戻しました','a11y.noUndo':'元に戻す履歴がありません','a11y.redone':'やり直しました','a11y.noRedo':'やり直す履歴がありません','a11y.savedJson':'{name} を保存しました','a11y.loadedJson':'{name} を読み込みました','a11y.clamped':'値を {v} に制限しました','a11y.viewReset':'プレビュー視点をリセットしました','a11y.viewLimit':'視点の限界に達しました','a11y.seedInvalid':'シードは0以上の整数を入力してください','a11y.licUrlInvalid':'有効なURLを入力してください（例: https://example.com）',
+    'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。','note.springOff':'揺れ物オフ中：スライダーは非表示。オンにすると表示されます。',
+    'note.outline':'アウトラインはPC版でのみ表示されます（Questのシェーダーは非対応）。',
+    'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
+    'about.keys':'キーボードショートカット','about.keyList':'Ctrl/⌘+S             → VRM書き出し\nCtrl/⌘+Shift+S       → JSON保存\nCtrl/⌘+Z             → 元に戻す\nCtrl/⌘+Shift+Z       → やり直す\nCtrl/⌘+Shift+P       → スクリーンショット\n?                    → このダイアログ\nM                    → かんたん/詳細 切替\n1〜8                 → タブ切替\nEsc                  → 表情プレビューを解除\n↑↓←→              → 3D回転（プレビュー選択時）\nShift+↑↓           → 上下パン（顔・足を確認）\n+/−                 → ズーム\nHome / 0             → 視点リセット\nダブルクリック       → プレビュー: 視点リセット / スライダー: デフォルト値\nDelete / Backspace   → スライダー: デフォルト値にリセット',
+    'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
+    'usage.Disallow':'不可','usage.Allow':'可',
+    'license.Redistribution_Prohibited':'再配布禁止','license.CC0':'CC0（パブリックドメイン）',
     'license.CC_BY':'CC BY','license.CC_BY_NC':'CC BY-NC','license.CC_BY_SA':'CC BY-SA',
-    'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND','license.Other':'ãã®ä»',
-    'out.title.ph':'ä¾: éã¢ãã¿ã¼','out.author.ph':'ä¾: ããªãã®åå',
-    'selftest.ok':'èªå·±è¨ºæ­: å¨ã¦æ­£å¸¸','selftest.ng':'èªå·±è¨ºæ­: ç°å¸¸ãã','selftest.count':'{pass}/{total} é ç®',
-    'err.loadFailed':'JSONãã¡ã¤ã«ãèª­ã¿è¾¼ãã¾ããã§ããï¼å½¢å¼ãä¸æ­£ããéã®JSONã§ã¯ããã¾ããï¼',
-    'err.loadTooLarge':'ãã¡ã¤ã«ãå¤§ãããã¾ãï¼2 MBä»¥ä¸ã®JSONã®ã¿èª­ã¿è¾¼ãã¾ãï¼',
-    'err.buildFailed':'ã¢ãã¿ã¼çæã«å¤±æãã¾ãã',
-    'err.exportFailed':'VRMæ¸ãåºãã«å¤±æãã¾ãã',
-    'err.screenshotFailed':'ã¹ã¯ãªã¼ã³ã·ã§ããã®ä¿å­ã«å¤±æãã¾ãã',
-    'err.unexpected':'äºæããªãã¨ã©ã¼ãçºçãã¾ãã',
-    'guide.t':'VRChatå°å¥æé ','guide.s1':'1. Unity Hub + VCC ã§ã¢ãã¿ã¼ãã­ã¸ã§ã¯ãä½æ','guide.s2':'2. UniVRM (v0.x) ãã¤ã³ãã¼ã','guide.s3':'3. VRM Converter for VRChat ãã¤ã³ãã¼ã','guide.s4':'4. .vrm ããã©ãã° âãVRChatã¢ãã¿ã¼ã«å¤æã','guide.s5':'5. VRChat SDK ã§ãã«ã & ã¢ããã­ã¼ã',
+    'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND','license.Other':'その他',
+    'out.title.ph':'例: 雛アバター','out.author.ph':'例: あなたの名前',
+    'selftest.ok':'自己診断: 全て正常','selftest.ng':'自己診断: 異常あり','selftest.count':'{pass}/{total} 項目',
+    'err.loadFailed':'JSONファイルを読み込めませんでした（形式が不正か、雛のJSONではありません）',
+    'err.loadTooLarge':'ファイルが大きすぎます（2 MB以下のJSONのみ読み込めます）',
+    'err.buildFailed':'アバター生成に失敗しました',
+    'err.exportFailed':'VRM書き出しに失敗しました',
+    'err.screenshotFailed':'スクリーンショットの保存に失敗しました',
+    'err.unexpected':'予期しないエラーが発生しました',
+    'guide.t':'VRChat導入手順','guide.s1':'1. Unity Hub + VCC でアバタープロジェクト作成','guide.s2':'2. UniVRM (v0.x) をインポート','guide.s3':'3. VRM Converter for VRChat をインポート','guide.s4':'4. .vrm をドラッグ →「VRChatアバターに変換」','guide.s5':'5. VRChat SDK でビルド & アップロード',
     // Round 512: the app ships as a single index.html, so a user who downloaded only that file
     // does NOT have docs/UPLOAD_GUIDE.md. These make the in-app guide self-sufficient.
-    'guide.pre':'ç¨æãããã®','guide.pre1':'VRChatã¢ã«ã¦ã³ãï¼Trust Rank ã New User ä»¥ä¸ãVisitor ã¯ã¢ããã­ã¼ãä¸å¯ãæ°æ¥ãã¬ã¤ã§ææ ¼ï¼','guide.pre2':'Windows PCï¼Unityä½æ¥­ã«å¿è¦ãã¢ãã¿ã¼ã®è¨­è¨ã ããªãã¹ããã§ãå¯ï¼',
-    'guide.dl':'å¥æåï¼URLãé¸æãã¦ã³ãã¼ï¼','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRMï¼VRM 0.x ç³»ã® .unitypackageï¼','guide.dl.conv':'VRM Converter for VRChat',
-    'guide.tr':'ã¤ã¾ãããã','guide.tr1':'ã¢ããã­ã¼ããã¿ã³ãæ¼ããªã â Trust Rank ã Visitorãæ°æ¥ãã¬ã¤ãã¦ New User ã«ãªãã®ãå¾ã¤','guide.tr2':'Quest ã§ãVery Poorãè­¦å â ç©çã¿ãã®ãæºãç©ãªããã§åæ¸ãåºãï¼PCçã®ã¿ãªãè­¦åã®ã¾ã¾é²ãã¦ãå¯ï¼','guide.tr3':'ã¢ãã«ããã³ã¯è²ã«ãªã â ã·ã§ã¼ãã¼æªå°å¥ãUniVRM ãåã«å¥ãã¦ãã .vrm ãåãè¾¼ã','guide.tr4':'ä»ã®ãã¥ã¼ã¢ã§å¾ããåã â VRM 0.x ä»æ§ï¼Z-åãï¼ãUnity / VRChat ã§ã¯æ­£å¸¸',
-    'guide.ver':'æé ã¯2026å¹´7ææç¹ãåãã¼ã«ã®UIã¯æ´æ°ããããããç¸éãããã°å¬å¼ãã­ã¥ã¡ã³ããæ­£ã¨ããã',
-    // Round 513: the rank estimator diagnosed but could not act â the sole remedy for a
+    'guide.pre':'用意するもの','guide.pre1':'VRChatアカウント（Trust Rank が New User 以上。Visitor はアップロード不可。数日プレイで昇格）','guide.pre2':'Windows PC（Unity作業に必要。アバターの設計だけならスマホでも可）',
+    'guide.dl':'入手先（URLを選択してコピー）','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRM（VRM 0.x 系の .unitypackage）','guide.dl.conv':'VRM Converter for VRChat',
+    'guide.tr':'つまずいたら','guide.tr1':'アップロードボタンが押せない → Trust Rank が Visitor。数日プレイして New User になるのを待つ','guide.tr2':'Quest で「Very Poor」警告 → 物理タブの「揺れ物オフ」で再書き出し（PC版のみなら警告のまま進めても可）','guide.tr3':'モデルがピンク色になる → シェーダー未導入。UniVRM を先に入れてから .vrm を取り込む','guide.tr4':'他のビューアで後ろを向く → VRM 0.x 仕様（Z-向き）。Unity / VRChat では正常',
+    'guide.ver':'手順は2026年7月時点。各ツールのUIは更新されるため、相違があれば公式ドキュメントを正とする。',
+    // Round 513: the rank estimator diagnosed but could not act — the sole remedy for a
     // non-Excellent Quest rank is springOff, which lives on the Physics tab.
-    'btn.questFix':'Quest Excellent ã«ãã','btn.questFix.tip':'é«ªã®æºãããªãã«ãã¦ Quest Excellent ã«ãã¾ãï¼Ctrl+Z ã§åãæ¶ãã¾ãï¼','a11y.questFixed':'æºãç©ããªãã«ãã¾ãã â Quest Excellent ã«ãªãã¾ãã',
-    'rank.limit':'å¾é',
-    'enum.eyeShape.round':'ä¸¸','enum.eyeShape.tare':'ããç®','enum.eyeShape.tsuri':'ã¤ãç®','enum.eyeShape.jito':'ãã¨ç®',
-    'enum.browType.soft':'ãããã','enum.browType.straight':'ã¾ã£ãã','enum.browType.arch':'ã¢ã¼ã',
-    'enum.hairStyle.short':'ã·ã§ã¼ã','enum.hairStyle.bob':'ãã','enum.hairStyle.long':'ã­ã³ã°','enum.hairStyle.twin':'ãã¤ã³','enum.hairStyle.pony':'ããã¼',
-    'enum.bangs.full':'ãã«','enum.bangs.see':'ã·ã¼ã¹ã«ã¼','enum.bangs.center':'ã»ã³ã¿ã¼åã',
-    'enum.outfit.onepiece':'ã¯ã³ãã¼ã¹','enum.outfit.sailor':'ã»ã¼ã©ã¼','enum.outfit.shirts':'ã·ã£ã','enum.outfit.hoodie':'ãã¼ã«ã¼',
-    'enum.sleeves.long':'é·è¢','enum.sleeves.short':'åè¢',
-    'cat.tris':'ä¸è§å½¢','cat.bones':'ãã¼ã³','cat.skinned':'ã¹ã­ã³ã¡ãã·ã¥','cat.mesh':'ã¡ãã·ã¥','cat.mat':'ãããªã¢ã«','cat.pbComp':'æºãç©é¨å','cat.pbTrans':'æºãç©ãã¼ã³','cat.pbCol':'ã³ã©ã¤ã','cat.pbCheck':'è¡çªå¤å®','cat.texMB':'ãã¯ã¹ãã£','cat.raycasts':'ã¬ã¤ã­ã£ã¹ã',
-    'st.vrm':'VRMãµã¤ãºæ¨å®',
-    'note.upload':'VRChatã¸ã¯ Unity + VRM Converter for VRChat çµç±ã§ã¢ããã­ã¼ããä»¥ä¸ã®æé ãåç§ã',
-    'expr.neutral':'ãã¥ã¼ãã©ã«','expr.a':'ã','expr.i':'ã','expr.u':'ã','expr.e':'ã','expr.o':'ã',
-    'expr.blink':'ã¾ã°ãã','expr.joy':'åã³','expr.angry':'æã','expr.sorrow':'æ²ãã¿','expr.fun':'æ¥½ãã',
-    'expr.edit':'è¡¨æã¨ãã£ã¿','expr.edit.hint':'åã³ã»æãã»æ²ãã¿ã»æ¥½ããã®4è¡¨æããåºæ¬ã¢ã¼ãã®çµã¿åããã§èª¿æ´ã§ãã¾ãï¼ããã ã¯ãªããã·ã³ã¯ç¨ã®ããç·¨éä¸å¯ï¼',
-    'expr.reset':'ããã©ã«ãã«æ»ã','expr.customized':'ã«ã¹ã¿ã æ¸',
-    'a11y.exprMix':'{expr} â {morph} ã®å¼·åº¦','a11y.exprReset':'{expr} ãããã©ã«ãã«æ»ãã¾ãã',
-    'lbl.height':'é«ã',
+    'btn.questFix':'Quest Excellent にする','btn.questFix.tip':'髪の揺れをオフにして Quest Excellent にします（Ctrl+Z で取り消せます）','a11y.questFixed':'揺れ物をオフにしました — Quest Excellent になりました',
+    'rank.limit':'律速',
+    'enum.eyeShape.round':'丸','enum.eyeShape.tare':'たれ目','enum.eyeShape.tsuri':'つり目','enum.eyeShape.jito':'じと目',
+    'enum.browType.soft':'やわらか','enum.browType.straight':'まっすぐ','enum.browType.arch':'アーチ',
+    'enum.hairStyle.short':'ショート','enum.hairStyle.bob':'ボブ','enum.hairStyle.long':'ロング','enum.hairStyle.twin':'ツイン','enum.hairStyle.pony':'ポニー',
+    'enum.bangs.full':'フル','enum.bangs.see':'シースルー','enum.bangs.center':'センター分け',
+    'enum.outfit.onepiece':'ワンピース','enum.outfit.sailor':'セーラー','enum.outfit.shirts':'シャツ','enum.outfit.hoodie':'パーカー',
+    'enum.sleeves.long':'長袖','enum.sleeves.short':'半袖',
+    'cat.tris':'三角形','cat.bones':'ボーン','cat.skinned':'スキンメッシュ','cat.mesh':'メッシュ','cat.mat':'マテリアル','cat.pbComp':'揺れ物部品','cat.pbTrans':'揺れ物ボーン','cat.pbCol':'コライダ','cat.pbCheck':'衝突判定','cat.texMB':'テクスチャ','cat.raycasts':'レイキャスト',
+    'st.vrm':'VRMサイズ推定',
+    'note.upload':'VRChatへは Unity + VRM Converter for VRChat 経由でアップロード。以下の手順を参照。',
+    'expr.neutral':'ニュートラル','expr.a':'あ','expr.i':'い','expr.u':'う','expr.e':'え','expr.o':'お',
+    'expr.blink':'まばたき','expr.joy':'喜び','expr.angry':'怒り','expr.sorrow':'悲しみ','expr.fun':'楽しい',
+    'expr.edit':'表情エディタ','expr.edit.hint':'喜び・怒り・悲しみ・楽しいの4表情を、基本モーフの組み合わせで調整できます（あ〜お はリップシンク用のため編集不可）',
+    'expr.reset':'デフォルトに戻す','expr.customized':'カスタム済',
+    'a11y.exprMix':'{expr} — {morph} の強度','a11y.exprReset':'{expr} をデフォルトに戻しました',
+    'lbl.height':'高さ',
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','gacha.lock':'Lock categories','gacha.lock.hint':'Locked categories are excluded from the reroll','a11y.gachaRanPartial':'Gacha â rerolled with some categories locked','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.copySeed.err':'Failed to copy seed','btn.copyLink':'Copy link','btn.copyLink.err':'Failed to copy link','a11y.linkCopied':'Share link copied to clipboard','btn.copied':'â Copied','btn.export':'Export VRM','btn.exporting':'Exportingâ¦','btn.exported':'â Exported','btn.saveJson':'Save params (.json)','btn.copyJson':'Copy to clipboard','btn.copyJson.err':'Failed to copy to clipboard','btn.copyJsonDone':'â Copied','btn.pasteJson':'Paste from clipboard','btn.pasteJson.ok':'â Pasted','btn.pasteJson.err':'Clipboard content is not valid Hina JSON','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','a11y.resetDone':'Avatar reset to defaults','a11y.resetCancelled':'Reset cancelled','btn.revert':'âº Revert to {p}','btn.screenshot':'PNG','btn.screenshot.tip':'Save screenshot (Ctrl/â+Shift+P)','btn.lang.tip':'Switch language â click for æ¥æ¬èª','hint.ctrlS':'Ctrl/â+S â Export VRM / Ctrl/â+Shift+S â Save JSON / Ctrl/â+Z â Undo / Ctrl/â+Shift+Z â Redo / Ctrl/â+Shift+P â PNG / M â Easy/Detail toggle / ? â Help / 1-8 â Switch tab',
+    'btn.gacha':'Gacha (randomize)','gacha.lock':'Lock categories','gacha.lock.hint':'Locked categories are excluded from the reroll','a11y.gachaRanPartial':'Gacha — rerolled with some categories locked','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.copySeed.err':'Failed to copy seed','btn.copyLink':'Copy link','btn.copyLink.err':'Failed to copy link','a11y.linkCopied':'Share link copied to clipboard','btn.copied':'✓ Copied','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.exported':'✓ Exported','btn.saveJson':'Save params (.json)','btn.copyJson':'Copy to clipboard','btn.copyJson.err':'Failed to copy to clipboard','btn.copyJsonDone':'✓ Copied','btn.pasteJson':'Paste from clipboard','btn.pasteJson.ok':'✓ Pasted','btn.pasteJson.err':'Clipboard content is not valid Hina JSON','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','a11y.resetDone':'Avatar reset to defaults','a11y.resetCancelled':'Reset cancelled','btn.revert':'↺ Revert to {p}','btn.screenshot':'PNG','btn.screenshot.tip':'Save screenshot (Ctrl/⌘+Shift+P)','btn.lang.tip':'Switch language — click for 日本語','hint.ctrlS':'Ctrl/⌘+S → Export VRM / Ctrl/⌘+Shift+S → Save JSON / Ctrl/⌘+Z → Undo / Ctrl/⌘+Shift+Z → Redo / Ctrl/⌘+Shift+P → PNG / M → Easy/Detail toggle / ? → Help / 1-8 → Switch tab',
     'mode.easy':'Easy','mode.detail':'Detail','mode.easy.tip':'Easy mode: basic params only','mode.detail.tip':'Detail mode: all params shown',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.version':'Version','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.filename':'File name','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'out.version.ph':'e.g. 1.0','out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
@@ -275,21 +275,21 @@ const I18N = {
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring bones','st.chains':'Spring chains','st.tex':'Texture est.',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'rank.tip.Excellent':'Visible to all users by default','rank.tip.Good':'Visible to users allowing Good+','rank.tip.Medium':'Visible only to users allowing Medium+','rank.tip.Poor':'Visible only to users allowing Poor+','rank.tip.VeryPoor':'Hidden for most users',
-    'hint.exprOff':'click to deactivate','hint.drag':'Drag/Arrows: rotate / Shift+ââ: pan / Wheel Â· +â: zoom / Double-click Â· Home/0: reset','hint.undoReady':'Ctrl+Z / â+Z â Undo','hint.redoReady':'Ctrl+Shift+Z / â+Shift+Z â Redo','hint.saved':'â Auto-saved','hint.sliderReset':'Double-click or Delete/Backspace to reset to default',
-    'hint.saveFail':'â  Save failed â export JSON manually to keep your work','hint.exportCorrupt':'â  VRM file is corrupt â please export again','hint.dropJson':'or drag & drop a .hina.json file anywhere on the page',
-    'hint.noGL':'WebGL unavailable â preview disabled (export still works)',
-    'hint.glLost':'WebGL context lost â reload to restore preview',
-    'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, Shift+â/â pan, +/â zoom, Home or double-click reset the view.',
+    'hint.exprOff':'click to deactivate','hint.drag':'Drag/Arrows: rotate / Shift+↑↓: pan / Wheel · +−: zoom / Double-click · Home/0: reset','hint.undoReady':'Ctrl+Z / ⌘+Z → Undo','hint.redoReady':'Ctrl+Shift+Z / ⌘+Shift+Z → Redo','hint.saved':'✓ Auto-saved','hint.sliderReset':'Double-click or Delete/Backspace to reset to default',
+    'hint.saveFail':'⚠ Save failed — export JSON manually to keep your work','hint.exportCorrupt':'⚠ VRM file is corrupt — please export again','hint.dropJson':'or drag & drop a .hina.json file anywhere on the page',
+    'hint.noGL':'WebGL unavailable — preview disabled (export still works)',
+    'hint.glLost':'WebGL context lost — reload to restore preview',
+    'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, Shift+↑/↓ pan, +/− zoom, Home or double-click reset the view.',
     'a11y.tabs':'Tab navigation','a11y.exprBar':'Expression preview','a11y.sliderReset':'{label} reset to default {v}','a11y.numIn':'{label} (numeric entry)',
     'a11y.stage':'3D preview area','a11y.panel':'Avatar settings panel','a11y.about.btn':'About Hina','a11y.canvas.role':'3D preview',
     'a11y.exprActive':'Expression: {expr}','a11y.exprNeutral':'Returned to neutral',
-    'a11y.rankStatus':'Performance â PC: {pc} / Quest: {q}',
-    'a11y.rankBadge':'Rank badge â click to open Stats tab','a11y.skip':'Skip to content',
-    'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.screenshotShared':'Screenshot shared','a11y.seedCopied':'Seed {n} copied to clipboard','a11y.gachaRan':'Gacha â generated with seed {n}','a11y.undone':'Undone','a11y.noUndo':'Nothing to undo','a11y.redone':'Redone','a11y.noRedo':'Nothing to redo','a11y.savedJson':'Saved {name}','a11y.loadedJson':'Loaded {name}','a11y.clamped':'Value clamped to {v}','a11y.viewReset':'Preview view reset','a11y.viewLimit':'View limit reached','a11y.seedInvalid':'Seed must be a non-negative integer','a11y.licUrlInvalid':'Enter a valid URL (e.g. https://example.com)',
-    'note.quest':'Springs OFF â Quest Excellent. ON â Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).','note.springOff':'Springs are OFF â sliders hidden. Enable springs above to show them.',
-    'note.outline':'The outline only renders on PC â Quest\'s shader does not support it.',
+    'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
+    'a11y.rankBadge':'Rank badge — click to open Stats tab','a11y.skip':'Skip to content',
+    'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.screenshotShared':'Screenshot shared','a11y.seedCopied':'Seed {n} copied to clipboard','a11y.gachaRan':'Gacha — generated with seed {n}','a11y.undone':'Undone','a11y.noUndo':'Nothing to undo','a11y.redone':'Redone','a11y.noRedo':'Nothing to redo','a11y.savedJson':'Saved {name}','a11y.loadedJson':'Loaded {name}','a11y.clamped':'Value clamped to {v}','a11y.viewReset':'Preview view reset','a11y.viewLimit':'View limit reached','a11y.seedInvalid':'Seed must be a non-negative integer','a11y.licUrlInvalid':'Enter a valid URL (e.g. https://example.com)',
+    'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).','note.springOff':'Springs are OFF — sliders hidden. Enable springs above to show them.',
+    'note.outline':'The outline only renders on PC — Quest\'s shader does not support it.',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
-    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl/â+S           â Export VRM\nCtrl/â+Shift+S     â Save JSON\nCtrl/â+Z           â Undo\nCtrl/â+Shift+Z     â Redo\nCtrl/â+Shift+P     â Screenshot\n?                  â This dialog\nM                  â Toggle Easy/Detail mode\n1â8                â Switch tabs\nEsc                â Deactivate expression preview\nArrow keys         â Rotate preview (when canvas focused)\nShift+â/â         â Pan up/down (inspect face or feet)\n+/â                â Zoom\nHome / 0           â Reset view\nDouble-click       â Preview: reset view / Slider: reset to default\nDelete / Backspace â Slider: reset to default',
+    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl/⌘+S           → Export VRM\nCtrl/⌘+Shift+S     → Save JSON\nCtrl/⌘+Z           → Undo\nCtrl/⌘+Shift+Z     → Redo\nCtrl/⌘+Shift+P     → Screenshot\n?                  → This dialog\nM                  → Toggle Easy/Detail mode\n1–8                → Switch tabs\nEsc                → Deactivate expression preview\nArrow keys         → Rotate preview (when canvas focused)\nShift+↑/↓         → Pan up/down (inspect face or feet)\n+/−                → Zoom\nHome / 0           → Reset view\nDouble-click       → Preview: reset view / Slider: reset to default\nDelete / Backspace → Slider: reset to default',
     'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
     'usage.Disallow':'Disallow','usage.Allow':'Allow',
     'license.Redistribution_Prohibited':'No redistribution','license.CC0':'CC0 (Public domain)',
@@ -298,17 +298,17 @@ const I18N = {
     'out.title.ph':'e.g. my-avatar','out.author.ph':'e.g. Your Name',
     'selftest.ok':'Self-test: all OK','selftest.ng':'Self-test: FAILED','selftest.count':'{pass}/{total} checks',
     'err.loadFailed':'Could not load JSON (invalid format or not a Hina file)',
-    'err.loadTooLarge':'File too large â only JSON files under 2 MB can be loaded',
+    'err.loadTooLarge':'File too large — only JSON files under 2 MB can be loaded',
     'err.buildFailed':'Avatar build failed',
     'err.exportFailed':'VRM export failed',
     'err.screenshotFailed':'Screenshot failed',
     'err.unexpected':'An unexpected error occurred',
-    'guide.t':'VRChat upload steps','guide.s1':'1. Create an avatar project with Unity Hub + VCC','guide.s2':'2. Import UniVRM (v0.x)','guide.s3':'3. Import VRM Converter for VRChat','guide.s4':'4. Drag the .vrm in â "Convert to VRChat avatar"','guide.s5':'5. Build & upload with the VRChat SDK',
+    'guide.t':'VRChat upload steps','guide.s1':'1. Create an avatar project with Unity Hub + VCC','guide.s2':'2. Import UniVRM (v0.x)','guide.s3':'3. Import VRM Converter for VRChat','guide.s4':'4. Drag the .vrm in → "Convert to VRChat avatar"','guide.s5':'5. Build & upload with the VRChat SDK',
     'guide.pre':'What you need','guide.pre1':'A VRChat account with Trust Rank New User or above (Visitors cannot upload; a few days of playing raises it)','guide.pre2':'A Windows PC (required for the Unity step; designing the avatar works on any device)',
     'guide.dl':'Where to get them (select a URL to copy)','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRM (the VRM 0.x .unitypackage)','guide.dl.conv':'VRM Converter for VRChat',
-    'guide.tr':'Troubleshooting','guide.tr1':'Upload button is greyed out â Trust Rank is Visitor. Play a few days until you reach New User','guide.tr2':'"Very Poor" warning on Quest â re-export with "no spring bones" on the Physics tab (or proceed as-is if PC-only)','guide.tr3':'Model turns pink â shader not installed. Import UniVRM before importing the .vrm','guide.tr4':'Faces backward in other viewers â that is the VRM 0.x spec (Z-forward). Correct in Unity / VRChat',
-    'guide.ver':'Steps verified as of July 2026. Tool UIs change â if your screen differs, treat the official docs of each tool as authoritative.',
-    'btn.questFix':'Make it Quest Excellent','btn.questFix.tip':'Turns off hair sway to reach Quest Excellent (Ctrl+Z to undo)','a11y.questFixed':'Spring bones turned off â now Quest Excellent',
+    'guide.tr':'Troubleshooting','guide.tr1':'Upload button is greyed out → Trust Rank is Visitor. Play a few days until you reach New User','guide.tr2':'"Very Poor" warning on Quest → re-export with "no spring bones" on the Physics tab (or proceed as-is if PC-only)','guide.tr3':'Model turns pink → shader not installed. Import UniVRM before importing the .vrm','guide.tr4':'Faces backward in other viewers → that is the VRM 0.x spec (Z-forward). Correct in Unity / VRChat',
+    'guide.ver':'Steps verified as of July 2026. Tool UIs change — if your screen differs, treat the official docs of each tool as authoritative.',
+    'btn.questFix':'Make it Quest Excellent','btn.questFix.tip':'Turns off hair sway to reach Quest Excellent (Ctrl+Z to undo)','a11y.questFixed':'Spring bones turned off — now Quest Excellent',
     'rank.limit':'Limited by',
     'enum.eyeShape.round':'Round','enum.eyeShape.tare':'Drooping','enum.eyeShape.tsuri':'Sharp','enum.eyeShape.jito':'Half-lidded',
     'enum.browType.soft':'Soft','enum.browType.straight':'Straight','enum.browType.arch':'Arched',
@@ -321,14 +321,14 @@ const I18N = {
     'note.upload':'Upload to VRChat via Unity + VRM Converter for VRChat. Follow the steps below.',
     'expr.neutral':'Neutral','expr.a':'A','expr.i':'I','expr.u':'U','expr.e':'E','expr.o':'O',
     'expr.blink':'Blink','expr.joy':'Joy','expr.angry':'Angry','expr.sorrow':'Sorrow','expr.fun':'Fun',
-    'expr.edit':'Expression editor','expr.edit.hint':'Blend the base morphs to customize the 4 emotion expressions (AâO stay fixed for lip-sync)',
+    'expr.edit':'Expression editor','expr.edit.hint':'Blend the base morphs to customize the 4 emotion expressions (A–O stay fixed for lip-sync)',
     'expr.reset':'Reset to default','expr.customized':'Customized',
-    'a11y.exprMix':'{expr} â {morph} weight','a11y.exprReset':'{expr} reset to default',
+    'a11y.exprMix':'{expr} — {morph} weight','a11y.exprReset':'{expr} reset to default',
     'lbl.height':'Height',
   }
 };
 
-/* ---------- atlas layout (1024Ã1024, px). UVs derive from these rects. ---------- */
+/* ---------- atlas layout (1024×1024, px). UVs derive from these rects. ---------- */
 const TEX = 1024;
 const ATLAS = {
   eyeL:  [0,0,256,192], eyeR: [256,0,512,192],
@@ -346,7 +346,7 @@ const uvRect  = name => { const r=ATLAS[name]; return [r[0]/TEX, r[1]/TEX, r[2]/
    Source: creators.vrchat.com "Performance Ranks" (2026-04-21). [E,G,M,P]; above P = Very Poor.
    raycasts added Round 494: a "Raycasts" category was added to the upstream table in the same
    2026-04-21 sync (VRChat 2026.2.1) but was missing here. Hina never emits VRC Raycast
-   components, so estimate() always reports 0 â this can never be the limiting factor for any
+   components, so estimate() always reports 0 — this can never be the limiting factor for any
    preset, but the table is pinned to match the source exactly per CLAUDE.md's update rule. */
 const RANKS = {
   pc: {
@@ -393,10 +393,10 @@ function rank(stats, platform){
 }
 
 /* ---------- serialization ---------- */
-// Whitelist of meta keys mirrors the app's META_DEFAULTS shape â every value is a string.
+// Whitelist of meta keys mirrors the app's META_DEFAULTS shape — every value is a string.
 // A raw Object.assign(meta, j.meta) would let pasted/loaded JSON carry a "__proto__" key that,
 // via [[Set]] during the merge, reassigns the meta object's own prototype (Annex B legacy accessor).
-// Building a fresh object from a fixed key list â never indexed by attacker-supplied key names â
+// Building a fresh object from a fixed key list — never indexed by attacker-supplied key names —
 // makes that impossible, matching the whitelist approach sanitize() already uses for params.
 const META_KEYS = ['title','version','author','contact','reference','allowed','violent','sexual','commercial','license','licenseUrl'];
 // Single source of truth for the enum-typed meta fields. The UI <select>s and exportVRM()'s
@@ -413,14 +413,14 @@ function sanitizeMeta(m){
   for (const k of META_KEYS){
     const v = m[k];
     // Enum-typed fields additionally require a whitelisted value (mirrors sanitize()'s
-    // s.opts.includes(v) check for enum PARAMS). An invalid value drops the key entirely â
+    // s.opts.includes(v) check for enum PARAMS). An invalid value drops the key entirely —
     // same semantics as a missing key, so the merge target keeps its current valid value.
     if (typeof v==='string' && (!META_ENUMS[k] || META_ENUMS[k].includes(v))) o[k]=v;
   }
   return o;
 }
 /* ---------- expression editor (Round 479) ----------
-   Only the 4 emotion expressions are user-editable â vowels are VRChat lip-sync visemes and
+   Only the 4 emotion expressions are user-editable — vowels are VRChat lip-sync visemes and
    blink is auto-blink, so editing those would break functional behavior, not just appearance.
    Weights are the VRM bind scale (integer 0-100); sparse (zero weights are dropped) so the
    default mix serializes small and is trivially recognizable as "untouched". */
@@ -447,12 +447,12 @@ function sanitizeExprMix(x){
   }
   return o;
 }
-// meta gets the same defense-in-depth sanitizeMeta() applies on load â exprMix already did
+// meta gets the same defense-in-depth sanitizeMeta() applies on load — exprMix already did
 // (sanitizeExprMix below); before this, a meta value corrupted in memory was written back out
 // verbatim even though the UI <select> could no longer display it.
 function serialize(p, meta, exprMix){ return JSON.stringify({app:'hina', version:VERSION, params:p, meta:sanitizeMeta(meta), exprMix:sanitizeExprMix(exprMix)}, null, 1); }
 function deserialize(text){
-  // Strip UTF-8 BOM (U+FEFF) â common when JSON is edited in Notepad on Windows;
+  // Strip UTF-8 BOM (U+FEFF) — common when JSON is edited in Notepad on Windows;
   // JSON.parse does not treat BOM as whitespace and would throw SyntaxError.
   if (typeof text==='string' && text.charCodeAt(0)===0xFEFF) text = text.slice(1);
   let j; try{ j=JSON.parse(text); }catch(e){ return null; }

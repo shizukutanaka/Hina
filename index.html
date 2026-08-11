@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<meta name="description" content="é (Hina) â ãã©ã¦ã¶ã§ä½ãVRChatç¨ã¢ãã¿ã¼ãVRM 0.xæ¸ãåºãã»å®å¨ã­ã¼ã«ã«ã»ä¾å­ã¼ã­">
+<meta name="description" content="雛 (Hina) — ブラウザで作るVRChat用アバター。VRM 0.x書き出し・完全ローカル・依存ゼロ">
 <meta name="theme-color" content="#0F1216">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="é">
+<meta name="apple-mobile-web-app-title" content="雛">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="color-scheme" content="dark">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230F1216' rx='5'/%3E%3Ctext x='16' y='24' font-size='20' text-anchor='middle' fill='%2300C4CC' font-family='serif'%3Eé%3C/text%3E%3C/svg%3E">
-<title>é â VRM Avatar Maker</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230F1216' rx='5'/%3E%3Ctext x='16' y='24' font-size='20' text-anchor='middle' fill='%2300C4CC' font-family='serif'%3E雛%3C/text%3E%3C/svg%3E">
+<title>雛 — VRM Avatar Maker</title>
 <style>
 :root{
   color-scheme:dark;
@@ -57,7 +57,7 @@ main{flex:1;display:flex;min-height:0}
 .row input[type=range]{flex:1;accent-color:var(--accent);height:22px}
 .row .num{flex:0 0 56px;font-size:11px;color:var(--text-faint);text-align:right;font-variant-numeric:tabular-nums}
 /* Round 498: was .row-scoped like Round 497's checkbox rule, so it never reached the gacha
-   seed <input class="num numIn"> â seedRow/gDiv (build/20-app.js) carry no class:'row' anywhere
+   seed <input class="num numIn"> — seedRow/gDiv (build/20-app.js) carry no class:'row' anywhere
    in their ancestor chain, unlike the other two numIn instances (paramRow(), renderExprEditor()),
    both of which ARE .row-wrapped. numIn only ever appears on these 3 inputs; un-scoping is safe. */
 input.numIn{font-size:11px;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:3px 5px;height:24px;cursor:text;appearance:textfield;-moz-appearance:textfield}
@@ -68,7 +68,7 @@ input.numIn:hover{border-color:var(--accent)}
 .limit{display:block;font-size:10px;color:var(--text-faint);margin-top:3px;line-height:1.4}
 /* Round 502: was .row input[type=text] only, so it silently stopped matching licUrlInp when
    Round 433 changed that field from type='text' to type='url' (for the native URL keyboard/
-   validity API) â the only input[type=url] in the app, always .row-wrapped (licUrlRow), so
+   validity API) — the only input[type=url] in the app, always .row-wrapped (licUrlRow), so
    adding it here is safe and covers it uniformly with its sibling text fields. */
 .row select,.row input[type=text],.row input[type=url]{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font:inherit;font-size:12px}
 input::placeholder{color:var(--text-dim);opacity:1}
@@ -78,7 +78,7 @@ input::placeholder{color:var(--text-dim);opacity:1}
 .sw:hover{scale:1.15}
 .sw[aria-pressed=true]{outline:2px solid var(--accent);outline-offset:2px}
 /* Round 497: was .row-scoped, so it never matched the gacha-lock checkboxes (Round 476),
-   whose ancestor chain (lockWrap/label) carries no .row class â they rendered at the browser's
+   whose ancestor chain (lockWrap/label) carries no .row class — they rendered at the browser's
    native default size, well under WCAG 2.2 SC 2.5.8's 24px minimum, despite Round 490 believing
    this rule already covered them. There are exactly two checkbox instances in the app (this one
    and the .row-wrapped bool PARAMS checkbox); un-scoping is safe and covers both. */
@@ -150,7 +150,7 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
   /* Round 499: .eBtn.active and .tab[aria-selected=true] are the same "selected among siblings"
      pattern as .preCard.selected above (color/background/border-color only, no other visual cue)
      but were never given the same forced-colors treatment when this block was introduced (Round
-     240) or later extended (Round 440) â .eBtn predates the media query entirely (Round 104) and
+     240) or later extended (Round 440) — .eBtn predates the media query entirely (Round 104) and
      was never revisited. Under Windows High Contrast Mode the author background/color/border-
      color this state relies on is overridden, making the active expression-preview button and
      the selected tab visually indistinguishable from their siblings for sighted HCM users
@@ -169,9 +169,9 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
 </head>
 <body>
 <a id="skipLink" href="#tabBody" style="position:fixed;top:-4rem;left:8px;z-index:9999;padding:8px 14px;background:var(--accent);color:#06282a;border-radius:6px;font-weight:700;text-decoration:none">Skip to content</a>
-<noscript><div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;text-align:center;padding:24px"><div><div style="font-size:32px;margin-bottom:16px">é</div><p style="margin-bottom:8px">ãã®ãã¼ã«ã®ä½¿ç¨ã«ã¯ JavaScript ãå¿è¦ã§ãã</p><p style="color:var(--text-dim)">Hina requires JavaScript to run. Please enable it in your browser settings.</p></div></div></noscript>
+<noscript><div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;text-align:center;padding:24px"><div><div style="font-size:32px;margin-bottom:16px">雛</div><p style="margin-bottom:8px">このツールの使用には JavaScript が必要です。</p><p style="color:var(--text-dim)">Hina requires JavaScript to run. Please enable it in your browser settings.</p></div></div></noscript>
 <header>
-  <h1 class="logo" id="mainH1" aria-label="é Hina â VRM Avatar Maker"><b aria-hidden="true">é</b><span aria-hidden="true">Hina Â· VRM Avatar Maker</span></h1>
+  <h1 class="logo" id="mainH1" aria-label="雛 Hina — VRM Avatar Maker"><b aria-hidden="true">雛</b><span aria-hidden="true">Hina · VRM Avatar Maker</span></h1>
   <div class="hdr-actions">
     <span id="autoSaveBadge" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true" style="font-size:11px;color:var(--ok);opacity:0;pointer-events:none"></span>
     <button type="button" class="hbtn" id="btnScreenshot" title=""></button>
@@ -184,9 +184,9 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
   <section id="stage">
     <canvas id="gl" tabindex="0" role="img" aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Shift+ArrowUp Shift+ArrowDown + - Home 0"></canvas>
     <div id="rankWrap">
-      <div class="rankBadge"><span class="lbl">PC</span><span class="val" id="rankPC">â</span></div>
-      <div class="rankBadge"><span class="lbl">QUEST</span><span class="val" id="rankQ">â</span><span id="rankQLim" style="font-size:9px;color:var(--text-faint);white-space:nowrap"></span></div>
-      <div class="rankBadge" id="heightBadge"><span class="lbl" id="heightLbl">é«ã</span><span class="val" id="heightVal">â</span></div>
+      <div class="rankBadge"><span class="lbl">PC</span><span class="val" id="rankPC">—</span></div>
+      <div class="rankBadge"><span class="lbl">QUEST</span><span class="val" id="rankQ">—</span><span id="rankQLim" style="font-size:9px;color:var(--text-faint);white-space:nowrap"></span></div>
+      <div class="rankBadge" id="heightBadge"><span class="lbl" id="heightLbl">高さ</span><span class="val" id="heightVal">—</span></div>
     </div>
     <div id="exprBar" role="toolbar" aria-orientation="horizontal" aria-label="expression preview"></div>
     <div id="hint"></div>
@@ -201,16 +201,16 @@ details[open]>:not(summary){opacity:1;transition:opacity .2s}
   </aside>
 </main>
 <dialog id="aboutDlg" aria-labelledby="aboutH2" aria-describedby="aboutTxt" aria-modal="true">
-  <h2 id="aboutH2">é (Hina) <span id="aboutVer"></span></h2>
+  <h2 id="aboutH2">雛 (Hina) <span id="aboutVer"></span></h2>
   <p id="aboutTxt"></p>
   <details style="margin-bottom:12px"><summary id="aboutKeysSumm" style="font-size:12px;color:var(--text-dim);cursor:pointer"></summary>
   <pre id="aboutKeys" style="font-size:11px;color:var(--text-faint);line-height:1.8;margin-top:6px;white-space:pre-wrap"></pre></details>
-  <p style="font-size:11px;color:var(--text-faint)">MIT License Â· Â© 2026 shizukutanaka<br>VRM is a registered trademark of the VRM Consortium.</p>
+  <p style="font-size:11px;color:var(--text-faint)">MIT License · © 2026 shizukutanaka<br>VRM is a registered trademark of the VRM Consortium.</p>
   <button type="button" class="btn" id="aboutClose" autofocus></button>
 </dialog>
 <script id="hina-core">
 /*HINA-CORE-START*/
-/* é (Hina) core â pure logic. No DOM / WebGL / Canvas references (tested in Node). */
+/* 雛 (Hina) core — pure logic. No DOM / WebGL / Canvas references (tested in Node). */
 'use strict';
 const HINA = (() => {
 
@@ -240,10 +240,10 @@ const M = {
     const qv=[q[0],q[1],q[2]], uv=M.cross(qv,v), uuv=M.cross(qv,uv);
     return M.add(v, M.add(M.scale(uv,2*q[3]), M.scale(uuv,2)));
   },
-  qFromTo(a,b){ // rotation taking unit a â unit b
+  qFromTo(a,b){ // rotation taking unit a → unit b
     const d=M.dot(a,b);
     if (d>0.999999) return M.qid();
-    if (d<-0.999999){ // 180Â°: pick orthogonal axis
+    if (d<-0.999999){ // 180°: pick orthogonal axis
       let ax=M.cross([1,0,0],a); if (M.len(ax)<1e-6) ax=M.cross([0,1,0],a);
       return M.qAxis(ax,Math.PI);
     }
@@ -285,76 +285,76 @@ const PAL = {
 };
 // Human-readable color names keyed by hex (for aria-label in swatches)
 const PAL_NAMES = {
-  '#ffe3d0':{ja:'ä¹³ç½',en:'Porcelain'},'#ffd6bd':{ja:'ã¯ãªã¼ã ',en:'Cream'},'#f7c5a8':{ja:'ãã¼ã',en:'Peach'},
-  '#eab28e':{ja:'ã¦ã©ã¼ã ãã¼ã¸ã¥',en:'Warm Beige'},'#d49a72':{ja:'ã«ã©ã¡ã«',en:'Caramel'},'#b97f59':{ja:'ãã©ã³ãã¿',en:'Terracotta'},
-  '#96603e':{ja:'ã¢ã³ãã¼',en:'Amber'},'#6f4528':{ja:'ã¨ããã¼',en:'Ebony'},
-  '#3a3a45':{ja:'ãªããã©ãã¯',en:'Off-black'},'#5a4632':{ja:'ãã¼ã¯ãã©ã¦ã³',en:'Dark Brown'},'#8a5a2b':{ja:'ãã§ã³ã¬ã¼ã',en:'Chocolate'},
-  '#b98a4a':{ja:'ã­ã£ã©ã¡ã«',en:'Caramel'},'#d9c08a':{ja:'ã´ã¼ã«ãã³',en:'Golden'},'#e8e0d8':{ja:'ãã©ãã',en:'Platinum'},
-  '#7a3b3b':{ja:'ãã¼ã¬ã³ãã£',en:'Burgundy'},'#a64d6d':{ja:'ã­ã¼ãº',en:'Rose'},'#5d4a7a':{ja:'ãã¼ãã«',en:'Purple'},
-  '#3d5a80':{ja:'ããããã¤ããã«ã¼',en:'Midnight Blue'},'#3f6f5f':{ja:'ãã©ã¬ã¹ã',en:'Forest'},'#c9577a':{ja:'ãã¼ã³ã¿',en:'Magenta'},
-  '#5a3825':{ja:'ãã¼ã¯ãã©ã¦ã³',en:'Dark Brown'},'#7a4a2a':{ja:'ã¢ã³ãã¼',en:'Amber'},
-  '#7a4a8a':{ja:'ãã¤ãªã¬ãã',en:'Violet'},'#a64d4d':{ja:'ã¬ãã',en:'Red'},'#caa84a':{ja:'ã´ã¼ã«ã',en:'Gold'},'#4a4a55':{ja:'ã°ã¬ã¼',en:'Gray'},
-  '#2f3a52':{ja:'ãã¤ãã¼',en:'Navy'},'#8a3b4a':{ja:'ãã¼ã¬ã³ãã£',en:'Burgundy'},'#27496d':{ja:'ã¹ãã¼ã«ãã«ã¼',en:'Steel Blue'},
-  '#7a5230':{ja:'ãã©ã¦ã³',en:'Brown'},'#384048':{ja:'ãã£ã³ã¼ã«',en:'Charcoal'},'#7d3c5e':{ja:'ãã©ã ',en:'Plum'},
-  '#9a8c5a':{ja:'ã«ã¼ã­',en:'Khaki'},'#46627a':{ja:'ã¹ã¬ã¼ã',en:'Slate'},
-  '#f2f2f2':{ja:'ãªããã¯ã¤ã',en:'Off-white'},'#e8c84a':{ja:'ã´ã¼ã«ã',en:'Gold'},'#d9534f':{ja:'ã¬ãã',en:'Red'},
-  '#00c4cc':{ja:'ãã£ã¼ã«',en:'Teal'},'#f0a0b8':{ja:'ãã³ã¯',en:'Pink'},'#ffffff':{ja:'ãã¯ã¤ã',en:'White'},
+  '#ffe3d0':{ja:'乳白',en:'Porcelain'},'#ffd6bd':{ja:'クリーム',en:'Cream'},'#f7c5a8':{ja:'ピーチ',en:'Peach'},
+  '#eab28e':{ja:'ウォームベージュ',en:'Warm Beige'},'#d49a72':{ja:'カラメル',en:'Caramel'},'#b97f59':{ja:'テラコッタ',en:'Terracotta'},
+  '#96603e':{ja:'アンバー',en:'Amber'},'#6f4528':{ja:'エボニー',en:'Ebony'},
+  '#3a3a45':{ja:'オフブラック',en:'Off-black'},'#5a4632':{ja:'ダークブラウン',en:'Dark Brown'},'#8a5a2b':{ja:'チョコレート',en:'Chocolate'},
+  '#b98a4a':{ja:'キャラメル',en:'Caramel'},'#d9c08a':{ja:'ゴールデン',en:'Golden'},'#e8e0d8':{ja:'プラチナ',en:'Platinum'},
+  '#7a3b3b':{ja:'バーガンディ',en:'Burgundy'},'#a64d6d':{ja:'ローズ',en:'Rose'},'#5d4a7a':{ja:'パープル',en:'Purple'},
+  '#3d5a80':{ja:'ミッドナイトブルー',en:'Midnight Blue'},'#3f6f5f':{ja:'フォレスト',en:'Forest'},'#c9577a':{ja:'マゼンタ',en:'Magenta'},
+  '#5a3825':{ja:'ダークブラウン',en:'Dark Brown'},'#7a4a2a':{ja:'アンバー',en:'Amber'},
+  '#7a4a8a':{ja:'バイオレット',en:'Violet'},'#a64d4d':{ja:'レッド',en:'Red'},'#caa84a':{ja:'ゴールド',en:'Gold'},'#4a4a55':{ja:'グレー',en:'Gray'},
+  '#2f3a52':{ja:'ネイビー',en:'Navy'},'#8a3b4a':{ja:'バーガンディ',en:'Burgundy'},'#27496d':{ja:'スチールブルー',en:'Steel Blue'},
+  '#7a5230':{ja:'ブラウン',en:'Brown'},'#384048':{ja:'チャコール',en:'Charcoal'},'#7d3c5e':{ja:'プラム',en:'Plum'},
+  '#9a8c5a':{ja:'カーキ',en:'Khaki'},'#46627a':{ja:'スレート',en:'Slate'},
+  '#f2f2f2':{ja:'オフホワイト',en:'Off-white'},'#e8c84a':{ja:'ゴールド',en:'Gold'},'#d9534f':{ja:'レッド',en:'Red'},
+  '#00c4cc':{ja:'ティール',en:'Teal'},'#f0a0b8':{ja:'ピンク',en:'Pink'},'#ffffff':{ja:'ホワイト',en:'White'},
 };
 
 /* ---------- parameter schema (single source of truth) ----------
    kinds: num {min,max,def,step}, enum {opts,def}, bool {def}, color {def,pal} */
 const PARAMS = {
-  // ä½æ ¼
-  height:    {k:'num', min:0.8, max:2.0, def:1.45, step:0.01, tab:'body', ja:'èº«é· (m)', en:'Height (m)'},
-  headRatio: {k:'num', min:0.18, max:0.36, def:0.24, step:0.005, tab:'body', ja:'é ­ã®æ¯ç', en:'Head ratio'},
-  shoulderW: {k:'num', min:0.14, max:0.34, def:0.21, step:0.005, tab:'body', ja:'è©å¹', en:'Shoulders'},
-  hipW:      {k:'num', min:0.14, max:0.34, def:0.215, step:0.005, tab:'body', ja:'è°å¹', en:'Hips'},
-  bust:      {k:'num', min:0, max:1, def:0.25, step:0.01, tab:'body', ja:'è¸', en:'Bust'},
-  armLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'èã®é·ã', en:'Arm length'},
-  legLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'èã®é·ã', en:'Leg length'},
-  armTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'èã®å¤ªã', en:'Arm width'},
-  legTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'èã®å¤ªã', en:'Leg width'},
-  // é¡
-  eyeSize:   {k:'num', min:0.6, max:1.4, def:1.0, step:0.01, tab:'face', ja:'ç®ã®å¤§ãã', en:'Eye size'},
-  eyeY:      {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'ç®ã®é«ã', en:'Eye height'},
-  eyeGap:    {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'ç®ã®éé', en:'Eye gap'},
-  eyeShape:  {k:'enum', opts:['round','tare','tsuri','jito'], def:'round', tab:'face', ja:'ç®ã®å½¢', en:'Eye shape'},
-  irisSize:  {k:'num', min:0.6, max:1.2, def:0.92, step:0.01, tab:'face', adv:1, ja:'ç³ã®å¤§ãã', en:'Iris size'},
-  browType:  {k:'enum', opts:['soft','straight','arch'], def:'soft', tab:'face', ja:'ç', en:'Brows'},
-  mouthW:    {k:'num', min:0.6, max:1.5, def:1.0, step:0.01, tab:'face', ja:'å£ã®å¹', en:'Mouth width'},
-  blush:     {k:'num', min:0, max:1, def:0.45, step:0.01, tab:'face', ja:'é ¬ç´', en:'Blush'},
-  // é«ª
-  hairStyle: {k:'enum', opts:['short','bob','long','twin','pony'], def:'twin', tab:'hair', ja:'é«ªå', en:'Hair style'},
-  bangs:     {k:'enum', opts:['full','see','center'], def:'full', tab:'hair', ja:'åé«ª', en:'Bangs'},
-  hairLen:   {k:'num', min:0.7, max:1.4, def:1.0, step:0.01, tab:'hair', ja:'é«ªã®é·ã', en:'Hair length'},
-  hairVol:   {k:'num', min:0.8, max:1.3, def:1.0, step:0.01, tab:'hair', ja:'ããªã¥ã¼ã ', en:'Volume'},
-  ahoge:     {k:'bool', def:true, tab:'hair', ja:'ã¢ãæ¯', en:'Ahoge'},
-  // æ
-  outfit:    {k:'enum', opts:['onepiece','sailor','shirts','hoodie'], def:'sailor', tab:'outfit', ja:'è¡£è£', en:'Outfit'},
-  skirtLen:  {k:'num', min:0.6, max:1.6, def:1.0, step:0.01, tab:'outfit', ja:'ã¹ã«ã¼ãä¸', en:'Skirt length'},
-  sleeves:   {k:'enum', opts:['long','short'], def:'long', tab:'outfit', ja:'è¢', en:'Sleeves'},
-  socks:     {k:'bool', def:true, tab:'outfit', adv:1, ja:'ã½ãã¯ã¹', en:'Socks'},
-  // è²
-  skinTone:  {k:'color', def:'#ffd6bd', pal:'skin',  tab:'color', ja:'è', en:'Skin'},
-  hairColor: {k:'color', def:'#5d4a7a', pal:'hair',  tab:'color', ja:'é«ª', en:'Hair'},
-  eyeColor:  {k:'color', def:'#3d5a80', pal:'eye',   tab:'color', ja:'ç³', en:'Eyes'},
-  clothMain: {k:'color', def:'#2f3a52', pal:'cloth', tab:'color', ja:'æã¡ã¤ã³', en:'Cloth main'},
-  clothSub:  {k:'color', def:'#f2f2f2', pal:'accent',tab:'color', ja:'æãµã', en:'Cloth sub'},
-  clothAccent:{k:'color',def:'#d9534f', pal:'accent',tab:'color', ja:'ã¢ã¯ã»ã³ã', en:'Accent'},
-  shoeColor: {k:'color', def:'#384048', pal:'cloth', tab:'color', ja:'é´', en:'Shoes'},
-  // technical toggle (like springOff) â export-only, excluded from gacha randomization
-  outline:   {k:'bool', def:false, tab:'color', adv:1, ja:'ã¢ã¦ãã©ã¤ã³', en:'Outline'},
-  // ç©ç
-  springOff: {k:'bool', def:false, tab:'phys', ja:'æºãç©ãªã (Quest Excellent)', en:'No springs (Quest Excellent)'},
-  hairStiff: {k:'num', min:0, max:1, def:0.65, step:0.01, tab:'phys', ja:'é«ªã®ç¡¬ã', en:'Hair stiffness'},
-  hairGrav:  {k:'num', min:0, max:1, def:0.05, step:0.01, tab:'phys', ja:'éå', en:'Gravity'},
-  hairDrag:  {k:'num', min:0, max:1, def:0.4, step:0.01, tab:'phys', ja:'æ¸è¡°', en:'Drag'},
+  // 体格
+  height:    {k:'num', min:0.8, max:2.0, def:1.45, step:0.01, tab:'body', ja:'身長 (m)', en:'Height (m)'},
+  headRatio: {k:'num', min:0.18, max:0.36, def:0.24, step:0.005, tab:'body', ja:'頭の比率', en:'Head ratio'},
+  shoulderW: {k:'num', min:0.14, max:0.34, def:0.21, step:0.005, tab:'body', ja:'肩幅', en:'Shoulders'},
+  hipW:      {k:'num', min:0.14, max:0.34, def:0.215, step:0.005, tab:'body', ja:'腰幅', en:'Hips'},
+  bust:      {k:'num', min:0, max:1, def:0.25, step:0.01, tab:'body', ja:'胸', en:'Bust'},
+  armLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'腕の長さ', en:'Arm length'},
+  legLen:    {k:'num', min:0.8, max:1.2, def:1.0, step:0.01, tab:'body', ja:'脚の長さ', en:'Leg length'},
+  armTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'腕の太さ', en:'Arm width'},
+  legTh:     {k:'num', min:0.7, max:1.5, def:1.0, step:0.01, tab:'body', adv:1, ja:'脚の太さ', en:'Leg width'},
+  // 顔
+  eyeSize:   {k:'num', min:0.6, max:1.4, def:1.0, step:0.01, tab:'face', ja:'目の大きさ', en:'Eye size'},
+  eyeY:      {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'目の高さ', en:'Eye height'},
+  eyeGap:    {k:'num', min:0, max:1, def:0.5, step:0.01, tab:'face', ja:'目の間隔', en:'Eye gap'},
+  eyeShape:  {k:'enum', opts:['round','tare','tsuri','jito'], def:'round', tab:'face', ja:'目の形', en:'Eye shape'},
+  irisSize:  {k:'num', min:0.6, max:1.2, def:0.92, step:0.01, tab:'face', adv:1, ja:'瞳の大きさ', en:'Iris size'},
+  browType:  {k:'enum', opts:['soft','straight','arch'], def:'soft', tab:'face', ja:'眉', en:'Brows'},
+  mouthW:    {k:'num', min:0.6, max:1.5, def:1.0, step:0.01, tab:'face', ja:'口の幅', en:'Mouth width'},
+  blush:     {k:'num', min:0, max:1, def:0.45, step:0.01, tab:'face', ja:'頬紅', en:'Blush'},
+  // 髪
+  hairStyle: {k:'enum', opts:['short','bob','long','twin','pony'], def:'twin', tab:'hair', ja:'髪型', en:'Hair style'},
+  bangs:     {k:'enum', opts:['full','see','center'], def:'full', tab:'hair', ja:'前髪', en:'Bangs'},
+  hairLen:   {k:'num', min:0.7, max:1.4, def:1.0, step:0.01, tab:'hair', ja:'髪の長さ', en:'Hair length'},
+  hairVol:   {k:'num', min:0.8, max:1.3, def:1.0, step:0.01, tab:'hair', ja:'ボリューム', en:'Volume'},
+  ahoge:     {k:'bool', def:true, tab:'hair', ja:'アホ毛', en:'Ahoge'},
+  // 服
+  outfit:    {k:'enum', opts:['onepiece','sailor','shirts','hoodie'], def:'sailor', tab:'outfit', ja:'衣装', en:'Outfit'},
+  skirtLen:  {k:'num', min:0.6, max:1.6, def:1.0, step:0.01, tab:'outfit', ja:'スカート丈', en:'Skirt length'},
+  sleeves:   {k:'enum', opts:['long','short'], def:'long', tab:'outfit', ja:'袖', en:'Sleeves'},
+  socks:     {k:'bool', def:true, tab:'outfit', adv:1, ja:'ソックス', en:'Socks'},
+  // 色
+  skinTone:  {k:'color', def:'#ffd6bd', pal:'skin',  tab:'color', ja:'肌', en:'Skin'},
+  hairColor: {k:'color', def:'#5d4a7a', pal:'hair',  tab:'color', ja:'髪', en:'Hair'},
+  eyeColor:  {k:'color', def:'#3d5a80', pal:'eye',   tab:'color', ja:'瞳', en:'Eyes'},
+  clothMain: {k:'color', def:'#2f3a52', pal:'cloth', tab:'color', ja:'服メイン', en:'Cloth main'},
+  clothSub:  {k:'color', def:'#f2f2f2', pal:'accent',tab:'color', ja:'服サブ', en:'Cloth sub'},
+  clothAccent:{k:'color',def:'#d9534f', pal:'accent',tab:'color', ja:'アクセント', en:'Accent'},
+  shoeColor: {k:'color', def:'#384048', pal:'cloth', tab:'color', ja:'靴', en:'Shoes'},
+  // technical toggle (like springOff) — export-only, excluded from gacha randomization
+  outline:   {k:'bool', def:false, tab:'color', adv:1, ja:'アウトライン', en:'Outline'},
+  // 物理
+  springOff: {k:'bool', def:false, tab:'phys', ja:'揺れ物オフ (Quest Excellent)', en:'No springs (Quest Excellent)'},
+  hairStiff: {k:'num', min:0, max:1, def:0.65, step:0.01, tab:'phys', ja:'髪の硬さ', en:'Hair stiffness'},
+  hairGrav:  {k:'num', min:0, max:1, def:0.05, step:0.01, tab:'phys', ja:'重力', en:'Gravity'},
+  hairDrag:  {k:'num', min:0, max:1, def:0.4, step:0.01, tab:'phys', ja:'減衰', en:'Drag'},
 };
 
 // Round 503: single source of truth for "which outfits render a skirt mesh". Previously
 // build/11-core-b.js's hasSkirt (geometry: does this outfit get the skirt latheY()) and
 // build/20-app.js's skirtLen-row visibility check were two independently hand-written literals
-// that happened to agree today but had nothing forcing them to stay in sync â the only existing
+// that happened to agree today but had nothing forcing them to stay in sync — the only existing
 // test (tests/run.js, pre-Round-503) checked that the substrings 'skirtLen'/'onepiece'/'sailor'
 // merely appeared in the file, not that the two lists were actually equal to each other.
 const SKIRT_OUTFITS = ['onepiece','sailor'];
@@ -377,12 +377,12 @@ function sanitize(p){
 
 /* ---------- presets ---------- */
 const PRESETS = [
-  {id:'suzume', ja:'ããã', en:'Suzume', p:{}},
-  {id:'kohaku', ja:'ãã¯ã', en:'Kohaku', p:{hairStyle:'bob', outfit:'onepiece', hairColor:'#8a5a2b', eyeColor:'#caa84a', clothMain:'#8a3b4a', clothSub:'#f2f2f2', clothAccent:'#e8c84a', bangs:'see', blush:0.6}},
-  {id:'aoi', ja:'ããã', en:'Aoi', p:{hairStyle:'long', outfit:'shirts', hairColor:'#3a3a45', eyeColor:'#3d5a80', clothMain:'#27496d', clothSub:'#ffffff', clothAccent:'#00c4cc', bangs:'center', eyeShape:'tsuri', blush:0.2}},
-  {id:'tsumugi', ja:'ã¤ãã', en:'Tsumugi', p:{hairStyle:'pony', outfit:'hoodie', hairColor:'#c9577a', eyeColor:'#7a4a8a', clothMain:'#5d4a7a', clothSub:'#f0a0b8', clothAccent:'#f2f2f2', eyeShape:'tare', mouthW:1.1, blush:0.65}},
-  {id:'minato', ja:'ã¿ãªã¨', en:'Minato', p:{hairStyle:'short', outfit:'shirts', bust:0, shoulderW:0.24, hipW:0.19, hairColor:'#3f6f5f', eyeColor:'#4a4a55', clothMain:'#384048', clothSub:'#f2f2f2', clothAccent:'#00c4cc', eyeShape:'jito', blush:0, ahoge:false, skirtLen:0.6}},
-  {id:'chibi', ja:'ã¡ã³', en:'Chibi', p:{height:1.0, headRatio:0.34, outfit:'onepiece', hairColor:'#d9c08a', eyeColor:'#3f6f5f', clothMain:'#3f6f5f', clothSub:'#f2f2f2', clothAccent:'#e8c84a', eyeSize:1.25, blush:0.7, legLen:0.85, armLen:0.9}},
+  {id:'suzume', ja:'すずめ', en:'Suzume', p:{}},
+  {id:'kohaku', ja:'こはく', en:'Kohaku', p:{hairStyle:'bob', outfit:'onepiece', hairColor:'#8a5a2b', eyeColor:'#caa84a', clothMain:'#8a3b4a', clothSub:'#f2f2f2', clothAccent:'#e8c84a', bangs:'see', blush:0.6}},
+  {id:'aoi', ja:'あおい', en:'Aoi', p:{hairStyle:'long', outfit:'shirts', hairColor:'#3a3a45', eyeColor:'#3d5a80', clothMain:'#27496d', clothSub:'#ffffff', clothAccent:'#00c4cc', bangs:'center', eyeShape:'tsuri', blush:0.2}},
+  {id:'tsumugi', ja:'つむぎ', en:'Tsumugi', p:{hairStyle:'pony', outfit:'hoodie', hairColor:'#c9577a', eyeColor:'#7a4a8a', clothMain:'#5d4a7a', clothSub:'#f0a0b8', clothAccent:'#f2f2f2', eyeShape:'tare', mouthW:1.1, blush:0.65}},
+  {id:'minato', ja:'みなと', en:'Minato', p:{hairStyle:'short', outfit:'shirts', bust:0, shoulderW:0.24, hipW:0.19, hairColor:'#3f6f5f', eyeColor:'#4a4a55', clothMain:'#384048', clothSub:'#f2f2f2', clothAccent:'#00c4cc', eyeShape:'jito', blush:0, ahoge:false, skirtLen:0.6}},
+  {id:'chibi', ja:'ちび', en:'Chibi', p:{height:1.0, headRatio:0.34, outfit:'onepiece', hairColor:'#d9c08a', eyeColor:'#3f6f5f', clothMain:'#3f6f5f', clothSub:'#f2f2f2', clothAccent:'#e8c84a', eyeSize:1.25, blush:0.7, legLen:0.85, armLen:0.9}},
 ];
 function presetParams(pre){ return sanitize(Object.assign(defaults(), pre.p)); }
 
@@ -412,73 +412,73 @@ function randomParams(seed){
 /* ---------- i18n ---------- */
 const I18N = {
   ja: {
-    'tab.preset':'ããªã»ãã','tab.body':'ä½æ ¼','tab.face':'é¡','tab.hair':'é«ª','tab.outfit':'æ','tab.color':'è²','tab.phys':'ç©ç','tab.out':'åºå',
-    'btn.gacha':'ã¬ãã£ï¼ã©ã³ãã çæï¼','gacha.lock':'ã­ãã¯å¯¾è±¡','gacha.lock.hint':'ã­ãã¯ããé ç®ã¯åçæã®å¯¾è±¡å¤ã«ãªãã¾ã','a11y.gachaRanPartial':'ã¬ãã£ â ä¸é¨ã®é ç®ãã­ãã¯ãã¦çæãã¾ãã','gacha.seed':'ã·ã¼ã: ','gacha.seed.ph':'ã·ã¼ãçªå·ãå¥åãã¦åå®è¡','btn.copySeed':'ã³ãã¼','btn.copySeed.err':'ã·ã¼ãã®ã³ãã¼ã«å¤±æãã¾ãã','btn.copyLink':'ãªã³ã¯ãã³ãã¼','btn.copyLink.err':'ãªã³ã¯ã®ã³ãã¼ã«å¤±æãã¾ãã','a11y.linkCopied':'å±æãªã³ã¯ãã¯ãªãããã¼ãã«ã³ãã¼ãã¾ãã','btn.copied':'â ã³ãã¼æ¸','btn.export':'VRM æ¸ãåºã','btn.exporting':'æ¸ãåºãä¸­â¦','btn.exported':'â æ¸ãåºãå®äº','btn.saveJson':'ãã©ã¡ã¼ã¿ä¿å­ (.json)','btn.copyJson':'ã¯ãªãããã¼ãã«ã³ãã¼','btn.copyJson.err':'ã¯ãªãããã¼ãã¸ã®ã³ãã¼ã«å¤±æãã¾ãã','btn.copyJsonDone':'â ã³ãã¼æ¸','btn.pasteJson':'ã¯ãªãããã¼ãããè²¼ãä»ã','btn.pasteJson.ok':'â è²¼ãä»ãã¾ãã','btn.pasteJson.err':'ã¯ãªãããã¼ãã®åå®¹ãä¸æ­£ã§ã','btn.loadJson':'ãã©ã¡ã¼ã¿èª­è¾¼','btn.reset':'åæå','btn.reset.confirm':'åæåãã¾ããï¼å¤æ´ã¯å¤±ããã¾ãã','a11y.resetDone':'åæåãã¾ãã','a11y.resetCancelled':'åæåãã­ã£ã³ã»ã«ãã¾ãã','btn.revert':'âº {p} ã«æ»ã','btn.screenshot':'PNG','btn.screenshot.tip':'ã¹ã¯ãªã¼ã³ã·ã§ãããä¿å­ï¼Ctrl/â+Shift+Pï¼','btn.lang.tip':'è¨èªåæ¿ â ã¯ãªãã¯ã§ English ã«åæ¿','hint.ctrlS':'Ctrl/â+S â VRMæ¸ãåºã / Ctrl/â+Shift+S â JSONä¿å­ / Ctrl/â+Z â åã«æ»ã / Ctrl/â+Shift+Z â ããç´ã / Ctrl/â+Shift+P â PNG / M â ãããã/è©³ç´°åæ¿ / ? â ãã«ã / 1ã8 â ã¿ãåæ¿',
-    'mode.easy':'ãããã','mode.detail':'è©³ç´°','mode.easy.tip':'ããããã¢ã¼ã: åºæ¬ãã©ã¡ã¼ã¿ã®ã¿è¡¨ç¤º','mode.detail.tip':'è©³ç´°ã¢ã¼ã: å¨ãã©ã¡ã¼ã¿ãè¡¨ç¤º',
-    'out.meta':'ã¡ã¿æå ±','out.stats':'çµ±è¨','out.title':'ã¿ã¤ãã«','out.version':'ãã¼ã¸ã§ã³','out.author':'ä½è','out.contact':'é£çµ¡å','out.reference':'åç§å','out.filename':'ãã¡ã¤ã«å','out.license':'ã©ã¤ã»ã³ã¹','out.allowed':'ä½¿ç¨è¨±å¯','out.commercial':'åç¨å©ç¨','out.violent':'æ´åè¡¨ç¾','out.sexual':'æ§çè¡¨ç¾',
-    'out.version.ph':'ä¾: 1.0','out.contact.ph':'ä¾: https://example.com','out.reference.ph':'ä¾: ãªãªã¸ãã«ã¢ãã¿ã¼',
-    'out.license.url':'ã©ã¤ã»ã³ã¹ URLï¼Other é¸ææï¼','out.license.url.ph':'ä¾: https://example.com/license',
-    'st.tris':'ä¸è§å½¢','st.bones':'ãã¼ã³','st.mat':'ãããªã¢ã«','st.mesh':'ã¹ã­ã³ã¡ãã·ã¥','st.spring':'æºãç©ãã¼ã³','st.chains':'æºãç©ãã§ã¼ã³','st.tex':'ãã¯ã¹ãã£æ¨å®',
+    'tab.preset':'プリセット','tab.body':'体格','tab.face':'顔','tab.hair':'髪','tab.outfit':'服','tab.color':'色','tab.phys':'物理','tab.out':'出力',
+    'btn.gacha':'ガチャ（ランダム生成）','gacha.lock':'ロック対象','gacha.lock.hint':'ロックした項目は再生成の対象外になります','a11y.gachaRanPartial':'ガチャ — 一部の項目をロックして生成しました','gacha.seed':'シード: ','gacha.seed.ph':'シード番号を入力して再実行','btn.copySeed':'コピー','btn.copySeed.err':'シードのコピーに失敗しました','btn.copyLink':'リンクをコピー','btn.copyLink.err':'リンクのコピーに失敗しました','a11y.linkCopied':'共有リンクをクリップボードにコピーしました','btn.copied':'✓ コピー済','btn.export':'VRM 書き出し','btn.exporting':'書き出し中…','btn.exported':'✓ 書き出し完了','btn.saveJson':'パラメータ保存 (.json)','btn.copyJson':'クリップボードにコピー','btn.copyJson.err':'クリップボードへのコピーに失敗しました','btn.copyJsonDone':'✓ コピー済','btn.pasteJson':'クリップボードから貼り付け','btn.pasteJson.ok':'✓ 貼り付けました','btn.pasteJson.err':'クリップボードの内容が不正です','btn.loadJson':'パラメータ読込','btn.reset':'初期化','btn.reset.confirm':'初期化しますか？変更は失われます。','a11y.resetDone':'初期化しました','a11y.resetCancelled':'初期化をキャンセルしました','btn.revert':'↺ {p} に戻す','btn.screenshot':'PNG','btn.screenshot.tip':'スクリーンショットを保存（Ctrl/⌘+Shift+P）','btn.lang.tip':'言語切替 — クリックで English に切替','hint.ctrlS':'Ctrl/⌘+S → VRM書き出し / Ctrl/⌘+Shift+S → JSON保存 / Ctrl/⌘+Z → 元に戻す / Ctrl/⌘+Shift+Z → やり直す / Ctrl/⌘+Shift+P → PNG / M → かんたん/詳細切替 / ? → ヘルプ / 1〜8 → タブ切替',
+    'mode.easy':'かんたん','mode.detail':'詳細','mode.easy.tip':'かんたんモード: 基本パラメータのみ表示','mode.detail.tip':'詳細モード: 全パラメータを表示',
+    'out.meta':'メタ情報','out.stats':'統計','out.title':'タイトル','out.version':'バージョン','out.author':'作者','out.contact':'連絡先','out.reference':'参照元','out.filename':'ファイル名','out.license':'ライセンス','out.allowed':'使用許可','out.commercial':'商用利用','out.violent':'暴力表現','out.sexual':'性的表現',
+    'out.version.ph':'例: 1.0','out.contact.ph':'例: https://example.com','out.reference.ph':'例: オリジナルアバター',
+    'out.license.url':'ライセンス URL（Other 選択時）','out.license.url.ph':'例: https://example.com/license',
+    'st.tris':'三角形','st.bones':'ボーン','st.mat':'マテリアル','st.mesh':'スキンメッシュ','st.spring':'揺れ物ボーン','st.chains':'揺れ物チェーン','st.tex':'テクスチャ推定',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
-    'rank.tip.Excellent':'å¨ã¦ã¼ã¶ã¼ã«ããã©ã«ãè¡¨ç¤º','rank.tip.Good':'Goodä»¥ä¸ãè¨±å¯ããã¦ã¼ã¶ã¼ã«è¡¨ç¤º','rank.tip.Medium':'Mediumä»¥ä¸ãè¨±å¯ããã¦ã¼ã¶ã¼ã®ã¿è¡¨ç¤º','rank.tip.Poor':'Poorä»¥ä¸ãè¨±å¯ããã¦ã¼ã¶ã¼ã®ã¿è¡¨ç¤º','rank.tip.VeryPoor':'ã»ã¼å¨ã¦ã¼ã¶ã¼ã«éè¡¨ç¤º',
-    'hint.exprOff':'ã¯ãªãã¯ã§è§£é¤','hint.drag':'ãã©ãã°/ç¢å°ã­ã¼: åè»¢ / Shift+ââ: ãã³ / ãã¤ã¼ã«ã»+â: ãºã¼ã  / ããã«ã¯ãªãã¯ã»Home/0: ãªã»ãã','hint.undoReady':'Ctrl+Z / â+Z â åã«æ»ã','hint.redoReady':'Ctrl+Shift+Z / â+Shift+Z â ããç´ã','hint.saved':'â èªåä¿å­','hint.sliderReset':'ããã«ã¯ãªãã¯ã¾ãã¯ Delete / Backspace ã­ã¼ã§ããã©ã«ãå¤ã«æ»ã',
-    'hint.saveFail':'â  ä¿å­å¤±æ â JSONãæåã§ä¿å­ãã¦ãã ãã','hint.exportCorrupt':'â  VRMãã¡ã¤ã«ãç ´æãã¦ãã¾ã â ããä¸åº¦æ¸ãåºãã¦ãã ãã','hint.dropJson':'ã¾ãã¯ .hina.json ãã¡ã¤ã«ãããã«ãã©ãã°ï¼ãã­ãã',
-    'hint.noGL':'WebGL ãä½¿ãã¾ãã â ãã¬ãã¥ã¼ç¡å¹ï¼æ¸ãåºãã¯åä½ãã¾ãï¼',
-    'hint.glLost':'WebGL ã³ã³ãã­ã¹ããå¤±ããã¾ãã â ãã¼ã¸ãåèª­ã¿è¾¼ã¿ãã¦ãã ãã',
-    'a11y.canvas':'ã¢ãã¿ã¼ã®3Dãã¬ãã¥ã¼ãç¢å°ã­ã¼ã§åè»¢ãShift+ââã§ãã³ãï¼ï¼âã§ãºã¼ã ãHomeã¾ãã¯ããã«ã¯ãªãã¯ã§åæä½ç½®ã«æ»ãã¾ãã',
-    'a11y.tabs':'ã¿ãããã²ã¼ã·ã§ã³','a11y.exprBar':'è¡¨æãã¬ãã¥ã¼','a11y.sliderReset':'{label} ãããã©ã«ãå¤ {v} ã«ãªã»ãããã¾ãã','a11y.numIn':'{label}ï¼æ°å¤å¥åï¼',
-    'a11y.stage':'3Dãã¬ãã¥ã¼ã¨ãªã¢','a11y.panel':'ã¢ãã¿ã¼è¨­å®ããã«','a11y.about.btn':'éã«ã¤ãã¦','a11y.canvas.role':'3Dãã¬ãã¥ã¼',
-    'a11y.exprActive':'è¡¨æ: {expr}','a11y.exprNeutral':'ãã¥ã¼ãã©ã«ã«æ»ãã¾ãã',
-    'a11y.rankStatus':'æ§è½ã©ã³ã¯ â PC: {pc} / Quest: {q}',
-    'a11y.rankBadge':'ã©ã³ã¯ããã¸ â ã¯ãªãã¯ã§çµ±è¨ã¿ãã¸','a11y.skip':'ã³ã³ãã³ãã¸ã¹ã­ãã',
-    'a11y.exported':'{name} ãæ¸ãåºãã¾ããï¼ç´{size}ï¼','a11y.screenshotDone':'ã¹ã¯ãªã¼ã³ã·ã§ãããä¿å­ãã¾ãã','a11y.screenshotShared':'ã¹ã¯ãªã¼ã³ã·ã§ãããå±æãã¾ãã','a11y.seedCopied':'ã·ã¼ã {n} ãã¯ãªãããã¼ãã«ã³ãã¼ãã¾ãã','a11y.gachaRan':'ã¬ãã£ â ã·ã¼ã {n} ã§çæãã¾ãã','a11y.undone':'åã«æ»ãã¾ãã','a11y.noUndo':'åã«æ»ãå±¥æ­´ãããã¾ãã','a11y.redone':'ããç´ãã¾ãã','a11y.noRedo':'ããç´ãå±¥æ­´ãããã¾ãã','a11y.savedJson':'{name} ãä¿å­ãã¾ãã','a11y.loadedJson':'{name} ãèª­ã¿è¾¼ã¿ã¾ãã','a11y.clamped':'å¤ã {v} ã«å¶éãã¾ãã','a11y.viewReset':'ãã¬ãã¥ã¼è¦ç¹ããªã»ãããã¾ãã','a11y.viewLimit':'è¦ç¹ã®éçã«éãã¾ãã','a11y.seedInvalid':'ã·ã¼ãã¯0ä»¥ä¸ã®æ´æ°ãå¥åãã¦ãã ãã','a11y.licUrlInvalid':'æå¹ãªURLãå¥åãã¦ãã ããï¼ä¾: https://example.comï¼',
-    'note.quest':'æºãç©ãªãã§ Quest Excellentããªã³ã®å ´åã¯ Quest Goodã','note.quest.nospring':'ãã®é«ªåã§ã¯æºãç©ãã¼ã³ãããã¾ããï¼å¸¸ã« Quest Excellentï¼ã','note.springOff':'æºãç©ãªãä¸­ï¼ã¹ã©ã¤ãã¼ã¯éè¡¨ç¤ºããªã³ã«ããã¨è¡¨ç¤ºããã¾ãã',
-    'note.outline':'ã¢ã¦ãã©ã¤ã³ã¯PCçã§ã®ã¿è¡¨ç¤ºããã¾ãï¼Questã®ã·ã§ã¼ãã¼ã¯éå¯¾å¿ï¼ã',
-    'about':'ãã©ã¦ã¶ã ãã§VRChatç¨ã¢ãã¿ã¼(VRM 0.x)ãä½ããã¼ã«ãå®å¨ã­ã¼ã«ã«åä½ã»å¤é¨éä¿¡ãªãã»ä¾å­ã¼ã­ã','about.close':'éãã',
-    'about.keys':'ã­ã¼ãã¼ãã·ã§ã¼ãã«ãã','about.keyList':'Ctrl/â+S             â VRMæ¸ãåºã\nCtrl/â+Shift+S       â JSONä¿å­\nCtrl/â+Z             â åã«æ»ã\nCtrl/â+Shift+Z       â ããç´ã\nCtrl/â+Shift+P       â ã¹ã¯ãªã¼ã³ã·ã§ãã\n?                    â ãã®ãã¤ã¢ã­ã°\nM                    â ãããã/è©³ç´° åæ¿\n1ã8                 â ã¿ãåæ¿\nEsc                  â è¡¨æãã¬ãã¥ã¼ãè§£é¤\nââââ              â 3Dåè»¢ï¼ãã¬ãã¥ã¼é¸ææï¼\nShift+ââ           â ä¸ä¸ãã³ï¼é¡ã»è¶³ãç¢ºèªï¼\n+/â                 â ãºã¼ã \nHome / 0             â è¦ç¹ãªã»ãã\nããã«ã¯ãªãã¯       â ãã¬ãã¥ã¼: è¦ç¹ãªã»ãã / ã¹ã©ã¤ãã¼: ããã©ã«ãå¤\nDelete / Backspace   â ã¹ã©ã¤ãã¼: ããã©ã«ãå¤ã«ãªã»ãã',
-    'allowed.OnlyAuthor':'ä½èã®ã¿','allowed.ExplicitlyLicensedPerson':'è¨±å¯ãããäºº','allowed.Everyone':'å¨å¡',
-    'usage.Disallow':'ä¸å¯','usage.Allow':'å¯',
-    'license.Redistribution_Prohibited':'åéå¸ç¦æ­¢','license.CC0':'CC0ï¼ãããªãã¯ãã¡ã¤ã³ï¼',
+    'rank.tip.Excellent':'全ユーザーにデフォルト表示','rank.tip.Good':'Good以上を許可したユーザーに表示','rank.tip.Medium':'Medium以上を許可したユーザーのみ表示','rank.tip.Poor':'Poor以上を許可したユーザーのみ表示','rank.tip.VeryPoor':'ほぼ全ユーザーに非表示',
+    'hint.exprOff':'クリックで解除','hint.drag':'ドラッグ/矢印キー: 回転 / Shift+↑↓: パン / ホイール・+−: ズーム / ダブルクリック・Home/0: リセット','hint.undoReady':'Ctrl+Z / ⌘+Z → 元に戻す','hint.redoReady':'Ctrl+Shift+Z / ⌘+Shift+Z → やり直す','hint.saved':'✓ 自動保存','hint.sliderReset':'ダブルクリックまたは Delete / Backspace キーでデフォルト値に戻す',
+    'hint.saveFail':'⚠ 保存失敗 — JSONを手動で保存してください','hint.exportCorrupt':'⚠ VRMファイルが破損しています — もう一度書き出してください','hint.dropJson':'または .hina.json ファイルをここにドラッグ＆ドロップ',
+    'hint.noGL':'WebGL が使えません — プレビュー無効（書き出しは動作します）',
+    'hint.glLost':'WebGL コンテキストが失われました — ページを再読み込みしてください',
+    'a11y.canvas':'アバターの3Dプレビュー。矢印キーで回転、Shift+↑↓でパン、＋／−でズーム、Homeまたはダブルクリックで初期位置に戻ります。',
+    'a11y.tabs':'タブナビゲーション','a11y.exprBar':'表情プレビュー','a11y.sliderReset':'{label} をデフォルト値 {v} にリセットしました','a11y.numIn':'{label}（数値入力）',
+    'a11y.stage':'3Dプレビューエリア','a11y.panel':'アバター設定パネル','a11y.about.btn':'雛について','a11y.canvas.role':'3Dプレビュー',
+    'a11y.exprActive':'表情: {expr}','a11y.exprNeutral':'ニュートラルに戻りました',
+    'a11y.rankStatus':'性能ランク — PC: {pc} / Quest: {q}',
+    'a11y.rankBadge':'ランクバッジ — クリックで統計タブへ','a11y.skip':'コンテンツへスキップ',
+    'a11y.exported':'{name} を書き出しました（約{size}）','a11y.screenshotDone':'スクリーンショットを保存しました','a11y.screenshotShared':'スクリーンショットを共有しました','a11y.seedCopied':'シード {n} をクリップボードにコピーしました','a11y.gachaRan':'ガチャ — シード {n} で生成しました','a11y.undone':'元に戻しました','a11y.noUndo':'元に戻す履歴がありません','a11y.redone':'やり直しました','a11y.noRedo':'やり直す履歴がありません','a11y.savedJson':'{name} を保存しました','a11y.loadedJson':'{name} を読み込みました','a11y.clamped':'値を {v} に制限しました','a11y.viewReset':'プレビュー視点をリセットしました','a11y.viewLimit':'視点の限界に達しました','a11y.seedInvalid':'シードは0以上の整数を入力してください','a11y.licUrlInvalid':'有効なURLを入力してください（例: https://example.com）',
+    'note.quest':'揺れ物オフで Quest Excellent。オンの場合は Quest Good。','note.quest.nospring':'この髪型では揺れ物ボーンがありません（常に Quest Excellent）。','note.springOff':'揺れ物オフ中：スライダーは非表示。オンにすると表示されます。',
+    'note.outline':'アウトラインはPC版でのみ表示されます（Questのシェーダーは非対応）。',
+    'about':'ブラウザだけでVRChat用アバター(VRM 0.x)を作るツール。完全ローカル動作・外部送信なし・依存ゼロ。','about.close':'閉じる',
+    'about.keys':'キーボードショートカット','about.keyList':'Ctrl/⌘+S             → VRM書き出し\nCtrl/⌘+Shift+S       → JSON保存\nCtrl/⌘+Z             → 元に戻す\nCtrl/⌘+Shift+Z       → やり直す\nCtrl/⌘+Shift+P       → スクリーンショット\n?                    → このダイアログ\nM                    → かんたん/詳細 切替\n1〜8                 → タブ切替\nEsc                  → 表情プレビューを解除\n↑↓←→              → 3D回転（プレビュー選択時）\nShift+↑↓           → 上下パン（顔・足を確認）\n+/−                 → ズーム\nHome / 0             → 視点リセット\nダブルクリック       → プレビュー: 視点リセット / スライダー: デフォルト値\nDelete / Backspace   → スライダー: デフォルト値にリセット',
+    'allowed.OnlyAuthor':'作者のみ','allowed.ExplicitlyLicensedPerson':'許可された人','allowed.Everyone':'全員',
+    'usage.Disallow':'不可','usage.Allow':'可',
+    'license.Redistribution_Prohibited':'再配布禁止','license.CC0':'CC0（パブリックドメイン）',
     'license.CC_BY':'CC BY','license.CC_BY_NC':'CC BY-NC','license.CC_BY_SA':'CC BY-SA',
-    'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND','license.Other':'ãã®ä»',
-    'out.title.ph':'ä¾: éã¢ãã¿ã¼','out.author.ph':'ä¾: ããªãã®åå',
-    'selftest.ok':'èªå·±è¨ºæ­: å¨ã¦æ­£å¸¸','selftest.ng':'èªå·±è¨ºæ­: ç°å¸¸ãã','selftest.count':'{pass}/{total} é ç®',
-    'err.loadFailed':'JSONãã¡ã¤ã«ãèª­ã¿è¾¼ãã¾ããã§ããï¼å½¢å¼ãä¸æ­£ããéã®JSONã§ã¯ããã¾ããï¼',
-    'err.loadTooLarge':'ãã¡ã¤ã«ãå¤§ãããã¾ãï¼2 MBä»¥ä¸ã®JSONã®ã¿èª­ã¿è¾¼ãã¾ãï¼',
-    'err.buildFailed':'ã¢ãã¿ã¼çæã«å¤±æãã¾ãã',
-    'err.exportFailed':'VRMæ¸ãåºãã«å¤±æãã¾ãã',
-    'err.screenshotFailed':'ã¹ã¯ãªã¼ã³ã·ã§ããã®ä¿å­ã«å¤±æãã¾ãã',
-    'err.unexpected':'äºæããªãã¨ã©ã¼ãçºçãã¾ãã',
-    'guide.t':'VRChatå°å¥æé ','guide.s1':'1. Unity Hub + VCC ã§ã¢ãã¿ã¼ãã­ã¸ã§ã¯ãä½æ','guide.s2':'2. UniVRM (v0.x) ãã¤ã³ãã¼ã','guide.s3':'3. VRM Converter for VRChat ãã¤ã³ãã¼ã','guide.s4':'4. .vrm ããã©ãã° âãVRChatã¢ãã¿ã¼ã«å¤æã','guide.s5':'5. VRChat SDK ã§ãã«ã & ã¢ããã­ã¼ã',
+    'license.CC_BY_NC_SA':'CC BY-NC-SA','license.CC_BY_ND':'CC BY-ND','license.CC_BY_NC_ND':'CC BY-NC-ND','license.Other':'その他',
+    'out.title.ph':'例: 雛アバター','out.author.ph':'例: あなたの名前',
+    'selftest.ok':'自己診断: 全て正常','selftest.ng':'自己診断: 異常あり','selftest.count':'{pass}/{total} 項目',
+    'err.loadFailed':'JSONファイルを読み込めませんでした（形式が不正か、雛のJSONではありません）',
+    'err.loadTooLarge':'ファイルが大きすぎます（2 MB以下のJSONのみ読み込めます）',
+    'err.buildFailed':'アバター生成に失敗しました',
+    'err.exportFailed':'VRM書き出しに失敗しました',
+    'err.screenshotFailed':'スクリーンショットの保存に失敗しました',
+    'err.unexpected':'予期しないエラーが発生しました',
+    'guide.t':'VRChat導入手順','guide.s1':'1. Unity Hub + VCC でアバタープロジェクト作成','guide.s2':'2. UniVRM (v0.x) をインポート','guide.s3':'3. VRM Converter for VRChat をインポート','guide.s4':'4. .vrm をドラッグ →「VRChatアバターに変換」','guide.s5':'5. VRChat SDK でビルド & アップロード',
     // Round 512: the app ships as a single index.html, so a user who downloaded only that file
     // does NOT have docs/UPLOAD_GUIDE.md. These make the in-app guide self-sufficient.
-    'guide.pre':'ç¨æãããã®','guide.pre1':'VRChatã¢ã«ã¦ã³ãï¼Trust Rank ã New User ä»¥ä¸ãVisitor ã¯ã¢ããã­ã¼ãä¸å¯ãæ°æ¥ãã¬ã¤ã§ææ ¼ï¼','guide.pre2':'Windows PCï¼Unityä½æ¥­ã«å¿è¦ãã¢ãã¿ã¼ã®è¨­è¨ã ããªãã¹ããã§ãå¯ï¼',
-    'guide.dl':'å¥æåï¼URLãé¸æãã¦ã³ãã¼ï¼','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRMï¼VRM 0.x ç³»ã® .unitypackageï¼','guide.dl.conv':'VRM Converter for VRChat',
-    'guide.tr':'ã¤ã¾ãããã','guide.tr1':'ã¢ããã­ã¼ããã¿ã³ãæ¼ããªã â Trust Rank ã Visitorãæ°æ¥ãã¬ã¤ãã¦ New User ã«ãªãã®ãå¾ã¤','guide.tr2':'Quest ã§ãVery Poorãè­¦å â ç©çã¿ãã®ãæºãç©ãªããã§åæ¸ãåºãï¼PCçã®ã¿ãªãè­¦åã®ã¾ã¾é²ãã¦ãå¯ï¼','guide.tr3':'ã¢ãã«ããã³ã¯è²ã«ãªã â ã·ã§ã¼ãã¼æªå°å¥ãUniVRM ãåã«å¥ãã¦ãã .vrm ãåãè¾¼ã','guide.tr4':'ä»ã®ãã¥ã¼ã¢ã§å¾ããåã â VRM 0.x ä»æ§ï¼Z-åãï¼ãUnity / VRChat ã§ã¯æ­£å¸¸',
-    'guide.ver':'æé ã¯2026å¹´7ææç¹ãåãã¼ã«ã®UIã¯æ´æ°ããããããç¸éãããã°å¬å¼ãã­ã¥ã¡ã³ããæ­£ã¨ããã',
-    // Round 513: the rank estimator diagnosed but could not act â the sole remedy for a
+    'guide.pre':'用意するもの','guide.pre1':'VRChatアカウント（Trust Rank が New User 以上。Visitor はアップロード不可。数日プレイで昇格）','guide.pre2':'Windows PC（Unity作業に必要。アバターの設計だけならスマホでも可）',
+    'guide.dl':'入手先（URLを選択してコピー）','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRM（VRM 0.x 系の .unitypackage）','guide.dl.conv':'VRM Converter for VRChat',
+    'guide.tr':'つまずいたら','guide.tr1':'アップロードボタンが押せない → Trust Rank が Visitor。数日プレイして New User になるのを待つ','guide.tr2':'Quest で「Very Poor」警告 → 物理タブの「揺れ物オフ」で再書き出し（PC版のみなら警告のまま進めても可）','guide.tr3':'モデルがピンク色になる → シェーダー未導入。UniVRM を先に入れてから .vrm を取り込む','guide.tr4':'他のビューアで後ろを向く → VRM 0.x 仕様（Z-向き）。Unity / VRChat では正常',
+    'guide.ver':'手順は2026年7月時点。各ツールのUIは更新されるため、相違があれば公式ドキュメントを正とする。',
+    // Round 513: the rank estimator diagnosed but could not act — the sole remedy for a
     // non-Excellent Quest rank is springOff, which lives on the Physics tab.
-    'btn.questFix':'Quest Excellent ã«ãã','btn.questFix.tip':'é«ªã®æºãããªãã«ãã¦ Quest Excellent ã«ãã¾ãï¼Ctrl+Z ã§åãæ¶ãã¾ãï¼','a11y.questFixed':'æºãç©ããªãã«ãã¾ãã â Quest Excellent ã«ãªãã¾ãã',
-    'rank.limit':'å¾é',
-    'enum.eyeShape.round':'ä¸¸','enum.eyeShape.tare':'ããç®','enum.eyeShape.tsuri':'ã¤ãç®','enum.eyeShape.jito':'ãã¨ç®',
-    'enum.browType.soft':'ãããã','enum.browType.straight':'ã¾ã£ãã','enum.browType.arch':'ã¢ã¼ã',
-    'enum.hairStyle.short':'ã·ã§ã¼ã','enum.hairStyle.bob':'ãã','enum.hairStyle.long':'ã­ã³ã°','enum.hairStyle.twin':'ãã¤ã³','enum.hairStyle.pony':'ããã¼',
-    'enum.bangs.full':'ãã«','enum.bangs.see':'ã·ã¼ã¹ã«ã¼','enum.bangs.center':'ã»ã³ã¿ã¼åã',
-    'enum.outfit.onepiece':'ã¯ã³ãã¼ã¹','enum.outfit.sailor':'ã»ã¼ã©ã¼','enum.outfit.shirts':'ã·ã£ã','enum.outfit.hoodie':'ãã¼ã«ã¼',
-    'enum.sleeves.long':'é·è¢','enum.sleeves.short':'åè¢',
-    'cat.tris':'ä¸è§å½¢','cat.bones':'ãã¼ã³','cat.skinned':'ã¹ã­ã³ã¡ãã·ã¥','cat.mesh':'ã¡ãã·ã¥','cat.mat':'ãããªã¢ã«','cat.pbComp':'æºãç©é¨å','cat.pbTrans':'æºãç©ãã¼ã³','cat.pbCol':'ã³ã©ã¤ã','cat.pbCheck':'è¡çªå¤å®','cat.texMB':'ãã¯ã¹ãã£','cat.raycasts':'ã¬ã¤ã­ã£ã¹ã',
-    'st.vrm':'VRMãµã¤ãºæ¨å®',
-    'note.upload':'VRChatã¸ã¯ Unity + VRM Converter for VRChat çµç±ã§ã¢ããã­ã¼ããä»¥ä¸ã®æé ãåç§ã',
-    'expr.neutral':'ãã¥ã¼ãã©ã«','expr.a':'ã','expr.i':'ã','expr.u':'ã','expr.e':'ã','expr.o':'ã',
-    'expr.blink':'ã¾ã°ãã','expr.joy':'åã³','expr.angry':'æã','expr.sorrow':'æ²ãã¿','expr.fun':'æ¥½ãã',
-    'expr.edit':'è¡¨æã¨ãã£ã¿','expr.edit.hint':'åã³ã»æãã»æ²ãã¿ã»æ¥½ããã®4è¡¨æããåºæ¬ã¢ã¼ãã®çµã¿åããã§èª¿æ´ã§ãã¾ãï¼ããã ã¯ãªããã·ã³ã¯ç¨ã®ããç·¨éä¸å¯ï¼',
-    'expr.reset':'ããã©ã«ãã«æ»ã','expr.customized':'ã«ã¹ã¿ã æ¸',
-    'a11y.exprMix':'{expr} â {morph} ã®å¼·åº¦','a11y.exprReset':'{expr} ãããã©ã«ãã«æ»ãã¾ãã',
-    'lbl.height':'é«ã',
+    'btn.questFix':'Quest Excellent にする','btn.questFix.tip':'髪の揺れをオフにして Quest Excellent にします（Ctrl+Z で取り消せます）','a11y.questFixed':'揺れ物をオフにしました — Quest Excellent になりました',
+    'rank.limit':'律速',
+    'enum.eyeShape.round':'丸','enum.eyeShape.tare':'たれ目','enum.eyeShape.tsuri':'つり目','enum.eyeShape.jito':'じと目',
+    'enum.browType.soft':'やわらか','enum.browType.straight':'まっすぐ','enum.browType.arch':'アーチ',
+    'enum.hairStyle.short':'ショート','enum.hairStyle.bob':'ボブ','enum.hairStyle.long':'ロング','enum.hairStyle.twin':'ツイン','enum.hairStyle.pony':'ポニー',
+    'enum.bangs.full':'フル','enum.bangs.see':'シースルー','enum.bangs.center':'センター分け',
+    'enum.outfit.onepiece':'ワンピース','enum.outfit.sailor':'セーラー','enum.outfit.shirts':'シャツ','enum.outfit.hoodie':'パーカー',
+    'enum.sleeves.long':'長袖','enum.sleeves.short':'半袖',
+    'cat.tris':'三角形','cat.bones':'ボーン','cat.skinned':'スキンメッシュ','cat.mesh':'メッシュ','cat.mat':'マテリアル','cat.pbComp':'揺れ物部品','cat.pbTrans':'揺れ物ボーン','cat.pbCol':'コライダ','cat.pbCheck':'衝突判定','cat.texMB':'テクスチャ','cat.raycasts':'レイキャスト',
+    'st.vrm':'VRMサイズ推定',
+    'note.upload':'VRChatへは Unity + VRM Converter for VRChat 経由でアップロード。以下の手順を参照。',
+    'expr.neutral':'ニュートラル','expr.a':'あ','expr.i':'い','expr.u':'う','expr.e':'え','expr.o':'お',
+    'expr.blink':'まばたき','expr.joy':'喜び','expr.angry':'怒り','expr.sorrow':'悲しみ','expr.fun':'楽しい',
+    'expr.edit':'表情エディタ','expr.edit.hint':'喜び・怒り・悲しみ・楽しいの4表情を、基本モーフの組み合わせで調整できます（あ〜お はリップシンク用のため編集不可）',
+    'expr.reset':'デフォルトに戻す','expr.customized':'カスタム済',
+    'a11y.exprMix':'{expr} — {morph} の強度','a11y.exprReset':'{expr} をデフォルトに戻しました',
+    'lbl.height':'高さ',
   },
   en: {
     'tab.preset':'Presets','tab.body':'Body','tab.face':'Face','tab.hair':'Hair','tab.outfit':'Outfit','tab.color':'Colors','tab.phys':'Physics','tab.out':'Export',
-    'btn.gacha':'Gacha (randomize)','gacha.lock':'Lock categories','gacha.lock.hint':'Locked categories are excluded from the reroll','a11y.gachaRanPartial':'Gacha â rerolled with some categories locked','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.copySeed.err':'Failed to copy seed','btn.copyLink':'Copy link','btn.copyLink.err':'Failed to copy link','a11y.linkCopied':'Share link copied to clipboard','btn.copied':'â Copied','btn.export':'Export VRM','btn.exporting':'Exportingâ¦','btn.exported':'â Exported','btn.saveJson':'Save params (.json)','btn.copyJson':'Copy to clipboard','btn.copyJson.err':'Failed to copy to clipboard','btn.copyJsonDone':'â Copied','btn.pasteJson':'Paste from clipboard','btn.pasteJson.ok':'â Pasted','btn.pasteJson.err':'Clipboard content is not valid Hina JSON','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','a11y.resetDone':'Avatar reset to defaults','a11y.resetCancelled':'Reset cancelled','btn.revert':'âº Revert to {p}','btn.screenshot':'PNG','btn.screenshot.tip':'Save screenshot (Ctrl/â+Shift+P)','btn.lang.tip':'Switch language â click for æ¥æ¬èª','hint.ctrlS':'Ctrl/â+S â Export VRM / Ctrl/â+Shift+S â Save JSON / Ctrl/â+Z â Undo / Ctrl/â+Shift+Z â Redo / Ctrl/â+Shift+P â PNG / M â Easy/Detail toggle / ? â Help / 1-8 â Switch tab',
+    'btn.gacha':'Gacha (randomize)','gacha.lock':'Lock categories','gacha.lock.hint':'Locked categories are excluded from the reroll','a11y.gachaRanPartial':'Gacha — rerolled with some categories locked','gacha.seed':'Seed: ','gacha.seed.ph':'Enter seed to replay','btn.copySeed':'Copy','btn.copySeed.err':'Failed to copy seed','btn.copyLink':'Copy link','btn.copyLink.err':'Failed to copy link','a11y.linkCopied':'Share link copied to clipboard','btn.copied':'✓ Copied','btn.export':'Export VRM','btn.exporting':'Exporting…','btn.exported':'✓ Exported','btn.saveJson':'Save params (.json)','btn.copyJson':'Copy to clipboard','btn.copyJson.err':'Failed to copy to clipboard','btn.copyJsonDone':'✓ Copied','btn.pasteJson':'Paste from clipboard','btn.pasteJson.ok':'✓ Pasted','btn.pasteJson.err':'Clipboard content is not valid Hina JSON','btn.loadJson':'Load params','btn.reset':'Reset','btn.reset.confirm':'Reset to defaults? All changes will be lost.','a11y.resetDone':'Avatar reset to defaults','a11y.resetCancelled':'Reset cancelled','btn.revert':'↺ Revert to {p}','btn.screenshot':'PNG','btn.screenshot.tip':'Save screenshot (Ctrl/⌘+Shift+P)','btn.lang.tip':'Switch language — click for 日本語','hint.ctrlS':'Ctrl/⌘+S → Export VRM / Ctrl/⌘+Shift+S → Save JSON / Ctrl/⌘+Z → Undo / Ctrl/⌘+Shift+Z → Redo / Ctrl/⌘+Shift+P → PNG / M → Easy/Detail toggle / ? → Help / 1-8 → Switch tab',
     'mode.easy':'Easy','mode.detail':'Detail','mode.easy.tip':'Easy mode: basic params only','mode.detail.tip':'Detail mode: all params shown',
     'out.meta':'Metadata','out.stats':'Stats','out.title':'Title','out.version':'Version','out.author':'Author','out.contact':'Contact','out.reference':'Reference','out.filename':'File name','out.license':'License','out.allowed':'Allowed users','out.commercial':'Commercial','out.violent':'Violence','out.sexual':'Sexual',
     'out.version.ph':'e.g. 1.0','out.contact.ph':'e.g. https://example.com','out.reference.ph':'e.g. Original avatar',
@@ -486,21 +486,21 @@ const I18N = {
     'st.tris':'Triangles','st.bones':'Bones','st.mat':'Materials','st.mesh':'Skinned meshes','st.spring':'Spring bones','st.chains':'Spring chains','st.tex':'Texture est.',
     'rank.Excellent':'Excellent','rank.Good':'Good','rank.Medium':'Medium','rank.Poor':'Poor','rank.VeryPoor':'Very Poor',
     'rank.tip.Excellent':'Visible to all users by default','rank.tip.Good':'Visible to users allowing Good+','rank.tip.Medium':'Visible only to users allowing Medium+','rank.tip.Poor':'Visible only to users allowing Poor+','rank.tip.VeryPoor':'Hidden for most users',
-    'hint.exprOff':'click to deactivate','hint.drag':'Drag/Arrows: rotate / Shift+ââ: pan / Wheel Â· +â: zoom / Double-click Â· Home/0: reset','hint.undoReady':'Ctrl+Z / â+Z â Undo','hint.redoReady':'Ctrl+Shift+Z / â+Shift+Z â Redo','hint.saved':'â Auto-saved','hint.sliderReset':'Double-click or Delete/Backspace to reset to default',
-    'hint.saveFail':'â  Save failed â export JSON manually to keep your work','hint.exportCorrupt':'â  VRM file is corrupt â please export again','hint.dropJson':'or drag & drop a .hina.json file anywhere on the page',
-    'hint.noGL':'WebGL unavailable â preview disabled (export still works)',
-    'hint.glLost':'WebGL context lost â reload to restore preview',
-    'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, Shift+â/â pan, +/â zoom, Home or double-click reset the view.',
+    'hint.exprOff':'click to deactivate','hint.drag':'Drag/Arrows: rotate / Shift+↑↓: pan / Wheel · +−: zoom / Double-click · Home/0: reset','hint.undoReady':'Ctrl+Z / ⌘+Z → Undo','hint.redoReady':'Ctrl+Shift+Z / ⌘+Shift+Z → Redo','hint.saved':'✓ Auto-saved','hint.sliderReset':'Double-click or Delete/Backspace to reset to default',
+    'hint.saveFail':'⚠ Save failed — export JSON manually to keep your work','hint.exportCorrupt':'⚠ VRM file is corrupt — please export again','hint.dropJson':'or drag & drop a .hina.json file anywhere on the page',
+    'hint.noGL':'WebGL unavailable — preview disabled (export still works)',
+    'hint.glLost':'WebGL context lost — reload to restore preview',
+    'a11y.canvas':'3D preview of your avatar. Arrow keys rotate, Shift+↑/↓ pan, +/− zoom, Home or double-click reset the view.',
     'a11y.tabs':'Tab navigation','a11y.exprBar':'Expression preview','a11y.sliderReset':'{label} reset to default {v}','a11y.numIn':'{label} (numeric entry)',
     'a11y.stage':'3D preview area','a11y.panel':'Avatar settings panel','a11y.about.btn':'About Hina','a11y.canvas.role':'3D preview',
     'a11y.exprActive':'Expression: {expr}','a11y.exprNeutral':'Returned to neutral',
-    'a11y.rankStatus':'Performance â PC: {pc} / Quest: {q}',
-    'a11y.rankBadge':'Rank badge â click to open Stats tab','a11y.skip':'Skip to content',
-    'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.screenshotShared':'Screenshot shared','a11y.seedCopied':'Seed {n} copied to clipboard','a11y.gachaRan':'Gacha â generated with seed {n}','a11y.undone':'Undone','a11y.noUndo':'Nothing to undo','a11y.redone':'Redone','a11y.noRedo':'Nothing to redo','a11y.savedJson':'Saved {name}','a11y.loadedJson':'Loaded {name}','a11y.clamped':'Value clamped to {v}','a11y.viewReset':'Preview view reset','a11y.viewLimit':'View limit reached','a11y.seedInvalid':'Seed must be a non-negative integer','a11y.licUrlInvalid':'Enter a valid URL (e.g. https://example.com)',
-    'note.quest':'Springs OFF â Quest Excellent. ON â Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).','note.springOff':'Springs are OFF â sliders hidden. Enable springs above to show them.',
-    'note.outline':'The outline only renders on PC â Quest\'s shader does not support it.',
+    'a11y.rankStatus':'Performance — PC: {pc} / Quest: {q}',
+    'a11y.rankBadge':'Rank badge — click to open Stats tab','a11y.skip':'Skip to content',
+    'a11y.exported':'Exported {name} (~{size})','a11y.screenshotDone':'Screenshot saved','a11y.screenshotShared':'Screenshot shared','a11y.seedCopied':'Seed {n} copied to clipboard','a11y.gachaRan':'Gacha — generated with seed {n}','a11y.undone':'Undone','a11y.noUndo':'Nothing to undo','a11y.redone':'Redone','a11y.noRedo':'Nothing to redo','a11y.savedJson':'Saved {name}','a11y.loadedJson':'Loaded {name}','a11y.clamped':'Value clamped to {v}','a11y.viewReset':'Preview view reset','a11y.viewLimit':'View limit reached','a11y.seedInvalid':'Seed must be a non-negative integer','a11y.licUrlInvalid':'Enter a valid URL (e.g. https://example.com)',
+    'note.quest':'Springs OFF → Quest Excellent. ON → Quest Good.','note.quest.nospring':'No spring bones for this hair style (always Quest Excellent).','note.springOff':'Springs are OFF — sliders hidden. Enable springs above to show them.',
+    'note.outline':'The outline only renders on PC — Quest\'s shader does not support it.',
     'about':'Make a VRChat-ready avatar (VRM 0.x) in your browser. Fully local, zero network, zero dependencies.','about.close':'Close',
-    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl/â+S           â Export VRM\nCtrl/â+Shift+S     â Save JSON\nCtrl/â+Z           â Undo\nCtrl/â+Shift+Z     â Redo\nCtrl/â+Shift+P     â Screenshot\n?                  â This dialog\nM                  â Toggle Easy/Detail mode\n1â8                â Switch tabs\nEsc                â Deactivate expression preview\nArrow keys         â Rotate preview (when canvas focused)\nShift+â/â         â Pan up/down (inspect face or feet)\n+/â                â Zoom\nHome / 0           â Reset view\nDouble-click       â Preview: reset view / Slider: reset to default\nDelete / Backspace â Slider: reset to default',
+    'about.keys':'Keyboard shortcuts','about.keyList':'Ctrl/⌘+S           → Export VRM\nCtrl/⌘+Shift+S     → Save JSON\nCtrl/⌘+Z           → Undo\nCtrl/⌘+Shift+Z     → Redo\nCtrl/⌘+Shift+P     → Screenshot\n?                  → This dialog\nM                  → Toggle Easy/Detail mode\n1–8                → Switch tabs\nEsc                → Deactivate expression preview\nArrow keys         → Rotate preview (when canvas focused)\nShift+↑/↓         → Pan up/down (inspect face or feet)\n+/−                → Zoom\nHome / 0           → Reset view\nDouble-click       → Preview: reset view / Slider: reset to default\nDelete / Backspace → Slider: reset to default',
     'allowed.OnlyAuthor':'Only author','allowed.ExplicitlyLicensedPerson':'Licensed person','allowed.Everyone':'Everyone',
     'usage.Disallow':'Disallow','usage.Allow':'Allow',
     'license.Redistribution_Prohibited':'No redistribution','license.CC0':'CC0 (Public domain)',
@@ -509,17 +509,17 @@ const I18N = {
     'out.title.ph':'e.g. my-avatar','out.author.ph':'e.g. Your Name',
     'selftest.ok':'Self-test: all OK','selftest.ng':'Self-test: FAILED','selftest.count':'{pass}/{total} checks',
     'err.loadFailed':'Could not load JSON (invalid format or not a Hina file)',
-    'err.loadTooLarge':'File too large â only JSON files under 2 MB can be loaded',
+    'err.loadTooLarge':'File too large — only JSON files under 2 MB can be loaded',
     'err.buildFailed':'Avatar build failed',
     'err.exportFailed':'VRM export failed',
     'err.screenshotFailed':'Screenshot failed',
     'err.unexpected':'An unexpected error occurred',
-    'guide.t':'VRChat upload steps','guide.s1':'1. Create an avatar project with Unity Hub + VCC','guide.s2':'2. Import UniVRM (v0.x)','guide.s3':'3. Import VRM Converter for VRChat','guide.s4':'4. Drag the .vrm in â "Convert to VRChat avatar"','guide.s5':'5. Build & upload with the VRChat SDK',
+    'guide.t':'VRChat upload steps','guide.s1':'1. Create an avatar project with Unity Hub + VCC','guide.s2':'2. Import UniVRM (v0.x)','guide.s3':'3. Import VRM Converter for VRChat','guide.s4':'4. Drag the .vrm in → "Convert to VRChat avatar"','guide.s5':'5. Build & upload with the VRChat SDK',
     'guide.pre':'What you need','guide.pre1':'A VRChat account with Trust Rank New User or above (Visitors cannot upload; a few days of playing raises it)','guide.pre2':'A Windows PC (required for the Unity step; designing the avatar works on any device)',
     'guide.dl':'Where to get them (select a URL to copy)','guide.dl.vcc':'VCC (VRChat Creator Companion)','guide.dl.univrm':'UniVRM (the VRM 0.x .unitypackage)','guide.dl.conv':'VRM Converter for VRChat',
-    'guide.tr':'Troubleshooting','guide.tr1':'Upload button is greyed out â Trust Rank is Visitor. Play a few days until you reach New User','guide.tr2':'"Very Poor" warning on Quest â re-export with "no spring bones" on the Physics tab (or proceed as-is if PC-only)','guide.tr3':'Model turns pink â shader not installed. Import UniVRM before importing the .vrm','guide.tr4':'Faces backward in other viewers â that is the VRM 0.x spec (Z-forward). Correct in Unity / VRChat',
-    'guide.ver':'Steps verified as of July 2026. Tool UIs change â if your screen differs, treat the official docs of each tool as authoritative.',
-    'btn.questFix':'Make it Quest Excellent','btn.questFix.tip':'Turns off hair sway to reach Quest Excellent (Ctrl+Z to undo)','a11y.questFixed':'Spring bones turned off â now Quest Excellent',
+    'guide.tr':'Troubleshooting','guide.tr1':'Upload button is greyed out → Trust Rank is Visitor. Play a few days until you reach New User','guide.tr2':'"Very Poor" warning on Quest → re-export with "no spring bones" on the Physics tab (or proceed as-is if PC-only)','guide.tr3':'Model turns pink → shader not installed. Import UniVRM before importing the .vrm','guide.tr4':'Faces backward in other viewers → that is the VRM 0.x spec (Z-forward). Correct in Unity / VRChat',
+    'guide.ver':'Steps verified as of July 2026. Tool UIs change — if your screen differs, treat the official docs of each tool as authoritative.',
+    'btn.questFix':'Make it Quest Excellent','btn.questFix.tip':'Turns off hair sway to reach Quest Excellent (Ctrl+Z to undo)','a11y.questFixed':'Spring bones turned off — now Quest Excellent',
     'rank.limit':'Limited by',
     'enum.eyeShape.round':'Round','enum.eyeShape.tare':'Drooping','enum.eyeShape.tsuri':'Sharp','enum.eyeShape.jito':'Half-lidded',
     'enum.browType.soft':'Soft','enum.browType.straight':'Straight','enum.browType.arch':'Arched',
@@ -532,14 +532,14 @@ const I18N = {
     'note.upload':'Upload to VRChat via Unity + VRM Converter for VRChat. Follow the steps below.',
     'expr.neutral':'Neutral','expr.a':'A','expr.i':'I','expr.u':'U','expr.e':'E','expr.o':'O',
     'expr.blink':'Blink','expr.joy':'Joy','expr.angry':'Angry','expr.sorrow':'Sorrow','expr.fun':'Fun',
-    'expr.edit':'Expression editor','expr.edit.hint':'Blend the base morphs to customize the 4 emotion expressions (AâO stay fixed for lip-sync)',
+    'expr.edit':'Expression editor','expr.edit.hint':'Blend the base morphs to customize the 4 emotion expressions (A–O stay fixed for lip-sync)',
     'expr.reset':'Reset to default','expr.customized':'Customized',
-    'a11y.exprMix':'{expr} â {morph} weight','a11y.exprReset':'{expr} reset to default',
+    'a11y.exprMix':'{expr} — {morph} weight','a11y.exprReset':'{expr} reset to default',
     'lbl.height':'Height',
   }
 };
 
-/* ---------- atlas layout (1024Ã1024, px). UVs derive from these rects. ---------- */
+/* ---------- atlas layout (1024×1024, px). UVs derive from these rects. ---------- */
 const TEX = 1024;
 const ATLAS = {
   eyeL:  [0,0,256,192], eyeR: [256,0,512,192],
@@ -557,7 +557,7 @@ const uvRect  = name => { const r=ATLAS[name]; return [r[0]/TEX, r[1]/TEX, r[2]/
    Source: creators.vrchat.com "Performance Ranks" (2026-04-21). [E,G,M,P]; above P = Very Poor.
    raycasts added Round 494: a "Raycasts" category was added to the upstream table in the same
    2026-04-21 sync (VRChat 2026.2.1) but was missing here. Hina never emits VRC Raycast
-   components, so estimate() always reports 0 â this can never be the limiting factor for any
+   components, so estimate() always reports 0 — this can never be the limiting factor for any
    preset, but the table is pinned to match the source exactly per CLAUDE.md's update rule. */
 const RANKS = {
   pc: {
@@ -604,10 +604,10 @@ function rank(stats, platform){
 }
 
 /* ---------- serialization ---------- */
-// Whitelist of meta keys mirrors the app's META_DEFAULTS shape â every value is a string.
+// Whitelist of meta keys mirrors the app's META_DEFAULTS shape — every value is a string.
 // A raw Object.assign(meta, j.meta) would let pasted/loaded JSON carry a "__proto__" key that,
 // via [[Set]] during the merge, reassigns the meta object's own prototype (Annex B legacy accessor).
-// Building a fresh object from a fixed key list â never indexed by attacker-supplied key names â
+// Building a fresh object from a fixed key list — never indexed by attacker-supplied key names —
 // makes that impossible, matching the whitelist approach sanitize() already uses for params.
 const META_KEYS = ['title','version','author','contact','reference','allowed','violent','sexual','commercial','license','licenseUrl'];
 // Single source of truth for the enum-typed meta fields. The UI <select>s and exportVRM()'s
@@ -624,14 +624,14 @@ function sanitizeMeta(m){
   for (const k of META_KEYS){
     const v = m[k];
     // Enum-typed fields additionally require a whitelisted value (mirrors sanitize()'s
-    // s.opts.includes(v) check for enum PARAMS). An invalid value drops the key entirely â
+    // s.opts.includes(v) check for enum PARAMS). An invalid value drops the key entirely —
     // same semantics as a missing key, so the merge target keeps its current valid value.
     if (typeof v==='string' && (!META_ENUMS[k] || META_ENUMS[k].includes(v))) o[k]=v;
   }
   return o;
 }
 /* ---------- expression editor (Round 479) ----------
-   Only the 4 emotion expressions are user-editable â vowels are VRChat lip-sync visemes and
+   Only the 4 emotion expressions are user-editable — vowels are VRChat lip-sync visemes and
    blink is auto-blink, so editing those would break functional behavior, not just appearance.
    Weights are the VRM bind scale (integer 0-100); sparse (zero weights are dropped) so the
    default mix serializes small and is trivially recognizable as "untouched". */
@@ -658,12 +658,12 @@ function sanitizeExprMix(x){
   }
   return o;
 }
-// meta gets the same defense-in-depth sanitizeMeta() applies on load â exprMix already did
+// meta gets the same defense-in-depth sanitizeMeta() applies on load — exprMix already did
 // (sanitizeExprMix below); before this, a meta value corrupted in memory was written back out
 // verbatim even though the UI <select> could no longer display it.
 function serialize(p, meta, exprMix){ return JSON.stringify({app:'hina', version:VERSION, params:p, meta:sanitizeMeta(meta), exprMix:sanitizeExprMix(exprMix)}, null, 1); }
 function deserialize(text){
-  // Strip UTF-8 BOM (U+FEFF) â common when JSON is edited in Notepad on Windows;
+  // Strip UTF-8 BOM (U+FEFF) — common when JSON is edited in Notepad on Windows;
   // JSON.parse does not treat BOM as whitespace and would throw SyntaxError.
   if (typeof text==='string' && text.charCodeAt(0)===0xFEFF) text = text.slice(1);
   let j; try{ j=JSON.parse(text); }catch(e){ return null; }
@@ -798,7 +798,7 @@ function faceQuad(g, c, wx, hy, uvr, skin){
   quad4(g,a,b,cc,d);
 }
 
-/* sphere band. dir = [sinÏ sinÎ¸, cosÏ, sinÏ cosÎ¸] â Î¸=0 faces +Z(back), Î¸=Ï faces -Z(front) */
+/* sphere band. dir = [sinφ sinθ, cosφ, sinφ cosθ] → θ=0 faces +Z(back), θ=π faces -Z(front) */
 function sphereBand(g, c, r, phi0, phi1, rings, segs, uv, skinFn, deform){
   const grid=[];
   for(let i=0;i<=rings;i++){
@@ -813,8 +813,8 @@ function sphereBand(g, c, r, phi0, phi1, rings, segs, uv, skinFn, deform){
     }
     grid.push(row);
   }
-  // A ring exactly at a sphere pole (phi=0 or phi=Ï) collapses every vertex in that ring to the
-  // same position (sin(phi)=0 for all Î¸) â distinct vertex indices, identical position. The
+  // A ring exactly at a sphere pole (phi=0 or phi=π) collapses every vertex in that ring to the
+  // same position (sin(phi)=0 for all θ) — distinct vertex indices, identical position. The
   // generic two-triangle quad then always emits one zero-area triangle at a pole row (112 of
   // them in the default avatar: head/hand/foot/scalp poles). Skip only that half of the quad;
   // the surviving triangle keeps its original indices/winding unchanged.
@@ -989,7 +989,7 @@ function buildAvatar(p){
       const x=g.pos[vi*3], cx=x/(hipR*1.6);
       const wl=Math.max(0,-cx)*0.5*t, wr=Math.max(0,cx)*0.5*t, wh=1-wl-wr;
       // Round 514: a joint index paired with weight 0 is a glTF spec violation
-      // (ACCESSOR_JOINTS_USED_ZERO_WEIGHT â the index MUST be 0 when the weight is 0). The top
+      // (ACCESSOR_JOINTS_USED_ZERO_WEIGHT — the index MUST be 0 when the weight is 0). The top
       // skirt ring has t=0 so both leg weights are 0, and any vertex off-centre has one of
       // wl/wr at 0, yet both leg joints were written unconditionally. Writing 0 instead is
       // deformation-neutral: a zero-weight influence contributes nothing either way.
@@ -1018,7 +1018,7 @@ function buildAvatar(p){
       const x0=s*shX*0.9, x1=s*(shX+(wristX-shX)*tEnd);
       tube(g, [
         {pos:[x0,shoulderY,0], r:armR*1.55, skin:[[idx.chest,0.4],[ua,0.6]]},
-        // Round 514: the short-sleeve branch used to emit [[ua,1],[la,0]] â a joint index paired
+        // Round 514: the short-sleeve branch used to emit [[ua,1],[la,0]] — a joint index paired
         // with weight 0, which glTF forbids (ACCESSOR_JOINTS_USED_ZERO_WEIGHT). Dropping the
         // dead influence entirely is deformation-neutral and reads clearer than nested ternaries.
         {pos:[s*(shX+(wristX-shX)*tEnd*0.5),shoulderY,0], r:armR*1.30, skin: tEnd>0.5?[[ua,0.6],[la,0.4]]:[[ua,1]]},
@@ -1078,7 +1078,7 @@ function buildAvatar(p){
     const A=addV(g,t0,n,uH,sk),B2=addV(g,t1,n,uH,sk),C=addV(g,m0,n,uH,sk),D=addV(g,m1,n,uH,sk),T=addV(g,tip,n,uH,sk);
     g.idx.push(A,B2,D, A,D,C, C,D,T);
   };
-  const F=Math.PI; // front center Î¸
+  const F=Math.PI; // front center θ
   if (p.bangs==='full'){
     for(let i=0;i<7;i++){
       const off=(i-3)*0.13*Math.PI;
@@ -1118,10 +1118,10 @@ function buildAvatar(p){
         const t=i/(path.length-1);
         const bi=sp.boneIdxs[Math.min(i, sp.boneIdxs.length-1)];
         const bp=sp.boneIdxs[Math.max(0,Math.min(i, sp.boneIdxs.length-1)-1)];
-        // Round 514: at the chain root (i=0) bi===bp, which emitted [[X,0.75],[X,0.25]] â the
+        // Round 514: at the chain root (i=0) bi===bp, which emitted [[X,0.75],[X,0.25]] — the
         // same joint twice (glTF ACCESSOR_JOINTS_INDEX_DUPLICATE) burning two of the four
         // influence slots on one bone. Collapsing to a single full-weight influence is exactly
-        // equivalent (0.75Â·MÂ·p + 0.25Â·MÂ·p == 1.0Â·MÂ·p) and frees a slot.
+        // equivalent (0.75·M·p + 0.25·M·p == 1.0·M·p) and frees a slot.
         return {pos, r:r0*(1-t*0.92)+0.004, skin: bi===bp ? [[bi,1]] : [[bi,0.75],[bp,0.25]]};
       });
       tube(g, rings, 8, tailUv);
@@ -1157,7 +1157,7 @@ function buildAvatar(p){
     }
   }
 
-  /* ---- face parts (kept LAST â outline pass excludes from here) ---- */
+  /* ---- face parts (kept LAST → outline pass excludes from here) ---- */
   const faceStart = g.pos.length/3;
   const faceZ=-headR*0.97 + 0.005*H*0;
   const ew=headR*0.21*p.eyeSize, eh=headR*0.17*p.eyeSize;
@@ -1213,11 +1213,11 @@ function buildAvatar(p){
   const eC_L=[-eyeX,eyeWY,faceZ], eC_R=[eyeX,eyeWY,faceZ];
   // vowels
   scaleTag('a','mouth',mc,1.15,3.4);
-  scaleTag('i','mouth',mc,1.55,0.45,0,0,headR*0.015); // /iË/ grin: corners lift
+  scaleTag('i','mouth',mc,1.55,0.45,0,0,headR*0.015); // /iː/ grin: corners lift
   scaleTag('u','mouth',mc,0.55,1.7,-headR*0.05);
-  scaleTag('e','mouth',mc,1.30,2.0,0,0,headR*0.008); // /eË/ slight corner lift
+  scaleTag('e','mouth',mc,1.30,2.0,0,0,headR*0.008); // /eː/ slight corner lift
   scaleTag('o','mouth',mc,0.75,2.7,-headR*0.035);
-  // blinks â inner brow pulls down more than outer (natural orbicularis motion)
+  // blinks — inner brow pulls down more than outer (natural orbicularis motion)
   scaleTag('blink','eyeL',eC_L,1,0.06); scaleTag('blink','eyeR',eC_R,1,0.06);
   browTilt('blink','browL',-headR*0.045,-headR*0.02); browTilt('blink','browR',-headR*0.045,-headR*0.02);
   scaleTag('blink_l','eyeL',eC_L,1,0.06); browTilt('blink_l','browL',-headR*0.045,-headR*0.02);
@@ -1276,7 +1276,7 @@ function utf8(str){
 /* ---------- VRM 0.x export ----------
    GLB container (glTF 2.0) + extensions.VRM (specVersion "0.0").
    Spec notes (vrm.dev): Y-up right-handed, model faces Z-, T-pose with identity
-   rotations (translations only) â IBM = translate(-worldPos).
+   rotations (translations only) → IBM = translate(-worldPos).
    Field names keep official VRM0 typos: "stiffiness", "*UssageName". */
 function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
   p = sanitize(p);
@@ -1317,7 +1317,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
   const aWgt=addAcc(addView(bw.push(fWgt),fWgt.byteLength,34962),5126,nV,'VEC4');
   const aIdx=addAcc(addView(bw.push(uIdx),uIdx.byteLength,34963),5123,uIdx.length,'SCALAR');
 
-  /* morph targets â glTF sparse accessor (only non-zero delta verts; SPEC Â§5.3) */
+  /* morph targets — glTF sparse accessor (only non-zero delta verts; SPEC §5.3) */
   const targetNames = build.morphs.names.slice();
   const targets = targetNames.map(name=>{
     const entries = build.morphs.sparse[name];
@@ -1326,12 +1326,12 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
     const sc = sorted.length;
     const acc={componentType:5126,count:nV,type:'VEC3'};
     // min/max must be computed from the SAME bytes actually serialized (Round 506): the sparse
-    // values are stored as float32 (valBuf below), which rounds the float64 deltas in `sorted` â
+    // values are stored as float32 (valBuf below), which rounds the float64 deltas in `sorted` —
     // computing min/max from the pre-rounding float64 values instead produced a declared min/max
     // that byte-mismatched the accessor's own data on every export (glTF spec requires exact
     // equality; the Khronos glTF-Validator flags this as ACCESSOR_MIN/MAX_MISMATCH, Error
     // severity). Mirrors how the main POSITION accessor above already gets its min/max from
-    // minMax3(fPos) â the rounded Float32Array, not pre-rounding source data.
+    // minMax3(fPos) — the rounded Float32Array, not pre-rounding source data.
     let mnx=0,mny=0,mnz=0,mxx=0,mxy=0,mxz=0; // implicit zeros from non-sparse entries
     if(sc>0){
       const idxBuf=new Uint16Array(sc), valBuf=new Float32Array(sc*3);
@@ -1372,7 +1372,7 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
     metaTexture=1;
   }
 
-  /* nodes: 0=Root, bones â i+1, mesh node last */
+  /* nodes: 0=Root, bones → i+1, mesh node last */
   const nodeOf=i=>i+1;
   const meshNode=bones.length+1;
   const childMap={};
@@ -1673,17 +1673,17 @@ let activePresetId = null, lastGachaSeed = null;
 // three sites that assign lastGachaSeed can't drift out of sync on what counts as valid.
 function clampSeed(v){ const n=Math.round(Number(v)); return (Number.isFinite(n)&&n>=0) ? Math.min(n,4294967295) : null; }
 // Native <input type=range> mutates its value (firing 'input' directly, with no preceding
-// 'pointerdown') on Arrow keys AND Home/End/PageUp/PageDown â all five are "jump" keys, not just
+// 'pointerdown') on Arrow keys AND Home/End/PageUp/PageDown — all five are "jump" keys, not just
 // Arrow*. Round 491 added onkeydown captureUndo() for Arrow keys on both sliders below but missed
 // Home/End/PageUp/PageDown, the same class of gap under a different key set (Round 496). Shared
 // here so both sliders can't drift on which keys count as an edit needing a pre-edit snapshot.
 const RANGE_JUMP_KEYS = new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown']);
-// Round 476: gacha category locks â full reroll only ever replaced everything; users who liked
+// Round 476: gacha category locks — full reroll only ever replaced everything; users who liked
 // 90% of a result had no way to keep it. Locked categories are excluded from the reroll.
 const GACHA_LOCK_TABS = ['body','face','hair','outfit','color'];
 let gachaLocks = {body:false, face:false, hair:false, outfit:false, color:false};
 // Round 512: download locations for the in-app upload guide. URLs live here (not in i18n) because
-// they are language-independent â duplicating them per locale would just invite ja/en drift.
+// they are language-independent — duplicating them per locale would just invite ja/en drift.
 // They intentionally mirror docs/UPLOAD_GUIDE.md; if that doc's URLs change, update both.
 const GUIDE_URLS = [
   ['guide.dl.vcc', 'https://vrchat.com/home/download'],
@@ -1694,9 +1694,9 @@ let params = HINA.defaults();
 const META_DEFAULTS = {title:'', version:'', author:'', contact:'', reference:'', allowed:'OnlyAuthor', violent:'Disallow', sexual:'Disallow', commercial:'Disallow', license:'Redistribution_Prohibited', licenseUrl:''};
 let meta = Object.assign({}, META_DEFAULTS);
 // Round 479: expression editor. exprMix is avatar data (like meta), unlike gachaLocks which is a
-// tool preference â it changes what the exported VRM looks like, so it's part of undo/persistence.
+// tool preference — it changes what the exported VRM looks like, so it's part of undo/persistence.
 let exprMix = HINA.defaultExprMix();
-// <details> open-state per emotion â transient (not persisted), reset by renderBody() rebuilds,
+// <details> open-state per emotion — transient (not persisted), reset by renderBody() rebuilds,
 // same rationale as the Round 477 gachaLocks disclosure fix.
 let exprEdOpen = {joy:false, angry:false, sorrow:false, fun:false};
 let build = null;
@@ -1704,7 +1704,7 @@ const t = k => (HINA.I18N[lang] && HINA.I18N[lang][k]) || k;
 
 const LS = 'hina.v1';
 // Safari Private mode allows setItem but writes don't persist. Verify with a roundtrip
-// (set probe â read back â delete). If readback fails, persistence is broken â surface this
+// (set probe → read back → delete). If readback fails, persistence is broken — surface this
 // once at startup so users export JSON before they lose work.
 let _lsBroken = false;
 (function _probeLS(){
@@ -1725,11 +1725,11 @@ function loadState(){
       return;
     }
     params = HINA.sanitize(j.params);
-    // Round 495: must go through sanitizeMeta() like params/exprMix below â j.meta is raw,
+    // Round 495: must go through sanitizeMeta() like params/exprMix below — j.meta is raw,
     // untrusted-origin data (localStorage can be tampered by a rogue extension, DevTools, or a
     // prior same-origin page) and Object.assign(meta, j.meta) with an own "__proto__" key from
     // JSON.parse reassigns meta's prototype via the Annex B [[Set]] accessor, the exact class of
-    // bug Round 469 fixed for deserialize()'s paste/file-load/drag-drop paths â this was the one
+    // bug Round 469 fixed for deserialize()'s paste/file-load/drag-drop paths — this was the one
     // remaining site still doing a raw merge.
     Object.assign(meta, HINA.sanitizeMeta(j.meta));
     if (j.lang==='en' || j.lang==='ja') lang = j.lang;
@@ -1742,7 +1742,7 @@ function loadState(){
     exprMix = HINA.sanitizeExprMix(j.exprMix);
   }catch(e){}
 }
-// Multi-level undo/redo (Ctrl+Z / Ctrl+Shift+Z, Round 481) â bounded stacks capture state before
+// Multi-level undo/redo (Ctrl+Z / Ctrl+Shift+Z, Round 481) — bounded stacks capture state before
 // user-initiated changes. MAX_UNDO caps memory (each entry is a small structuredClone of
 // params/meta/exprMix, not geometry/images, so 20 entries is cheap regardless of avatar complexity).
 const MAX_UNDO = 20;
@@ -1753,7 +1753,7 @@ function captureUndo(){
   const now = Date.now();
   // Debounce grouping preserved exactly as before: rapid successive edits (e.g. re-clicking a
   // slider within 1.5s) collapse into the ONE stack entry already pushed for this edit session,
-  // rather than pushing a new entry per click â _undoAt only advances when we actually push.
+  // rather than pushing a new entry per click — _undoAt only advances when we actually push.
   if (!_undoStack.length || now - _undoAt > 1500){
     _undoStack.push(_snapState());
     if (_undoStack.length > MAX_UNDO) _undoStack.shift();
@@ -1779,27 +1779,27 @@ function doUndo(){
   clearTimeout(_undoHintTimer);
   _restoreState(s);
   // Force the next captureUndo() to start a fresh debounce session rather than possibly still
-  // grouping with whatever edit was captured just before this undo â otherwise a genuinely new
+  // grouping with whatever edit was captured just before this undo — otherwise a genuinely new
   // edit made within 1.5s of that PRE-undo capture would be silently skipped (never pushed) while
   // leaving _redoStack stale, so a later Ctrl+Shift+Z would jump to a now-irrelevant future state.
   _undoAt = 0;
   // rebuild() unconditionally resets the expression preview to neutral (same as every other
-  // avatar-altering action), so no extra resync is needed here â the restored exprMix is
+  // avatar-altering action), so no extra resync is needed here — the restored exprMix is
   // simply what the next expression-button click will read.
   const _undoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_undoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
   // Flash the new Ctrl+Shift+Z shortcut so redo is discoverable (mirrors captureUndo()'s
-  // undoReady flash) â otherwise nothing in the UI ever reveals that redo exists. Appended to
+  // undoReady flash) — otherwise nothing in the UI ever reveals that redo exists. Appended to
   // the SAME srStatus announcement (not a separate one) so screen reader users learn this too,
-  // not just sighted users watching the hint bar â gated on !activeExpr in both places so AT
+  // not just sighted users watching the hint bar — gated on !activeExpr in both places so AT
   // users aren't told about a hint that isn't actually showing (hint bar shows expr text instead).
   const h=$('hint'), noExprActive=!activeExpr;
   if (h && noExprActive){
     h.textContent = t('hint.redoReady');
     _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
   }
-  if(sr) sr.textContent = noExprActive ? t('a11y.undone')+' â '+t('hint.redoReady') : t('a11y.undone');
+  if(sr) sr.textContent = noExprActive ? t('a11y.undone')+' — '+t('hint.redoReady') : t('a11y.undone');
 }
 function doRedo(){
   const sr=$('srStatus');
@@ -1810,11 +1810,11 @@ function doRedo(){
   const s = _redoStack.pop();
   clearTimeout(_undoHintTimer);
   _restoreState(s);
-  _undoAt = 0; // same rationale as doUndo() â start the next edit as a fresh debounce session
+  _undoAt = 0; // same rationale as doUndo() — start the next edit as a fresh debounce session
   const _redoFocusInPanel = $('tabBody').contains(document.activeElement);
   rebuild(); renderBody(false); saveState();
   if (_redoFocusInPanel){ const tb=$('tabBody'); if(tb) tb.focus(); }
-  // Flash hint.undoReady again after redoing (mirrors doUndo()'s hint.redoReady flash) â the
+  // Flash hint.undoReady again after redoing (mirrors doUndo()'s hint.redoReady flash) — the
   // redo just made undo available again, and the existing key says exactly that. Same
   // combined-srStatus rationale as doUndo(): screen reader users should learn this too.
   const h=$('hint'), noExprActive=!activeExpr;
@@ -1822,7 +1822,7 @@ function doRedo(){
     h.textContent = t('hint.undoReady');
     _undoHintTimer = setTimeout(()=>{ const h2=$('hint'); if(h2&&!activeExpr) h2.textContent=_hintDefault(); }, 3000);
   }
-  if(sr) sr.textContent = noExprActive ? t('a11y.redone')+' â '+t('hint.undoReady') : t('a11y.redone');
+  if(sr) sr.textContent = noExprActive ? t('a11y.redone')+' — '+t('hint.undoReady') : t('a11y.redone');
 }
 
 let _errTimer = null;
@@ -1832,10 +1832,10 @@ function showErr(msg){
   const sa=$('srAlert'); if(sa){ clearTimeout(_srAlertTimer); sa.textContent=''; requestAnimationFrame(()=>{ const a=$('srAlert'); if(a) a.textContent=msg; _srAlertTimer=setTimeout(()=>{ const a2=$('srAlert'); if(a2) a2.textContent=''; },5500); }); }
   const h=$('hint'); if(h){ clearTimeout(_errTimer); h.textContent=msg; h.style.color='var(--err)';
     _errTimer=setTimeout(()=>{ if($('hint')){ $('hint').style.color='';
-      $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' â '+t('hint.exprOff'):_hintDefault(); }},4500); }
+      $('hint').textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }},4500); }
 }
 // Safely extract a human-readable message from any thrown value (Error, string, null, plain object, etc.)
-// â avoids "Error: undefined" in the hint bar when non-Error values are thrown.
+// — avoids "Error: undefined" in the hint bar when non-Error values are thrown.
 const _errMsg = e => { try{ return (e && typeof e.message==='string' && e.message) || String(e); }catch(_){ return 'unknown error'; } };
 let _saveTimer = null, _saveBadgeTimer = null;
 function saveState(){
@@ -1852,7 +1852,7 @@ function saveState(){
       }
     }catch(e){
       clearTimeout(_saveBadgeTimer);
-      // localStorage broken (private browsing/quota) â showErr() once per transition only.
+      // localStorage broken (private browsing/quota) — showErr() once per transition only.
       const wasBroken=_lsBroken; _lsBroken=true;
       const b=$('autoSaveBadge');
       if (b){ b.removeAttribute('aria-hidden'); b.textContent=t('hint.saveFail'); b.style.color='var(--warn)'; b.style.opacity='1'; }
@@ -1861,7 +1861,7 @@ function saveState(){
   }, 500);
 }
 
-/* ---------- texture atlas (2D canvas â WebGL + PNG export) ---------- */
+/* ---------- texture atlas (2D canvas → WebGL + PNG export) ---------- */
 const atlas = document.createElement('canvas');
 atlas.width = atlas.height = TEXSZ;
 const ax = atlas.getContext('2d');
@@ -1935,14 +1935,14 @@ function drawAtlas(p){
   block('hairHi', HINA.shade(p.hairColor,1.4));
   // face parts
   drawEye(ATLAS.eyeL, p);
-  // mirror eyeL â eyeR
+  // mirror eyeL → eyeR
   const eL=ATLAS.eyeL, eR=ATLAS.eyeR;
   ax.save(); ax.translate(eR[0]+(eR[2]-eR[0]), eR[1]); ax.scale(-1,1);
   ax.drawImage(atlas, eL[0],eL[1],eL[2]-eL[0],eL[3]-eL[1], 0,0,eR[2]-eR[0],eR[3]-eR[1]);
   ax.restore();
   drawBrow(ATLAS.browL, p, false);
   drawBrow(ATLAS.browR, p, true);
-  // mouth â rx scales with mouthW so texture matches 3D ellipse (max w*0.47 stays within atlas half-width)
+  // mouth — rx scales with mouthW so texture matches 3D ellipse (max w*0.47 stays within atlas half-width)
   { const r=ATLAS.mouth, w=r[2]-r[0], h=r[3]-r[1];
     ax.save(); ax.translate(r[0]+w/2, r[1]+h/2);
     const g = ax.createLinearGradient(0,-h*0.3,0,h*0.36);
@@ -1952,7 +1952,7 @@ function drawAtlas(p){
     ax.fillStyle='rgba(60,20,28,0.85)';
     ax.beginPath(); ax.ellipse(0,-h*0.06,w*0.20*p.mouthW,h*0.16,0,0,Math.PI*2); ax.fill();
     ax.restore(); }
-  // blush (alpha < 0.5 discarded by MASK â radius scales with intensity)
+  // blush (alpha < 0.5 discarded by MASK → radius scales with intensity)
   { const r=ATLAS.blush, w=r[2]-r[0];
     if (p.blush>0.02){
       const cx=r[0]+w/2, cy=r[1]+w/2;
@@ -2112,7 +2112,7 @@ function setExpr(name){
   morphDirty = true;
   const hintEl = $('hint');
   if (hintEl) hintEl.textContent = activeExpr
-    ? t('expr.'+activeExpr) + ' â ' + t('hint.exprOff')
+    ? t('expr.'+activeExpr) + ' — ' + t('hint.exprOff')
     : _hintDefault();
   const srEl = $('srStatus');
   if (srEl) srEl.textContent = activeExpr
@@ -2175,7 +2175,7 @@ function poseAndSkin(time){
     for(let i=0;i<n;i++){ localQ.push(M.qid()); worldMats.push(M.mId()); skinMats.push(M.mId()); } }
   for(let i=0;i<n;i++) localQ[i]=M.qid();
   const breath = reduceMotion ? 0 : Math.sin(time*0.0014);
-  // relaxed A-pose (preview only â export stays T-pose)
+  // relaxed A-pose (preview only — export stays T-pose)
   localQ[idx.lUA] = M.qAxis([0,0,1],  0.96 + breath*0.015);
   localQ[idx.rUA] = M.qAxis([0,0,1], -0.96 - breath*0.015);
   localQ[idx.lLA] = M.qAxis([0,0,1],  0.10);
@@ -2278,7 +2278,7 @@ function resize(){
 function renderFrame(time){
   if (!build || !GLOK || _glLost) return;
   resize();
-  // blink â suppressed when an expression is locked via the preview bar
+  // blink — suppressed when an expression is locked via the preview bar
   if (!activeExpr && !reduceMotion){
     blinkT -= 1/60;
     if (blinkT<=0 && blinkPhase<0){ blinkPhase=0; }
@@ -2378,7 +2378,7 @@ function renderFrame(time){
       const newMidY=(cur[0][1]+cur[1][1])/2;
       const d1=Math.hypot(cur[0][0]-cur[1][0], cur[0][1]-cur[1][1]);
       if (d0>0) camDist=M.clamp(camDist*d0/d1, 0.6, 8);
-      // Two-finger vertical drag pans camTarget (same as Shift+ââ on desktop)
+      // Two-finger vertical drag pans camTarget (same as Shift+↑↓ on desktop)
       const H0=build?build.dims.H:1.45;
       const dy=(newMidY-oldMidY)/cv.getBoundingClientRect().height;
       camTarget[1]=M.clamp(camTarget[1]-dy*H0*1.5, 0, H0*1.1);
@@ -2396,7 +2396,7 @@ function renderFrame(time){
   cv.addEventListener('dblclick',()=>{ const H0=build?build.dims.H:1.45;
     camYaw=Math.PI; camPitch=0.10; camDist=H0*1.85; camTarget=[0,H0*0.55,0];
     const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.viewReset'); });
-  // keyboard camera control (WCAG 2.1.1 â preview must be operable without a pointer)
+  // keyboard camera control (WCAG 2.1.1 — preview must be operable without a pointer)
   cv.addEventListener('keydown',e=>{
     const rot=0.18, zoom=0.12; let used=true;
     const H0=build?build.dims.H:1.45;
@@ -2405,7 +2405,7 @@ function renderFrame(time){
       case 'ArrowLeft':  camYaw += rot; break;
       case 'ArrowRight': camYaw -= rot; break;
       case 'ArrowUp':
-        // Shift+â pans the camera target up (inspect face); plain â orbits upward
+        // Shift+↑ pans the camera target up (inspect face); plain ↑ orbits upward
         if (e.shiftKey) camTarget[1]=M.clamp(camTarget[1]+0.08*H0, 0, H0*1.1);
         else camPitch=M.clamp(camPitch+rot, -0.5, 1.25); break;
       case 'ArrowDown':
@@ -2460,15 +2460,15 @@ function renderTabs(){
 }
 
 // Round 508: a JSON-loaded (paste/file/drag-drop) num-type PARAMS value can carry arbitrary
-// decimal precision â sanitize() clamps to [min,max] but intentionally does not round to `step`
-// (FEATURE_AUDIT Â§5: no correctness impact on file size/determinism/export, so left alone there).
+// decimal precision — sanitize() clamps to [min,max] but intentionally does not round to `step`
+// (FEATURE_AUDIT §5: no correctness impact on file size/determinism/export, so left alone there).
 // But paramRow()'s purely-textual displays (aria-valuetext, the easy-mode read-only span) used
 // String(params[k]) directly, so a value like 1.033333333333333 was announced/shown with all 16
-// digits â precision a real slider drag could never produce (native range inputs always snap to
+// digits — precision a real slider drag could never produce (native range inputs always snap to
 // `step`), and inconsistent with the numeric-entry field's own onchange clamp path, which stores
 // whatever the user typed verbatim rather than reformatting it. Does NOT touch the range/numIn
-// inputs' own `value` (still the exact stored number â detail-mode numIn is the precise-entry
-// field, showing full precision there is correct) â only the two read-only text surfaces.
+// inputs' own `value` (still the exact stored number — detail-mode numIn is the precise-entry
+// field, showing full precision there is correct) — only the two read-only text surfaces.
 const stepDecimals = step => { const s=String(step), i=s.indexOf('.'); return i<0?0:s.length-i-1; };
 const fmtNum = (v,step) => (+v).toFixed(stepDecimals(step));
 function paramRow(k){
@@ -2476,7 +2476,7 @@ function paramRow(k){
   const label = lang==='ja'?s.ja:s.en;
   const pid='pr-'+k;
   if (s.k==='num'){
-    // detail mode exposes a direct numeric entry (SPEC Â§2); easy mode shows a read-only value
+    // detail mode exposes a direct numeric entry (SPEC §2); easy mode shows a read-only value
     let valEl;
     const r=el('input',{id:pid, type:'range',min:s.min,max:s.max,step:s.step,value:params[k],
       'aria-label':label, 'aria-valuetext':fmtNum(params[k],s.step), 'aria-describedby':'sliderDesc', title:t('hint.sliderReset'),
@@ -2544,7 +2544,7 @@ function paramRow(k){
     const isActive=params[k]===c;
     const cname=(HINA.PAL_NAMES[c]||{})[lang]||c;
     const btn=el('button',{type:'button', class:'sw', style:'background:'+c,
-      'aria-label':label+' â '+cname, 'aria-pressed':String(isActive),
+      'aria-label':label+' — '+cname, 'aria-pressed':String(isActive),
       tabindex:isActive?'0':'-1',
       title:cname+' '+c, onclick:()=>{captureUndo(); params[k]=c; inp.value=c; onParam(k);
         setSwTab(swBtns.indexOf(btn)); updateSwPressedState();}});
@@ -2571,20 +2571,20 @@ function onParam(k){
   activePresetId=null;
   const s=PARAMS[k];
   if (s.k==='color'){ drawAtlas(params); uploadTexture(); saveState(); return; }
-  // outline is an export-only material flag â no geometry/atlas/preview impact, so skip the
+  // outline is an export-only material flag — no geometry/atlas/preview impact, so skip the
   // expensive rebuild() (unlike springOff, which does change the live preview and PB counts).
   // renderBody(false) still runs to show/hide the note.outline hint below the checkbox.
   if (k==='outline'){ saveState(); renderBody(false); const re=document.getElementById('pr-outline'); if(re) re.focus();
     // Mirror the springOff branch below: when the visual note.outline hint appears, announce it
-    // to srStatus too â otherwise screen reader users never learn the Quest-incompatibility
+    // to srStatus too — otherwise screen reader users never learn the Quest-incompatibility
     // caveat that sighted users see appear right below the checkbox.
     if (params.outline){ const sr=$('srStatus'); if(sr) sr.textContent=t('note.outline'); }
     return; }
   if (s.tab==='phys' && k!=='springOff'){ saveState(); return; }   // live physics
   lastGachaSeed=null; // structural change: seed no longer reproduces this avatar's geometry
   rebuild();
-  // Only re-render panel when the param changes row structure (skirtLenâoutfit, spring slidersâspringOff).
-  // All other params leave the panel layout unchanged â skipping renderBody() prevents the
+  // Only re-render panel when the param changes row structure (skirtLen↔outfit, spring sliders↔springOff).
+  // All other params leave the panel layout unchanged — skipping renderBody() prevents the
   // panel from jumping back to scrollTop=0 on every slider tick.
   // scrollReset=false: preserve scroll position so toggling springOff doesn't snap the panel top.
   if (k==='outfit' || k==='springOff'){ renderBody(false); const re=document.getElementById('pr-'+k); if(re) re.focus();
@@ -2592,7 +2592,7 @@ function onParam(k){
       const sr=$('srStatus'); if(sr) sr.textContent=params.springOff?t('note.springOff'):(hasS?t('note.quest'):t('note.quest.nospring')); } }
 }
 
-// Round 479: expression editor â face tab, detail mode only. Lets users blend the 10 user-facing
+// Round 479: expression editor — face tab, detail mode only. Lets users blend the 10 user-facing
 // morphs (5 vowels + blink + 4 emotions) into the 4 emotion expressions; vowels/blink themselves
 // stay fixed (VRChat lip-sync/auto-blink). One <details> per emotion, collapsed by default.
 function renderExprEditor(bd){
@@ -2608,7 +2608,7 @@ function renderExprEditor(bd){
     if (!isDefault) summary.append(el('span',{
       style:'color:var(--accent);font-size:9px;vertical-align:super;margin-left:4px',
       role:'img', 'aria-label':t('expr.customized')
-    }, 'â'));
+    }, '●'));
     det.append(summary);
     const wrap = el('div',{style:'margin-top:6px'});
     for (const morphKey of HINA.EXPR_INGREDIENTS){
@@ -2616,7 +2616,7 @@ function renderExprEditor(bd){
       const rid = 'exprMix-'+name+'-'+morphKey;
       const rowLabel = t('a11y.exprMix').replace('{expr}',t('expr.'+name)).replace('{morph}',t('expr.'+morphKey));
       let numEl;
-      // setExpr(name) does more than sync morphW â it also re-announces srStatus, rewrites the
+      // setExpr(name) does more than sync morphW — it also re-announces srStatus, rewrites the
       // hint bar, and re-highlights every expression-bar button. Calling it on every oninput tick
       // during a drag (which can fire dozens of times per second) would spam all three needlessly,
       // since the active expression itself never changes mid-drag, only its weight. Only take the
@@ -2639,7 +2639,7 @@ function renderExprEditor(bd){
         'aria-label':t('a11y.numIn').replace('{label}',rowLabel), inputmode:'numeric', enterkeyhint:'done',
         onwheel:e=>e.preventDefault(),
         onchange:e=>{ captureUndo(); let n=Math.round(Number(e.target.value));
-          // Mirrors paramRow()'s numIn _announce pattern (build/20-app.js ~line 811) â that
+          // Mirrors paramRow()'s numIn _announce pattern (build/20-app.js ~line 811) — that
           // sibling input announces out-of-range/non-numeric entry via aria-invalid+showErr();
           // this one silently clamped with no announcement at all until this fix.
           const _announce=(cv)=>{ e.target.setAttribute('aria-invalid','true'); e.target.setAttribute('aria-errormessage','srAlert');
@@ -2683,9 +2683,9 @@ function renderBody(scrollReset=true){
       const nmDiv=el('div',{class:'nm', title:preLabel2}, preLabel2);
       if (isModified) nmDiv.append(el('span',{
         style:'color:var(--accent);font-size:9px;vertical-align:super;margin-left:3px',
-        title:lang==='ja'?'ããªã»ããããå¤æ´ä¸­':'Modified from preset',
-        role:'img', 'aria-label':lang==='ja'?'ããªã»ããããå¤æ´ä¸­':'Modified from preset'
-      }, 'â'));
+        title:lang==='ja'?'プリセットから変更中':'Modified from preset',
+        role:'img', 'aria-label':lang==='ja'?'プリセットから変更中':'Modified from preset'
+      }, '●'));
       grid.append(el('button',{type:'button', class:'preCard'+(isSelected?' selected':''),
         'aria-pressed':String(isSelected),
         tabindex: (isSelected || (!hasSelected && _firstCard)) ? '0' : '-1',
@@ -2727,7 +2727,7 @@ function renderBody(scrollReset=true){
       const anyLock=GACHA_LOCK_TABS.some(tk=>gachaLocks[tk]);
       if (anyLock) for(const k in HINA.PARAMS) if (gachaLocks[HINA.PARAMS[k].tab]) rolled[k]=params[k];
       // A locked reroll is no longer fully determined by the seed alone, so it can't be reproduced
-      // by re-entering that seed â clearing it keeps the "same seed = same avatar" promise honest
+      // by re-entering that seed — clearing it keeps the "same seed = same avatar" promise honest
       // for the seed input, Copy/Copy Link buttons, and the ?seed=N sharing feature (Rounds 474-475).
       lastGachaSeed=anyLock?null:seed;
       params=rolled;
@@ -2737,10 +2737,10 @@ function renderBody(scrollReset=true){
       const gb=$('gachaBtn'); if(gb) gb.focus();
     };
     gDiv.append(el('button',{type:'button', id:'gachaBtn', class:'btn wide', onclick:()=>runGacha(crypto.getRandomValues(new Uint32Array(1))[0])}, t('btn.gacha')));
-    // Round 476: category locks â collapsed by default so the default 3-click flow (SPEC Â§2) stays
+    // Round 476: category locks — collapsed by default so the default 3-click flow (SPEC §2) stays
     // uncluttered; discoverable via disclosure, same pattern as the About dialog's shortcut list.
     // Round 477: renderBody() recreates this <details> on every gacha click (runGacha calls it),
-    // which would otherwise snap the disclosure shut even while locks are active â auto-open it
+    // which would otherwise snap the disclosure shut even while locks are active — auto-open it
     // whenever any lock is set so users can always see/manage their active locks without re-expanding.
     const lockDet=el('details',{style:'margin-top:8px', ...(GACHA_LOCK_TABS.some(tk=>gachaLocks[tk])?{open:''}:{})});
     lockDet.append(el('summary',{style:'font-size:12px;color:var(--text-dim);cursor:pointer'}, t('gacha.lock')));
@@ -2786,7 +2786,7 @@ function renderBody(scrollReset=true){
         }).catch(()=>{ cpBtn.disabled=false; cpBtn.removeAttribute('aria-busy'); if(_cpBF) cpBtn.focus(); cpBtn.textContent='!'; setTimeout(()=>{ cpBtn.textContent=t('btn.copySeed'); },1500); showErr(t('btn.copySeed.err')); });
       }
     }, t('btn.copySeed'));
-    // Round 475: makes the ?seed=N sharing added in Round 474 discoverable â that feature had
+    // Round 475: makes the ?seed=N sharing added in Round 474 discoverable — that feature had
     // zero UI surface before this (only reachable by manually editing the address bar).
     const cpLinkBtn=el('button',{type:'button', class:'btn',style:'padding:4px 8px;font-size:11px;flex:none',
       ...(lastGachaSeed===null?{disabled:''}:{}),
@@ -2832,7 +2832,7 @@ function renderBody(scrollReset=true){
 
 let statEls={};
 function renderOut(bd){
-  // Primary action at top â the export button is why the user opened this tab
+  // Primary action at top — the export button is why the user opened this tab
   _exportBtn = el('button',{type:'button', class:'btn primary wide', 'aria-keyshortcuts':'Control+S Meta+S', onclick:doExport}, _exporting?t('btn.exporting'):t('btn.export'));
   if (_exporting){ _exportBtn.disabled=true; _exportBtn.setAttribute('aria-busy','true'); }
   bd.append(_exportBtn);
@@ -2932,7 +2932,7 @@ function renderOut(bd){
       pstj.disabled=true; pstj.setAttribute('aria-busy','true');
       navigator.clipboard.readText().then(text=>{
         pstj.disabled=false; pstj.removeAttribute('aria-busy');
-        // Unlike file/drag-drop loads, clipboard text has no browser-enforced size cap â a hostile
+        // Unlike file/drag-drop loads, clipboard text has no browser-enforced size cap — a hostile
         // page's "copy" button could place gigabytes on the clipboard and hang JSON.parse on paste.
         if (text.length > 2*1024*1024){
           pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
@@ -2952,7 +2952,7 @@ function renderOut(bd){
   }
   const file=el('input',{type:'file', accept:'.json,application/json', style:'display:none',
     onchange:e=>{ const f=e.target.files[0]; if(!f) return;
-      // The accept attribute is only a picker UI hint â most OS file dialogs offer an "All Files"
+      // The accept attribute is only a picker UI hint — most OS file dialogs offer an "All Files"
       // override that bypasses it, so a non-JSON file can still reach here. Mirror the drag-drop
       // handler's type check (below) so a large non-JSON file (e.g. a photo) gets the accurate
       // "wrong format" message instead of a misleading "too large" one when size alone is checked.
@@ -2991,8 +2991,8 @@ function renderOut(bd){
   const gd=el('div',{class:'note'});
   // Round 512: the distribution artifact is a single index.html, so a user who followed the
   // README ("download index.html, open it") does NOT have docs/UPLOAD_GUIDE.md. The in-app guide
-  // was five one-liners with no prerequisites, no download locations and no troubleshooting â
-  // i.e. no help at all across exactly the stretch (install â convert â upload) where a
+  // was five one-liners with no prerequisites, no download locations and no troubleshooting —
+  // i.e. no help at all across exactly the stretch (install → convert → upload) where a
   // 3D-illiterate beginner is guaranteed to be on their own. Ported from UPLOAD_GUIDE.md.
   gd.append(el('div',{style:'font-weight:700;margin-bottom:2px'}, t('guide.pre')));
   const pul=el('ul',{style:'margin:0 0 10px 16px;line-height:1.8'});
@@ -3002,7 +3002,7 @@ function renderOut(bd){
   for(const k of ['guide.s1','guide.s2','guide.s3','guide.s4','guide.s5'])
     ol.append(el('li',{}, t(k)));
   gd.append(ol);
-  // URLs are rendered as plain selectable text, never <a href> â the app deliberately contains
+  // URLs are rendered as plain selectable text, never <a href> — the app deliberately contains
   // zero external navigation targets so the "fully local / auditable" posture stays unambiguous.
   gd.append(el('div',{style:'font-weight:700;margin:10px 0 2px'}, t('guide.dl')));
   const dul=el('ul',{style:'margin:0 0 0 16px;line-height:1.8'});
@@ -3020,12 +3020,12 @@ function renderOut(bd){
 }
 
 const RANKCOLOR=['var(--r-e)','var(--r-g)','var(--r-m)','var(--r-p)','var(--r-vp)'];
-// the bottleneck categories that hold a rank back (SPEC F-010: å¾éé ç®ãæç¤º)
+// the bottleneck categories that hold a rank back (SPEC F-010: 律速項目を明示)
 function limitText(r){
   if (r.idx===0 || !r.worst || !r.worst.length) return '';
   return t('rank.limit')+': '+r.worst.map(c=>t('cat.'+c)).join(' / ');
 }
-// WCAG 4.1.3 â announce rank changes to assistive tech, but only when the
+// WCAG 4.1.3 — announce rank changes to assistive tech, but only when the
 // label actually changes (slider ticks must not spam the live region).
 let lastRankKey='';
 function announceRank(pc, q){
@@ -3043,37 +3043,37 @@ function updateStats(){
   const pc=HINA.rank(est,'pc'), q=HINA.rank(est,'quest');
   const set=(elm,r)=>{ const lim=limitText(r);
     elm.textContent=t('rank.'+r.rank); elm.style.color=RANKCOLOR[r.idx];
-    const tip=t('rank.tip.'+r.rank)+(lim?' â '+lim:'');
+    const tip=t('rank.tip.'+r.rank)+(lim?' — '+lim:'');
     elm.title=tip; elm.parentElement.title=tip;
-    // Keep aria-label on rankBadge button in sync with current rank so SR reads "PC: Excellent â clickâ¦"
+    // Keep aria-label on rankBadge button in sync with current rank so SR reads "PC: Excellent — click…"
     const lbl=elm.parentElement.querySelector('.lbl');
     if(lbl) elm.parentElement.setAttribute('aria-label',
-      (lbl.textContent+': '+t('rank.'+r.rank)+(lim?' ('+lim+')':'')+' â '+t('a11y.rankBadge'))); };
+      (lbl.textContent+': '+t('rank.'+r.rank)+(lim?' ('+lim+')':'')+' — '+t('a11y.rankBadge'))); };
   set($('rankPC'),pc); set($('rankQ'),q);
   const qlim=$('rankQLim');
   if(qlim) qlim.textContent = (q.worst&&q.worst.length&&q.idx>0) ? '('+t('cat.'+q.worst[0])+')' : '';
   const hv=$('heightVal'); if (hv){ hv.textContent=params.height.toFixed(2)+' m';
     const hb=$('heightBadge');
-    if(hb) hb.setAttribute('aria-label', t('lbl.height')+': '+params.height.toFixed(2)+' m â '+t('a11y.rankBadge')); }
+    if(hb) hb.setAttribute('aria-label', t('lbl.height')+': '+params.height.toFixed(2)+' m — '+t('a11y.rankBadge')); }
   announceRank(pc, q);
   if (statEls.tris){
     // Annotate tris and bones with Quest Excellent threshold so users can see headroom at a glance
     const QE=HINA.RANKS.quest;
-    const ann=(val,lim)=>val+(val>lim?' / '+lim+' â ':' / '+lim);
+    const ann=(val,lim)=>val+(val>lim?' / '+lim+' ⚠':' / '+lim);
     statEls.tris.textContent=ann(est.tris,QE.tris[0]);
     statEls.bones.textContent=ann(est.bones,QE.bones[0]);
     statEls.mat.textContent=est.mat;
     statEls.skinned.textContent=est.skinned;
     statEls.pbComp.textContent=params.springOff?0:est.pbComp;
     statEls.pbTrans.textContent=params.springOff?0:est.pbTrans;
-    // texMB: annotate with QE threshold (10 MB) so users see headroom â pbComp/pbTrans not annotated
-    // because their QE threshold is 0 (springs off), making "/ 0 â " misleading
-    statEls.texMB.textContent='~'+est.texMB+(est.texMB>QE.texMB[0]?' / '+QE.texMB[0]+' â ':' / '+QE.texMB[0])+' MB';
+    // texMB: annotate with QE threshold (10 MB) so users see headroom — pbComp/pbTrans not annotated
+    // because their QE threshold is 0 (springs off), making "/ 0 ⚠" misleading
+    statEls.texMB.textContent='~'+est.texMB+(est.texMB>QE.texMB[0]?' / '+QE.texMB[0]+' ⚠':' / '+QE.texMB[0])+' MB';
     statEls.approxBytes.textContent='~'+Math.round(est.approxBytes/1024)+' KB';
     statEls.rkPC.innerHTML=''; statEls.rkQ.innerHTML='';
     const badge=r=>{ const lim=limitText(r);
-      const tip=t('rank.tip.'+r.rank)+(lim?' â '+lim:'');
-      const b=el('span',{class:'rk', title:tip, 'aria-label':t('rank.'+r.rank)+' â '+t('rank.tip.'+r.rank)}, t('rank.'+r.rank));
+      const tip=t('rank.tip.'+r.rank)+(lim?' — '+lim:'');
+      const b=el('span',{class:'rk', title:tip, 'aria-label':t('rank.'+r.rank)+' — '+t('rank.tip.'+r.rank)}, t('rank.'+r.rank));
       b.style.background=RANKCOLOR[r.idx]; b.style.color='#0c1014';
       const wrap=el('span',{}, b);
       if (lim) wrap.append(el('span',{class:'limit'}, lim));
@@ -3081,8 +3081,8 @@ function updateStats(){
     statEls.rkPC.append(badge(pc)); statEls.rkQ.append(badge(q));
     // Round 513: the estimator diagnosed the bottleneck but offered no way to act on it. Measured
     // across all 6 presets and 300 gacha rolls, the ONLY reachable Quest limiter is the spring-bone
-    // group (pbComp/pbTrans/pbCol/pbCheck) â tris/bones/mat/skinned/texMB are held clear of the
-    // thresholds by design â and its sole remedy is springOff, buried on the Physics tab. With
+    // group (pbComp/pbTrans/pbCol/pbCheck) — tris/bones/mat/skinned/texMB are held clear of the
+    // thresholds by design — and its sole remedy is springOff, buried on the Physics tab. With
     // springOff the Quest rank is Excellent in every one of those 306 cases. README already
     // promises a "one-tap Quest Excellent mode"; this is that tap, placed where the user actually
     // reads the bad rank. Routes through onParam('springOff') so it behaves exactly like the
@@ -3090,16 +3090,16 @@ function updateStats(){
     if (q.idx>0 && !params.springOff){
       statEls.rkQ.append(el('button',{type:'button', class:'btn',
         style:'display:block;margin-top:6px;padding:3px 8px;font-size:11px',
-        title:t('btn.questFix.tip'), 'aria-label':t('btn.questFix')+' â '+t('btn.questFix.tip'),
+        title:t('btn.questFix.tip'), 'aria-label':t('btn.questFix')+' — '+t('btn.questFix.tip'),
         onclick:()=>{
           captureUndo();
           params.springOff=true;
           onParam('springOff');   // rebuild + renderBody(false); destroys this button
-          // renderBody() replaced the panel, so this button is gone â park focus on the panel
+          // renderBody() replaced the panel, so this button is gone — park focus on the panel
           // rather than letting it fall to <body> (same pattern as doUndo()).
           const tb=$('tabBody'); if(tb) tb.focus();
           // onParam announced note.springOff ("sliders are hidden"), which is the right message
-          // on the Physics tab but not here â the user's intent was the rank, so say that instead.
+          // on the Physics tab but not here — the user's intent was the rank, so say that instead.
           const sr=$('srStatus'); if(sr) sr.textContent=t('a11y.questFixed');
         }}, t('btn.questFix')));
     }
@@ -3114,8 +3114,8 @@ function download(bytes, name, type){
   a.href=u; a.download=name; a.setAttribute('aria-hidden','true'); document.body.append(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(u), 8000);
 }
-// 100-char cap: longest suffix is '.hina.json' (10) â 110 chars total, well under OS limits (255 bytes)
-// Windows reserves these device names for ANY extension (CON.vrm is blocked same as bare CON) â
+// 100-char cap: longest suffix is '.hina.json' (10) → 110 chars total, well under OS limits (255 bytes)
+// Windows reserves these device names for ANY extension (CON.vrm is blocked same as bare CON) —
 // a title that sanitizes down to one of them would make the exported file unsaveable on Windows.
 const WIN_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
 function safeName(s, fb){ let v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').slice(0,100); if (WIN_RESERVED.test(v)) v+='_'; return v||fb; }
@@ -3126,8 +3126,8 @@ function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_g
 // title on every lang/mode toggle; renderOut()'s updateFnPrev() set an informative-but-always-
 // Japanese-prefix title whenever the Output tab rendered. Depending on which tab was open and
 // which of the two later sites ran last, either the filename info or the localization was
-// silently lost â they could never both hold at once. titledStem() is always both.
-function titledStem(){ return (lang==='ja'?'é':'Hina') + ' â ' + fnameStem(); }
+// silently lost — they could never both hold at once. titledStem() is always both.
+function titledStem(){ return (lang==='ja'?'雛':'Hina') + ' — ' + fnameStem(); }
 function updateTitle(){ document.title = titledStem(); }
 const canvasBlob = c => new Promise(res => c.toBlob(res, 'image/png'));
 let _glLost = false;
@@ -3137,8 +3137,8 @@ let _exporting = false, _exportBtn = null, _exportedRevertTimer = null;
 async function doExport(){
   if (_exporting){ showErr(t('btn.exporting')); return; }
   if (!build) return;
-  // Cancel any pending "Exported â â Export VRM" revert from a previous export so it doesn't
-  // overwrite the "Exportingâ¦" label of THIS export (Ctrl+S re-press within 2s of completion).
+  // Cancel any pending "Exported ✓ → Export VRM" revert from a previous export so it doesn't
+  // overwrite the "Exporting…" label of THIS export (Ctrl+S re-press within 2s of completion).
   clearTimeout(_exportedRevertTimer);
   _exportedRevertTimer = null;
   _exporting = true;
@@ -3146,7 +3146,7 @@ async function doExport(){
   const fname = safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom'))+'.vrm';
   // Progressive enhancement: File System Access API (Chrome/Edge) lets users choose where to save
   // instead of always sending to the default Downloads folder. Called before any other await so
-  // user-activation context is still fresh. AbortError = user cancelled â abort silently.
+  // user-activation context is still fresh. AbortError = user cancelled → abort silently.
   let _fsHandle = null;
   if (typeof window.showSaveFilePicker === 'function'){ try { _fsHandle = await window.showSaveFilePicker({ suggestedName: fname, types: [{ description: 'VRM 3D Avatar', accept: { 'application/octet-stream': ['.vrm'] } }] }); } catch(e){ if (e.name === 'AbortError'){ _exporting = false; return; } } }
   // Snapshot all mutable state so slider/meta changes during async awaits don't affect the export
@@ -3155,11 +3155,11 @@ async function doExport(){
   const exportMeta = structuredClone(meta);
   const exportExprMix = structuredClone(exprMix);
   // Round 505: the shared `atlas` canvas (module-level, repainted in place by drawAtlas() from
-  // both onParam()'s color branch and rebuild() â neither checks _exporting) was read live via
+  // both onParam()'s color branch and rebuild() — neither checks _exporting) was read live via
   // canvasBlob(atlas) below, AFTER the two async gaps above/below this point. A color edit (or
   // any rebuild-triggering change: gacha reroll, preset revert, undo/redo, JSON load) landing in
   // that window repainted the atlas with a DIFFERENT params state than exportParams/exportBuild,
-  // producing a structurally valid but semantically corrupt GLB â colors baked into the atlas
+  // producing a structurally valid but semantically corrupt GLB — colors baked into the atlas
   // wouldn't match the geometry/meta actually exported. Copying into an offscreen canvas here,
   // synchronously (no await between this line and the snapshots above), freezes it exactly like
   // the thumbnail below already does with `tc`.
@@ -3167,11 +3167,11 @@ async function doExport(){
   exportAtlas.width = atlas.width; exportAtlas.height = atlas.height;
   exportAtlas.getContext('2d').drawImage(atlas, 0, 0);
   // Round 510: _exportBtn is a module-level var reassigned every renderOut() (unlike btnScreenshot/
-  // btnSaveJson, which are static header buttons â see doScreenshot()/saveJson()'s local `const
+  // btnSaveJson, which are static header buttons — see doScreenshot()/saveJson()'s local `const
   // btn=$('...')`). If the user switches away from the Output tab and back while an export is
   // in-flight, renderOut() creates a brand-new button and reassigns _exportBtn to it. Without
   // pinning the exact instance here, the finally block's focus-restore below would read whatever
-  // _exportBtn CURRENTLY is at that point â a fresh button the user never actually clicked â and
+  // _exportBtn CURRENTLY is at that point — a fresh button the user never actually clicked — and
   // steal focus onto it from wherever the user has since moved on to (e.g. mid-typing in another
   // field), even though _exportFocusWasBtn only ever answered "was the ORIGINAL button focused?".
   const _exportBtnAtStart = _exportBtn;
@@ -3181,7 +3181,7 @@ async function doExport(){
   try{
     let thumbBytes = null;
     if (GLOK && !_glLost){
-      renderFrame(performance.now());            // same task â buffer readable
+      renderFrame(performance.now());            // same task → buffer readable
       const sq = Math.min(cv.width, cv.height);
       const tc = document.createElement('canvas');
       tc.width = tc.height = 256;
@@ -3214,10 +3214,10 @@ async function doExport(){
   finally{
     _exporting = false;
     if (_exportBtn){ _exportBtn.disabled = false; _exportBtn.removeAttribute('aria-busy');
-      // Ensure button text always resets â catch branch sets showErr but doesn't touch textContent
+      // Ensure button text always resets — catch branch sets showErr but doesn't touch textContent
       if (_exportBtn.textContent===t('btn.exporting')) _exportBtn.textContent=t('btn.export');
       // Only restore focus if _exportBtn still refers to the exact button instance the user
-      // clicked (not a later renderOut() replacement) â otherwise silently no-op, same as the
+      // clicked (not a later renderOut() replacement) — otherwise silently no-op, same as the
       // already-detached case isConnected already guards against.
       if (_exportFocusWasBtn && _exportBtn===_exportBtnAtStart && _exportBtn.isConnected) _exportBtn.focus(); }
   }
@@ -3225,7 +3225,7 @@ async function doExport(){
 let _savingJson = false;
 async function saveJson(){
   // Round 504: doExport()/doScreenshot() both self-guard against re-entry (_exporting/
-  // _screenshotting) before doing anything â saveJson() didn't. btn.disabled only blocks a
+  // _screenshotting) before doing anything — saveJson() didn't. btn.disabled only blocks a
   // second mouse click (browsers suppress click on disabled controls); it does nothing against
   // the Ctrl+Shift+S keyboard shortcut, which fires from document regardless of the button's
   // state. A user double-pressing the shortcut (or clicking then pressing it) between
@@ -3236,7 +3236,7 @@ async function saveJson(){
   if (_savingJson) return;
   _savingJson = true;
   const btn=$('btnSaveJson');
-  // Disabling a focused control drops focus to <body> (standard browser behavior) â btn is
+  // Disabling a focused control drops focus to <body> (standard browser behavior) — btn is
   // disabled below BEFORE the async showSaveFilePicker gap even opens, so without restoring
   // focus here, keyboard/screen-reader users land on <body> after every save attempt. doExport()
   // and doScreenshot() already capture+restore focus around their own async gaps; this mirrors it.
@@ -3258,7 +3258,7 @@ function doScreenshot(){
   if (btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
   const _scrDone=()=>{ _screenshotting=false; if (btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); if (_scrFocusWasBtn) btn.focus(); } };
   // Round 505: cv.toBlob()'s pixel capture is frozen at call time (browser spec), but
-  // fnameStem()/meta.title were previously re-read live INSIDE the async callback below â an
+  // fnameStem()/meta.title were previously re-read live INSIDE the async callback below — an
   // undo/redo (or any rebuild-triggering edit) landing in that gap could hand out a filename/
   // share-title from a different generation than the pixels actually captured. Snapshot
   // synchronously here, mirroring how doExport() snapshots params/meta/exprMix before its own
@@ -3288,7 +3288,7 @@ function doScreenshot(){
         navigator.share({files:[file], title:scrTitle, text:scrText}).then(()=>{
           if(sr) sr.textContent=t('a11y.screenshotShared');
         }).catch(err=>{
-          // AbortError = user cancelled â silently ignore. Other errors â fallback.
+          // AbortError = user cancelled — silently ignore. Other errors → fallback.
           if (err && err.name==='AbortError') return;
           _fallbackDownload();
           if(sr) sr.textContent=t('a11y.screenshotDone');
@@ -3337,12 +3337,12 @@ function rebuild(){
 }
 
 /* ---------- header / dialogs / boot ---------- */
-// version from core â single source of truth (HINA.VERSION)
+// version from core — single source of truth (HINA.VERSION)
 if ($('aboutVer')) $('aboutVer').textContent = 'v' + HINA.VERSION;
 function applyLang(){
   document.documentElement.lang = lang;
   updateTitle();
-  const mh=$('mainH1'); if(mh) mh.setAttribute('aria-label', lang==='ja' ? 'é VRMã¢ãã¿ã¼ã¡ã¼ã«ã¼' : 'Hina â VRM Avatar Maker');
+  const mh=$('mainH1'); if(mh) mh.setAttribute('aria-label', lang==='ja' ? '雛 VRMアバターメーカー' : 'Hina — VRM Avatar Maker');
   const bl=$('btnLang'); bl.textContent=lang==='ja'?'EN':'JA';
   bl.title=t('btn.lang.tip'); bl.setAttribute('aria-label', t('btn.lang.tip'));
   const bm=$('btnMode'); bm.textContent=mode==='easy'?t('mode.easy'):t('mode.detail');
@@ -3368,14 +3368,14 @@ function applyLang(){
   if ($('aboutKeys')) $('aboutKeys').textContent = t('about.keyList');
   $('aboutClose').textContent = t('about.close');
   if ($('heightLbl')) $('heightLbl').textContent = t('lbl.height');
-  // rankBadge static reset (heightBadge is excluded â it gets a dynamic label in updateStats)
+  // rankBadge static reset (heightBadge is excluded — it gets a dynamic label in updateStats)
   document.querySelectorAll('.rankBadge:not(#heightBadge)').forEach(b=>b.setAttribute('aria-label', t('a11y.rankBadge')));
   const sc=$('btnScreenshot'); if(sc){ sc.textContent=t('btn.screenshot'); sc.title=t('btn.screenshot.tip'); sc.setAttribute('aria-label',t('btn.screenshot.tip')); sc.setAttribute('aria-keyshortcuts','Control+Shift+P Meta+Shift+P'); sc.style.display=(GLOK&&!_glLost)?'':'none'; }
   const nov=$('noGlOverlay'); if(nov) nov.textContent=t('hint.noGL');
   const sd=$('sliderDesc'); if(sd) sd.textContent=t('hint.sliderReset');
   const sl=$('skipLink'); if(sl) sl.textContent=t('a11y.skip');
   document.documentElement.lang = lang;
-  // scrollReset=false: user stays on the same tab â preserve their scroll position across lang/mode changes
+  // scrollReset=false: user stays on the same tab — preserve their scroll position across lang/mode changes
   renderTabs(); renderBody(false); buildExprBar(); updateStats();
 }
 $('btnLang').addEventListener('click',()=>{ lang=lang==='ja'?'en':'ja'; saveState(); applyLang(); const sr=$('srStatus'); if(sr) sr.textContent=t('btn.lang.tip'); });
@@ -3383,12 +3383,12 @@ $('btnMode').addEventListener('click',()=>{ mode=mode==='easy'?'detail':'easy'; 
 $('btnScreenshot').addEventListener('click', doScreenshot);
 let _dlgReturnFocus = null;
 // Round 501: #skipLink is a real focusable <a href> sibling of <header>/<main> (not a descendant
-// of either â see build/00-head.html body order), so it was left out of the inert scope entirely.
+// of either — see build/00-head.html body order), so it was left out of the inert scope entirely.
 // Round 411's own rationale for inert ("screen readers can browse behind aria-modal dialogs on
 // some AT/browser combos") applies to it exactly the same as header/main: off-screen via
 // position:fixed;top:-4rem is not display:none/aria-hidden/inert, so it stayed reachable by an
 // AT virtual cursor while the About dialog was modal, and activating it (href="#tabBody") would
-// move focus behind the open dialog â defeating the modal boundary this feature exists to enforce.
+// move focus behind the open dialog — defeating the modal boundary this feature exists to enforce.
 const _dlgBg = ()=>{ const sl=$('skipLink'), h=document.querySelector('header'), m=document.querySelector('main'); return (sl&&h&&m)?[sl,h,m]:[]; };
 const openAbout=()=>{ _dlgReturnFocus=document.activeElement; _dlgBg().forEach(el=>{ el.inert=true; }); $('btnAbout').setAttribute('aria-expanded','true'); $('aboutDlg').showModal(); };
 $('btnAbout').addEventListener('click', openAbout);
@@ -3399,7 +3399,7 @@ $('aboutDlg').addEventListener('click',e=>{ if (e.target===$('aboutDlg')) $('abo
 $('aboutDlg').addEventListener('close',()=>{ _dlgBg().forEach(el=>{ el.inert=false; }); $('btnAbout').setAttribute('aria-expanded','false'); ((_dlgReturnFocus && _dlgReturnFocus.isConnected) ? _dlgReturnFocus : $('btnAbout')).focus(); _dlgReturnFocus=null; });
 
 // When WebGL is unavailable, create a centered overlay on the canvas so the
-// black rectangle doesn't look like a crash â hint bar text alone is easy to miss
+// black rectangle doesn't look like a crash — hint bar text alone is easy to miss
 if (!GLOK){
   const ov=document.createElement('div');
   ov.setAttribute('aria-hidden','true');
@@ -3408,7 +3408,7 @@ if (!GLOK){
   $('stage').appendChild(ov);
 }
 loadState();
-// Shareable seed link: ?seed=N reproduces the exact gacha result â no server round-trip,
+// Shareable seed link: ?seed=N reproduces the exact gacha result — no server round-trip,
 // purely client-side query-string parsing (same "zero communication" posture as ?selftest).
 // Overrides whatever loadState() restored, since an explicit URL seed signals deliberate intent
 // to view that avatar. A malformed/missing param is silently ignored (falls back to local state).
@@ -3428,7 +3428,7 @@ applyLang();
 // Request durable storage so browsers don't LRU-evict auto-saved avatar state under storage pressure.
 // Fire-and-forget: no UI on grant (silent win); no UI on denial (existing behaviour, warn devs only).
 if (!_lsBroken) navigator.storage?.persist?.();
-// Persistent warning when localStorage is broken (Safari Private mode etc.) â surfaces after
+// Persistent warning when localStorage is broken (Safari Private mode etc.) — surfaces after
 // applyLang() so the i18n key resolves correctly. Badge stays permanently; showErr() adds assertive SR.
 if (_lsBroken){
   const b=$('autoSaveBadge');
@@ -3450,13 +3450,13 @@ document.addEventListener('keydown',e=>{
   const notField = !['INPUT','SELECT','TEXTAREA'].includes(tag) && !document.activeElement.isContentEditable;
   const dlgOpen = $('aboutDlg').open;
   if (!dlgOpen){
-    // Round 507: KeyboardEvent.key reflects Caps Lock state for letter keys â e.g. the 's' key
+    // Round 507: KeyboardEvent.key reflects Caps Lock state for letter keys — e.g. the 's' key
     // reports as 'S' with Caps Lock on and no Shift, and back to 's' with Caps Lock + Shift
     // together (the two invert-case effects cancel out). Comparing against a fixed-case literal
     // made every shortcut below silently no-op whenever Caps Lock was on, in EITHER Shift state,
     // since neither branch's case-sensitive key check could ever match. Lowercasing letter keys
     // and using e.shiftKey as the sole (case-independent) discriminator fixes every one of them
-    // at once â the same pattern the 'm'/'M' mode-toggle shortcut a few lines below already used.
+    // at once — the same pattern the 'm'/'M' mode-toggle shortcut a few lines below already used.
     const key = e.key.length===1 ? e.key.toLowerCase() : e.key;
     if ((e.ctrlKey||e.metaKey) && key==='s' && e.shiftKey && notField){
       e.preventDefault(); saveJson();
@@ -3489,7 +3489,7 @@ document.addEventListener('keydown',e=>{
   if (e.key==='Escape' && !$('aboutDlg').open){
     if (document.body.classList.contains('drag-over')){
       document.body.classList.remove('drag-over');
-      const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' â '+t('hint.exprOff'):_hintDefault(); }
+      const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }
     } else if (activeExpr !== null){
       e.preventDefault(); setExpr(null);
     }
@@ -3498,9 +3498,9 @@ document.addEventListener('keydown',e=>{
 const _emergencySave=()=>{ clearTimeout(_saveTimer); try{ localStorage.setItem(LS, JSON.stringify({params, meta, lang, mode, activeTab, activePresetId, lastGachaSeed, gachaLocks, exprMix})); }catch(e){} };
 // pagehide is sufficient and does not prevent bfcache (unlike beforeunload, which blocks it).
 window.addEventListener('pagehide', _emergencySave);
-// Mobile browsers may kill backgrounded tabs without firing pagehide â flush on visibilitychange too.
+// Mobile browsers may kill backgrounded tabs without firing pagehide — flush on visibilitychange too.
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden && _saveTimer) _emergencySave(); });
-// Drag-and-drop JSON loading â complement the file button; 'Files' check avoids conflicts with 3D canvas drag
+// Drag-and-drop JSON loading — complement the file button; 'Files' check avoids conflicts with 3D canvas drag
 document.body.addEventListener('dragover',e=>{
   if (!e.dataTransfer.types.includes('Files')) return;
   e.preventDefault(); document.body.classList.add('drag-over');
@@ -3508,17 +3508,17 @@ document.body.addEventListener('dragover',e=>{
 });
 document.body.addEventListener('dragleave',e=>{
   if(!e.relatedTarget){ document.body.classList.remove('drag-over');
-    const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' â '+t('hint.exprOff'):_hintDefault(); } }
+    const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); } }
 });
 document.body.addEventListener('drop',e=>{
   document.body.classList.remove('drag-over');
   // Round 509: dragleave and the Escape handler both restore the activeExpr ternary (show the
-  // expression-preview hint if one is active, not the generic default) â drop dropped the
+  // expression-preview hint if one is active, not the generic default) — drop dropped the
   // ternary and always used _hintDefault(). Harmless on a successful load (rebuild() resets
   // activeExpr=null anyway, making _hintDefault() correct by the time anyone reads it), but a
   // dropped file with a valid .json name/type that fails deserialize() (FileReader.readAsText is
   // genuinely async) briefly shows the wrong hint until showErr() supersedes it moments later.
-  const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' â '+t('hint.exprOff'):_hintDefault(); }
+  const h=$('hint'); if(h){ h.style.color=''; h.textContent=activeExpr?t('expr.'+activeExpr)+' — '+t('hint.exprOff'):_hintDefault(); }
   if (!e.dataTransfer.files.length) return;
   e.preventDefault();
   const f=e.dataTransfer.files[0];
@@ -3557,10 +3557,10 @@ if (location.search.indexOf('selftest')>=0){
   const pass=st.results.filter(r=>r.ok).length, total=st.results.length;
   const countStr=t('selftest.count').replace('{pass}',pass).replace('{total}',total);
   box.append(el('div',{style:'font-weight:700;margin-bottom:6px;color:'+(st.ok?'var(--ok)':'var(--err)')},
-    (st.ok?t('selftest.ok'):t('selftest.ng'))+' â '+countStr));
+    (st.ok?t('selftest.ok'):t('selftest.ng'))+' — '+countStr));
   for(const r of st.results)
     box.append(el('div',{style:'color:'+(r.ok?'var(--text-dim)':'var(--err)')},
-      (r.ok?'â ':'â ')+r.name+(r.msg?' â '+r.msg:'')));
+      (r.ok?'✓ ':'✗ ')+r.name+(r.msg?' — '+r.msg:'')));
 }
 window.addEventListener('unhandledrejection', e=>{ if(e.reason) showErr(t('err.unexpected')+': '+_errMsg(e.reason)); });
 let _rafPaused = false;

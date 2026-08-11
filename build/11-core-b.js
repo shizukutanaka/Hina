@@ -116,7 +116,7 @@ function faceQuad(g, c, wx, hy, uvr, skin){
   quad4(g,a,b,cc,d);
 }
 
-/* sphere band. dir = [sinÏ sinÎ¸, cosÏ, sinÏ cosÎ¸] â Î¸=0 faces +Z(back), Î¸=Ï faces -Z(front) */
+/* sphere band. dir = [sinφ sinθ, cosφ, sinφ cosθ] → θ=0 faces +Z(back), θ=π faces -Z(front) */
 function sphereBand(g, c, r, phi0, phi1, rings, segs, uv, skinFn, deform){
   const grid=[];
   for(let i=0;i<=rings;i++){
@@ -131,8 +131,8 @@ function sphereBand(g, c, r, phi0, phi1, rings, segs, uv, skinFn, deform){
     }
     grid.push(row);
   }
-  // A ring exactly at a sphere pole (phi=0 or phi=Ï) collapses every vertex in that ring to the
-  // same position (sin(phi)=0 for all Î¸) â distinct vertex indices, identical position. The
+  // A ring exactly at a sphere pole (phi=0 or phi=π) collapses every vertex in that ring to the
+  // same position (sin(phi)=0 for all θ) — distinct vertex indices, identical position. The
   // generic two-triangle quad then always emits one zero-area triangle at a pole row (112 of
   // them in the default avatar: head/hand/foot/scalp poles). Skip only that half of the quad;
   // the surviving triangle keeps its original indices/winding unchanged.
@@ -307,7 +307,7 @@ function buildAvatar(p){
       const x=g.pos[vi*3], cx=x/(hipR*1.6);
       const wl=Math.max(0,-cx)*0.5*t, wr=Math.max(0,cx)*0.5*t, wh=1-wl-wr;
       // Round 514: a joint index paired with weight 0 is a glTF spec violation
-      // (ACCESSOR_JOINTS_USED_ZERO_WEIGHT â the index MUST be 0 when the weight is 0). The top
+      // (ACCESSOR_JOINTS_USED_ZERO_WEIGHT — the index MUST be 0 when the weight is 0). The top
       // skirt ring has t=0 so both leg weights are 0, and any vertex off-centre has one of
       // wl/wr at 0, yet both leg joints were written unconditionally. Writing 0 instead is
       // deformation-neutral: a zero-weight influence contributes nothing either way.
@@ -336,7 +336,7 @@ function buildAvatar(p){
       const x0=s*shX*0.9, x1=s*(shX+(wristX-shX)*tEnd);
       tube(g, [
         {pos:[x0,shoulderY,0], r:armR*1.55, skin:[[idx.chest,0.4],[ua,0.6]]},
-        // Round 514: the short-sleeve branch used to emit [[ua,1],[la,0]] â a joint index paired
+        // Round 514: the short-sleeve branch used to emit [[ua,1],[la,0]] — a joint index paired
         // with weight 0, which glTF forbids (ACCESSOR_JOINTS_USED_ZERO_WEIGHT). Dropping the
         // dead influence entirely is deformation-neutral and reads clearer than nested ternaries.
         {pos:[s*(shX+(wristX-shX)*tEnd*0.5),shoulderY,0], r:armR*1.30, skin: tEnd>0.5?[[ua,0.6],[la,0.4]]:[[ua,1]]},
@@ -396,7 +396,7 @@ function buildAvatar(p){
     const A=addV(g,t0,n,uH,sk),B2=addV(g,t1,n,uH,sk),C=addV(g,m0,n,uH,sk),D=addV(g,m1,n,uH,sk),T=addV(g,tip,n,uH,sk);
     g.idx.push(A,B2,D, A,D,C, C,D,T);
   };
-  const F=Math.PI; // front center Î¸
+  const F=Math.PI; // front center θ
   if (p.bangs==='full'){
     for(let i=0;i<7;i++){
       const off=(i-3)*0.13*Math.PI;
@@ -436,10 +436,10 @@ function buildAvatar(p){
         const t=i/(path.length-1);
         const bi=sp.boneIdxs[Math.min(i, sp.boneIdxs.length-1)];
         const bp=sp.boneIdxs[Math.max(0,Math.min(i, sp.boneIdxs.length-1)-1)];
-        // Round 514: at the chain root (i=0) bi===bp, which emitted [[X,0.75],[X,0.25]] â the
+        // Round 514: at the chain root (i=0) bi===bp, which emitted [[X,0.75],[X,0.25]] — the
         // same joint twice (glTF ACCESSOR_JOINTS_INDEX_DUPLICATE) burning two of the four
         // influence slots on one bone. Collapsing to a single full-weight influence is exactly
-        // equivalent (0.75Â·MÂ·p + 0.25Â·MÂ·p == 1.0Â·MÂ·p) and frees a slot.
+        // equivalent (0.75·M·p + 0.25·M·p == 1.0·M·p) and frees a slot.
         return {pos, r:r0*(1-t*0.92)+0.004, skin: bi===bp ? [[bi,1]] : [[bi,0.75],[bp,0.25]]};
       });
       tube(g, rings, 8, tailUv);
@@ -475,7 +475,7 @@ function buildAvatar(p){
     }
   }
 
-  /* ---- face parts (kept LAST â outline pass excludes from here) ---- */
+  /* ---- face parts (kept LAST → outline pass excludes from here) ---- */
   const faceStart = g.pos.length/3;
   const faceZ=-headR*0.97 + 0.005*H*0;
   const ew=headR*0.21*p.eyeSize, eh=headR*0.17*p.eyeSize;
@@ -531,11 +531,11 @@ function buildAvatar(p){
   const eC_L=[-eyeX,eyeWY,faceZ], eC_R=[eyeX,eyeWY,faceZ];
   // vowels
   scaleTag('a','mouth',mc,1.15,3.4);
-  scaleTag('i','mouth',mc,1.55,0.45,0,0,headR*0.015); // /iË/ grin: corners lift
+  scaleTag('i','mouth',mc,1.55,0.45,0,0,headR*0.015); // /iː/ grin: corners lift
   scaleTag('u','mouth',mc,0.55,1.7,-headR*0.05);
-  scaleTag('e','mouth',mc,1.30,2.0,0,0,headR*0.008); // /eË/ slight corner lift
+  scaleTag('e','mouth',mc,1.30,2.0,0,0,headR*0.008); // /eː/ slight corner lift
   scaleTag('o','mouth',mc,0.75,2.7,-headR*0.035);
-  // blinks â inner brow pulls down more than outer (natural orbicularis motion)
+  // blinks — inner brow pulls down more than outer (natural orbicularis motion)
   scaleTag('blink','eyeL',eC_L,1,0.06); scaleTag('blink','eyeR',eC_R,1,0.06);
   browTilt('blink','browL',-headR*0.045,-headR*0.02); browTilt('blink','browR',-headR*0.045,-headR*0.02);
   scaleTag('blink_l','eyeL',eC_L,1,0.06); browTilt('blink_l','browL',-headR*0.045,-headR*0.02);
