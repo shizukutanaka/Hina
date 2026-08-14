@@ -6766,6 +6766,61 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 519: every triangle is wound counter-clockwise (glTF front-face convention) ---- */
+{
+  // Measured in Round 518, fixed here: 67.5% of triangles were wound clockwise relative to their
+  // outward vertex normals. That broke the preview's inverted-hull outline — it draws with
+  // cullFace(FRONT) and depth writes on, so on a CW triangle the outward face survives culling
+  // and the hull (~5mm outside the body) occludes the body itself. Rendering measured 58,933
+  // visible body pixels before the fix against 96,825 with the outline pass disabled entirely;
+  // after the fix, 96,369 — the whole body, less only the thin rim the outline should be.
+  //
+  // Note this is exactly the failure mode that no amount of data-level testing would have caught
+  // on its own: the geometry was valid, the normals were correct, and every spec check passed.
+  // It only became visible by rendering.
+  const cwCount = B6 => {
+    const P = B6.geom.pos, N = B6.geom.nrm, I = B6.geom.idx;
+    let cw = 0;
+    for (let t = 0; t < I.length; t += 3){
+      const a = I[t], b = I[t+1], c = I[t+2];
+      const ux = P[b*3]-P[a*3], uy = P[b*3+1]-P[a*3+1], uz = P[b*3+2]-P[a*3+2];
+      const vx = P[c*3]-P[a*3], vy = P[c*3+1]-P[a*3+1], vz = P[c*3+2]-P[a*3+2];
+      const cx = uy*vz-uz*vy, cy = uz*vx-ux*vz, cz = ux*vy-uy*vx;
+      let sx = 0, sy = 0, sz = 0;
+      for (const i of [a,b,c]){ sx += N[i*3]; sy += N[i*3+1]; sz += N[i*3+2]; }
+      if (cx*sx + cy*sy + cz*sz < 0) cw++;
+    }
+    return cw;
+  };
+  let cwTotal = 0, triTotal = 0, swept = 0;
+  const wsweep = p6 => { swept++; const b6 = H.buildAvatar(p6);
+    cwTotal += cwCount(b6); triTotal += b6.geom.idx.length / 3; };
+  wsweep(H.defaults());
+  H.PRESETS.forEach(pr => wsweep(H.presetParams(pr)));
+  for (let s = 0; s < 100; s++) wsweep(H.randomParams(s));
+  for (const k in H.PARAMS){
+    const sp = H.PARAMS[k];
+    if (sp.k === 'num') for (const v of [sp.min, sp.max]) wsweep(Object.assign(H.defaults(), {[k]: v}));
+    else if (sp.k === 'enum') for (const o of sp.opts) wsweep(Object.assign(H.defaults(), {[k]: o}));
+    else if (sp.k === 'bool') for (const v of [true, false]) wsweep(Object.assign(H.defaults(), {[k]: v}));
+  }
+  ok(swept > 120 && triTotal > 100000,
+    `winding sweep covers the parameter space (${swept} avatars, ${triTotal} triangles)`);
+  ok(cwTotal === 0,
+    `every triangle is wound CCW against its outward normals (${cwTotal} clockwise of ${triTotal})`);
+  // Non-vacuous: the detector must actually flag a reversed triangle.
+  {
+    const probe = H.buildAvatar(H.defaults());
+    const t0 = probe.geom.idx[1];
+    probe.geom.idx[1] = probe.geom.idx[2]; probe.geom.idx[2] = t0;
+    ok(cwCount(probe) === 1,
+      'the CW detector flags a single deliberately reversed triangle (sweep cannot pass vacuously)');
+  }
+  // Guard the normalisation itself so a refactor cannot quietly drop it.
+  ok(/if \(cx\*sx \+ cy\*sy \+ cz\*sz < 0\)\{ I\[t\+1\] = c; I\[t\+2\] = b; \}/.test(html),
+    'buildAvatar() normalises winding by swapping the last two indices of back-wound triangles');
+}
+
 /* ---- Round 517: triangle-quality floor — no sliver triangles anywhere in the parameter space ---- */
 {
   // Round 489 removed the zero-area triangles at sphere poles and added a position-based area

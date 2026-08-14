@@ -554,6 +554,32 @@ function buildAvatar(p){
   scaleTag('fun','eyeL',eC_L,1,0.55); scaleTag('fun','eyeR',eC_R,1,0.55);
   browTilt('fun','browL', headR*0.06, headR*0.05); browTilt('fun','browR', headR*0.06, headR*0.05);
 
+  // Round 519: normalise triangle winding to counter-clockwise (glTF 2.0 defines CCW as the
+  // front face). The generators emitted a mix — 67.5% of triangles were wound clockwise relative
+  // to their outward vertex normals — which broke the preview's outline pass: that pass is an
+  // inverted-hull (build/20-app.js expands along the normal and draws with cullFace(FRONT), with
+  // depth writes on). On a CW triangle the outward face reads as back-facing, so front-culling
+  // keeps it, and the hull — sitting ~5mm *outside* the body — draws in front and wins the depth
+  // test, hiding the body underneath. Measured: 39% of the visible body was being covered
+  // (58,933 body pixels vs 96,825 with the outline pass disabled entirely); after this fix,
+  // 96,339 — i.e. the whole body, minus only the thin silhouette rim the outline is meant to be.
+  // Swapping two indices reorders a triangle without moving it: positions, normals, UVs, skin
+  // weights and the triangle set itself are all untouched, so this is deformation-neutral
+  // (same safety property as Rounds 489 and 514).
+  {
+    const P = g.pos, N = g.nrm, I = g.idx;
+    for (let t = 0; t < I.length; t += 3){
+      const a = I[t], b = I[t+1], c = I[t+2];
+      const ux = P[b*3]-P[a*3], uy = P[b*3+1]-P[a*3+1], uz = P[b*3+2]-P[a*3+2];
+      const vx = P[c*3]-P[a*3], vy = P[c*3+1]-P[a*3+1], vz = P[c*3+2]-P[a*3+2];
+      // geometric normal from the winding, compared against the summed shading normals
+      const cx = uy*vz-uz*vy, cy = uz*vx-ux*vz, cz = ux*vy-uy*vx;
+      let sx = 0, sy = 0, sz = 0;
+      for (const i of [a,b,c]){ sx += N[i*3]; sy += N[i*3+1]; sz += N[i*3+2]; }
+      if (cx*sx + cy*sy + cz*sz < 0){ I[t+1] = c; I[t+2] = b; }
+    }
+  }
+
   return { geom:g, bones, springs, humanoid, dims, idx, faceStart,
     morphs:{names:morphNames, sparse},
     collider:{ bone: idx.head, offset:[0, 0.0, 0.01*H], radius: headR*0.88 } };
