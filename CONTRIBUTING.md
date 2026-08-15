@@ -10,6 +10,14 @@ node tests/run.js
 ```
 `index.html` 内の `<script id="hina-core">` を抽出して実行する。コアロジックはDOM/WebGL非依存を維持すること。
 
+## 視覚チェック（任意）
+```
+node tools/render-check.js          # 形状・被覆・対称性を13ケースで確認
+node tools/render-check.js --keep   # 描画したPNGを残す
+```
+ジオメトリを変更した場合に推奨。playwright + Chromium が必要で、無ければ SKIP して正常終了する（必須ではない）。
+色・テクスチャはソフトウェアラスタライザでは検証できないため、判定するのは「客観的に異常な状態」のみ（本体の隠蔽・空描画・極端な非対称）。
+
 ## ブランチ戦略
 - `feature/<issue番号>-<説明>` / `fix/<issue番号>-<説明>` / `chore/<説明>`
 - main直push禁止。PRはSquash merge。diffは500行以内。
