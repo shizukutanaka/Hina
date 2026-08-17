@@ -8,7 +8,7 @@
 |---|------|------|
 | 1 | **依存ゼロ・単一HTML・完全ローカル** | 配布/監査/オフラインの保証。通信ゼロ（`fetch`/`XHR`/`WebSocket`/外部`<link>`不存在）は自動テストで担保 |
 | 2 | **品質保証の厚さ** | 自動テスト**1998件・0失敗**。ガチャは決定論的（mulberry32・シード再現・ボタン/入力欄/URLの3経路が単一関数に集約）。既定6プリセットの Quest Excellent（揺れ物OFF）/ Good以上（ON）はテストが保証 |
-| 3 | **仕様準拠の厳密性** | **公式 Khronos glTF-Validator で全11書き出し 0 errors**（Round 524で実機実行。残る警告2種はVRM 0.x構造に内在する想定内）。accessor min/max の厳密一致（Round 506で違反を発見・修正）、sparse昇順、GLBヘッダ検証、VRM0メタの全enum防御、MToonキーワード整合（Round 522） |
+| 3 | **仕様準拠の厳密性・実ローダー互換** | **公式 Khronos glTF-Validator で全11書き出し 0 errors**（Round 524）＋**参照Web VRMローダー three-vrm が全ケース完全読込**（Round 525: humanoid15ボーン/17表情/springBone/firstPerson全解決）。accessor min/max厳密一致（506）、sparse昇順、GLBヘッダ検証、VRM0メタ全enum防御、MToonキーワード整合（522） |
 | 4 | **セキュリティ硬化** | prototype pollution 対策をJSON流入の全4経路に適用（Round 469/495）、貼り付けDoSガード（470）、メタenum/シードの全層検証（492/493） |
 | 5 | **アクセシビリティ** | WCAG 2.2 AA（新設SC 2.5.8の24pxターゲット含む）、Windowsハイコントラスト（forced-colors）での選択状態表示、SRアナウンス規律（showErr統一・スパム抑制・フォーカス復元）、完全キーボード操作 |
 | 6 | **監査証跡・二言語ドキュメント** | FEATURE_AUDIT による引き継ぎ可能な監査記録、CHANGELOG最新化、README/UPLOAD_GUIDE の日英二言語化 |
