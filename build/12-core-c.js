@@ -241,7 +241,18 @@ function exportVRM(build, p, meta, pngBytes, thumbPngBytes, exprMix){
       _MainTex:[0,0,1,1], _ShadeTexture:[0,0,1,1],
     },
     textureProperties:{_MainTex:0, _ShadeTexture:0},
-    keywordMap:{_ALPHATEST_ON:true},
+    // Round 522: MToon selects its outline pass by SHADER KEYWORD (compile-time #if defined),
+    // not by the _OutlineWidthMode float alone — the float and the keyword are meant to agree.
+    // We set _OutlineWidthMode=1 (WorldCoordinates) and _OutlineColorMode=0 (FixedColor) when the
+    // user enables outline, so the matching keywords are MTOON_OUTLINE_WIDTH_WORLD and
+    // MTOON_OUTLINE_COLOR_FIXED (exact names from MToon's Utils.cs constants). Omitting them meant
+    // any VRM consumer that keys the variant off the keyword define — the three-vrm / Babylon /
+    // Godot MToon ports do exactly this — rendered NO outline despite the float being set. For
+    // importers that re-derive keywords from the floats the extra keywords are harmlessly
+    // redundant. This only affects outline-enabled exports; the default (outline off) is unchanged.
+    keywordMap: p.outline
+      ? {_ALPHATEST_ON:true, MTOON_OUTLINE_WIDTH_WORLD:true, MTOON_OUTLINE_COLOR_FIXED:true}
+      : {_ALPHATEST_ON:true},
     tagMap:{RenderType:'TransparentCutout'},
   }];
 

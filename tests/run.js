@@ -8273,6 +8273,27 @@ function accData(j, bin, ai){
   ok(mpOff._OutlineWidth===mpOn._OutlineWidth && mpOff._OutlineWidth===0.07,
     'R473: _OutlineWidth stays at its existing default (0.07) regardless of the toggle');
 
+  // Round 522: MToon selects its outline pass by shader KEYWORD (compile-time #if defined), not by
+  // the _OutlineWidthMode float alone. The keyword must agree with the float mode, or a consumer
+  // that keys the variant off the define (three-vrm / Babylon / Godot MToon ports) renders no
+  // outline despite the float being set. Keyword names are MToon's own Utils.cs constants.
+  const kmOff = offExp.json.extensions.VRM.materialProperties[0].keywordMap;
+  const kmOn  = onExp.json.extensions.VRM.materialProperties[0].keywordMap;
+  ok(!kmOff.MTOON_OUTLINE_WIDTH_WORLD && !kmOff.MTOON_OUTLINE_COLOR_FIXED,
+    'R522: outline OFF carries no outline keywords (matches _OutlineWidthMode=0)');
+  // width keyword must match the mode Hina sets (1 = WorldCoordinates)
+  ok(mpOn._OutlineWidthMode===1 && kmOn.MTOON_OUTLINE_WIDTH_WORLD===true,
+    'R522: outline ON sets MTOON_OUTLINE_WIDTH_WORLD to match _OutlineWidthMode=1');
+  // color keyword must match the color mode Hina sets (0 = FixedColor)
+  ok(mpOn._OutlineColorMode===0 && kmOn.MTOON_OUTLINE_COLOR_FIXED===true,
+    'R522: outline ON sets MTOON_OUTLINE_COLOR_FIXED to match _OutlineColorMode=0');
+  // and it must NOT set the mismatched keywords (screen width / mixed color)
+  ok(!kmOn.MTOON_OUTLINE_WIDTH_SCREEN && !kmOn.MTOON_OUTLINE_COLOR_MIXED,
+    'R522: outline ON does not set keywords for modes it is not using (screen/mixed)');
+  // _ALPHATEST_ON is preserved in both states (the material is always cutout)
+  ok(kmOff._ALPHATEST_ON===true && kmOn._ALPHATEST_ON===true,
+    'R522: _ALPHATEST_ON kept in both outline states (material is always cutout)');
+
   // randomParams(): outline is excluded from gacha randomization, like springOff
   ok(/k!==.springOff.\s*&&\s*k!==.outline./.test(html),
     'R473: randomParams() excludes outline from bool randomization (technical toggle, not an appearance trait)');
