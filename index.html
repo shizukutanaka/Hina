@@ -1680,14 +1680,19 @@ function selfTest(){
   return {ok:R.every(r=>r.ok), results:R};
 }
 
+// Round 526 (Musk-method "delete" pass): SKIRT_OUTFITS and buildSkeleton were removed from the
+// public surface below — both are used only INSIDE core (SKIRT_OUTFITS by hasSkirt(); buildSkeleton
+// by buildAvatar()), and nothing in the app or tests referenced HINA.SKIRT_OUTFITS /
+// HINA.buildSkeleton. The definitions stay; only the unnecessary export is gone, shrinking the
+// surface an auditor must reason about. hasSkirt() and buildAvatar() remain the public entry points.
 return {
   VERSION, M, hex2rgb, shade, HEXRE, PAL, PAL_NAMES,
-  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams, SKIRT_OUTFITS, hasSkirt,
+  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams, hasSkirt,
   I18N, TEX, ATLAS, uvBlock, uvRect,
   RANKS, RANK_NAMES, estimate, rank,
   serialize, deserialize, sanitizeMeta, META_ENUMS, PNG1, b64ToBytes,
   EXPR_EDITABLE, EXPR_INGREDIENTS, defaultExprMix, sanitizeExprMix,
-  HB, buildSkeleton, buildAvatar, BinWriter, exportVRM, selfTest,
+  HB, buildAvatar, BinWriter, exportVRM, selfTest,
 };
 })();
 if (typeof module!=='undefined' && module.exports) module.exports = HINA;
