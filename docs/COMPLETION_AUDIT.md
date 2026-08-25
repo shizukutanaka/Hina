@@ -57,6 +57,8 @@ Round 528 で FEATURE_AUDIT §3-4 の最後の未修正欠陥（マルチタッ�
 | 参照ローダー three-vrm | **全ケース完全読込**（humanoid15・表情17プリセット意味的マッピング・springBone・meta往復） |
 | 視覚回帰 render-check | **全13ケース ok** |
 | 書き出しE2E（実ブラウザ） | **ボタン→DL→公式バリデータ0 errors**（Round 529。両保存経路・キャンセル復帰も検証） |
+| 自己診断 `?selftest`（実ブラウザ） | **22/22 all OK**（Round 530） |
+| 自動保存の往復（実ブラウザ） | **UI編集→リロード→復元を確認**（Round 530。保存経路は2系統で冗長） |
 | 既知の未修正欠陥 | **ゼロ** |
 | dead code（i18n/CSS/export） | **ゼロ** |
 

@@ -242,6 +242,82 @@ async function main(){
     await ctx2.close();
   }
 
+  /* --- Round 530: the app's other two user-facing promises, verified through the real UI.
+     Export (above) proves a file comes out. These prove the app can audit itself and that a
+     user's work is not lost. Both were previously only covered by unit-level tests. --- */
+  console.log('\nself-test and persistence:');
+  {
+    // (a) ?selftest — the product's own audit affordance, central to "single HTML = auditable"
+    const p3 = await browser.newPage({ viewport:{width:1200,height:900} });
+    const e3 = [];
+    p3.on('pageerror', e => e3.push(String(e.message).slice(0,120)));
+    try {
+      await p3.goto('file://' + INDEX + '?selftest');
+      await p3.waitForTimeout(2600);
+      const r = await p3.evaluate(() => {
+        try {
+          const res = HINA.selfTest();
+          const bad = (res.results || []).filter(x => !x.ok).map(x => x.name);
+          return { ok: !!res.ok, total: (res.results || []).length, bad };
+        } catch (err) { return { ok:false, total:0, bad:['threw: ' + err.message] }; }
+      });
+      const bad = [];
+      if (!r.ok) bad.push('selfTest() reported not-ok: ' + r.bad.join(', '));
+      if (r.total < 10) bad.push(`only ${r.total} checks ran`);
+      if (e3.length) bad.push('page error: ' + e3[0]);
+      console.log(`  ${'?selftest'.padEnd(20)} ${String(r.total).padStart(8)} checks  `
+        + (bad.length ? 'FAIL — ' + bad.join('; ') : 'ok (all checks pass in-browser)'));
+      if (bad.length) failures++;
+    } catch (e) {
+      console.log('  ?selftest              FAIL — ' + String(e.message).slice(0,120)); failures++;
+    }
+    await p3.close();
+
+    // (b) auto-save round-trip: edit through the UI, reload, confirm the work came back
+    const ctx3 = await browser.newContext({ viewport:{width:1200,height:900} });
+    const p4 = await ctx3.newPage();
+    const e4 = [];
+    p4.on('pageerror', e => e4.push(String(e.message).slice(0,120)));
+    try {
+      await p4.goto('file://' + INDEX);
+      await p4.waitForTimeout(2500);
+      await p4.getByRole('tab', { name: /Hair|髪/ }).click();
+      await p4.waitForTimeout(400);
+      const sel = await p4.$('#pr-hairStyle');
+      if (!sel) throw new Error('hair style control not found');
+      const opts = await sel.$$eval('option', o => o.map(x => x.value));
+      const current = await sel.inputValue();
+      const pick = opts.find(o => o !== current) || opts[0];
+      await sel.selectOption(pick);
+      await p4.waitForTimeout(400);
+      await p4.getByRole('tab', { name: /Export|出力/ }).click();
+      await p4.waitForTimeout(400);
+      const title = await p4.$('#meta-title');
+      if (title) await title.fill('PersistCheck');
+      await p4.waitForTimeout(600);
+
+      await p4.reload();
+      await p4.waitForTimeout(2500);
+      await p4.getByRole('tab', { name: /Hair|髪/ }).click();
+      await p4.waitForTimeout(400);
+      const gotHair = await p4.$eval('#pr-hairStyle', e => e.value).catch(() => null);
+      await p4.getByRole('tab', { name: /Export|出力/ }).click();
+      await p4.waitForTimeout(400);
+      const gotTitle = await p4.$eval('#meta-title', e => e.value).catch(() => null);
+
+      const bad = [];
+      if (gotHair !== pick) bad.push(`hair style not restored (wanted ${pick}, got ${gotHair})`);
+      if (gotTitle !== 'PersistCheck') bad.push(`name not restored (got ${JSON.stringify(gotTitle)})`);
+      if (e4.length) bad.push('page error: ' + e4[0]);
+      console.log(`  ${'auto-save reload'.padEnd(20)} ${String(pick).padStart(8)}         `
+        + (bad.length ? 'FAIL — ' + bad.join('; ') : 'ok (edits survive a reload)'));
+      if (bad.length) failures++;
+    } catch (e) {
+      console.log('  auto-save reload       FAIL — ' + String(e.message).slice(0,120)); failures++;
+    }
+    await ctx3.close();
+  }
+
   await browser.close();
 
   if (KEEP) console.log('\nPNGs kept in ' + tmp);
