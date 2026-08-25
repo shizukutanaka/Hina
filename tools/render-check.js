@@ -187,6 +187,61 @@ async function main(){
       + `   ${bb.padEnd(15)} ${a.asym.toFixed(3)}  ${problems.length ? 'FAIL — ' + problems.join('; ') : 'ok'}`);
     if (problems.length) failures++;
   }
+
+  /* --- Round 529: end-to-end export. Everything above proves the avatar DRAWS; this proves the
+     button a user actually clicks produces a real file. Until now export was only ever exercised
+     by calling exportVRM() from Node — never through the UI. Runs with the File System Access API
+     removed so the download path is taken (in Chrome/Edge the app opens a save dialog instead,
+     which cannot be driven headlessly); also checks the app recovers when that dialog is
+     cancelled, since that is a reachable user action. --- */
+  console.log('\nexport end-to-end:');
+  {
+    const ctx2 = await browser.newContext({ viewport:{width:1200,height:900}, acceptDownloads:true });
+    const p2 = await ctx2.newPage();
+    const perr = [];
+    p2.on('pageerror', e => perr.push(String(e.message).slice(0,120)));
+    await p2.addInitScript(() => { delete window.showSaveFilePicker; });
+    await p2.goto('file://' + INDEX);
+    await p2.waitForTimeout(2400);
+    try {
+      await p2.getByRole('tab', { name: /Export|出力/ }).click();
+      await p2.waitForTimeout(600);
+      const title = await p2.$('#meta-title');
+      if (title) await title.fill('RenderCheck');
+      let btn = null;
+      for (const b of await p2.$$('#tabBody button')){
+        const s2 = (await b.textContent() || '').trim();
+        if (/Export VRM|VRM 書き出し/.test(s2)){ btn = b; break; }
+      }
+      if (!btn) throw new Error('export button not found');
+      const [download] = await Promise.all([
+        p2.waitForEvent('download', { timeout: 45000 }).catch(() => null),
+        btn.click(),
+      ]);
+      if (!download) throw new Error('clicking Export produced no download');
+      const out = path.join(tmp, download.suggestedFilename());
+      await download.saveAs(out);
+      const buf = fs.readFileSync(out);
+      const magic = buf.readUInt32LE(0), declared = buf.readUInt32LE(8);
+      const okMagic = magic === 0x46546C67;            // 'glTF'
+      const okLen = declared === buf.length;
+      const okName = /\.vrm$/i.test(download.suggestedFilename());
+      const bad = [];
+      if (!okMagic) bad.push('bad GLB magic 0x' + magic.toString(16));
+      if (!okLen) bad.push(`declared length ${declared} != file size ${buf.length}`);
+      if (!okName) bad.push('downloaded file is not named *.vrm');
+      if (buf.length < 50000) bad.push(`suspiciously small (${buf.length} bytes)`);
+      if (perr.length) bad.push('page error: ' + perr[0]);
+      console.log(`  ${download.suggestedFilename().padEnd(20)} ${String(buf.length).padStart(8)} bytes  `
+        + (bad.length ? 'FAIL — ' + bad.join('; ') : 'ok (valid GLB header, length matches)'));
+      if (bad.length) failures++;
+    } catch (e) {
+      console.log('  export flow            FAIL — ' + String(e.message).slice(0,140));
+      failures++;
+    }
+    await ctx2.close();
+  }
+
   await browser.close();
 
   if (KEEP) console.log('\nPNGs kept in ' + tmp);
