@@ -6766,6 +6766,40 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 528: camera rotate uses a per-pointer anchor (multi-touch jump fix) ---- */
+{
+  // The last open defect in FEATURE_AUDIT §3-4: touching a second finger during a rotate drag
+  // made the view jump when that finger lifted. Mechanism: pointerdown overwrote a SHARED px/py
+  // anchor with the second finger's position, so the first finger's next move computed its delta
+  // against the OTHER finger's coordinates. Reproduced with real CDP touch events — a 10px move
+  // produced 1.504 rad (86 degrees) of spin, exactly (Ax - Bx) * 0.008. After the fix the same
+  // sequence yields 0.080 rad, the correct value for 10px. The fix DELETES the shared state: the
+  // ptrs Map already holds each pointer's own last position.
+  const camIife = html.slice(html.indexOf("cv.addEventListener('pointerdown'"),
+                             html.indexOf("cv.addEventListener('wheel'"));
+  ok(camIife.length > 200, 'located the pointer-handler region for inspection');
+  // the shared anchor must be gone — its presence is the bug
+  ok(!/\bpx\s*=\s*e\.clientX/.test(camIife) && !/\bpy\s*=\s*e\.clientY/.test(camIife),
+    'R528: no shared px/py anchor is written from pointer events (that shared state was the bug)');
+  ok(!/e\.clientX\s*-\s*px\b/.test(camIife) && !/e\.clientY\s*-\s*py\b/.test(camIife),
+    'R528: rotate delta is not computed against a shared anchor');
+  // rotate must read this pointer's own previous position out of the Map
+  ok(/const prev\s*=\s*ptrs\.get\(e\.pointerId\);/.test(camIife),
+    'R528: rotate reads the per-pointer anchor from ptrs.get(e.pointerId)');
+  ok(/camYaw\s*-=\s*\(e\.clientX-prev\[0\]\)/.test(camIife)
+     && /camPitch\s*=\s*M\.clamp\(camPitch\+\(e\.clientY-prev\[1\]\)/.test(camIife),
+    'R528: yaw/pitch deltas use that per-pointer anchor');
+  // and the anchor must be advanced after use, so the next move measures from here
+  ok(/prev\[1\]\)[\s\S]{0,120}ptrs\.set\(e\.pointerId,\[e\.clientX,e\.clientY\]\);/.test(camIife),
+    'R528: the per-pointer anchor is updated after the delta is applied');
+  // a pointer that never went down on the canvas must not steer the camera or join pinch math
+  ok(/if \(!ptrs\.has\(e\.pointerId\)\) return;/.test(camIife),
+    'R528: pointermove ignores pointers that did not go down on the canvas');
+  // the pinch branch is untouched and still keyed off two tracked pointers
+  ok(/if \(ptrs\.size===2\)\{/.test(camIife) && /camDist=M\.clamp\(camDist\*d0\/d1/.test(camIife),
+    'R528: two-finger pinch branch is preserved');
+}
+
 /* ---- Round 519: every triangle is wound counter-clockwise (glTF front-face convention) ---- */
 {
   // Measured in Round 518, fixed here: 67.5% of triangles were wound clockwise relative to their

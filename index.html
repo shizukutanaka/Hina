@@ -2398,11 +2398,17 @@ function renderFrame(time){
 
 /* ---------- camera input ---------- */
 (()=>{
-  let drag=false, px=0, py=0;
+  // Round 528: the rotate anchor is per-pointer (ptrs holds each pointer's own last position),
+  // not a shared px/py. The shared anchor was the §3-4 view-jump bug: a second finger's
+  // pointerdown overwrote it, so when that finger lifted, the first finger's next move computed
+  // its delta against the OTHER finger's position — measured 1.5 rad of spin for a 10px move
+  // (CDP touch repro). Deleting the shared state deletes the defect: the Map already stores
+  // exactly the right anchor for every pointer, in both the drag and pinch branches.
+  let drag=false;
   const ptrs=new Map();
   cv.addEventListener('pointerdown',e=>{
     cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,[e.clientX,e.clientY]);
-    drag=true; px=e.clientX; py=e.clientY; cv.classList.add('drag');
+    drag=true; cv.classList.add('drag');
   });
   cv.addEventListener('pointermove',e=>{
     const r=cv.getBoundingClientRect();
@@ -2411,6 +2417,9 @@ function renderFrame(time){
       gazeY=M.clamp(((e.clientY-r.top)/r.height-0.5)*2, -1, 1);
       return;
     }
+    // a pointer that never went down on the canvas (e.g. the mouse hovering across it while a
+    // touch drag is in progress) must not steer the camera or join the pinch math
+    if (!ptrs.has(e.pointerId)) return;
     if (ptrs.size===2){
       const old=[...ptrs.values()];
       const oldMidY=(old[0][1]+old[1][1])/2;
@@ -2426,10 +2435,10 @@ function renderFrame(time){
       camTarget[1]=M.clamp(camTarget[1]-dy*H0*1.5, 0, H0*1.1);
       return;
     }
+    const prev=ptrs.get(e.pointerId);
+    camYaw -= (e.clientX-prev[0])*0.008;
+    camPitch = M.clamp(camPitch+(e.clientY-prev[1])*0.006, -0.5, 1.25);
     ptrs.set(e.pointerId,[e.clientX,e.clientY]);
-    camYaw -= (e.clientX-px)*0.008;
-    camPitch = M.clamp(camPitch+(e.clientY-py)*0.006, -0.5, 1.25);
-    px=e.clientX; py=e.clientY;
   });
   const up=e=>{ ptrs.delete(e.pointerId); if(!ptrs.size){drag=false; cv.classList.remove('drag');} };
   cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);

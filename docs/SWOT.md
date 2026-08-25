@@ -34,9 +34,8 @@
 | 3 | P2 | エコシステム定期監視（creators.vrchat.comのRANKS・VRM Converter・UniVRMリリース） | Sonnet | 変化があればOpus/人間へ報告のみ（対応判断はしない） |
 | 4 | P2 | SPEC.md / FAQ.md の英語化 | Sonnet | README/UPLOAD_GUIDEで確立した同一ファイル+相互アンカー方式を踏襲 |
 | 5 | P3 | v0.2機能（指ボーン・髪型/衣装追加） | Opus | #2完了後のみ。骨/三角形予算の試算は FEATURE_AUDIT §3-1 に記録済み |
-| 6 | P3 | 3Dプレビューのマルチタッチ既知問題（回転中の2本目指で視点ジャンプ） | Opus | FEATURE_AUDIT §3-4。深刻度低で保留中 |
-| 7 | P3 | CONTRIBUTING.md の実態同期（ブランチ戦略の記述が現運用と乖離） | Sonnet | 小規模 |
-| 8 | P3 | VRM 1.0 対応の再評価 | 人間 | CLAUDE.mdの「0.x固定」制約の変更判断はユーザー専権。#3の監視結果を判断材料に |
+| 6 | P3 | CONTRIBUTING.md の実態同期（ブランチ戦略の記述が現運用と乖離） | Sonnet | 小規模 |
+| 7 | P3 | VRM 1.0 対応の再評価 | 人間 | CLAUDE.mdの「0.x固定」制約の変更判断はユーザー専権。#3の監視結果を判断材料に |
 
 ## 参照
 
