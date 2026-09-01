@@ -19,11 +19,12 @@ node tools/render-check.js --keep   # 描画したPNGを残す
 色・テクスチャはソフトウェアラスタライザでは検証できないため、判定するのは「客観的に異常な状態」のみ（本体の隠蔽・空描画・極端な非対称）。
 
 ## ブランチ戦略
-- `feature/<issue番号>-<説明>` / `fix/<issue番号>-<説明>` / `chore/<説明>`
-- main直push禁止。PRはSquash merge。diffは500行以内。
+- `main` が公開ブランチ（配布物 `index.html` を含む完成状態を維持する）。
+- 人間のコントリビュータ: `feature/<issue番号>-<説明>` / `fix/<issue番号>-<説明>` / `chore/<説明>` で分岐し、PR（Squash merge）で `main` へ。diffは500行以内。
+- AI保守セッション: `docs/INSTRUCTIONS_OPUS.md` / `docs/INSTRUCTIONS_SONNET.md` の手順に従い、監査済みコミット（`Round N:` 形式・テスト全通過が条件）を作業ブランチと `main` の両方へ反映する運用実績がある。いずれの経路でも「テスト0失敗でなければ `main` に載せない」が不変条件。
 
 ## コミット規約
-Conventional Commits（feat / fix / refactor / docs / test / chore / build / ci）。破壊的変更は `feat!:`。
+Conventional Commits（feat / fix / refactor / docs / test / chore / build / ci）。破壊的変更は `feat!:`。監査ラウンドのコミットは `Round N:` プレフィックス（docs/FEATURE_AUDIT.md の通し番号）。
 
 ## PR前チェックリスト
 - [ ] `node tests/run.js` 全通過

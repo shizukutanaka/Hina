@@ -112,12 +112,12 @@ There are no config files or environment variables. Save parameters as JSON with
 
 | File | Contents |
 |------|----------|
-| [docs/SPEC.md](docs/SPEC.md) | Specification (parameter tables, VRM output spec, rank thresholds) |
+| [docs/SPEC.md#english](docs/SPEC.md#english) | Specification (parameter tables, VRM output spec, rank thresholds — English + Japanese) |
 | [docs/FAQ.md#english](docs/FAQ.md#english) | Frequently asked questions (English + Japanese) |
 | [docs/UPLOAD_GUIDE.md#english](docs/UPLOAD_GUIDE.md#english) | Getting into VRChat (beginner-friendly, English + Japanese) |
 | [docs/adr/](docs/adr/) | Architecture decision records |
 
-> The FAQ and upload guide are bilingual; the remaining docs are Japanese for now. The in-app UI is fully bilingual.
+> The specification, FAQ and upload guide are all bilingual; only the ADRs remain Japanese. The in-app UI is fully bilingual.
 
 ## Donation
 

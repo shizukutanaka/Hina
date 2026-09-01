@@ -11,7 +11,7 @@
 | 3 | **仕様準拠の厳密性・実ローダー互換** | **公式 Khronos glTF-Validator で全11書き出し 0 errors**（Round 524）＋**参照Web VRMローダー three-vrm が全ケース完全読込**（Round 525: humanoid15ボーン/17表情/springBone/firstPerson全解決）。accessor min/max厳密一致（506）、sparse昇順、GLBヘッダ検証、VRM0メタ全enum防御、MToonキーワード整合（522） |
 | 4 | **セキュリティ硬化** | prototype pollution 対策をJSON流入の全4経路に適用（Round 469/495）、貼り付けDoSガード（470）、メタenum/シードの全層検証（492/493） |
 | 5 | **アクセシビリティ** | WCAG 2.2 AA（新設SC 2.5.8の24pxターゲット含む）、Windowsハイコントラスト（forced-colors）での選択状態表示、SRアナウンス規律（showErr統一・スパム抑制・フォーカス復元）、完全キーボード操作 |
-| 6 | **監査証跡・二言語ドキュメント** | FEATURE_AUDIT による引き継ぎ可能な監査記録、CHANGELOG最新化、README/UPLOAD_GUIDE の日英二言語化 |
+| 6 | **監査証跡・二言語ドキュメント** | FEATURE_AUDIT による引き継ぎ可能な監査記録、CHANGELOG最新化、ユーザー/コントリビュータ向け文書（README・UPLOAD_GUIDE・FAQ・SPEC）の日英二言語化 |
 | 7 | **成熟度の実証** | 主要3サブシステムの全行通読 clean sweep に加え、Round 528 で最後の既知欠陥（マルチタッチ視点ジャンプ）を修正し**既知の未修正欠陥ゼロ**・**dead code ゼロ**（マスク法削除ハントで実測、Round 526）。ソクラテス問答による完成主張の検証記録は COMPLETION_AUDIT 参照 |
 
 ## 短所・制約（正直に）
@@ -20,7 +20,7 @@
 |---|------|------|
 | 1 | **視覚検証パイプラインの制約**（最大のボトルネック・Round 518で部分的に緩和） | ヘッドレスChromium+SwiftShaderで**ジオメトリ／シルエット／プロポーションは検証可能**と実証済み（`node tools/render-check.js`／FEATURE_AUDIT §5-16）。ただし**色・テクスチャ・顔パーツは検証不能**——SwiftShaderのcanvas→テクスチャ経路が空を返し、メインFSの`if(c.a<0.5)discard`で全フラグメントが落ちるため（アトラス内容とUNPACK_FLIP_Y設定はいずれも正常＝製品側の不具合ではない。ImageData経由の回避も無効）。色を伴う判断とUnity/UniVRM実機での取込確認は依然として人間が必要。**実績**: この限定的な視覚検証だけで Round 519 の実バグ（アウトラインが本体の39%を覆い隠していた）を発見・修正できた |
 | 2 | **表現力の上限** | ミトン手（指ボーンなし）・プリセット6体・髪型5種。v0.1スコープとしては設計通りだが競合（VRoid等）比では狭い |
-| 3 | **ドキュメントの言語** | SPEC.md・adr は日本語のみ（README・UPLOAD_GUIDE・FAQ は二言語化済み） |
+| 3 | **ドキュメントの言語** | adr（設計判断記録・開発者向け内部文書）のみ日本語。ユーザー/コントリビュータ向け文書（README・UPLOAD_GUIDE・FAQ・SPEC）は全て二言語化済み（Round 533） |
 | 4 | **テストの一部が正規表現ウィンドウ方式** | リファクタで文字列がずれると割れる/まれに空検証化する（Round 496/497で実例を発見・修正済み。「ウィンドウ更新+RoundNコメント」の運用規約でカバー中） |
 | 5 | **持込経路の外部依存リスク**（コード外・2026-07の外部調査で確認） | VRM Converter for VRChat は2025-01以降更新停止、VRChatはUnity 6移行ベータ中、エコシステムはVRM 1.0へ緩やかにシフト。コンバータが追従しない場合、初心者向けアップロード経路が断絶しUPLOAD_GUIDE全面書き直しが必要 |
 | 6 | **公開設定の残作業**（リポジトリSettings権限が必要・AI環境から実行不可） | デフォルトブランチの`main`切替 / `v0.1.0` Release作成 / GitHub Pages有効化（有効化すれば `https://shizukutanaka.github.io/Hina/` で直接動作） |
@@ -32,10 +32,10 @@
 | 1 | **P1** | 公開設定3点（default branch→main / v0.1.0 Release / GitHub Pages） | **人間** | 各1–2クリック。Pagesは配布UXを大きく改善 |
 | 2 | **P1** | 視覚検証体制の確立 — **部分的に達成済み（Round 518）**。残るのは色/テクスチャ/顔パーツの確認と、Unity/UniVRM実機での取込確認 | **人間+Opus** | ヘッドレスChromium+SwiftShaderで**ジオメトリ／シルエット／プロポーション／ポーズは検証可能**と実証（`node tools/render-check.js`。手順は FEATURE_AUDIT §5-16）。色は不可（下記）。形状系のv0.2作業はこの範囲で部分的に解錠できる |
 | 3 | P2 | エコシステム定期監視（creators.vrchat.comのRANKS・VRM Converter・UniVRMリリース） | Sonnet | 変化があればOpus/人間へ報告のみ（対応判断はしない） |
-| 4 | P2 | SPEC.md の英語化（FAQは英語化済み） | Sonnet | README/UPLOAD_GUIDE/FAQで確立した同一ファイル+相互アンカー方式を踏襲 |
-| 5 | P3 | v0.2機能（指ボーン・髪型/衣装追加） | Opus | #2完了後のみ。骨/三角形予算の試算は FEATURE_AUDIT §3-1 に記録済み |
-| 6 | P3 | CONTRIBUTING.md の実態同期（ブランチ戦略の記述が現運用と乖離） | Sonnet | 小規模 |
-| 7 | P3 | VRM 1.0 対応の再評価 | 人間 | CLAUDE.mdの「0.x固定」制約の変更判断はユーザー専権。#3の監視結果を判断材料に |
+| 4 | P3 | v0.2機能（指ボーン・髪型/衣装追加） | Opus | #2完了後のみ。骨/三角形予算の試算は FEATURE_AUDIT §3-1 に記録済み |
+| 5 | P3 | VRM 1.0 対応の再評価 | 人間 | CLAUDE.mdの「0.x固定」制約の変更判断はユーザー専権。#3の監視結果を判断材料に |
+
+> Round 533 時点で、**この環境から実行可能な改善案はすべて実行済み**（SPEC英語化・CONTRIBUTING実態同期を完了し本表から除去）。残る5件はすべて、人間の権限（#1,#5）・実機/視覚判断（#2,#4）・定期監視という性質上の継続タスク（#3）であり、単発のコード/文書作業として消化できるものは無い。
 
 ## 参照
 
