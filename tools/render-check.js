@@ -318,6 +318,78 @@ async function main(){
     await ctx3.close();
   }
 
+  /* --- Round 531: the last two user-facing promises — the share URL and undo/redo.
+     ?seed=N is the distribution promise ("send this link, your friend gets the same avatar").
+     Determinism alone is not enough to verify it: an implementation that ignored the seed and
+     always produced the same avatar would pass an identity check, so this asserts BOTH that the
+     same seed reproduces and that a different seed differs. Undo/redo is driven with real
+     keyboard events, not function calls. --- */
+  console.log('\nshare URL and undo/redo:');
+  {
+    const paramsSig = pg => pg.evaluate(() => {
+      try { return JSON.stringify((JSON.parse(localStorage.getItem('hina.v1')) || {}).params || {}); }
+      catch (e) { return null; }
+    });
+    // (a) ?seed=N reproducibility across fresh contexts
+    try {
+      const sigs = [];
+      for (const seed of [12345, 12345, 999]){
+        const c5 = await browser.newContext({ viewport:{width:1100,height:800} });
+        const p5 = await c5.newPage();
+        await p5.goto('file://' + INDEX + '?seed=' + seed);
+        await p5.waitForTimeout(2400);
+        sigs.push(await paramsSig(p5));
+        await c5.close();
+      }
+      const bad = [];
+      if (!sigs[0] || sigs[0] !== sigs[1]) bad.push('same seed did not reproduce');
+      if (sigs[0] === sigs[2]) bad.push('different seed produced the same avatar (seed ignored)');
+      console.log(`  ${'?seed share URL'.padEnd(20)}          `
+        + (bad.length ? 'FAIL — ' + bad.join('; ') : 'ok (seed 12345 reproduces; 999 differs)'));
+      if (bad.length) failures++;
+    } catch (e) {
+      console.log('  ?seed share URL        FAIL — ' + String(e.message).slice(0,120)); failures++;
+    }
+    // (b) undo/redo through real keyboard events
+    const c6 = await browser.newContext({ viewport:{width:1200,height:900} });
+    const p6 = await c6.newPage();
+    const e6 = [];
+    p6.on('pageerror', e => e6.push(String(e.message).slice(0,120)));
+    try {
+      await p6.goto('file://' + INDEX);
+      await p6.waitForTimeout(2500);
+      await p6.getByRole('tab', { name: /Hair|髪/ }).click();
+      await p6.waitForTimeout(400);
+      const sel6 = await p6.$('#pr-hairStyle');
+      if (!sel6) throw new Error('hair style control not found');
+      const opts6 = await sel6.$$eval('option', o => o.map(x => x.value));
+      const orig = await sel6.inputValue();
+      const pick6 = opts6.find(o => o !== orig);
+      await sel6.selectOption(pick6);
+      await p6.waitForTimeout(500);
+      await p6.keyboard.press('Control+z');
+      await p6.waitForTimeout(700);
+      await p6.getByRole('tab', { name: /Hair|髪/ }).click();
+      await p6.waitForTimeout(400);
+      const afterUndo = await p6.$eval('#pr-hairStyle', e => e.value).catch(() => null);
+      await p6.keyboard.press('Control+Shift+z');
+      await p6.waitForTimeout(700);
+      await p6.getByRole('tab', { name: /Hair|髪/ }).click();
+      await p6.waitForTimeout(400);
+      const afterRedo = await p6.$eval('#pr-hairStyle', e => e.value).catch(() => null);
+      const bad = [];
+      if (afterUndo !== orig) bad.push(`Ctrl+Z did not restore (wanted ${orig}, got ${afterUndo})`);
+      if (afterRedo !== pick6) bad.push(`Ctrl+Shift+Z did not reapply (wanted ${pick6}, got ${afterRedo})`);
+      if (e6.length) bad.push('page error: ' + e6[0]);
+      console.log(`  ${'undo / redo'.padEnd(20)}          `
+        + (bad.length ? 'FAIL — ' + bad.join('; ') : `ok (${orig}→${pick6}→undo→redo round-trips)`));
+      if (bad.length) failures++;
+    } catch (e) {
+      console.log('  undo / redo            FAIL — ' + String(e.message).slice(0,120)); failures++;
+    }
+    await c6.close();
+  }
+
   await browser.close();
 
   if (KEEP) console.log('\nPNGs kept in ' + tmp);
