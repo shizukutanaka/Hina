@@ -467,6 +467,100 @@ async function main(){
     await c6.close();
   }
 
+  /* --- Round 542: "complete keyboard operation" (SWOT strength #5, WCAG 2.1.1) had never been
+     measured, only asserted. Four groups use the roving-tabindex pattern — the tablist, the
+     expression bar, the colour swatches and the preset cards — where every member but one carries
+     tabindex="-1". That is correct ARIA authoring ONLY if arrow keys actually move focus within the
+     group; without a working handler those controls are simply unreachable by keyboard, and a
+     static audit cannot tell the two apart because the markup is identical. So this drives the real
+     keys.
+
+     Two traps, both of which produced false failures while writing this and are avoided below:
+     the entry point must not already sit at the boundary being tested (Home cannot move focus that
+     is already on the first item — which reads as a bug and is not), and activating a card
+     re-renders the panel, so element handles go stale and every step must re-query. --- */
+  console.log('\nkeyboard operation (roving tabindex groups):');
+  {
+    const c8 = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const pg = await c8.newPage();
+    await pg.goto('file://' + INDEX);
+    await pg.waitForTimeout(2500);
+
+    const probe = async (label, openTab, sel) => {
+      const bad = [];
+      try {
+        if (openTab){ await pg.click(openTab); await pg.waitForTimeout(450); }
+        // Scope every measurement to the focused element's OWN roving group, not to every element
+        // the selector matches. The colour swatches are six independent groups (one per colour row,
+        // and the palettes are different lengths - 8, 6, 10 ...), so Home/End correctly move within
+        // a row. Measuring against all 54 reported "End went to 7 of 54" and looked like a product
+        // bug; it was this test asking the wrong question.
+        const idxOf = () => pg.evaluate(q => {
+          const leaf = q.split(' ').pop();
+          const a = document.activeElement;
+          const group = a && a.parentElement ? [...a.parentElement.querySelectorAll(leaf)] : [];
+          const items = group.length ? group : [...document.querySelectorAll(q)];
+          return { focus: items.indexOf(a), n: items.length,
+                   zero: items.filter(e => e.getAttribute('tabindex') === '0').length };
+        }, sel);
+        const entry = `${sel}[tabindex="0"]`;
+        if (!(await pg.$(entry))) { bad.push('no tabindex=0 entry point — the group cannot be reached by Tab'); }
+        else {
+          const start = await pg.evaluate(q => [...document.querySelectorAll(q)].length, sel);
+          if (start < 2) bad.push(`only ${start} member(s); nothing to navigate`);
+          else {
+            await pg.focus(entry); await pg.waitForTimeout(120);
+            const a0 = await idxOf();
+            await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(250);
+            const a1 = await idxOf();
+            if (a1.focus === a0.focus) bad.push('ArrowRight does not move focus');
+            await pg.keyboard.press('ArrowLeft'); await pg.waitForTimeout(250);
+            const a2 = await idxOf();
+            if (a2.focus === a1.focus) bad.push('ArrowLeft does not move focus');
+            // step to the middle FIRST, so Home has somewhere to go
+            await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(200);
+            await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(200);
+            const mid = await idxOf();
+            await pg.keyboard.press('Home'); await pg.waitForTimeout(250);
+            const hm = await idxOf();
+            if (mid.focus > 0 && hm.focus !== 0) bad.push(`Home went to ${hm.focus}, expected the first item`);
+            await pg.keyboard.press('End'); await pg.waitForTimeout(250);
+            const en = await idxOf();
+            if (en.focus !== en.n - 1) bad.push(`End went to ${en.focus} of ${en.n}, expected the last item`);
+          }
+        }
+      } catch (e) { bad.push('threw: ' + String(e.message).slice(0, 90)); }
+      console.log(`  ${label.padEnd(22)}    ` + (bad.length ? 'FAIL — ' + bad.join('; ') : 'ok (Arrow/Home/End move focus, Tab reaches the group)'));
+      if (bad.length) failures++;
+    };
+
+    await probe('tablist', null, '[role=tab]');
+    await probe('expression bar', null, '.eBtn');
+    await probe('colour swatches', '#tab-color', '#tabBody .sw');
+    await probe('preset cards', '#tab-preset', '#tabBody .preCard');
+
+    // a preset card must also ACTIVATE from the keyboard, not merely receive focus
+    {
+      const bad = [];
+      try {
+        for (const key of ['Enter', 'Space']){
+          await pg.click('#tab-preset'); await pg.waitForTimeout(450);
+          await pg.focus('#tabBody .preCard[tabindex="0"]'); await pg.waitForTimeout(120);
+          await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(250);
+          const before = await pg.evaluate(() =>
+            [...document.querySelectorAll('#tabBody .preCard')].findIndex(e => e.classList.contains('selected')));
+          await pg.keyboard.press(key); await pg.waitForTimeout(800);
+          const after = await pg.evaluate(() =>
+            [...document.querySelectorAll('#tabBody .preCard')].findIndex(e => e.classList.contains('selected')));
+          if (after === before) bad.push(`${key} did not select the focused card (stayed on ${before})`);
+        }
+      } catch (e) { bad.push('threw: ' + String(e.message).slice(0, 90)); }
+      console.log('  preset activation         ' + (bad.length ? 'FAIL — ' + bad.join('; ') : 'ok (Enter and Space both select the focused card)'));
+      if (bad.length) failures++;
+    }
+    await c8.close();
+  }
+
   /* --- Round 538: texture colour fidelity, read out of the exported .vrm itself.
      The oracle is core: randomParams(seed) says exactly which colours seed N must produce, and
      ATLAS says exactly where each one is painted. So this drives the REAL user path
