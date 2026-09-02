@@ -1301,9 +1301,12 @@ function renderOut(bd){
   {
     const pstj=el('button',{type:'button', class:'btn wide', onclick:()=>{
       const _pstjF=document.activeElement===pstj;
-      const _pfail=()=>{ pstj.disabled=false; pstj.removeAttribute('aria-busy'); if(_pstjF) pstj.focus(); pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
-        showErr(t('btn.pasteJson.err')); };
-      if (typeof navigator.clipboard?.readText !== 'function'){ _pfail(); return; }
+      const _pfail=(msg)=>{ pstj.disabled=false; pstj.removeAttribute('aria-busy'); if(_pstjF) pstj.focus(); pstj.textContent='!'; setTimeout(()=>{ pstj.textContent=t('btn.pasteJson'); },1500);
+        showErr(msg || t('btn.pasteJson.err')); };
+      // Round 553: the browser cannot read the clipboard (Firefox/Safari) — a different failure from
+      // "the clipboard held something that isn't Hina JSON", and it needs a different message,
+      // because the user's data is fine and the fix is to use the file button instead.
+      if (typeof navigator.clipboard?.readText !== 'function'){ _pfail(t('btn.pasteJson.unsupported')); return; }
       pstj.disabled=true; pstj.setAttribute('aria-busy','true');
       navigator.clipboard.readText().then(text=>{
         pstj.disabled=false; pstj.removeAttribute('aria-busy');

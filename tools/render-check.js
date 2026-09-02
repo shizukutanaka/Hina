@@ -467,6 +467,105 @@ async function main(){
     await c6.close();
   }
 
+  /* --- Round 553: the fallback branches that exist FOR Firefox and Safari, actually executed.
+     Those browsers cannot be installed here — the Playwright download is blocked, re-confirmed in
+     Round 553 — so Round 534 could only audit the source statically. But what actually differs in
+     those browsers is a short list of missing APIs, and Chromium can be stripped of exactly those.
+     That runs the real fallback code, which a static audit never does.
+
+     It found a genuine defect on the first run: with clipboard.readText absent, the paste button
+     reported "Clipboard content is not valid Hina JSON" — blaming data that was fine, when the
+     browser simply cannot read the clipboard. Fixed in the same round. --- */
+  console.log('\nFirefox/Safari fallbacks (APIs removed from Chromium):');
+  {
+    const mkStripped = async strip => {
+      const c = await browser.newContext({ viewport: { width: 1280, height: 1000 }, acceptDownloads: true });
+      const pg = await c.newPage();
+      const errs = [];
+      pg.on('pageerror', e => errs.push(String(e).slice(0, 90)));
+      await pg.addInitScript(strip);
+      await pg.goto('file://' + INDEX);
+      await pg.waitForTimeout(2400);
+      return { c, pg, errs };
+    };
+    const alerts = pg => pg.evaluate(() => {
+      const a = document.getElementById('srAlert'), s2 = document.getElementById('srStatus');
+      return ((a && a.textContent.trim()) || '') + ' | ' + ((s2 && s2.textContent.trim()) || '');
+    });
+    const bad = [];
+
+    // 1. no File System Access API (both browsers): saving params must still produce a file
+    try {
+      const { c, pg, errs } = await mkStripped(() => { delete window.showSaveFilePicker; });
+      await pg.getByRole('tab', { name: /Export|出力/ }).click();
+      await pg.waitForTimeout(600);
+      let btn = null;
+      for (const x of await pg.$$('#tabBody button')){
+        const t2 = ((await x.textContent()) || '').trim();
+        if (/\.json\)|\(\.json/i.test(t2)){ btn = x; break; }
+      }
+      if (!btn) bad.push('no-picker: the save-params button was not found');
+      else {
+        const [d] = await Promise.all([
+          pg.waitForEvent('download', { timeout: 25000 }).catch(() => null), btn.click(),
+        ]);
+        if (!d) bad.push('no-picker: saving params produced no file (the download fallback is broken)');
+      }
+      if (errs.length) bad.push('no-picker: page error ' + errs[0]);
+      await c.close();
+    } catch (e) { bad.push('no-picker threw: ' + String(e.message).slice(0, 80)); }
+
+    // 2. no clipboard object at all: copy buttons must fail visibly, not throw
+    try {
+      const { c, pg, errs } = await mkStripped(() => {
+        Object.defineProperty(navigator, 'clipboard', { get: () => undefined, configurable: true });
+      });
+      await pg.getByRole('tab', { name: /Preset|プリセット/ }).click(); await pg.waitForTimeout(500);
+      await pg.click('#gachaBtn'); await pg.waitForTimeout(800);
+      let clicked = 0;
+      for (const x of await pg.$$('#tabBody button')){
+        const al = (await x.getAttribute('aria-label')) || '';
+        if (/copy|コピー/i.test(al)){ await x.click().catch(() => {}); clicked++; await pg.waitForTimeout(350); }
+      }
+      const said = await alerts(pg);
+      if (!clicked) bad.push('no-clipboard: found no copy buttons to exercise');
+      else if (!/fail|失敗/i.test(said)) bad.push(`no-clipboard: copy failed silently (announced ${JSON.stringify(said.slice(0,50))})`);
+      if (errs.length) bad.push('no-clipboard: page error ' + errs[0]);
+      await c.close();
+    } catch (e) { bad.push('no-clipboard threw: ' + String(e.message).slice(0, 80)); }
+
+    // 3. clipboard without readText (the Firefox/Safari case): paste must blame the BROWSER,
+    //    not the user's data, and must point at the file route
+    try {
+      const { c, pg, errs } = await mkStripped(() => {
+        Object.defineProperty(navigator, 'clipboard',
+          { get: () => ({ writeText: async () => {} }), configurable: true });
+      });
+      await pg.getByRole('tab', { name: /Export|出力/ }).click(); await pg.waitForTimeout(600);
+      let btn = null;
+      for (const x of await pg.$$('#tabBody button')){
+        const t2 = ((await x.textContent()) || '') + ((await x.getAttribute('aria-label')) || '');
+        if (/paste|貼/i.test(t2)){ btn = x; break; }
+      }
+      if (!btn) bad.push('no-readText: the paste button was not found');
+      else {
+        await btn.click(); await pg.waitForTimeout(900);
+        const said = await alerts(pg);
+        if (/not valid|不正/i.test(said))
+          bad.push('no-readText: reported invalid CONTENT when the browser simply cannot read the clipboard');
+        else if (!/cannot read|対応していません/i.test(said))
+          bad.push(`no-readText: unclear message ${JSON.stringify(said.slice(0, 60))}`);
+      }
+      if (errs.length) bad.push('no-readText: page error ' + errs[0]);
+      await c.close();
+    } catch (e) { bad.push('no-readText threw: ' + String(e.message).slice(0, 80)); }
+
+    console.log('  degraded-API paths        '
+      + (bad.length ? 'FAIL — ' + bad.join('; ')
+         : 'ok (no picker -> file still saves; no clipboard -> copy fails visibly; no readText -> blames the browser and points at Load params)'));
+    if (bad.length) failures++;
+  }
+
   /* --- Round 548: an action's screen-reader announcement must survive. SWOT claims "SR announcement
      discipline (showErr unified, spam suppressed, focus restored)". Focus restoration measured
      clean across seven DOM-rebuilding actions, but the announcement did not: clicking "Make it

@@ -5953,7 +5953,7 @@ function accData(j, bin, ai){
 {
   ok(/pstj\.disabled=true[\s\S]{0,40}aria-busy.*true[\s\S]{0,200}clipboard\.readText/.test(html),
     'pasteJson sets disabled+aria-busy before clipboard.readText (user may see permission prompt)');
-  ok(/pstj\.disabled=false[\s\S]{0,40}removeAttribute\('aria-busy'\)[\s\S]{0,500}pstj\.disabled=false[\s\S]{0,40}removeAttribute\('aria-busy'\)/.test(html),
+  ok(/pstj\.disabled=false[\s\S]{0,40}removeAttribute\('aria-busy'\)[\s\S]{0,900}pstj\.disabled=false[\s\S]{0,40}removeAttribute\('aria-busy'\)/.test(html),   // gap widened R553
     'pasteJson clears disabled+aria-busy in both success and _pfail paths');
 }
 
@@ -8511,7 +8511,7 @@ function accData(j, bin, ai){
   // read clipboard text with no size check — clipboard content is not browser-size-limited like
   // File objects are, so a malicious page's copy button could hang the tab on paste.
   const pstjIdx = html.indexOf("const pstj=el('button'");
-  const pstjBlock = pstjIdx >= 0 ? html.slice(pstjIdx, pstjIdx + 1200) : '';
+  const pstjBlock = pstjIdx >= 0 ? html.slice(pstjIdx, pstjIdx + 2000) : '';   // widened R553
   ok(/text\.length > 2\*1024\*1024/.test(pstjBlock),
     'R470: pasteJson() checks clipboard text.length against the 2 MB guard before deserialize');
   ok(/text\.length > 2\*1024\*1024[\s\S]{0,150}showErr\(t\('err\.loadTooLarge'\)\)/.test(pstjBlock),
@@ -8630,8 +8630,11 @@ function accData(j, bin, ai){
     'R461: cpj _fail uses showErr() for assertive SR announcement (not srStatus-only)');
 
   // pasteJson: clipboard read failure now announces assertively
-  ok(/const _pfail=\(\)=>\{[\s\S]{0,250}showErr\(t\('btn\.pasteJson\.err'\)\)/.test(html),
-    'R461: pstj _pfail uses showErr() for assertive SR announcement (not srStatus-only)');
+  // Round 553: _pfail gained an optional message parameter so the "this browser cannot read the
+  // clipboard" case can say that instead of blaming the user's data. The requirement is unchanged:
+  // it must announce assertively via showErr, and it must still default to the content message.
+  ok(/const _pfail=\(msg\)=>\{[\s\S]{0,250}showErr\(msg \|\| t\('btn\.pasteJson\.err'\)\)/.test(html),
+    'R461: pstj _pfail uses showErr() for assertive SR announcement, defaulting to btn.pasteJson.err');
 }
 
 /* ---- Round 460: failure-path SR announcements in doUndo/seed-clamp/cpBtn upgraded to showErr() ---- */
@@ -9056,6 +9059,29 @@ function accData(j, bin, ai){
     'dialog has overscroll-behavior:contain to prevent scroll chaining to the page behind it');
   ok(/prefers-reduced-motion:reduce[\s\S]{0,200},dialog\{transition:none/.test(html),
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
+}
+
+/* ---- Round 553: "cannot read the clipboard" must not be reported as "your data is bad" ---- */
+{
+  // Firefox and Safari do not give a file:// page clipboard.readText(). The paste button detected
+  // that correctly, but reported it with btn.pasteJson.err — "Clipboard content is not valid Hina
+  // JSON" — which blames the user's data and sends them off debugging JSON that is perfectly fine.
+  // Found by simulating those browsers in Chromium (deleting the API), which is the only way this
+  // environment can reach them: the Firefox download is blocked, re-confirmed in Round 553.
+  ok(H.I18N.ja['btn.pasteJson.unsupported'] && H.I18N.en['btn.pasteJson.unsupported'],
+    'R553: the unsupported-clipboard message exists in both locales');
+  ok(H.I18N.ja['btn.pasteJson.unsupported'] !== H.I18N.ja['btn.pasteJson.err']
+     && H.I18N.en['btn.pasteJson.unsupported'] !== H.I18N.en['btn.pasteJson.err'],
+    'R553: it is a DIFFERENT message from the invalid-content one — that was the bug');
+  // it must point at the alternative that works everywhere, or it is just a nicer dead end
+  ok(/パラメータ読込/.test(H.I18N.ja['btn.pasteJson.unsupported'])
+     && /Load params/.test(H.I18N.en['btn.pasteJson.unsupported']),
+    'R553: the message names the file-based route (btn.loadJson) as the way forward');
+  ok(H.I18N.ja['btn.pasteJson.unsupported'].includes(H.I18N.ja['btn.loadJson'])
+     && H.I18N.en['btn.pasteJson.unsupported'].includes(H.I18N.en['btn.loadJson']),
+    'R553: it quotes the button label exactly, so it stays correct if that label is renamed');
+  ok(/readText !== 'function'\)\{ _pfail\(t\('btn\.pasteJson\.unsupported'\)\)/.test(html),
+    'R553: the capability branch passes the capability message, not the content one');
 }
 
 /* ---- Round 551: the whole RANKS table, pinned to the verified upstream values ---- */
