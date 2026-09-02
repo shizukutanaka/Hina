@@ -15,13 +15,24 @@
  * playwright, so it SKIPS cleanly (exit 0) wherever that is unavailable.
  *
  * WHAT IT CAN AND CANNOT SEE
- * Colour and texture are NOT verifiable under a software rasteriser: SwiftShader's
+ * The RENDERED PREVIEW cannot show colour under a software rasteriser: SwiftShader's
  * canvas-to-texture upload yields an empty texture, so the main fragment shader's leading
  * `if (c.a < 0.5) discard;` kills every fragment. (The product is not at fault — the atlas is
  * correct at upload time and UNPACK_FLIP_Y_WEBGL is set.) To see shape at all, this tool
  * renders a PATCHED COPY with that discard removed and the body forced to a flat colour. It
  * therefore judges only objectively-wrong states — occlusion, empty draws, gross asymmetry —
  * never "does this look nice".
+ *
+ * Round 538 corrects a claim this file used to make. It said colour was "NOT verifiable", full
+ * stop. That was true of the preview and false of the product: what a VRChat user actually sees
+ * is the texture embedded in the exported .vrm, which is a FILE, not a render. Reading it needs
+ * no GPU at all — the GLB carries a PNG, and Node's zlib decodes it. The preview limitation had
+ * been generalised into a limitation on the whole product, which quietly left the app's entire
+ * colour pipeline with no end-to-end coverage: swapping `block('skin', p.skinTone)` to
+ * `p.hairColor` — every avatar's skin painted the wrong colour, plainly visible in VRChat —
+ * passed all 2094 unit tests, the official Khronos glTF-Validator, and three-vrm, because those
+ * check UVs and structure and never the painted pixels. That mutation is what the section below
+ * now catches.
  *
  * USAGE
  *   node tools/render-check.js            # all cases
@@ -36,6 +47,72 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const INDEX = path.join(ROOT, 'index.html');
 const KEEP = process.argv.includes('--keep');
+
+/* ---- Round 538: read the texture out of an exported .vrm. Zero dependencies: a GLB is a
+   header + JSON chunk + BIN chunk, and canvas.toBlob() emits an 8-bit non-interlaced PNG,
+   which is zlib plus per-row filters — both in Node's stdlib. ---- */
+const zlib = require('zlib');
+
+function glbImage(buf){                      // first embedded image of a GLB
+  const jsonLen = buf.readUInt32LE(12);
+  const json = JSON.parse(buf.toString('utf8', 20, 20 + jsonLen));
+  const im = json.images && json.images[0];
+  if (!im) throw new Error('the exported GLB carries no image');
+  const bv = json.bufferViews[im.bufferView];
+  const start = 20 + jsonLen + 8 + (bv.byteOffset || 0);
+  return { mime: im.mimeType, bytes: buf.slice(start, start + bv.byteLength) };
+}
+
+function decodePNG(buf){
+  if (buf.readUInt32BE(0) !== 0x89504E47) throw new Error('not a PNG');
+  let off = 8, w = 0, h = 0, depth = 0, ctype = 0; const idat = [];
+  while (off < buf.length){
+    const len = buf.readUInt32BE(off), type = buf.toString('ascii', off + 4, off + 8);
+    const data = buf.slice(off + 8, off + 8 + len);
+    if (type === 'IHDR'){
+      w = data.readUInt32BE(0); h = data.readUInt32BE(4); depth = data[8]; ctype = data[9];
+      if (data[12] !== 0) throw new Error('interlaced PNG unsupported');
+    } else if (type === 'IDAT') idat.push(data);
+    else if (type === 'IEND') break;
+    off += 12 + len;
+  }
+  if (depth !== 8) throw new Error('bit depth ' + depth + ' unsupported');
+  const ch = ctype === 6 ? 4 : ctype === 2 ? 3 : ctype === 0 ? 1 : null;
+  if (!ch) throw new Error('colour type ' + ctype + ' unsupported');
+  const raw = zlib.inflateSync(Buffer.concat(idat));
+  const stride = w * ch, out = Buffer.alloc(h * stride);
+  let pos = 0;
+  for (let y = 0; y < h; y++){
+    const f = raw[pos++], line = raw.slice(pos, pos + stride); pos += stride;
+    const cur = out.slice(y * stride, (y + 1) * stride);
+    const prev = y ? out.slice((y - 1) * stride, y * stride) : null;
+    for (let x = 0; x < stride; x++){
+      const a = x >= ch ? cur[x - ch] : 0, b = prev ? prev[x] : 0, c = (prev && x >= ch) ? prev[x - ch] : 0;
+      let v = line[x];
+      if (f === 1) v += a; else if (f === 2) v += b; else if (f === 3) v += (a + b) >> 1;
+      else if (f === 4){
+        const pr = a + b - c, pa = Math.abs(pr - a), pb = Math.abs(pr - b), pc = Math.abs(pr - c);
+        v += (pa <= pb && pa <= pc) ? a : (pb <= pc ? b : c);
+      }
+      cur[x] = v & 255;
+    }
+  }
+  return { w, h, ch, data: out };
+}
+const pixel = (img, x, y) => {
+  const i = (y * img.w + x) * img.ch;
+  return { r: img.data[i], g: img.data[i+1], b: img.data[i+2], a: img.ch === 4 ? img.data[i+3] : 255 };
+};
+const toHex = c => '#' + [c.r, c.g, c.b].map(v => v.toString(16).padStart(2, '0')).join('');
+
+/* core is the oracle: it knows the atlas layout and what colours a given seed must produce */
+function loadCore(){
+  const html = fs.readFileSync(INDEX, 'utf8');
+  const a = html.indexOf('/*HINA-CORE-START*/'), b = html.indexOf('/*HINA-CORE-END*/');
+  const mod = { exports: {} };
+  new Function('module', 'exports', html.slice(a, b))(mod, mod.exports);
+  return mod.exports;
+}
 
 /* ---- resolve playwright from anywhere it might live, else skip ---- */
 function loadPlaywright(){
@@ -388,6 +465,142 @@ async function main(){
       console.log('  undo / redo            FAIL — ' + String(e.message).slice(0,120)); failures++;
     }
     await c6.close();
+  }
+
+  /* --- Round 538: texture colour fidelity, read out of the exported .vrm itself.
+     The oracle is core: randomParams(seed) says exactly which colours seed N must produce, and
+     ATLAS says exactly where each one is painted. So this drives the REAL user path
+     (?seed=N share URL -> Export button -> downloaded file), then opens the file and checks the
+     pixels. No GPU involved, so the SwiftShader texture limitation does not apply.
+     The no-seed startup state is not pinned separately: it is PRESETS[0] and goes through this
+     same drawAtlas() path, so a second case would add cost without adding coverage. --- */
+  console.log('\ntexture colour fidelity (read from the exported .vrm):');
+  {
+    const H = loadCore();
+    const SOLID = { skin:'skinTone', hair:'hairColor', clothMain:'clothMain',
+                    clothSub:'clothSub', accent:'clothAccent', shoe:'shoeColor' };
+    const c7 = await browser.newContext({ viewport:{width:1200,height:900}, acceptDownloads:true });
+    for (const seed of [424242, 7, 99991]){
+      const p7 = await c7.newPage();
+      const e7 = [];
+      p7.on('pageerror', e => e7.push(String(e.message).slice(0,120)));
+      const bad = [];
+      try {
+        await p7.addInitScript(() => { delete window.showSaveFilePicker; });
+        await p7.goto('file://' + INDEX + '?seed=' + seed);
+        await p7.waitForTimeout(2600);
+        await p7.getByRole('tab', { name: /Export|出力/ }).click();
+        await p7.waitForTimeout(500);
+        let btn = null;
+        for (const b of await p7.$$('#tabBody button')){
+          const t = (await b.textContent() || '').trim();
+          if (/Export VRM|VRM 書き出し/.test(t)){ btn = b; break; }
+        }
+        if (!btn) throw new Error('export button not found');
+        const [dl] = await Promise.all([
+          p7.waitForEvent('download', { timeout: 45000 }).catch(() => null),
+          btn.click(),
+        ]);
+        if (!dl) throw new Error('clicking Export produced no download');
+        const out = path.join(tmp, 'colour-' + seed + '.vrm');
+        await dl.saveAs(out);
+
+        const im = glbImage(fs.readFileSync(out));
+        if (im.mime !== 'image/png') bad.push('embedded texture is ' + im.mime + ', not image/png');
+        const img = decodePNG(im.bytes);
+        if (img.w !== H.TEX || img.h !== H.TEX) bad.push(`texture is ${img.w}x${img.h}, expected ${H.TEX}`);
+        const want = H.randomParams(seed);
+
+        // every solid block must carry exactly the colour this seed chose
+        for (const [blk, key] of Object.entries(SOLID)){
+          const b = H.ATLAS[blk];
+          const got = toHex(pixel(img, b[0] + 32, b[1] + 32));
+          const exp = String(want[key]).toLowerCase();
+          if (got !== exp) bad.push(`${blk} block is ${got}, but ${key}=${exp}`);
+        }
+        // the derived highlight must match core's own shade()
+        {
+          const b = H.ATLAS.hairHi;
+          const got = toHex(pixel(img, b[0] + 32, b[1] + 32));
+          const exp = String(H.shade(want.hairColor, 1.4)).toLowerCase();
+          if (got !== exp) bad.push(`hairHi block is ${got}, but shade(hairColor,1.4)=${exp}`);
+        }
+        // face parts must actually be painted, not left blank
+        const region = r => {
+          const seen = new Set(); let opaque = 0, n = 0;
+          for (let y = r[1]; y < r[3]; y += 3) for (let x = r[0]; x < r[2]; x += 3){
+            const c = pixel(img, x, y); n++;
+            if (c.a > 127) opaque++;
+            seen.add(c.r + ',' + c.g + ',' + c.b + ',' + c.a);
+          }
+          return { distinct: seen.size, opaque: 100 * opaque / n };
+        };
+        const eyes = region(H.ATLAS.eyeL), mouth = region(H.ATLAS.mouth), brow = region(H.ATLAS.browL);
+        if (eyes.distinct < 20 || eyes.opaque < 10) bad.push(`eye region looks unpainted (${eyes.distinct} colours, ${eyes.opaque.toFixed(1)}% opaque)`);
+        if (mouth.distinct < 10 || mouth.opaque < 5) bad.push(`mouth region looks unpainted (${mouth.distinct} colours, ${mouth.opaque.toFixed(1)}% opaque)`);
+        if (brow.opaque < 5) bad.push(`brow region looks unpainted (${brow.opaque.toFixed(1)}% opaque)`);
+        // blush is alpha-graded and MASK-discarded below 0.5, so only assert it when the seed asked for it
+        if (want.blush > 0.5 && region(H.ATLAS.blush).opaque < 1) bad.push('blush requested but nothing opaque was painted');
+
+        // eyeR is produced by mirroring eyeL — verify it is a MIRROR and not a plain copy
+        {
+          const eL = H.ATLAS.eyeL, eR = H.ATLAS.eyeR, w = eL[2] - eL[0], h = eL[3] - eL[1];
+          let asMirror = 0, asCopy = 0, selfSym = 0, n = 0;
+          for (let y = 4; y < h; y += 7) for (let x = 4; x < w - 4; x += 7){
+            const a = pixel(img, eL[0] + x, eL[1] + y);
+            const m = pixel(img, eR[0] + (w - 1 - x), eR[1] + y);
+            const c = pixel(img, eR[0] + x, eR[1] + y);
+            const s2 = pixel(img, eL[0] + (w - 1 - x), eL[1] + y);
+            n++;
+            if (a.r===m.r && a.g===m.g && a.b===m.b && a.a===m.a) asMirror++;
+            if (a.r===c.r && a.g===c.g && a.b===c.b && a.a===c.a) asCopy++;
+            if (a.r===s2.r && a.g===s2.g && a.b===s2.b && a.a===s2.a) selfSym++;
+          }
+          if (asMirror < n) bad.push(`right eye is not a clean mirror of the left (${asMirror}/${n})`);
+          // only meaningful when the eye is actually asymmetric; otherwise mirror and copy coincide
+          if (selfSym < n * 0.9 && asCopy >= n) bad.push('right eye is a straight copy, not a mirror');
+        }
+        /* The VRM also embeds a 256x256 THUMBNAIL (meta.texture), which is what VRChat and
+           UniVRM show in an avatar list. It is a crop of the WebGL canvas, so under SwiftShader
+           its CONTENT is not representative and is deliberately not judged here — that is the
+           same preview limitation described at the top of this file. Its STRUCTURE is fully
+           checkable though, and was not covered by anything before: a thumbnail that silently
+           stopped being written, or that pointed at the atlas instead of its own image, would
+           have shipped unnoticed. */
+        {
+          const raw = fs.readFileSync(out);
+          const jsonLen = raw.readUInt32LE(12);
+          const gl = JSON.parse(raw.toString('utf8', 20, 20 + jsonLen));
+          const ti = gl.extensions && gl.extensions.VRM && gl.extensions.VRM.meta
+            ? gl.extensions.VRM.meta.texture : undefined;
+          if (typeof ti !== 'number' || ti < 0) bad.push('VRM meta carries no thumbnail texture index');
+          else {
+            const src = gl.textures[ti] && gl.textures[ti].source;
+            const mainSrc = gl.textures[0] && gl.textures[0].source;
+            if (src === mainSrc) bad.push('thumbnail points at the main atlas instead of its own image');
+            else {
+              const bv = gl.bufferViews[gl.images[src].bufferView];
+              const st = 20 + jsonLen + 8 + (bv.byteOffset || 0);
+              const th = decodePNG(raw.slice(st, st + bv.byteLength));
+              if (th.w !== 256 || th.h !== 256) bad.push(`thumbnail is ${th.w}x${th.h}, expected 256x256`);
+              let clear = 0, n = 0;
+              for (let y = 0; y < th.h; y += 8) for (let x = 0; x < th.w; x += 8){
+                n++; if (pixel(th, x, y).a < 128) clear++;
+              }
+              if (clear > n * 0.5) bad.push(`thumbnail is mostly transparent (${(100*clear/n).toFixed(0)}%)`);
+            }
+          }
+        }
+        if (e7.length) bad.push('page error: ' + e7[0]);
+      } catch (e) {
+        bad.push(String(e.message).slice(0, 140));
+      }
+      await p7.close();
+      console.log(`  seed ${String(seed).padEnd(14)}       `
+        + (bad.length ? 'FAIL — ' + bad.join('; ') : 'ok (7 blocks match randomParams(), face parts painted, right eye mirrored, thumbnail sound)'));
+      if (bad.length) failures++;
+    }
+    await c7.close();
   }
 
   await browser.close();
