@@ -9047,6 +9047,68 @@ function accData(j, bin, ai){
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
 }
 
+/* ---- Round 547: a keydown handler that moves focus must stop the key's default action ---- */
+{
+  // Round 546 was one instance of a class, so this sweeps the class instead of waiting for the
+  // next instance. The bug there: Enter's handler blurred the field, which fired change, which ran
+  // the gacha, which focused the gacha button — and then the SAME keystroke's default action
+  // activated that freshly focused button, throwing away the seed the user had typed.
+  //
+  // The rule that prevents it is narrow and mechanical: if a keydown handler moves focus, the
+  // keystroke must not also go on to do whatever it would have done. It is deliberately NOT
+  // "every keydown handler must preventDefault" — the slider handlers call captureUndo() and then
+  // let the range input's own arrow/Home/End behaviour happen, which is exactly right. Only
+  // handlers that relocate focus are covered.
+  //
+  // Sweeping the six handlers by hand found the four roving groups, the canvas camera and the
+  // global shortcuts all already correct; the seed input was the only offender. This keeps it that
+  // way, including for handlers nobody has written yet.
+  //
+  // Scope, stated honestly because it was measured rather than assumed: this covers handlers that
+  // move focus IN THEIR OWN BODY. It does NOT catch Round 546 itself, where the move was indirect
+  // — handler → blur() → change → runGacha() → focus() — and re-introducing that exact bug leaves
+  // this check green (verified). That path is held by the R546 assertion above and by the
+  // end-to-end seed check in tools/render-check.js. Two guards, two different shapes of the same
+  // mistake; neither subsumes the other.
+  const ui = html.slice(html.indexOf('/*HINA-CORE-END*/'));
+  // find each handler and take its body by brace matching, so no fixed-size window can drift
+  const bodyAt = i => {
+    const open = ui.indexOf('{', i);
+    if (open < 0) return '';
+    let depth = 0;
+    for (let j = open; j < ui.length && j < open + 20000; j++){
+      const c = ui[j];
+      if (c === '{') depth++;
+      else if (c === '}'){ depth--; if (depth === 0) return ui.slice(open, j + 1); }
+    }
+    return '';
+  };
+  const starts = [];
+  const re = /addEventListener\(\s*'keydown'|onkeydown\s*:/g;
+  let m;
+  while ((m = re.exec(ui))) starts.push(m.index);
+  ok(starts.length >= 6, `R547: keydown handlers were located (${starts.length} found)`);
+
+  const offenders = [];
+  let focusMovers = 0;
+  for (const st of starts){
+    const body = bodyAt(st);
+    if (!body) continue;
+    if (!/\.focus\(\)/.test(body)) continue;      // only handlers that relocate focus
+    focusMovers++;
+    if (!/preventDefault\(\)/.test(body)){
+      const head = ui.slice(st, st + 60).replace(/\s+/g, ' ');
+      offenders.push(head);
+    }
+  }
+  ok(focusMovers >= 4,
+    `R547: the sweep found handlers that actually move focus (${focusMovers}) — otherwise the rule below would be checking nothing`);
+  ok(offenders.length === 0,
+    'R547: every keydown handler that moves focus also calls preventDefault(), so the keystroke '
+    + 'cannot go on to act on the element it was just moved to (the Round 546 bug)'
+    + (offenders.length ? ` [OFFENDERS: ${offenders.join(' | ')}]` : ''));
+}
+
 /* ---- Round 545: no orphaned i18n key, including the dynamically-built ones ---- */
 {
   // SWOT claims "dead code ゼロ", measured once by hand in Round 526. Eighteen rounds of change
