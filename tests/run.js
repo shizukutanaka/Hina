@@ -6766,6 +6766,38 @@ function accData(j, bin, ai){
     'saveJson() falls back to <a download> when showSaveFilePicker unavailable or errors');
 }
 
+/* ---- Round 535: sanitizeMeta() normalises free-text the same way the VRM writer does ---- */
+{
+  // Found by actually attacking the app's load paths in a real browser rather than unit-testing
+  // the sanitiser in isolation: a crafted .hina.json carrying a 5,000-character title was accepted
+  // verbatim into app state. The UI fields declare maxlength="256" and the VRM writer's str() does
+  // .slice(0,256) after stripping C0 control characters, so the load path was the one place that
+  // did neither — the app displayed a value the exporter would silently cut down, which is exactly
+  // the silent truncation those maxlength attributes were added to prevent.
+  const long = 'x'.repeat(5000);
+  const withCtrl = 'a' + String.fromCharCode(0) + 'b' + String.fromCharCode(31) + 'c';
+  const out = H.sanitizeMeta({ title: long, author: withCtrl, contact: 'https://ok.example',
+                               license: 'EVIL_LICENSE', allowed: 'Everyone' });
+  ok(out.title.length === 256,
+    `R535: over-long free-text meta is capped at 256 on load (got ${out.title.length})`);
+  ok(out.author === 'abc',
+    'R535: C0 control characters are stripped from free-text meta on load');
+  ok(out.contact === 'https://ok.example',
+    'R535: ordinary strings pass through unchanged');
+  // the enum behaviour that was already correct must be preserved, not traded away
+  ok(!('license' in out),
+    'R535: an invalid enum value is still dropped entirely (unchanged from Round 492)');
+  ok(out.allowed === 'Everyone',
+    'R535: a valid enum value is still kept (unchanged from Round 492)');
+  // the cap must match the exporter's, so the two cannot drift apart
+  ok(/slice\(0,256\)/.test(html) && /[\u0000-\u001f]/.test(html),
+    'R535: the load-path normalisation mirrors the exporter str() contract (256 cap + C0 strip)');
+  // end-to-end through deserialize(), the path a loaded file actually takes
+  const round = H.deserialize(JSON.stringify({ app:'hina', params:{}, meta:{ title: long } }));
+  ok(round.meta.title.length === 256,
+    'R535: the cap applies through deserialize(), not just direct sanitizeMeta() calls');
+}
+
 /* ---- Round 528: camera rotate uses a per-pointer anchor (multi-touch jump fix) ---- */
 {
   // The last open defect in FEATURE_AUDIT §3-4: touching a second finger during a rotate drag

@@ -626,7 +626,15 @@ function sanitizeMeta(m){
     // Enum-typed fields additionally require a whitelisted value (mirrors sanitize()'s
     // s.opts.includes(v) check for enum PARAMS). An invalid value drops the key entirely —
     // same semantics as a missing key, so the merge target keeps its current valid value.
-    if (typeof v==='string' && (!META_ENUMS[k] || META_ENUMS[k].includes(v))) o[k]=v;
+    if (typeof v!=='string') continue;
+    if (META_ENUMS[k]){ if (META_ENUMS[k].includes(v)) o[k]=v; continue; }
+    // Round 535: free-text meta fields get the SAME normalisation the VRM writer's str() applies
+    // (strip C0 control chars, cap at 256). Found by actually attacking the load paths in a real
+    // browser: a crafted .hina.json carrying a 5,000-character title was accepted verbatim into
+    // app state, so the UI showed a value the exporter would silently cut to 256 - precisely the
+    // silent truncation the maxlength="256" attributes were added to prevent. Normalising here
+    // makes the load path, the input fields and the exporter agree on one contract, not three.
+    o[k]=v.replace(/[\u0000-\u001f]/g,'').slice(0,256);
   }
   return o;
 }
