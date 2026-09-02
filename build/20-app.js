@@ -1193,6 +1193,8 @@ function renderBody(scrollReset=true){
 }
 
 let statEls={};
+// Round 548: survives renderOut(), unlike the fnPreview element itself — see updateFnPrev().
+let _fnAnnounced='';
 function renderOut(bd){
   // Primary action at top — the export button is why the user opened this tab
   _exportBtn = el('button',{type:'button', class:'btn primary wide', 'aria-keyshortcuts':'Control+S Meta+S', onclick:doExport}, _exporting?t('btn.exporting'):t('btn.export'));
@@ -1208,10 +1210,21 @@ function renderOut(bd){
   // typing into the title field doesn't spam the live region with per-keystroke updates.
   const fnPrev=el('div',{class:'limit', id:'fnPreview'});
   let _fnPrevTimer=null;
+  // Round 548: the dedupe below used to compare against fnPrev.textContent, but renderOut() builds
+  // a BRAND NEW fnPrev every time, so its textContent was always '' and the check never fired. The
+  // announcement therefore fired on every Export-tab render — not just when the name changed — and
+  // 500ms later it overwrote whatever the user's actual action had announced. Measured: clicking
+  // "Make it Quest Excellent" wrote "Spring bones turned off — now Quest Excellent" at +2408ms and
+  // then "File name: hina_custom.vrm" at +2905ms, so a screen reader user was told the wrong thing
+  // about what they just did. The comparison now lives in a variable that outlives the re-render,
+  // and the first render only establishes the baseline: opening a tab is not a filename change.
   const updateFnPrev=()=>{ const s=fnameStem(); const nxt=t('out.filename')+': '+s+'.vrm';
     updateTitle();
-    if(fnPrev.textContent===nxt) return;
     fnPrev.textContent=nxt;
+    if(_fnAnnounced===nxt) return;
+    const first = _fnAnnounced==='';
+    _fnAnnounced=nxt;
+    if(first) return;
     clearTimeout(_fnPrevTimer);
     _fnPrevTimer=setTimeout(()=>{ const sr=$('srStatus'); if(sr) sr.textContent=nxt; }, 500);
   };

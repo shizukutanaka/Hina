@@ -4968,9 +4968,20 @@ function accData(j, bin, ai){
 
 /* ---- Round 237: fnPreview only sets textContent when value changes to avoid SR re-announcement ---- */
 {
-  ok(/fnPrev\.textContent===nxt\) return/.test(html) ||
-     /fnPrev\.textContent\s*!==\s*nxt/.test(html),
-    'fnPreview guarded: only updates textContent when filename actually changes (early-return on equal)');
+  // Round 548: this pinned the ORIGINAL guard, which compared against fnPrev.textContent. That was
+  // the bug: renderOut() creates a new fnPrev each time, so the comparison was always against '',
+  // the guard never fired, and every Export-tab re-render queued a filename announcement that
+  // clobbered the real one 500ms later. The requirement was always "only announce a genuine
+  // change"; only the mechanism was wrong. So assert the requirement, and specifically that the
+  // memory outlives the re-render.
+  ok(/let _fnAnnounced\s*=/.test(html),
+    'R548: the last-announced filename is remembered OUTSIDE renderOut(), so it survives a re-render');
+  ok(/if\(_fnAnnounced===nxt\) return;/.test(html),
+    'R548: an unchanged filename is not announced again (the SR de-spam guard actually fires now)');
+  ok(!/fnPrev\.textContent===nxt\) return/.test(html),
+    'R548: the guard no longer compares against a freshly-created element, which never matched');
+  ok(/_fnAnnounced===''[\s\S]{0,80}if\(first\) return;/.test(html),
+    'R548: the first render only establishes the baseline — opening the tab is not a filename change');
 }
 
 /* ---- Round 236: color-scheme:dark so native form controls render in dark mode ---- */

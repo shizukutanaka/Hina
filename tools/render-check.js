@@ -467,6 +467,57 @@ async function main(){
     await c6.close();
   }
 
+  /* --- Round 548: an action's screen-reader announcement must survive. SWOT claims "SR announcement
+     discipline (showErr unified, spam suppressed, focus restored)". Focus restoration measured
+     clean across seven DOM-rebuilding actions, but the announcement did not: clicking "Make it
+     Quest Excellent" announced the right thing and then, 500ms later, a debounced filename
+     announcement from renderOut() overwrote it — so a screen-reader user was told the wrong thing
+     about what they had just done. No source-level test can see that; it is only visible as a
+     sequence in time, which is why this watches srStatus with a MutationObserver and asserts on
+     the LAST message rather than the first. --- */
+  console.log('\nscreen-reader announcement survives the action:');
+  {
+    const ctxA = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const pa = await ctxA.newPage();
+    const bad = [];
+    let writes = [];
+    try {
+      await pa.goto('file://' + INDEX);
+      await pa.waitForTimeout(2500);
+      // give the avatar spring bones so the Quest rank drops and the fix button appears
+      await pa.getByRole('tab', { name: /Hair|髪/ }).click(); await pa.waitForTimeout(450);
+      await pa.selectOption('#pr-hairStyle', 'twin'); await pa.waitForTimeout(900);
+      await pa.getByRole('tab', { name: /Export|出力/ }).click(); await pa.waitForTimeout(700);
+
+      await pa.evaluate(() => {
+        window.__sr = [];
+        const el = document.getElementById('srStatus');
+        new MutationObserver(() => window.__sr.push(el.textContent.trim()))
+          .observe(el, { childList: true, characterData: true, subtree: true });
+      });
+      const btn = pa.getByRole('button', { name: /Make it Quest Excellent|Quest Excellent にする/ }).first();
+      if (!(await btn.count())) bad.push('the Quest-fix button did not appear, so nothing was measured');
+      else {
+        await btn.click();
+        await pa.waitForTimeout(1600);          // longer than the 500ms filename debounce
+        writes = await pa.evaluate(() => window.__sr);
+        if (!writes.length) bad.push('no announcement at all for an action that changes the avatar');
+        else {
+          const last = writes[writes.length - 1];
+          if (!/Quest Excellent|Excellent/.test(last))
+            bad.push(`the action's announcement was overwritten — last message was ${JSON.stringify(last)}`);
+          if (writes.some(w => /File name|ファイル名/.test(w)))
+            bad.push('a filename announcement fired for an action that did not change the filename');
+        }
+      }
+    } catch (e) { bad.push('threw: ' + String(e.message).slice(0, 110)); }
+    console.log('  quest-fix announcement    '
+      + (bad.length ? 'FAIL — ' + bad.join('; ')
+         : `ok (${writes.length} announcement(s), last one is the action's own and no stray filename message)`));
+    if (bad.length) failures++;
+    await ctxA.close();
+  }
+
   /* --- Round 546: typing a seed must apply THAT seed, whether you leave the field with Tab or
      with Enter. The field carries enterkeyhint='go', so Enter is the gesture it invites — on a
      phone the key is literally labelled "go". Enter was broken and nothing noticed: blur() fired
