@@ -9019,6 +9019,63 @@ function accData(j, bin, ai){
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
 }
 
+/* ---- Round 541: the "make it Quest Excellent" button must actually deliver that ---- */
+{
+  // The rank badge grows a one-tap button (Round 513) labelled btn.questFix, whose whole promise is
+  // that pressing it yields Quest Excellent. All it does is set springOff. That premise was measured
+  // once, over "all 6 presets and 300 gacha rolls" — but neither presets nor randomParams() reach
+  // the slider space a user actually has. Someone dragging height, hairLen and hairVol to their
+  // extremes is in states no preset and no gacha roll visits, and nothing pinned the promise there.
+  // Round 539 was exactly this shape: a control that says it does something and does not. So the
+  // premise is now a test rather than a comment, and it sweeps the reachable space instead of a
+  // hand-picked set of configurations.
+  //
+  // The sweep is deterministic (mulberry32 with a fixed seed) so a failure is reproducible, and it
+  // samples every parameter independently — including combinations no preset would ever produce.
+  let _r = 0x9e3779b9;
+  const rf = () => { _r |= 0; _r = _r + 0x6D2B79F5 | 0;
+    let t = Math.imul(_r ^ _r >>> 15, 1 | _r);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const pickV = sc => {
+    if (sc.k === 'bool') return rf() < 0.5;
+    if (sc.k === 'enum') return sc.opts[Math.floor(rf() * sc.opts.length)];
+    if (sc.k === 'color') return '#' + Math.floor(rf() * 0xffffff).toString(16).padStart(6, '0');
+    return sc.min + rf() * (sc.max - sc.min);
+  };
+  let notExcellent = 0, worstSeen = null, maxTris = 0, maxBones = 0;
+  const N = 3000;
+  for (let i = 0; i < N; i++){
+    const raw = {};
+    for (const k in H.PARAMS) raw[k] = pickV(H.PARAMS[k]);
+    raw.springOff = true;                       // precisely what the button does
+    const q = H.sanitize(raw);
+    const est = H.estimate(H.buildAvatar(q), q);
+    if (est.tris > maxTris) maxTris = est.tris;
+    if (est.bones > maxBones) maxBones = est.bones;
+    const r = H.rank(est, 'quest');
+    if (r.rank !== 'Excellent'){
+      notExcellent++;
+      if (!worstSeen) worstSeen = { rank: r.rank, worst: r.worst, tris: est.tris, bones: est.bones };
+    }
+  }
+  ok(notExcellent === 0,
+    `R541: springOff yields Quest Excellent across ${N} randomly sampled reachable states, so the `
+    + 'btn.questFix promise holds beyond the presets and gacha rolls it was originally measured on'
+    + (worstSeen ? ` [FAILED e.g. ${JSON.stringify(worstSeen)}]` : ''));
+  // guard the guard: if the sweep silently stopped producing varied avatars it would pass while
+  // proving nothing, so pin that it really exercised a range and stayed inside the Quest budget
+  ok(maxTris > 1000 && maxTris < 7500,
+    `R541: the sweep built real avatars and every one stayed under the 7500-tri Excellent limit (max ${maxTris})`);
+  ok(maxBones > 15 && maxBones < 75,
+    `R541: bone counts stayed under the 75-bone Excellent limit across the sweep (max ${maxBones})`);
+
+  // and the button must only be offered when it can actually help: it is rendered when the Quest
+  // rank is below Excellent AND springs are still on, which is the only state its remedy addresses
+  ok(/if \(q\.idx>0 && !params\.springOff\)/.test(html),
+    'R541: btn.questFix is offered only while the rank is below Excellent and springOff is still off');
+}
+
 /* ---- Round 540: every parameter must actually change something ---- */
 {
   // Round 539 found a colour picker that changed nothing on three of four outfits. That is a class,
