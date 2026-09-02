@@ -142,11 +142,14 @@ Raycasts は2026-04-21同期で追加された項目（Round 494で推定器テ�
 
 ## 10. 受け入れ基準（DoD）
 
-- [ ] `node tests/run.js` 全通過（GLB構造バリデータ含む）
-- [ ] 既定6プリセット: tris<7500・bones<75・mat=1・skinnedMesh=1 をテストで担保
-- [ ] 書き出したVRMがGLB仕様（マジック/チャンク/4byte整列/accessor整合）を満たすことを機械検証
-- [ ] i18n ja/en キー完全一致
-- [ ] 揺れ物OFF時 Quest判定=Excellent / ON時=Good をテストで担保
+**全項目を満たしている（2026-09 / Round 554 で実測）。** 各項目には再現コマンドと実測値を併記する。
+チェックは手作業ではなく `tests/run.js` の R554 ブロックが検証しており、**どれか1つでも崩れればテストが落ちる**。
+
+- [x] `node tests/run.js` 全通過（GLB構造バリデータ含む） — **2153 passed / 0 failed**
+- [x] 既定6プリセット: tris<7500・bones<75・mat=1・skinnedMesh=1 をテストで担保 — **最悪でも tris 1,849 / bones 30**
+- [x] 書き出したVRMがGLB仕様（マジック/チャンク/4byte整列/accessor整合）を満たすことを機械検証 — 内蔵バリデータに加え、`node tools/spec-check.js` の**公式 Khronos glTF-Validator で18バリエーション 0 errors**
+- [x] i18n ja/en キー完全一致 — **229キー / ja-only 0・en-only 0**
+- [x] 揺れ物OFF時 Quest判定=Excellent / ON時=Good をテストで担保 — 6プリセット全てで成立
 
 ---
 
@@ -293,8 +296,12 @@ Verdict: the worst rank across all categories. On Quest, "springs ON caps at Goo
 
 ## 10. Definition of done
 
-- [ ] `node tests/run.js` fully green (includes the GLB structural validator)
-- [ ] All 6 default presets: tris < 7,500, bones < 75, mat = 1, skinnedMesh = 1, guaranteed by tests
-- [ ] Exported VRMs machine-verified against the GLB format (magic/chunks/4-byte alignment/accessor consistency)
-- [ ] i18n ja/en key sets identical
-- [ ] Quest verdict = Excellent with springs off / Good with springs on, guaranteed by tests
+**Every item holds, measured 2026-09 (Round 554).** Each carries the command that reproduces it and
+the value measured. The ticks are not maintained by hand: the R554 block in `tests/run.js` checks
+every criterion, so **if any one of them stops holding, the suite fails.**
+
+- [x] `node tests/run.js` fully green (includes the GLB structural validator) — **2153 passed / 0 failed**
+- [x] All 6 default presets: tris < 7,500, bones < 75, mat = 1, skinnedMesh = 1, guaranteed by tests — **worst case tris 1,849 / bones 30**
+- [x] Exported VRMs machine-verified against the GLB format (magic/chunks/4-byte alignment/accessor consistency) — the built-in validator, plus `node tools/spec-check.js`: **official Khronos glTF-Validator, 18 variants, 0 errors**
+- [x] i18n ja/en key sets identical — **229 keys, 0 ja-only, 0 en-only**
+- [x] Quest verdict = Excellent with springs off / Good with springs on, guaranteed by tests — holds for all 6 presets

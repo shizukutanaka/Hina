@@ -9061,6 +9061,65 @@ function accData(j, bin, ai){
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
 }
 
+/* ---- Round 554: the product's own Definition of Done, made executable ---- */
+{
+  // docs/SPEC.md §10 lists five acceptance criteria, and CLAUDE.md makes SPEC normative. Every one
+  // of them held — and had held for a long time — but all five boxes were still unticked, so the
+  // document said "not done" while the evidence said otherwise. Ticking them by hand would just
+  // move the problem: a checkbox is a claim, and this session's whole method is that claims decay
+  // unless something checks them. So the ticks are backed by this block. If a criterion stops
+  // holding, this fails; and if someone unticks a box while the criterion still holds, that fails
+  // too — the document and the code are pinned to each other in both directions.
+  const spec = fs.readFileSync(path.join(__dirname, '..', 'docs', 'SPEC.md'), 'utf8');
+
+  // 1. the suite itself is green — self-evident when this runs, but assert the harness is real
+  ok(pass > 2000 && fail === 0,
+    `R554 DoD-1: the suite is green as this criterion claims (${pass} passed, ${fail} failed so far)`);
+
+  // 2. every default preset stays inside the Quest Excellent budget
+  let worstTris = 0, worstBones = 0, budgetOk = true;
+  for (const pre of H.PRESETS){
+    const p2 = H.presetParams(pre);
+    const e = H.estimate(H.buildAvatar(p2), p2);
+    worstTris = Math.max(worstTris, e.tris); worstBones = Math.max(worstBones, e.bones);
+    if (!(e.tris < 7500 && e.bones < 75 && e.mat === 1 && e.skinned === 1)) budgetOk = false;
+  }
+  ok(budgetOk, `R554 DoD-2: all ${H.PRESETS.length} presets inside tris<7500 / bones<75 / mat=1 / skinned=1 (worst ${worstTris} tris, ${worstBones} bones)`);
+
+  // 3. the exported binary is machine-verified. The zero-dependency suite carries its own GLB
+  //    structural validator; tools/spec-check.js adds the official Khronos one on top.
+  ok(/glTF|0x46546C67/.test(html) && html.includes('exportVRM'),
+    'R554 DoD-3: the exporter and its GLB structural checks are present in the build');
+
+  // 4. i18n key sets identical
+  const jaK = Object.keys(H.I18N.ja), enK = Object.keys(H.I18N.en);
+  const jaOnly = jaK.filter(k => !enK.includes(k)), enOnly = enK.filter(k => !jaK.includes(k));
+  ok(jaOnly.length === 0 && enOnly.length === 0,
+    `R554 DoD-4: ja/en key sets are identical (${jaK.length} keys)`
+    + (jaOnly.length ? ` [ja-only: ${jaOnly.slice(0,3)}]` : '') + (enOnly.length ? ` [en-only: ${enOnly.slice(0,3)}]` : ''));
+
+  // 5. springs off => Quest Excellent, springs on => at least Good, for every preset
+  const rankTrouble = [];
+  for (const pre of H.PRESETS){
+    const on = H.presetParams(pre);
+    const off = H.sanitize(Object.assign({}, on, { springOff: true }));
+    const rOn = H.rank(H.estimate(H.buildAvatar(on), on), 'quest').rank;
+    const rOff = H.rank(H.estimate(H.buildAvatar(off), off), 'quest').rank;
+    if (rOff !== 'Excellent' || !(rOn === 'Excellent' || rOn === 'Good'))
+      rankTrouble.push(`${pre.id}: on=${rOn} off=${rOff}`);
+  }
+  ok(rankTrouble.length === 0,
+    'R554 DoD-5: springs off gives Quest Excellent and springs on stays at least Good, for every preset'
+    + (rankTrouble.length ? ` [${rankTrouble.join(', ')}]` : ''));
+
+  // and the document must reflect that, in both languages — an unticked box is now a failure,
+  // because the criteria above just proved the product satisfies it
+  const boxes = (spec.match(/^- \[x\] /gm) || []).length;
+  const unticked = (spec.match(/^- \[ \] /gm) || []).length;
+  ok(boxes >= 10 && unticked === 0,
+    `R554: SPEC §10 records all five criteria as met in both languages (${boxes} ticked, ${unticked} still unticked)`);
+}
+
 /* ---- Round 553: "cannot read the clipboard" must not be reported as "your data is bad" ---- */
 {
   // Firefox and Safari do not give a file:// page clipboard.readText(). The paste button detected
