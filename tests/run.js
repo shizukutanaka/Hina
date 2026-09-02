@@ -9019,6 +9019,83 @@ function accData(j, bin, ai){
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
 }
 
+/* ---- Round 539: usesClothSub() must match what the geometry actually samples ---- */
+{
+  // Measuring which atlas block every vertex samples turned up a control that did nothing: only
+  // the `shirts` outfit puts any triangle on the clothSub block, yet the colour tab offered the
+  // "服サブ / Cloth sub" picker for every outfit. On the default outfit (onepiece) a user could
+  // change that colour and see no change at all — not in the preview, not in the exported avatar.
+  // The row is now hidden where it has no effect, exactly as skirtLen already is.
+  //
+  // The list itself is the risk: SUBCOLOR_OUTFITS is a hand-written literal, the same shape that
+  // drifted for skirts before Round 503. So this test does NOT restate the list. It DERIVES the
+  // answer from real geometry — build each outfit, classify each vertex's UV into an atlas block,
+  // and require usesClothSub() to agree.
+  //
+  // What this can and cannot catch, established by mutation rather than assumed. Editing the list
+  // alone can no longer be WRONG: geometry, the UI gate and this test all read that one constant,
+  // so adding 'hoodie' to it genuinely gives the hoodie a sub colour and everything stays true.
+  // (That mutation passes, correctly.) The failure that is still reachable is geometry going
+  // around the helper — putting uC2 on an outfit without adding it to the list — and that one is
+  // caught: it reports `usesClothSub('hoodie')=false` against geometry that samples the block.
+  const inBlock = (u, v, name) => {
+    const b = H.ATLAS[name], x = u * H.TEX, y = v * H.TEX;
+    return x >= b[0] && x <= b[0] + 64 && y >= b[1] && y <= b[1] + 64;
+  };
+  const geometryUses = (outfit, name) => {
+    for (const pre of H.PRESETS) for (const hs of H.PARAMS.hairStyle.opts){
+      const g = H.buildAvatar(Object.assign(H.presetParams(pre), { outfit, hairStyle: hs })).geom;
+      for (let i = 0; i < g.pos.length / 3; i++)
+        if (inBlock(g.uv[i*2], g.uv[i*2+1], name)) return true;
+    }
+    return false;
+  };
+  let agreed = 0;
+  for (const outfit of H.PARAMS.outfit.opts){
+    const real = geometryUses(outfit, 'clothSub');
+    ok(H.usesClothSub(outfit) === real,
+      `R539: usesClothSub('${outfit}')=${H.usesClothSub(outfit)} matches the geometry (${real ? 'samples' : 'never samples'} the clothSub block)`);
+    if (H.usesClothSub(outfit) === real) agreed++;
+  }
+  ok(agreed === H.PARAMS.outfit.opts.length && agreed >= 4,
+    `R539: every outfit was actually checked against geometry (${agreed})`);
+  // at least one outfit on each side, else the check above could pass while saying nothing
+  ok(H.PARAMS.outfit.opts.some(o => H.usesClothSub(o)) && H.PARAMS.outfit.opts.some(o => !H.usesClothSub(o)),
+    'R539: the sub-colour genuinely splits the outfits (some use it, some do not) — otherwise this gate would be pointless');
+
+  // Every vertex of every outfit must land inside SOME known atlas region. A UV pointing at unused
+  // atlas space samples transparent texels, which the MASK material discards — a hole in the body.
+  // Nothing checked this before: the existing tests only require UVs to be inside [0,1].
+  const REGIONS = ['skin','hair','clothMain','clothSub','accent','shoe','white','hairHi'];
+  const RECTS = ['eyeL','eyeR','browL','browR','mouth','blush'];
+  const inRect = (u, v, name) => {
+    const r = H.ATLAS[name], x = u * H.TEX, y = v * H.TEX;
+    return x >= r[0] && x <= r[2] && y >= r[1] && y <= r[3];
+  };
+  let stray = 0, checked = 0;
+  for (const outfit of H.PARAMS.outfit.opts) for (const hs of H.PARAMS.hairStyle.opts){
+    const g = H.buildAvatar(Object.assign(H.presetParams(H.PRESETS[0]), { outfit, hairStyle: hs })).geom;
+    for (let i = 0; i < g.pos.length / 3; i++){
+      const u = g.uv[i*2], v = g.uv[i*2+1]; checked++;
+      if (!REGIONS.some(n => inBlock(u, v, n)) && !RECTS.some(n => inRect(u, v, n))) stray++;
+    }
+  }
+  ok(checked > 20000, `R539: the stray-UV sweep really ran (${checked} vertices)`);
+  ok(stray === 0,
+    `R539: every vertex UV lands inside a painted atlas region — none sample blank atlas space, which MASK would discard into a hole (${stray} stray)`);
+
+  // the UI gate must go through core, not a second hand-written literal (the Round 503 lesson)
+  ok(/k==='clothSub'\s*&&\s*!HINA\.usesClothSub\(params\.outfit\)/.test(html),
+    'R539: the colour-tab row filter asks core usesClothSub(), it does not re-list the outfits');
+  // Narrowly: the two UV decisions must go through core. A third `p.outfit==='shirts'` remains in
+  // the geometry, deliberately — it sets the torso's bottom height for a tucked shirt, which is a
+  // proportion question, not a colour one. Folding it into usesClothSub() would tie two unrelated
+  // concepts together and break the moment either changed independently.
+  ok(/const topUv = usesClothSub\(p\.outfit\)/.test(html)
+     && /const sUv = usesClothSub\(p\.outfit\)/.test(html),
+    'R539: both clothSub UV decisions (top shell, sleeves) ask usesClothSub() rather than testing the outfit name');
+}
+
 /* ---- Round 537: the suite audits ITSELF for vacuous source-window assertions ---- */
 {
   // SWOT weakness #4 says a slice of index.html pinned by a string anchor "breaks, or rarely goes

@@ -281,7 +281,7 @@ function buildAvatar(p){
 
   /* outfit */
   const skirtTop=hipsY+0.035*H, skirtLenW = (0.10+0.10*p.skirtLen)*H;
-  const topUv = p.outfit==='shirts' ? uC2 : uC;
+  const topUv = usesClothSub(p.outfit) ? uC2 : uC;
   // top shell
   latheY(g, [
     {y:spineY-0.03*H, rx:hipR*0.84, rz:hipR*0.66, skin:tor(idx.hips,0.35,idx.spine,0.65)},
@@ -330,7 +330,7 @@ function buildAvatar(p){
   // sleeves
   {
     const tEnd = p.sleeves==='long'?0.94:0.40;
-    const sUv = p.outfit==='shirts'?uC2:uC;
+    const sUv = usesClothSub(p.outfit)?uC2:uC;
     for(const s of [-1,1]){
       const ua=s<0?idx.lUA:idx.rUA, la=s<0?idx.lLA:idx.rLA;
       const x0=s*shX*0.9, x1=s*(shX+(wristX-shX)*tEnd);

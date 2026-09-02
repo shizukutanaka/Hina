@@ -148,6 +148,17 @@ const PARAMS = {
 // merely appeared in the file, not that the two lists were actually equal to each other.
 const SKIRT_OUTFITS = ['onepiece','sailor'];
 const hasSkirt = outfit => SKIRT_OUTFITS.includes(outfit);
+
+// Round 539: same treatment for the sub-colour. The geometry decided "does this outfit use the
+// clothSub atlas block?" with a bare `p.outfit==='shirts'` written out twice (top shell, sleeves)
+// — the identical hand-written-literal shape Round 503 removed above. Measuring which atlas block
+// each vertex samples showed the consequence went further than duplication: for onepiece, sailor
+// and hoodie NO triangle samples clothSub at all, yet the colour tab still offered the "服サブ /
+// Cloth sub" picker. On the default outfit a user could change that colour and see nothing happen,
+// in the preview or in the exported avatar. The row is now hidden for those outfits, exactly as
+// skirtLen already is, and a test derives this list from the real geometry so it cannot drift.
+const SUBCOLOR_OUTFITS = ['shirts'];
+const usesClothSub = outfit => SUBCOLOR_OUTFITS.includes(outfit);
 function defaults(){ const p={}; for(const k in PARAMS) p[k]=PARAMS[k].def; return p; }
 
 function sanitize(p){

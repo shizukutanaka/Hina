@@ -1167,6 +1167,9 @@ function renderBody(scrollReset=true){
     if (s.tab!==activeTab) continue;
     if (mode==='easy' && s.adv) continue;
     if (k==='skirtLen' && !HINA.hasSkirt(params.outfit)) continue;
+    // Round 539: no geometry samples the clothSub block unless the outfit is one that uses it,
+    // so offering the picker there is a control that silently does nothing.
+    if (k==='clothSub' && !HINA.usesClothSub(params.outfit)) continue;
     if (['hairStiff','hairGrav','hairDrag'].includes(k) && params.springOff) continue;
     bd.append(paramRow(k));
   }

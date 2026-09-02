@@ -359,6 +359,17 @@ const PARAMS = {
 // merely appeared in the file, not that the two lists were actually equal to each other.
 const SKIRT_OUTFITS = ['onepiece','sailor'];
 const hasSkirt = outfit => SKIRT_OUTFITS.includes(outfit);
+
+// Round 539: same treatment for the sub-colour. The geometry decided "does this outfit use the
+// clothSub atlas block?" with a bare `p.outfit==='shirts'` written out twice (top shell, sleeves)
+// — the identical hand-written-literal shape Round 503 removed above. Measuring which atlas block
+// each vertex samples showed the consequence went further than duplication: for onepiece, sailor
+// and hoodie NO triangle samples clothSub at all, yet the colour tab still offered the "服サブ /
+// Cloth sub" picker. On the default outfit a user could change that colour and see nothing happen,
+// in the preview or in the exported avatar. The row is now hidden for those outfits, exactly as
+// skirtLen already is, and a test derives this list from the real geometry so it cannot drift.
+const SUBCOLOR_OUTFITS = ['shirts'];
+const usesClothSub = outfit => SUBCOLOR_OUTFITS.includes(outfit);
 function defaults(){ const p={}; for(const k in PARAMS) p[k]=PARAMS[k].def; return p; }
 
 function sanitize(p){
@@ -971,7 +982,7 @@ function buildAvatar(p){
 
   /* outfit */
   const skirtTop=hipsY+0.035*H, skirtLenW = (0.10+0.10*p.skirtLen)*H;
-  const topUv = p.outfit==='shirts' ? uC2 : uC;
+  const topUv = usesClothSub(p.outfit) ? uC2 : uC;
   // top shell
   latheY(g, [
     {y:spineY-0.03*H, rx:hipR*0.84, rz:hipR*0.66, skin:tor(idx.hips,0.35,idx.spine,0.65)},
@@ -1020,7 +1031,7 @@ function buildAvatar(p){
   // sleeves
   {
     const tEnd = p.sleeves==='long'?0.94:0.40;
-    const sUv = p.outfit==='shirts'?uC2:uC;
+    const sUv = usesClothSub(p.outfit)?uC2:uC;
     for(const s of [-1,1]){
       const ua=s<0?idx.lUA:idx.rUA, la=s<0?idx.lLA:idx.rLA;
       const x0=s*shX*0.9, x1=s*(shX+(wristX-shX)*tEnd);
@@ -1695,7 +1706,7 @@ function selfTest(){
 // surface an auditor must reason about. hasSkirt() and buildAvatar() remain the public entry points.
 return {
   VERSION, M, hex2rgb, shade, HEXRE, PAL, PAL_NAMES,
-  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams, hasSkirt,
+  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams, hasSkirt, usesClothSub,
   I18N, TEX, ATLAS, uvBlock, uvRect,
   RANKS, RANK_NAMES, estimate, rank,
   serialize, deserialize, sanitizeMeta, META_ENUMS, PNG1, b64ToBytes,
@@ -2875,6 +2886,9 @@ function renderBody(scrollReset=true){
     if (s.tab!==activeTab) continue;
     if (mode==='easy' && s.adv) continue;
     if (k==='skirtLen' && !HINA.hasSkirt(params.outfit)) continue;
+    // Round 539: no geometry samples the clothSub block unless the outfit is one that uses it,
+    // so offering the picker there is a control that silently does nothing.
+    if (k==='clothSub' && !HINA.usesClothSub(params.outfit)) continue;
     if (['hairStiff','hairGrav','hairDrag'].includes(k) && params.springOff) continue;
     bd.append(paramRow(k));
   }

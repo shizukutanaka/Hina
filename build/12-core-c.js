@@ -419,7 +419,7 @@ function selfTest(){
 // surface an auditor must reason about. hasSkirt() and buildAvatar() remain the public entry points.
 return {
   VERSION, M, hex2rgb, shade, HEXRE, PAL, PAL_NAMES,
-  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams, hasSkirt,
+  PARAMS, defaults, sanitize, PRESETS, presetParams, rng, randomParams, hasSkirt, usesClothSub,
   I18N, TEX, ATLAS, uvBlock, uvRect,
   RANKS, RANK_NAMES, estimate, rank,
   serialize, deserialize, sanitizeMeta, META_ENUMS, PNG1, b64ToBytes,

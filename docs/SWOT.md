@@ -1,18 +1,18 @@
 # 雛 (Hina) — 長所・短所・改善案（2026-07時点）
 
-本文書は、75ラウンドの集中監査（Round 464–538、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
+本文書は、76ラウンドの集中監査（Round 464–539、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
 
 ## 長所（実証済み）
 
 | # | 長所 | 根拠 |
 |---|------|------|
 | 1 | **依存ゼロ・単一HTML・完全ローカル** | 配布/監査/オフラインの保証。通信ゼロ（`fetch`/`XHR`/`WebSocket`/外部`<link>`不存在）は自動テストで担保 |
-| 2 | **品質保証の厚さ** | 自動テスト**2094件・0失敗**（約2秒）。ガチャは決定論的（mulberry32・3経路が単一関数に集約）。既定6プリセットの Quest Excellent（揺れ物OFF）/ Good以上（ON）はテストが保証。さらに**主要なユーザー向け約束6系統が実ブラウザE2Eで恒久検証**（書き出し・自己診断・自動保存・共有URL・Undo/Redo・視覚回帰13ケース＝`tools/render-check.js`、Round 529–531）。**スイートは自分自身も監査する**——ソース窓アンカーの死活と否定アサーションの番人規則を機械強制（Round 537） |
+| 2 | **品質保証の厚さ** | 自動テスト**2104件・0失敗**（約2秒）。ガチャは決定論的（mulberry32・3経路が単一関数に集約）。既定6プリセットの Quest Excellent（揺れ物OFF）/ Good以上（ON）はテストが保証。さらに**主要なユーザー向け約束6系統が実ブラウザE2Eで恒久検証**（書き出し・自己診断・自動保存・共有URL・Undo/Redo・視覚回帰13ケース＝`tools/render-check.js`、Round 529–531）。**スイートは自分自身も監査する**——ソース窓アンカーの死活と否定アサーションの番人規則を機械強制（Round 537） |
 | 3 | **仕様準拠の厳密性・実ローダー互換** | **公式 Khronos glTF-Validator で全11書き出し 0 errors**（Round 524）＋**参照Web VRMローダー three-vrm が全ケース完全読込**（Round 525: humanoid15ボーン/17表情/springBone/firstPerson全解決）。accessor min/max厳密一致（506）、sparse昇順、GLBヘッダ検証、VRM0メタ全enum防御、MToonキーワード整合（522）。**書き出したテクスチャの実ピクセルまで検証**（538: 全色が`randomParams(seed)`と一致） |
 | 4 | **セキュリティ硬化（実攻撃で検証済み）** | prototype pollution 対策をJSON流入の全4経路に適用（Round 469/495）、貼り付けDoSガード（470）、メタenum/シードの全層検証（492/493）。**Round 535で実ブラウザから4経路すべてへ実際に攻撃**（`__proto__`汚染・不正enum・範囲外値・3MB巨大ファイル）し、汚染ゼロ・既定値へのフォールバック・拒否をすべて実証。同時に発見した文字列契約の不整合（5,000字titleの素通し）も修正済み。**Round 536で書き出しファイル名も攻撃**し、パス脱出不能を確認のうえ制御文字・BIDI偽装・Windows予約名の取り逃しを修正 |
 | 5 | **アクセシビリティ** | WCAG 2.2 AA（新設SC 2.5.8の24pxターゲット含む）、Windowsハイコントラスト（forced-colors）での選択状態表示、SRアナウンス規律（showErr統一・スパム抑制・フォーカス復元）、完全キーボード操作 |
 | 6 | **監査証跡・二言語ドキュメント** | FEATURE_AUDIT による引き継ぎ可能な監査記録、CHANGELOG最新化、ユーザー/コントリビュータ向け文書（README・UPLOAD_GUIDE・FAQ・SPEC）の日英二言語化 |
-| 7 | **成熟度の実証** | 主要3サブシステムの全行通読 clean sweep に加え、Round 528 で最後の既知欠陥（マルチタッチ視点ジャンプ）を修正し**既知の未修正欠陥ゼロ**・**dead code ゼロ**（マスク法削除ハントで実測、Round 526）。ソクラテス問答による完成主張の検証記録は COMPLETION_AUDIT 参照 |
+| 7 | **成熟度の実証** | 主要3サブシステムの全行通読 clean sweep に加え、Round 528 で最後の既知欠陥（マルチタッチ視点ジャンプ）を修正。以後も Round 536（ファイル名）・539（効果のないカラーピッカー）と、**新しい検証手段を得るたびに新しい実欠陥が出ている**——「既知の未修正欠陥ゼロ」は現時点の状態であって、探索が尽きたという意味ではない・**dead code ゼロ**（マスク法削除ハントで実測、Round 526）。ソクラテス問答による完成主張の検証記録は COMPLETION_AUDIT 参照 |
 
 ## 短所・制約（正直に）
 
