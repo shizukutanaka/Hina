@@ -1,6 +1,6 @@
 # 雛 (Hina) — 長所・短所・改善案（2026-07時点）
 
-本文書は、88ラウンドの集中監査（Round 464–551、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
+本文書は、89ラウンドの集中監査（Round 464–552、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
 
 ## 長所（実証済み）
 
@@ -22,7 +22,7 @@
 | 2 | **表現力の上限** | ミトン手（指ボーンなし）・プリセット6体・髪型5種。v0.1スコープとしては設計通りだが競合（VRoid等）比では狭い |
 | 3 | **ドキュメントの言語** | adr（設計判断記録・開発者向け内部文書）のみ日本語。ユーザー/コントリビュータ向け文書（README・UPLOAD_GUIDE・FAQ・SPEC）は全て二言語化済み（Round 533） |
 | 4 | **テストの一部が正規表現ウィンドウ方式**（Round 537で空検証リスクは機械強制へ格上げ） | リファクタで文字列がずれると割れる点は変わらない（設計上の対価）。ただし**静かに空検証化する**方の危険は、スイート自身が全窓アンカーの死活と「否定アサーションを持つ窓は肯定アサーションも持つ」規則を検査するメタテストで**機械強制**するようにした（Round 537）。実例はRound 496/497・526・536で発見・修正済み。番人不在の窓3件も同時に解消（うち1件は通読では見つからず機械が発見） |
-| 5 | **持込経路の外部依存リスク**（コード外・2026-07の外部調査で確認） | VRM Converter for VRChat は2025-01以降更新停止、VRChatはUnity 6移行ベータ中、エコシステムはVRM 1.0へ緩やかにシフト。コンバータが追従しない場合、初心者向けアップロード経路が断絶しUPLOAD_GUIDE全面書き直しが必要 |
+| 5 | **持込経路の外部依存リスク**（コード外・**2026-09にRound 552で再実測**） | **一次ソースで確認した現状**: VRM Converter for VRChat は最新リリースが **v41.5.2（2025-01-22）で20か月更新なし**、その `package.json` は UniVRM **0.128.1** を依存宣言。一方 UniVRM は開発継続中で最新 **0.131.2（2026-07-24）**、**VRM 0.x系のリリースも継続**している（雛の対象は健在）。つまり断絶はまだ起きていないが、**コンバータだけが取り残されつつある**。UPLOAD_GUIDE は「最新のUniVRMを入れる」としか書いておらず版差の警告が無かったため、Round 552 で**日英両方にバージョン注記を追加**（不調時は 0.128.1 へ下げる）。コンバータが Unity 6 / VRM 1.0 移行に追従しない場合、初心者導線の全面書き直しが必要という見立ては変わらない |
 | 6 | **公開設定の残作業**（リポジトリSettings権限が必要・AI環境から実行不可） | デフォルトブランチの`main`切替 / `v0.1.0` Release作成 / GitHub Pages有効化（有効化すれば `https://shizukutanaka.github.io/Hina/` で直接動作） |
 
 ## 改善案（優先度順・推奨担当付き）
@@ -31,7 +31,7 @@
 |---|--------|------|------|------|
 | 1 | **P1** | 公開設定3点（default branch→main / v0.1.0 Release / GitHub Pages） | **人間** | 各1–2クリック。Pagesは配布UXを大きく改善 |
 | 2 | **P1** | 視覚検証体制の確立 — **大部分が達成済み（Round 518 形状 / Round 538 色・テクスチャ・顔パーツ）**。残るのは **Unity/UniVRM実機での取込確認**、**プレビュー描画そのものの色**（SwiftShader制約）、および **Firefox/Safari 実機での `tools/render-check.js` 相当のE2E実行**（Round 534で静的監査のみ完了） | **人間** | 形状は `node tools/render-check.js`、色は同ツールの texture colour fidelity セクション（書き出した.vrmのPNGを直接検査）で自動化済み。**AI環境で可能な視覚検証はここまで**——残りは実機・実GPU・実ゲーム内での判断 |
-| 3 | P2 | エコシステム定期監視（creators.vrchat.comのRANKS・VRM Converter・UniVRMリリース） | Sonnet／**AIセッションでも実行可** | **Round 551 で RANKS の照合はこの環境から実行可能と実証**（`creators.vrchat.com` は egress 遮断だが、creator-docs の GitHub ミラーは読める）。2026-09時点で全11カテゴリ×2プラットフォームが上流と一致＝ドリフト無し。照合値はテストに固定済みなので、次回は上流を読んで**そのリテラルを更新するだけ**でよい。VRM Converter / UniVRM のリリース監視は未着手 |
+| 3 | P2 | エコシステム定期監視（creators.vrchat.comのRANKS・VRM Converter・UniVRMリリース） | Sonnet／**AIセッションでも実行可** | **Round 551 で RANKS の照合はこの環境から実行可能と実証**（`creators.vrchat.com` は egress 遮断だが、creator-docs の GitHub ミラーは読める）。2026-09時点で全11カテゴリ×2プラットフォームが上流と一致＝ドリフト無し。照合値はテストに固定済みなので、次回は上流を読んで**そのリテラルを更新するだけ**でよい。VRM Converter / UniVRM のリリース監視も **Round 552 で実施**（両方とも一次ソースから取得できた） |
 | 4 | P3 | v0.2機能（指ボーン・髪型/衣装追加） | Opus | #2完了後のみ。骨/三角形予算の試算は FEATURE_AUDIT §3-1 に記録済み |
 | 5 | P3 | VRM 1.0 対応の再評価 | 人間 | CLAUDE.mdの「0.x固定」制約の変更判断はユーザー専権。#3の監視結果を判断材料に |
 

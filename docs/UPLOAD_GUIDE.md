@@ -26,6 +26,13 @@
 2. **VRM Converter for VRChat**: https://github.com/esperecyan/VRMConverterForVRChat の案内に従い導入（VCCリポジトリ追加 or .unitypackage）
    - 配布元: esperecyan（pixiv BOOTHでも配布）
 
+> **バージョンについて（2026-09 時点で確認）**
+> VRM Converter for VRChat の最新リリースは **v41.5.2（2025-01-22）** で、その `package.json` は
+> UniVRM **0.128.1** を依存として宣言している。一方 UniVRM 側は開発が続いており最新は **0.131.2（2026-07-24）**。
+> つまり「最新のUniVRM」を入れると、コンバータが想定するバージョンより新しくなる。
+> 多くの場合そのまま動くが、**変換時にエラーが出たら UniVRM を 0.128.1 に下げて試すこと**。
+> （UniVRM の releases ページから過去バージョンを取得できる。コンバータ側は 2025-01 以降リリースが無い。）
+
 ## 4. VRMを変換する
 1. `yourname.vrm` をUnityの **Projectウィンドウへドラッグ**（プレハブが生成される）
 2. 生成されたプレハブを選択 → メニュー **VRM0 → Duplicate and Convert for VRChat**
@@ -84,6 +91,13 @@ From the `.vrm` Hina exports to using it in VRChat. About 15–30 minutes, entir
 1. **UniVRM**: from https://github.com/vrm-c/UniVRM/releases get the **VRM 0.x `.unitypackage`** → drag & drop into Unity → Import
 2. **VRM Converter for VRChat**: install per https://github.com/esperecyan/VRMConverterForVRChat (add its VCC repository, or the `.unitypackage`)
    - Distributed by esperecyan (also on pixiv BOOTH)
+
+> **About versions (checked 2026-09)**
+> The converter's latest release is **v41.5.2 (2025-01-22)**, and its `package.json` declares a
+> dependency on UniVRM **0.128.1**. UniVRM itself is still being developed — the current release is
+> **0.131.2 (2026-07-24)**. So "the newest UniVRM" is newer than what the converter was built
+> against. It usually still works, but **if conversion errors out, drop UniVRM back to 0.128.1**
+> (older versions are on the UniVRM releases page). The converter has had no release since 2025-01.
 
 ## 4. Convert the VRM
 1. Drag `yourname.vrm` **into Unity's Project window** (a prefab is generated)
