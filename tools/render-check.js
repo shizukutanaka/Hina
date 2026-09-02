@@ -480,6 +480,7 @@ async function main(){
     const SOLID = { skin:'skinTone', hair:'hairColor', clothMain:'clothMain',
                     clothSub:'clothSub', accent:'clothAccent', shoe:'shoeColor' };
     const c7 = await browser.newContext({ viewport:{width:1200,height:900}, acceptDownloads:true });
+    const perSeed = [];   // Round 540: kept for the cross-seed comparison after this loop
     for (const seed of [424242, 7, 99991]){
       const p7 = await c7.newPage();
       const e7 = [];
@@ -535,6 +536,17 @@ async function main(){
           }
           return { distinct: seen.size, opaque: 100 * opaque / n };
         };
+        // Round 540: keep an exact copy of each face region so the seeds can be compared afterwards
+        const regionBytes = name => {
+          const r = H.ATLAS[name], out = [];
+          for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++){
+            const c = pixel(img, x, y); out.push(c.r, c.g, c.b, c.a);
+          }
+          return out.join(',');
+        };
+        perSeed.push({ seed, params: want,
+          regions: { eyeL: regionBytes('eyeL'), browL: regionBytes('browL'),
+                     mouth: regionBytes('mouth'), blush: regionBytes('blush') } });
         const eyes = region(H.ATLAS.eyeL), mouth = region(H.ATLAS.mouth), brow = region(H.ATLAS.browL);
         if (eyes.distinct < 20 || eyes.opaque < 10) bad.push(`eye region looks unpainted (${eyes.distinct} colours, ${eyes.opaque.toFixed(1)}% opaque)`);
         if (mouth.distinct < 10 || mouth.opaque < 5) bad.push(`mouth region looks unpainted (${mouth.distinct} colours, ${mouth.opaque.toFixed(1)}% opaque)`);
@@ -601,6 +613,39 @@ async function main(){
       if (bad.length) failures++;
     }
     await c7.close();
+
+    /* --- Round 540: does each face control actually DO anything?
+       Round 539 found a colour picker that changed nothing, because a control being wired up
+       (clothSub really was painted into the atlas) does not mean anything consumes it. The same
+       question applies to every face parameter. This needs no extra exports: the three seeds above
+       already carry different eyeShape / irisSize / eyeColor / browType / hairColor / mouthW /
+       blush, so core can say which pairs OUGHT to differ, and the decoded textures say whether
+       they do. A region that stays byte-identical while its inputs change is a dead control.
+       It skips rather than fails when the seeds happen to agree, so it can never fail vacuously. --- */
+    const DRIVERS = {
+      eyeL:  ['eyeShape', 'irisSize', 'eyeColor'],
+      browL: ['browType', 'hairColor'],
+      mouth: ['mouthW'],
+      blush: ['blush'],
+    };
+    for (const [name, keys] of Object.entries(DRIVERS)){
+      let compared = 0, differed = 0;
+      for (let i = 0; i < perSeed.length; i++) for (let j = i + 1; j < perSeed.length; j++){
+        const a = perSeed[i], b = perSeed[j];
+        if (keys.every(k => String(a.params[k]) === String(b.params[k]))) continue;  // nothing to expect
+        compared++;
+        if (a.regions[name] !== b.regions[name]) differed++;
+      }
+      if (!compared){
+        console.log(`  ${name.padEnd(22)}    skipped (these seeds agree on ${keys.join('/')}, nothing to compare)`);
+      } else {
+        const okc = differed === compared;
+        console.log(`  ${name.padEnd(22)}    `
+          + (okc ? `ok (${compared} seed pair(s) differ in ${keys.join('/')}, and the painted region differs too)`
+                 : `FAIL — ${compared - differed} of ${compared} seed pair(s) changed ${keys.join('/')} but painted an IDENTICAL ${name} region`));
+        if (!okc) failures++;
+      }
+    }
   }
 
   await browser.close();

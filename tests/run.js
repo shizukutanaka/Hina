@@ -9019,6 +9019,70 @@ function accData(j, bin, ai){
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
 }
 
+/* ---- Round 540: every parameter must actually change something ---- */
+{
+  // Round 539 found a colour picker that changed nothing on three of four outfits. That is a class,
+  // not an incident, so this enumerates it instead of hunting one more instance: perturb each
+  // PARAMS entry in turn and ask whether ANY observable output moves — the built geometry, or the
+  // bytes of the exported VRM. A control that moves neither is, from the user's seat, a lie.
+  //
+  // Eleven parameters legitimately move neither, because they are painted into the texture atlas by
+  // the UI layer (drawAtlas/drawEye/drawBrow), which core cannot reach — a Node export carries the
+  // 1x1 placeholder PNG, not the real atlas. Those are listed below and are covered end-to-end by
+  // tools/render-check.js instead (Round 538 checks the colours land in the exported PNG; Round 540
+  // checks each face region actually changes when its inputs do). The assertion is set EQUALITY in
+  // both directions, so a newly-added dead control cannot hide by simply not being on the list.
+  const ATLAS_ONLY = ['eyeShape','irisSize','browType','blush',
+                      'skinTone','hairColor','eyeColor','clothMain','clothSub','clothAccent','shoeColor'];
+
+  const geomSig = p => {
+    const b = H.buildAvatar(p), g = b.geom;
+    return JSON.stringify([g.pos.map(v => +v.toFixed(6)), g.uv.map(v => +v.toFixed(6)),
+      g.idx, g.jnt, g.wgt.map(v => +v.toFixed(5)),
+      b.bones.map(x => [x.name, x.w && x.w.map(v => +v.toFixed(6))]), b.springs.length]);
+  };
+  const meta540 = H.sanitizeMeta({ title: 'sweep' });
+  const png540 = H.b64ToBytes(H.PNG1);
+  const expBytes = p => Buffer.from(H.exportVRM(H.buildAvatar(p), p, meta540, png540, null, H.defaultExprMix()).bytes);
+
+  // start from a hair style that HAS spring chains, otherwise springOff/hairStiff/hairGrav/hairDrag
+  // are unreachable and would look dead for a reason that is about the base state, not the control
+  const base540 = H.sanitize(Object.assign(H.defaults(), { hairStyle: 'twin' }));
+  ok(H.buildAvatar(base540).springs.length > 0,
+    'R540: the sweep starts from a configuration that actually has spring chains');
+  const g0 = geomSig(base540), e0 = expBytes(base540);
+
+  const altOf = (k, sc) => {
+    if (sc.k === 'bool') return !base540[k];
+    if (sc.k === 'enum') return sc.opts.find(o => o !== base540[k]);
+    if (sc.k === 'color') return base540[k] === '#123456' ? '#654321' : '#123456';
+    return base540[k] === sc.max ? sc.min : sc.max;
+  };
+  const inert = [];
+  let swept = 0;
+  for (const k in H.PARAMS){
+    const sc = H.PARAMS[k];
+    const v = altOf(k, sc);
+    if (v === undefined || v === base540[k]) continue;
+    swept++;
+    const p2 = H.sanitize(Object.assign({}, base540, { [k]: v }));
+    const moved = geomSig(p2) !== g0 || !expBytes(p2).equals(e0);
+    if (!moved) inert.push(k);
+  }
+  ok(swept >= 30, `R540: the sweep really covered the parameter set (${swept} parameters perturbed)`);
+
+  const missing = ATLAS_ONLY.filter(k => !inert.includes(k));
+  const surprise = inert.filter(k => !ATLAS_ONLY.includes(k));
+  ok(surprise.length === 0,
+    'R540: no parameter is inert — every control changes the geometry or the exported VRM, except the '
+    + 'texture-atlas ones covered by tools/render-check.js'
+    + (surprise.length ? ` [INERT AND UNEXPLAINED: ${surprise.join(', ')}]` : ''));
+  ok(missing.length === 0,
+    'R540: every parameter excused as "atlas-only" really is inert in core — otherwise the excuse is '
+    + 'stale and the list should shrink'
+    + (missing.length ? ` [NO LONGER ATLAS-ONLY: ${missing.join(', ')}]` : ''));
+}
+
 /* ---- Round 539: usesClothSub() must match what the geometry actually samples ---- */
 {
   // Measuring which atlas block every vertex samples turned up a control that did nothing: only
