@@ -4409,6 +4409,10 @@ function accData(j, bin, ai){
   const _onParamStart = html.indexOf("function onParam(");
   const _onParamEnd   = html.indexOf("\nfunction ", _onParamStart + 1);
   const _onParamBody  = html.slice(_onParamStart, _onParamEnd);
+  // Round 537 sentinel: a negative assertion over a source window passes vacuously if the window
+  // is empty, so prove the window really is onParam()'s body before asserting what is absent.
+  ok(_onParamBody.startsWith('function onParam(') && /rebuild\(\)/.test(_onParamBody),
+    'R537 sentinel: the onParam window is non-empty and really contains onParam()\'s rebuild() call');
   ok(!/rebuild\(\);\s*renderBody\(\)/.test(_onParamBody),
     'renderBody() is not called unconditionally after rebuild() in onParam — prevents scroll-jump on every slider tick');
 
@@ -5694,6 +5698,10 @@ function accData(j, bin, ai){
   const barFnStart = html.indexOf('function buildExprBar()');
   const barFnEnd = html.indexOf('\nfunction ', barFnStart + 1);
   const barFnBody = html.slice(barFnStart, barFnEnd > barFnStart ? barFnEnd : barFnStart + 2000);
+  // Round 537 sentinel: without this, renaming buildExprBar() would empty the window and the
+  // negative below would pass while proving nothing.
+  ok(barFnBody.startsWith('function buildExprBar()') && barFnBody.length > 100,
+    'R537 sentinel: the buildExprBar window is non-empty and really contains that function');
   ok(!barFnBody.includes("bar.addEventListener('keydown'"),
     'buildExprBar() does not register its own keydown listener (avoids accumulation on each rebuild)');
 
@@ -7574,6 +7582,10 @@ function accData(j, bin, ai){
   const lockIdx = html.indexOf("const lockWrap=el('div',{style:'margin-top:6px");
   ok(lockIdx>=0, 'gacha-lock lockWrap construction found in source');
   const lockChunk = html.slice(lockIdx, lockIdx+700);
+  // Round 537 sentinel: lockIdx>=0 above only proves the anchor exists; this proves the 700-char
+  // window still spans the checkbox markup the negative assertion below is talking about.
+  ok(/type:'checkbox'/.test(lockChunk) && /el\('label'/.test(lockChunk),
+    'R537 sentinel: the lockWrap window still spans the gacha-lock checkbox + label markup');
   ok(!/class:'row'/.test(lockChunk),
     'lockWrap/label genuinely have no class:\'row\' (confirms this was a real, not hypothetical, gap)');
   // The fix: the CSS rule is no longer .row-scoped, so it applies to input[type=checkbox]
@@ -9005,6 +9017,79 @@ function accData(j, bin, ai){
     'dialog has overscroll-behavior:contain to prevent scroll chaining to the page behind it');
   ok(/prefers-reduced-motion:reduce[\s\S]{0,200},dialog\{transition:none/.test(html),
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
+}
+
+/* ---- Round 537: the suite audits ITSELF for vacuous source-window assertions ---- */
+{
+  // SWOT weakness #4 says a slice of index.html pinned by a string anchor "breaks, or rarely goes
+  // vacuous, when a refactor shifts the text", and that this is "covered by convention". It had
+  // already bitten three times (R496/497 stale literal, R526 comment pushed a name out of a
+  // 400-char window, R536 four tests pinned the literal source of safeName). Convention is not a
+  // control. Musk step 5 - automate - applies to the test suite as much as to the product, so the
+  // rule is now enforced by machine instead of by memory.
+  //
+  // Two failure modes, both silent:
+  //   A. The anchor literal no longer occurs in index.html. html.indexOf() returns -1, the slice
+  //      collapses to '', and every NEGATIVE assertion over that window passes proving nothing.
+  //   B. The anchor still resolves but the fixed-length window no longer spans the code, so a
+  //      negative assertion again passes vacuously.
+  // Mode A is caught exactly: every anchor literal must occur in index.html. Mode B is caught by
+  // the sentinel rule: a window used in a negative assertion must ALSO carry a positive assertion
+  // over the same window, which fails loudly when the window drifts. Adding this check found three
+  // windows with no sentinel (_onParamBody, barFnBody, lockChunk) - barFnBody was not visible to a
+  // read-through, which is the whole argument for automating it.
+  const selfSrc = fs.readFileSync(__filename, 'utf8');
+  // Comment lines must NOT count as references. Found by mutation-testing this very block:
+  // deleting a real sentinel still passed, because the prose above happens to name the three
+  // windows it found. A guard a comment can defeat is not a guard.
+  const selfLines = selfSrc.split('\n').filter(L => !/^\s*(?:\/\/|\/\*|\*)/.test(L));
+
+  // --- A. every html.indexOf()/lastIndexOf() anchor literal must still occur in index.html ---
+  const anchorRe = /html\.(?:last)?indexOf\(\s*(['"])((?:\\.|(?!\1).)*)\1/g;
+  const anchors = new Map();
+  let am;
+  while ((am = anchorRe.exec(selfSrc))){
+    let lit;
+    try { lit = JSON.parse('"' + am[2].replace(/"/g, '\\"').replace(/\\'/g, "'") + '"'); }
+    catch (e) { lit = am[2]; }
+    const line = selfSrc.slice(0, am.index).split('\n').length;
+    if (!anchors.has(lit)) anchors.set(lit, []);
+    anchors.get(lit).push(line);
+  }
+  // Guard the guard: if the scanner regex ever stops matching it would report a clean sweep over
+  // an empty set - the exact vacuity this block exists to prevent.
+  ok(anchors.size >= 40,
+    `R537: the anchor scanner still finds the window anchors (got ${anchors.size}, expect >= 40)`);
+  const deadAnchors = [...anchors].filter(([lit]) => !html.includes(lit))
+    .map(([lit, ls]) => `${JSON.stringify(lit)} (run.js:${ls.join(',')})`);
+  ok(deadAnchors.length === 0,
+    'R537: every source-window anchor literal still occurs in index.html — a dead anchor silently '
+    + 'empties its window and makes negative assertions vacuous' + (deadAnchors.length ? ' [DEAD: ' + deadAnchors.join(' | ') + ']' : ''));
+
+  // --- B. every window used negatively must also be used positively (the sentinel rule) ---
+  const declRe = /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=[^;]*?html\.slice\(/g;
+  const winNames = new Set();
+  let dm;
+  while ((dm = declRe.exec(selfSrc))) winNames.add(dm[1]);
+  ok(winNames.size >= 40,
+    `R537: the window-variable scanner still finds the sliced windows (got ${winNames.size}, expect >= 40)`);
+  const noSentinel = [];
+  for (const n of winNames){
+    const isDecl  = new RegExp('(?:const|let|var)\\s+' + n + '\\b\\s*=');
+    // strip the two shapes that assert ABSENCE, then ask whether the name is still referenced
+    const negTest = new RegExp('!\\s*/(?:\\\\.|\\[[^\\]]*\\]|[^/])*/[gimsuy]*\\.test\\(\\s*' + n + '\\s*\\)', 'g');
+    const negVar  = new RegExp('!\\s*' + n + '\\b', 'g');
+    let positive = false;
+    for (const L of selfLines){
+      if (!L.includes(n) || isDecl.test(L)) continue;
+      if (L.replace(negTest, '').replace(negVar, '').includes(n)){ positive = true; break; }
+    }
+    if (!positive) noSentinel.push(n);
+  }
+  ok(noSentinel.length === 0,
+    'R537: every sliced source window carries at least one POSITIVE assertion, so a window that '
+    + 'drifts off its target fails loudly instead of passing vacuously'
+    + (noSentinel.length ? ' [NO SENTINEL: ' + noSentinel.join(', ') + ']' : ''));
 }
 
 /* ---- selfTest ---- */
