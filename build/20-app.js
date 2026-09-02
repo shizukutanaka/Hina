@@ -1468,8 +1468,36 @@ function download(bytes, name, type){
 // 100-char cap: longest suffix is '.hina.json' (10) → 110 chars total, well under OS limits (255 bytes)
 // Windows reserves these device names for ANY extension (CON.vrm is blocked same as bare CON) —
 // a title that sanitizes down to one of them would make the exported file unsaveable on Windows.
-const WIN_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
-function safeName(s, fb){ let v=(s||'').trim().replace(/[\\/:*?"<>|]/g,'_').slice(0,100); if (WIN_RESERVED.test(v)) v+='_'; return v||fb; }
+// Round 536: Windows reserves these device names with ANY extension - CON.txt is as unusable as
+// CON - so the guard must match a reserved FIRST COMPONENT, not just a bare exact name. The old
+// /^(...)$/ form missed 'CON.vrm', and appending '_' to the whole string would not have helped
+// anyway (Windows reads the part before the first dot), so the underscore now goes immediately
+// after the reserved word: CON -> CON_, CON.vrm -> CON_.vrm, while CONSOLE is left alone.
+const WIN_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?=\.|$)/i;
+// Round 536: this is the single chokepoint for every exported filename (.vrm, .hina.json and the
+// screenshot PNG), built from meta.title, so it was attacked directly with 20 payloads. Path
+// escape was already impossible - separators become '_', so '../../../etc/passwd' collapses to
+// '.._.._.._etc_passwd' - and the Windows reserved-device guard held. Three gaps did show up:
+//   1. C0 control characters survived, even though the VRM writer's str() and sanitizeMeta()
+//      (Round 535) both strip them. This function was the third layer still out of contract.
+//   2. BIDI overrides survived, which is the classic filename display-spoof (a .vrm that reads
+//      as another extension in a file manager). Reachable via a crafted .hina.json, since those
+//      code points are not C0 and so pass sanitizeMeta().
+//   3. A leading dot made the export a hidden file on Unix ('where did my file go?'), and a
+//      trailing dot is silently dropped by Windows.
+// Severity is genuinely low - output always carries a .vrm/.json/.png extension and cannot escape
+// the download directory - but all three close in one function, so the three layers now agree.
+function safeName(s, fb){
+  let v=(s||'').trim()
+    .replace(/[\u0000-\u001f\u007f]/g,'')      // C0 + DEL, matching str() and sanitizeMeta()
+    .replace(/[\u202a-\u202e\u2066-\u2069]/g,'')    // BIDI overrides: filename display spoofing
+    .replace(/[\\/:*?"<>|]/g,'_')   // path separators and Windows-illegal characters
+    .slice(0,100)
+    .replace(/^[.]+/,'')            // no hidden files, no dot-only names
+    .replace(/[. ]+$/,'');          // Windows silently strips trailing dots and spaces
+  v = v.replace(WIN_RESERVED, '$1_');
+  return v||fb;
+}
 function fnameStem(){ return safeName(meta.title, lastGachaSeed!==null ? 'hina_gacha_'+lastGachaSeed : 'hina_'+(activePresetId||'custom')); }
 // Round 500: single source of truth for document.title (and the navigator.share title, which
 // wants the same string). Previously 3 uncoordinated sites raced: rebuild() (Round 33) set a

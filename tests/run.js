@@ -4506,7 +4506,7 @@ function accData(j, bin, ai){
   // Fix: slice(0, 100) in safeName() — longest suffix '.hina.json' gives 110 chars total.
 
   // Source: safeName() has .slice(0,100)
-  ok(/safeName[\s\S]{0,100}slice\(0,100\)/.test(html),
+  ok(/function safeName[\s\S]{0,900}?\.slice\(0,100\)/.test(html),
     'safeName() clamps result to 100 characters via .slice(0,100) (filesystem safety)');
 
   // Functional: a 256-char title produces a stem of exactly 100 chars
@@ -8387,15 +8387,49 @@ function accData(j, bin, ai){
   // Windows blocks these names for ANY extension — "con.vrm" is just as unsaveable as bare "con".
   // A title that sanitizes down to one of them would silently break export/save on Windows with
   // no useful error message (showSaveFilePicker throws, or <a download> gets silently mangled).
-  ok(/WIN_RESERVED\s*=\s*\/\^\(con\|prn\|aux\|nul\|com\[1-9\]\|lpt\[1-9\]\)\$\/i/.test(html),
-    'R472: WIN_RESERVED regex covers all Windows reserved device names, case-insensitive');
-  ok(/if \(WIN_RESERVED\.test\(v\)\) v\+='_'/.test(html),
-    'R472: safeName() appends an underscore suffix when the sanitized stem matches a reserved name');
-  // Order matters: the reserved-name check must run on the already-trimmed/replaced/sliced value
-  const snIdx = html.indexOf('function safeName(s, fb)');
-  const snLine = snIdx >= 0 ? html.slice(snIdx, snIdx + 220) : '';
-  ok(/slice\(0,100\)[\s\S]{0,20}if \(WIN_RESERVED\.test\(v\)\)/.test(snLine),
-    'R472: reserved-name check runs after trim/replace/slice, on the final sanitized stem');
+  // Round 536: these three assertions used to pin the literal source shape of the old
+  // /^(...)$/ regex and the `if (WIN_RESERVED.test(v)) v+='_'` line. Attacking the sanitizer
+  // showed that exact-match form was wrong: Windows reserves CON, NUL and friends with ANY
+  // extension, so "CON.vrm" slipped through, and appending '_' to the whole string would not
+  // have helped anyway because Windows reads the component before the first dot. The guard now
+  // inserts the underscore right after the reserved word. Pinning source text is what made these
+  // tests break on a behaviour-improving change (SWOT #4), so they now assert BEHAVIOUR through
+  // the real function extracted from the build.
+  const _snSrc = html.slice(html.indexOf('const WIN_RESERVED'),
+                            html.indexOf('function fnameStem'));
+  const safeName = new Function(_snSrc + '; return safeName;')();
+  const firstComponentOf = n => n.split('.')[0];
+  const RESERVED_BARE = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+  for (const name of ['CON', 'con', 'PRN', 'AUX', 'NUL', 'COM1', 'COM9', 'LPT1', 'LPT9']){
+    ok(!RESERVED_BARE.test(firstComponentOf(safeName(name, 'fb'))),
+      `R536: bare reserved device name "${name}" is defused (got ${JSON.stringify(safeName(name, 'fb'))})`);
+    const withExt = name + '.vrm';
+    ok(!RESERVED_BARE.test(firstComponentOf(safeName(withExt, 'fb'))),
+      `R536: reserved name with an extension "${withExt}" is defused too (got ${JSON.stringify(safeName(withExt, 'fb'))})`);
+  }
+  // names that merely start with or contain a reserved word must be left alone
+  for (const ok_name of ['CONSOLE', 'myCON', 'contract', 'nulla']){
+    ok(safeName(ok_name, 'fb') === ok_name,
+      `R536: "${ok_name}" is not a reserved name and passes through unchanged`);
+  }
+  // the three gaps the attack exposed, asserted on behaviour
+  ok(safeName('evil' + String.fromCharCode(0) + '.exe', 'fb') === 'evil.exe',
+    'R536: C0 control characters are stripped from the filename stem');
+  ok(!/[\u202a-\u202e\u2066-\u2069]/.test(safeName('evil' + String.fromCharCode(0x202E) + 'gnp.vrm', 'fb')),
+    'R536: BIDI override characters are stripped (filename display spoofing)');
+  ok(safeName('.bashrc', 'fb') === 'bashrc',
+    'R536: a leading dot is removed so the export is not a hidden file');
+  ok(safeName('..', 'fb') === 'fb' && safeName('...', 'fb') === 'fb',
+    'R536: dot-only titles fall back instead of producing odd names');
+  ok(safeName('name.', 'fb') === 'name',
+    'R536: trailing dots are removed (Windows strips them silently)');
+  // and the defences that already worked must not regress
+  ok(!/[\\/]/.test(safeName('../../../etc/passwd', 'fb')),
+    'R536: path separators cannot survive, so directory escape stays impossible');
+  ok(safeName('', 'fb') === 'fb' && safeName('   ', 'fb') === 'fb',
+    'R536: empty and whitespace-only titles fall back to the generated stem');
+  ok(safeName('x'.repeat(500), 'fb').length === 100,
+    'R536: the 100-character clamp still applies');
 }
 
 /* ---- Round 471: saveState() catch only calls showErr() once per broken-localStorage transition ---- */
