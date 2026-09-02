@@ -511,6 +511,77 @@ async function main(){
         }
       }
     } catch (e) { bad.push('threw: ' + String(e.message).slice(0, 110)); }
+    /* Round 549: the same question across a set of actions rather than one. Two rules, both of
+       which the quest-fix bug broke: a live region must not receive the SAME sentence twice in a
+       row (screen readers re-announce it), and the LAST thing said after an action must be about
+       that action.
+
+       Measured by wrapping the textContent setter, NOT with a MutationObserver: setting
+       textContent emits more than one mutation record, and counting records reported 9 identical
+       writes for a single gacha click where there was really one. That false reading looked
+       exactly like the spam this is meant to detect. */
+    {
+      const bad2 = [];
+      let report = [];
+      try {
+        const pb = await ctxA.newPage();
+        await pb.goto('file://' + INDEX);
+        await pb.waitForTimeout(2500);
+        const arm = () => pb.evaluate(() => {
+          window.__ann = [];
+          const d = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent');
+          for (const id of ['srStatus', 'srAlert', 'autoSaveBadge']){
+            const el = document.getElementById(id);
+            if (!el || el.__wrapped) continue;
+            Object.defineProperty(el, 'textContent', {
+              configurable: true,
+              get(){ return d.get.call(this); },
+              set(v){ window.__ann.push(id + '|' + String(v).trim()); d.set.call(this, v); },
+            });
+            el.__wrapped = true;
+          }
+          window.__ann = [];
+        });
+        const actions = [
+          ['slider', async () => {
+            await pb.getByRole('tab', { name: /Body|体型/ }).click(); await pb.waitForTimeout(450);
+            await (await pb.$('#pr-height')).focus();
+            for (let i = 0; i < 4; i++){ await pb.keyboard.press('ArrowRight'); await pb.waitForTimeout(90); }
+          }, /Undo|元に戻す/],
+          ['preset', async () => {
+            await pb.getByRole('tab', { name: /Preset|プリセット/ }).click(); await pb.waitForTimeout(450);
+            const cards = await pb.$$('#tabBody .preCard'); await cards[3].click();
+          }, null],
+          ['gacha', async () => {
+            await pb.getByRole('tab', { name: /Preset|プリセット/ }).click(); await pb.waitForTimeout(450);
+            await pb.click('#gachaBtn');
+          }, /Gacha|ガチャ/],
+        ];
+        for (const [name, act, lastMustMatch] of actions){
+          await arm();
+          await act();
+          await pb.waitForTimeout(2200);
+          const writes = (await pb.evaluate(() => window.__ann)).filter(w => w.split('|')[1] !== '');
+          let repeated = 0;
+          for (let i = 1; i < writes.length; i++) if (writes[i] === writes[i - 1]) repeated++;
+          if (repeated) bad2.push(`${name}: the same sentence was written to a live region ${repeated} time(s) in a row`);
+          if (!writes.length) bad2.push(`${name}: nothing was announced at all`);
+          else if (lastMustMatch){
+            const srWrites = writes.filter(w => w.startsWith('srStatus|'));
+            const last = srWrites.length ? srWrites[srWrites.length - 1] : '';
+            if (!lastMustMatch.test(last))
+              bad2.push(`${name}: the last srStatus message was ${JSON.stringify(last.slice(0, 50))}, not about the action`);
+          }
+          report.push(`${name}=${writes.length}`);
+        }
+        await pb.close();
+      } catch (e) { bad2.push('threw: ' + String(e.message).slice(0, 100)); }
+      console.log('  no live-region spam       '
+        + (bad2.length ? 'FAIL — ' + bad2.join('; ')
+           : `ok (${report.join(', ')} announcement(s); none repeated, each action's own message last)`));
+      if (bad2.length) failures++;
+    }
+
     console.log('  quest-fix announcement    '
       + (bad.length ? 'FAIL — ' + bad.join('; ')
          : `ok (${writes.length} announcement(s), last one is the action's own and no stray filename message)`));
