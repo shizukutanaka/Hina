@@ -1,6 +1,6 @@
 # 雛 (Hina) — 長所・短所・改善案（2026-07時点）
 
-本文書は、68ラウンドの集中監査（Round 464–531、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
+本文書は、71ラウンドの集中監査（Round 464–534、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
 
 ## 長所（実証済み）
 
