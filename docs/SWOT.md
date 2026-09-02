@@ -1,13 +1,13 @@
 # 雛 (Hina) — 長所・短所・改善案（2026-07時点）
 
-本文書は、87ラウンドの集中監査（Round 464–550、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
+本文書は、88ラウンドの集中監査（Round 464–551、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
 
 ## 長所（実証済み）
 
 | # | 長所 | 根拠 |
 |---|------|------|
 | 1 | **依存ゼロ・単一HTML・完全ローカル**（通信ゼロは Round 543 で**実測**） | 配布/監査/オフラインの保証。**訂正**: 本項は以前「`fetch`/`XHR`/`WebSocket`/外部`<link>`不存在は自動テストで担保」と書いていたが、実際に存在したのはソース正規表現3本のみで、**XHR・WebSocket・sendBeacon・EventSource・動的`import()`・Service Worker はどのテストでも検査されていなかった**（製品は clean だったが、それを保つものが無かった）。Round 543 で不足分をテスト化し、さらに**実ブラウザのリクエストログを付けてアプリ全体を操作**する監査を`tools/render-check.js` に追加——全タブ・ガチャ・表情・書き出しを実行して**観測されたリクエストは文書自身の1件のみ**、5種のネットワークAPIは**一度も呼ばれない**ことを実測（実行時組み立てのURLは正規表現では見えないため）|
-| 2 | **品質保証の厚さ** | 自動テスト**2144件・0失敗**（約2秒）。ガチャは決定論的（mulberry32・3経路が単一関数に集約）。既定6プリセットの Quest Excellent（揺れ物OFF）/ Good以上（ON）はテストが保証。さらに**主要なユーザー向け約束6系統が実ブラウザE2Eで恒久検証**（書き出し・自己診断・自動保存・共有URL・Undo/Redo・視覚回帰13ケース＝`tools/render-check.js`、Round 529–531）。**スイートは自分自身も監査する**——ソース窓アンカーの死活と否定アサーションの番人規則を機械強制（Round 537）。さらに**全38パラメータを摂動して「出力が動かないコントロール」を集合等価で固定**（Round 540）——効かないUIが増えれば即座に失敗する |
+| 2 | **品質保証の厚さ** | 自動テスト**2148件・0失敗**（約2秒）。ガチャは決定論的（mulberry32・3経路が単一関数に集約）。既定6プリセットの Quest Excellent（揺れ物OFF）/ Good以上（ON）はテストが保証。さらに**主要なユーザー向け約束6系統が実ブラウザE2Eで恒久検証**（書き出し・自己診断・自動保存・共有URL・Undo/Redo・視覚回帰13ケース＝`tools/render-check.js`、Round 529–531）。**スイートは自分自身も監査する**——ソース窓アンカーの死活と否定アサーションの番人規則を機械強制（Round 537）。さらに**全38パラメータを摂動して「出力が動かないコントロール」を集合等価で固定**（Round 540）——効かないUIが増えれば即座に失敗する |
 | 3 | **仕様準拠の厳密性・実ローダー互換** | **公式 Khronos glTF-Validator で 0 errors**＋**参照Web VRMローダー three-vrm が全ケース完全読込**（Round 524/525 で確立。**Round 550 で25ラウンド分の変更後に再実測し維持を確認**——対象を11→**18ケース**へ拡大し、`node tools/spec-check.js` の1コマンドで再現可能にした）。accessor min/max厳密一致（506）、sparse昇順、GLBヘッダ検証、VRM0メタ全enum防御、MToonキーワード整合（522）。**書き出したテクスチャの実ピクセルまで検証**（538: 全色が`randomParams(seed)`と一致） |
 | 4 | **セキュリティ硬化（実攻撃で検証済み）** | prototype pollution 対策をJSON流入の全4経路に適用（Round 469/495）、貼り付けDoSガード（470）、メタenum/シードの全層検証（492/493）。**Round 535で実ブラウザから4経路すべてへ実際に攻撃**（`__proto__`汚染・不正enum・範囲外値・3MB巨大ファイル）し、汚染ゼロ・既定値へのフォールバック・拒否をすべて実証。同時に発見した文字列契約の不整合（5,000字titleの素通し）も修正済み。**Round 536で書き出しファイル名も攻撃**し、パス脱出不能を確認のうえ制御文字・BIDI偽装・Windows予約名の取り逃しを修正 |
 | 5 | **アクセシビリティ**（キーボード操作は Round 542 で**実測済み**） | WCAG 2.2 AA（新設SC 2.5.8の24pxターゲット含む）、Windowsハイコントラスト（forced-colors）での選択状態表示、SRアナウンス規律（showErr統一・スパム抑制・フォーカス復元）——**Round 548 で実測**: DOM再構築を伴う7操作すべてでフォーカス復元はクリーンだったが、**読み上げは0.5秒後に別内容へ上書きされていた**（修正済み・E2Eで恒久検証）。**Round 549 でスパム抑制も実測**——スライダー/プリセット/ガチャいずれも同一文の連続書き込みはゼロで、操作自身の文が最後に来る（主張どおり）。**完全キーボード操作**は主張ではなく実測——roving tabindex を使う4グループ（タブリスト・表情バー・カラースウォッチ・プリセットカード）すべてで、実ブラウザの実キー入力により Arrow/Home/End の移動と Enter/Space の実行を確認し `tools/render-check.js` へ恒久化（WCAG 2.1.1）|
@@ -31,7 +31,7 @@
 |---|--------|------|------|------|
 | 1 | **P1** | 公開設定3点（default branch→main / v0.1.0 Release / GitHub Pages） | **人間** | 各1–2クリック。Pagesは配布UXを大きく改善 |
 | 2 | **P1** | 視覚検証体制の確立 — **大部分が達成済み（Round 518 形状 / Round 538 色・テクスチャ・顔パーツ）**。残るのは **Unity/UniVRM実機での取込確認**、**プレビュー描画そのものの色**（SwiftShader制約）、および **Firefox/Safari 実機での `tools/render-check.js` 相当のE2E実行**（Round 534で静的監査のみ完了） | **人間** | 形状は `node tools/render-check.js`、色は同ツールの texture colour fidelity セクション（書き出した.vrmのPNGを直接検査）で自動化済み。**AI環境で可能な視覚検証はここまで**——残りは実機・実GPU・実ゲーム内での判断 |
-| 3 | P2 | エコシステム定期監視（creators.vrchat.comのRANKS・VRM Converter・UniVRMリリース） | Sonnet | 変化があればOpus/人間へ報告のみ（対応判断はしない） |
+| 3 | P2 | エコシステム定期監視（creators.vrchat.comのRANKS・VRM Converter・UniVRMリリース） | Sonnet／**AIセッションでも実行可** | **Round 551 で RANKS の照合はこの環境から実行可能と実証**（`creators.vrchat.com` は egress 遮断だが、creator-docs の GitHub ミラーは読める）。2026-09時点で全11カテゴリ×2プラットフォームが上流と一致＝ドリフト無し。照合値はテストに固定済みなので、次回は上流を読んで**そのリテラルを更新するだけ**でよい。VRM Converter / UniVRM のリリース監視は未着手 |
 | 4 | P3 | v0.2機能（指ボーン・髪型/衣装追加） | Opus | #2完了後のみ。骨/三角形予算の試算は FEATURE_AUDIT §3-1 に記録済み |
 | 5 | P3 | VRM 1.0 対応の再評価 | 人間 | CLAUDE.mdの「0.x固定」制約の変更判断はユーザー専権。#3の監視結果を判断材料に |
 

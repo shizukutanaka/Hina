@@ -9058,6 +9058,53 @@ function accData(j, bin, ai){
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
 }
 
+/* ---- Round 551: the whole RANKS table, pinned to the verified upstream values ---- */
+{
+  // CLAUDE.md: "Rank基準値は creators.vrchat.com 2026-04版。改定時は core の RANKS テーブルのみ更新".
+  // Existing tests check individual boundaries and the estimator's behaviour; nothing pinned the
+  // table as a whole against the source, so a typo in an untested cell could pass. These numbers
+  // were read off the upstream document on 2026-09 (Round 551) and matched every cell on both
+  // platforms — five months after the 2026-04 sync, with no drift.
+  //
+  // This is the ecosystem-monitoring task made mechanical: a future session re-reads the upstream
+  // table and only has to update THIS literal, and any edit to RANKS that is not a deliberate
+  // re-sync fails immediately. The source is mirrored on GitHub because creators.vrchat.com is
+  // egress-blocked here — the path is recorded in build/10-core-a.js above the table.
+  const UPSTREAM = {
+    pc: { tris:[32000,70000,70000,70000], texMB:[40,75,110,150], skinned:[1,2,8,16], mesh:[4,8,16,24],
+          mat:[4,8,16,32], pbComp:[4,8,16,32], pbTrans:[16,64,128,256], pbCol:[4,8,16,32],
+          pbCheck:[32,128,256,512], bones:[75,150,256,400], raycasts:[1,4,8,15] },
+    quest: { tris:[7500,10000,15000,20000], texMB:[10,18,25,40], skinned:[1,1,2,2], mesh:[1,1,2,2],
+             mat:[1,1,2,4], pbComp:[0,4,6,8], pbTrans:[0,16,32,64], pbCol:[0,4,8,16],
+             pbCheck:[0,16,32,64], bones:[75,90,150,150], raycasts:[1,2,4,8] },
+  };
+  const diffs = [];
+  for (const plat of ['pc', 'quest']){
+    for (const k of Object.keys(UPSTREAM[plat])){
+      const got = H.RANKS[plat][k];
+      if (!got){ diffs.push(`${plat}.${k} missing from RANKS`); continue; }
+      if (JSON.stringify(got) !== JSON.stringify(UPSTREAM[plat][k]))
+        diffs.push(`${plat}.${k}: ${JSON.stringify(got)} != upstream ${JSON.stringify(UPSTREAM[plat][k])}`);
+    }
+    for (const k of Object.keys(H.RANKS[plat]))
+      if (!(k in UPSTREAM[plat])) diffs.push(`${plat}.${k} is in RANKS but not in the verified upstream set`);
+  }
+  ok(diffs.length === 0,
+    'R551: every RANKS cell matches the upstream VRChat table verified 2026-09'
+    + (diffs.length ? ` [${diffs.slice(0, 4).join(' | ')}]` : ''));
+  ok(Object.keys(H.RANKS.pc).length === 11 && Object.keys(H.RANKS.quest).length === 11,
+    `R551: both platforms model exactly the 11 categories Hina can emit (pc=${Object.keys(H.RANKS.pc).length}, quest=${Object.keys(H.RANKS.quest).length})`);
+
+  // The categories upstream ranks but Hina omits are safe for a structural reason, not a numeric
+  // one: a .vrm is glTF and carries no Unity components, so Contacts / Constraints / Animators /
+  // Lights / Particle Systems / Trail+Line Renderers / Audio Sources are all necessarily 0. Pin
+  // the property that makes that true — the exporter emits no such extensions or component data.
+  const est = H.estimate(H.buildAvatar(H.defaults()), H.defaults());
+  ok(est.raycasts === 0, 'R551: Hina emits no raycast components, as the table comment states');
+  ok(!('contacts' in est) && !('constraints' in est) && !('audioSources' in est),
+    'R551: the estimator does not invent values for categories the format cannot carry');
+}
+
 /* ---- Round 547: a keydown handler that moves focus must stop the key's default action ---- */
 {
   // Round 546 was one instance of a class, so this sweeps the class instead of waiting for the

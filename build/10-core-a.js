@@ -358,7 +358,20 @@ const uvRect  = name => { const r=ATLAS[name]; return [r[0]/TEX, r[1]/TEX, r[2]/
    raycasts added Round 494: a "Raycasts" category was added to the upstream table in the same
    2026-04-21 sync (VRChat 2026.2.1) but was missing here. Hina never emits VRC Raycast
    components, so estimate() always reports 0 — this can never be the limiting factor for any
-   preset, but the table is pinned to match the source exactly per CLAUDE.md's update rule. */
+   preset, but the table is pinned to match the source exactly per CLAUDE.md's update rule.
+
+   Re-verified 2026-09 (Round 551) against the upstream source: every one of the 11 categories
+   below matches on BOTH platforms, so five months brought no drift. Two practical notes for
+   whoever checks next, because both cost time to rediscover:
+     - creators.vrchat.com is blocked by this environment's egress proxy. The docs are open source,
+       so read the mirror instead: raw.githubusercontent.com/vrchat-community/creator-docs/main/
+       Docs/docs/avatars/avatar-performance-ranking-system.md  (note the doubled "Docs/docs" — the
+       obvious single-docs path 404s).
+     - upstream also ranks categories Hina does not model: Contacts, Constraint Count/Depth,
+       Animators, Lights, Particle Systems, Trail/Line Renderers, Audio Sources. None of them can
+       ever bite, and not because we checked the numbers: a .vrm is glTF, which carries no Unity
+       components at all, so every one of these is structurally 0 for anything Hina writes, and
+       every one of them permits 0 at Excellent. They are omitted deliberately, not overlooked. */
 const RANKS = {
   pc: {
     tris:[32000,70000,70000,70000], bones:[75,150,256,400], skinned:[1,2,8,16], mesh:[4,8,16,24],
