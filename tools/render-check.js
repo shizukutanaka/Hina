@@ -467,6 +467,107 @@ async function main(){
     await c6.close();
   }
 
+  /* --- Round 543: the zero-network promise, enforced by actually watching the network.
+     CLAUDE.md makes "single HTML, zero dependencies" non-negotiable, and its stated reasons are
+     distribution, auditability and an OFFLINE guarantee. Until now that promise rested on four
+     source regexes in tests/run.js: no <script src>, no external <link href>, no fetch("http…),
+     no external <a href>. A regex cannot see a URL that is built at runtime — fetch(someVar),
+     a template literal, an Image().src assigned in JS — and, as it turned out, XMLHttpRequest,
+     WebSocket, sendBeacon, EventSource, dynamic import() and service workers were not checked by
+     ANY test at all, even though SWOT claimed they were. The product is in fact clean; the point
+     is that nothing was holding it that way.
+
+     So this drives the real app with the browser's own request log attached, and additionally
+     replaces fetch/XHR/WebSocket/EventSource/sendBeacon with recorders before any page script
+     runs. A request that never leaves the page still gets caught by the recorders; one that does
+     gets caught by the request log.
+
+     The trap in a "nothing happened" assertion is that doing nothing also produces nothing, so the
+     exercise below is verified: tab switches are confirmed via aria-selected, the gacha must
+     actually change the parameters, and the export must actually produce a file. If the app stops
+     being exercised, this fails rather than passing vacuously. --- */
+  console.log('\nzero-network promise (real request log, whole-app exercise):');
+  {
+    const ctx9 = await browser.newContext({ viewport: { width: 1280, height: 1000 }, acceptDownloads: true });
+    const requests = [];
+    ctx9.on('request', r => requests.push(r.method() + ' ' + r.url()));
+    const pg = await ctx9.newPage();
+    await pg.addInitScript(() => {
+      // headless Chromium exposes showSaveFilePicker, which never resolves without a user, so the
+      // export would hang instead of downloading — same removal the other export sections do
+      delete window.showSaveFilePicker;
+      window.__netCalls = [];
+      const trap = name => function (...a) {
+        window.__netCalls.push(name + ' ' + String(a[0]).slice(0, 120));
+        throw new Error('network blocked by audit: ' + name);
+      };
+      try { window.fetch = trap('fetch'); } catch (e) {}
+      try { window.XMLHttpRequest = function () { window.__netCalls.push('XMLHttpRequest'); }; } catch (e) {}
+      try { window.WebSocket = function (u) { window.__netCalls.push('WebSocket ' + u); }; } catch (e) {}
+      try { window.EventSource = function (u) { window.__netCalls.push('EventSource ' + u); }; } catch (e) {}
+      try { navigator.sendBeacon = trap('sendBeacon'); } catch (e) {}
+    });
+    const bad = [];
+    let didTabs = 0, gachaChanged = false, exported = 0;
+    try {
+      await pg.goto('file://' + INDEX);
+      await pg.waitForTimeout(2500);
+
+      const tabIds = await pg.$$eval('[role=tab]', es => es.map(e => e.id));
+      for (const id of tabIds){
+        await pg.click('#' + id); await pg.waitForTimeout(300);
+        const sel = await pg.getAttribute('#' + id, 'aria-selected');
+        if (sel === 'true') didTabs++;
+      }
+      // gacha must genuinely reroll the parameters, not merely be clicked
+      const sig = () => pg.evaluate(() =>
+        [...document.querySelectorAll('#tabBody input[type=range]')].map(e => e.value).join(','));
+      await pg.getByRole('tab', { name: /Body|体型/ }).click(); await pg.waitForTimeout(350);
+      const s0 = await sig();
+      // the gacha lives inside the Preset tab, not a tab of its own
+      await pg.getByRole('tab', { name: /Preset|プリセット/ }).click(); await pg.waitForTimeout(400);
+      const rollBtn = await pg.$('#gachaBtn');
+      if (rollBtn){
+        await rollBtn.click(); await pg.waitForTimeout(900);
+        await pg.getByRole('tab', { name: /Body|体型/ }).click(); await pg.waitForTimeout(350);
+        gachaChanged = (await sig()) !== s0;
+      }
+      const eb = await pg.$('.eBtn'); if (eb){ await eb.click(); await pg.waitForTimeout(400); }
+
+      // the export path is the one place a naive implementation would phone home
+      await pg.getByRole('tab', { name: /Export|出力/ }).click(); await pg.waitForTimeout(500);
+      let expBtn = null;
+      for (const b of await pg.$$('#tabBody button')){
+        const t9 = (await b.textContent() || '').trim();
+        if (/Export VRM|VRM 書き出し/.test(t9)){ expBtn = b; break; }
+      }
+      if (expBtn){
+        const [d] = await Promise.all([
+          pg.waitForEvent('download', { timeout: 45000 }).catch(() => null),
+          expBtn.click(),
+        ]);
+        if (d){ exported = 1; await d.path(); }
+      }
+      await pg.waitForTimeout(800);
+
+      const apiCalls = await pg.evaluate(() => window.__netCalls || []);
+      const external = requests.filter(u => !/^(GET|POST|PUT|HEAD) (file:|data:|blob:)/.test(u));
+      if (external.length) bad.push(`${external.length} non-local request(s): ${external.slice(0,3).join(' | ')}`);
+      if (apiCalls.length) bad.push(`network API used: ${apiCalls.slice(0,3).join(' | ')}`);
+      // non-vacuity: the exercise must have actually happened
+      if (didTabs < 6) bad.push(`only ${didTabs} tabs switched — the exercise did not run, so "no requests" proves nothing`);
+      if (!exported) bad.push('export produced no file — the heaviest code path never ran');
+      if (!gachaChanged) bad.push('the gacha did not change any parameter — that path never really ran');
+    } catch (e) { bad.push('threw: ' + String(e.message).slice(0, 110)); }
+
+    const localCount = requests.filter(u => /(file:|data:|blob:)/.test(u)).length;
+    console.log('  whole-app exercise        '
+      + (bad.length ? 'FAIL — ' + bad.join('; ')
+         : `ok (${didTabs} tabs, gacha, expression, export=${exported}; ${requests.length} request(s), all local (${localCount}), fetch/XHR/WebSocket/EventSource/sendBeacon never called)`));
+    if (bad.length) failures++;
+    await ctx9.close();
+  }
+
   /* --- Round 542: "complete keyboard operation" (SWOT strength #5, WCAG 2.1.1) had never been
      measured, only asserted. Four groups use the roving-tabindex pattern — the tablist, the
      expression bar, the colour swatches and the preset cards — where every member but one carries

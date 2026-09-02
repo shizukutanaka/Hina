@@ -1,13 +1,13 @@
 # 雛 (Hina) — 長所・短所・改善案（2026-07時点）
 
-本文書は、79ラウンドの集中監査（Round 464–542、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
+本文書は、80ラウンドの集中監査（Round 464–543、記録は [FEATURE_AUDIT.md](FEATURE_AUDIT.md)）・公開作業・マスク法による完成監査（[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md)）を経た時点でのプロダクト評価。**各主張には本セッションで実証した根拠を付す**。後続のAIセッションが作業を選ぶ際の情報源であり、[INSTRUCTIONS_OPUS.md](INSTRUCTIONS_OPUS.md) / [INSTRUCTIONS_SONNET.md](INSTRUCTIONS_SONNET.md) のタスクメニューはここから引く。
 
 ## 長所（実証済み）
 
 | # | 長所 | 根拠 |
 |---|------|------|
-| 1 | **依存ゼロ・単一HTML・完全ローカル** | 配布/監査/オフラインの保証。通信ゼロ（`fetch`/`XHR`/`WebSocket`/外部`<link>`不存在）は自動テストで担保 |
-| 2 | **品質保証の厚さ** | 自動テスト**2112件・0失敗**（約2秒）。ガチャは決定論的（mulberry32・3経路が単一関数に集約）。既定6プリセットの Quest Excellent（揺れ物OFF）/ Good以上（ON）はテストが保証。さらに**主要なユーザー向け約束6系統が実ブラウザE2Eで恒久検証**（書き出し・自己診断・自動保存・共有URL・Undo/Redo・視覚回帰13ケース＝`tools/render-check.js`、Round 529–531）。**スイートは自分自身も監査する**——ソース窓アンカーの死活と否定アサーションの番人規則を機械強制（Round 537）。さらに**全38パラメータを摂動して「出力が動かないコントロール」を集合等価で固定**（Round 540）——効かないUIが増えれば即座に失敗する |
+| 1 | **依存ゼロ・単一HTML・完全ローカル**（通信ゼロは Round 543 で**実測**） | 配布/監査/オフラインの保証。**訂正**: 本項は以前「`fetch`/`XHR`/`WebSocket`/外部`<link>`不存在は自動テストで担保」と書いていたが、実際に存在したのはソース正規表現3本のみで、**XHR・WebSocket・sendBeacon・EventSource・動的`import()`・Service Worker はどのテストでも検査されていなかった**（製品は clean だったが、それを保つものが無かった）。Round 543 で不足分をテスト化し、さらに**実ブラウザのリクエストログを付けてアプリ全体を操作**する監査を`tools/render-check.js` に追加——全タブ・ガチャ・表情・書き出しを実行して**観測されたリクエストは文書自身の1件のみ**、5種のネットワークAPIは**一度も呼ばれない**ことを実測（実行時組み立てのURLは正規表現では見えないため）|
+| 2 | **品質保証の厚さ** | 自動テスト**2121件・0失敗**（約2秒）。ガチャは決定論的（mulberry32・3経路が単一関数に集約）。既定6プリセットの Quest Excellent（揺れ物OFF）/ Good以上（ON）はテストが保証。さらに**主要なユーザー向け約束6系統が実ブラウザE2Eで恒久検証**（書き出し・自己診断・自動保存・共有URL・Undo/Redo・視覚回帰13ケース＝`tools/render-check.js`、Round 529–531）。**スイートは自分自身も監査する**——ソース窓アンカーの死活と否定アサーションの番人規則を機械強制（Round 537）。さらに**全38パラメータを摂動して「出力が動かないコントロール」を集合等価で固定**（Round 540）——効かないUIが増えれば即座に失敗する |
 | 3 | **仕様準拠の厳密性・実ローダー互換** | **公式 Khronos glTF-Validator で全11書き出し 0 errors**（Round 524）＋**参照Web VRMローダー three-vrm が全ケース完全読込**（Round 525: humanoid15ボーン/17表情/springBone/firstPerson全解決）。accessor min/max厳密一致（506）、sparse昇順、GLBヘッダ検証、VRM0メタ全enum防御、MToonキーワード整合（522）。**書き出したテクスチャの実ピクセルまで検証**（538: 全色が`randomParams(seed)`と一致） |
 | 4 | **セキュリティ硬化（実攻撃で検証済み）** | prototype pollution 対策をJSON流入の全4経路に適用（Round 469/495）、貼り付けDoSガード（470）、メタenum/シードの全層検証（492/493）。**Round 535で実ブラウザから4経路すべてへ実際に攻撃**（`__proto__`汚染・不正enum・範囲外値・3MB巨大ファイル）し、汚染ゼロ・既定値へのフォールバック・拒否をすべて実証。同時に発見した文字列契約の不整合（5,000字titleの素通し）も修正済み。**Round 536で書き出しファイル名も攻撃**し、パス脱出不能を確認のうえ制御文字・BIDI偽装・Windows予約名の取り逃しを修正 |
 | 5 | **アクセシビリティ**（キーボード操作は Round 542 で**実測済み**） | WCAG 2.2 AA（新設SC 2.5.8の24pxターゲット含む）、Windowsハイコントラスト（forced-colors）での選択状態表示、SRアナウンス規律（showErr統一・スパム抑制・フォーカス復元）。**完全キーボード操作**は主張ではなく実測——roving tabindex を使う4グループ（タブリスト・表情バー・カラースウォッチ・プリセットカード）すべてで、実ブラウザの実キー入力により Arrow/Home/End の移動と Enter/Space の実行を確認し `tools/render-check.js` へ恒久化（WCAG 2.1.1）|

@@ -26,6 +26,19 @@ ok(html.startsWith('<!DOCTYPE html>'), 'doctype first');
 ok(!/<script[^>]*\ssrc=/.test(html), 'no external <script src>');
 ok(!/<link[^>]*\shref=['"](?!data:)/.test(html), 'no external <link href> (data: URIs allowed for inline favicon)');
 ok(!/\bfetch\s*\(\s*['"]http/.test(html), 'no external fetch');
+// Round 543: SWOT claimed "fetch/XHR/WebSocket/外部<link> 不存在は自動テストで担保", but only the
+// three regexes above existed — XMLHttpRequest, WebSocket, sendBeacon, EventSource, dynamic
+// import() and service workers were checked by NOTHING. The app was clean, but nothing held it
+// that way, and any of these would break the offline guarantee CLAUDE.md calls non-negotiable.
+// A regex still cannot see a URL assembled at runtime, so tools/render-check.js additionally
+// drives the whole app with the browser's request log attached; this is the cheap first line.
+for (const api of ['XMLHttpRequest', 'WebSocket', 'EventSource', 'sendBeacon', 'serviceWorker', 'importScripts']){
+  ok(!html.includes(api), `R543: the app never references ${api} (offline guarantee)`);
+}
+ok(!/\bimport\s*\(/.test(html), 'R543: no dynamic import() — nothing can be pulled in at runtime');
+ok(!/\bnew\s+Worker\s*\(/.test(html), 'R543: no Worker() — no separate script file to fetch');
+// a runtime-built fetch URL would slip past the http-literal check above
+ok(!/\bfetch\s*\(/.test(html), 'R543: fetch is never called at all, not merely never called with an http literal');
 ok((html.match(/<canvas/g) || []).length === 1, 'single canvas');
 ok(html.includes("'guide.s1'") && html.indexOf("guide.s1") !== html.lastIndexOf("guide.s1"), 'in-app upload guide wired (i18n + UI)');
 // WCAG 2.1.1: the 3D preview must be keyboard-operable (focusable + key handler + aria-label)
