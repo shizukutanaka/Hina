@@ -9032,6 +9032,51 @@ function accData(j, bin, ai){
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
 }
 
+/* ---- Round 544: docs/SPEC.md is normative, so it must not silently drift from the code ---- */
+{
+  // CLAUDE.md says outright: "docs/SPEC.md … 実装と乖離したらSPECが正" — if the spec and the
+  // implementation disagree, the SPEC is right and the code is wrong. That makes an un-updated
+  // spec a defect, not a chore. Round 539 changed user-visible behaviour (the cloth-sub colour
+  // picker is now only offered for outfits that actually sample that atlas block) and the spec's
+  // F-007 row still described the old unconditional behaviour. Nothing noticed, because nothing
+  // was looking. These checks make the two claims the spec makes about THIS behaviour testable,
+  // and guard the bilingual promise (SWOT strength #6) structurally rather than by inspection.
+  const spec = fs.readFileSync(path.join(__dirname, '..', 'docs', 'SPEC.md'), 'utf8');
+  ok(spec.length > 4000, `R544: SPEC.md was actually read (${spec.length} bytes)`);
+
+  // 1. the spec must describe the conditional sub-colour, in both languages
+  const jaHalf = spec.slice(0, spec.indexOf('# Hina Specification'));
+  const enHalf = spec.slice(spec.indexOf('# Hina Specification'));
+  ok(jaHalf.includes('usesClothSub') && enHalf.includes('usesClothSub'),
+    'R544: both language halves of SPEC name usesClothSub() as the source of truth for the sub colour');
+  ok(/shirts/.test(jaHalf) && /shirts/.test(enHalf),
+    'R544: both halves name the outfit that actually uses the sub colour, so a reader can check it');
+  // and the spec must agree with the code it describes
+  ok(H.usesClothSub('shirts') === true && H.PARAMS.outfit.opts.filter(o => H.usesClothSub(o)).length === 1,
+    'R544: the code still matches what SPEC F-007 now says (exactly one outfit uses the sub colour)');
+
+  // 2. bilingual parity: every feature id in one half must exist in the other. SWOT calls the
+  //    user-facing docs fully bilingual; an F-row added to only one half would quietly break that.
+  const ids = half => [...half.matchAll(/\|\s*(F-\d{3})\s*\|/g)].map(m => m[1]);
+  const jaIds = ids(jaHalf), enIds = ids(enHalf);
+  ok(jaIds.length >= 10, `R544: the feature table was found in the Japanese half (${jaIds.length} rows)`);
+  const missingEn = jaIds.filter(i => !enIds.includes(i));
+  const missingJa = enIds.filter(i => !jaIds.includes(i));
+  ok(missingEn.length === 0 && missingJa.length === 0,
+    'R544: the feature tables are in bilingual sync'
+    + (missingEn.length ? ` [missing from English: ${missingEn.join(',')}]` : '')
+    + (missingJa.length ? ` [missing from Japanese: ${missingJa.join(',')}]` : ''));
+
+  // 3. the spec's own numbers must match the code they describe
+  ok(new RegExp(String(H.PRESETS.length) + '\\s*体').test(jaHalf),
+    `R544: SPEC's preset count matches PRESETS (${H.PRESETS.length})`);
+  ok(new RegExp('髪型' + H.PARAMS.hairStyle.opts.length + '種').test(jaHalf),
+    `R544: SPEC's hair-style count matches PARAMS (${H.PARAMS.hairStyle.opts.length})`);
+  ok(new RegExp('パレット' + H.PAL.skin.length).test(jaHalf) && enHalf.includes(H.PAL.skin.length + '-palette'),
+    `R544: SPEC's skin-palette size matches PAL.skin in both languages (${H.PAL.skin.length})`);
+  ok(spec.includes('VRM 0.x'), 'R544: SPEC still states the non-negotiable VRM 0.x target');
+}
+
 /* ---- Round 541: the "make it Quest Excellent" button must actually deliver that ---- */
 {
   // The rank badge grows a one-tap button (Round 513) labelled btn.questFix, whose whole promise is

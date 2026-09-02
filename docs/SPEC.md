@@ -36,7 +36,7 @@
 | F-004 | 顔編集 | 目の大きさ/位置/形状(4種)・瞳サイズ・眉(3種)・口幅・頬紅 |
 | F-005 | 髪編集 | 髪型5種(ショート/ボブ/ロング/ツイン/ポニー)・前髪3種・長さ・ボリューム・アホ毛 |
 | F-006 | 衣装 | 4種(ワンピース/セーラー/シャツ+パンツ/パーカー)・スカート丈・袖 |
-| F-007 | 配色 | 肌(パレット8)・髪・瞳・服メイン/サブ/アクセント・靴。任意色入力可 |
+| F-007 | 配色 | 肌(パレット8)・髪・瞳・服メイン/サブ/アクセント・靴。任意色入力可。**服サブは、そのブロックを実際に参照するジオメトリを持つ衣装（現状 `shirts`）でのみ表示する**——参照されない衣装で出しても見た目が一切変わらないため（Round 539。判定は core の `usesClothSub()` が単一情報源） |
 | F-008 | 物理調整 | 髪の硬さ/重力/減衰。**揺れ物オフ**トグル（Quest Excellent用） |
 | F-009 | プレビュー | WebGLトゥーン(2階調+リム)・輪郭線・軌道カメラ・呼吸/瞬き/視線追従/髪Verlet物理。`prefers-reduced-motion`で自動アニメ停止 |
 | F-010 | Rank推定 | §6の全項目をPC/Quest別に判定し最悪値をランクとして色付き表示。律速項目を明示 |
@@ -188,7 +188,7 @@ A single-file HTML tool that lets VRChat users with no 3D-modelling experience c
 | F-004 | Face | Eye size/position/shape (4), iris size, brows (3), mouth width, blush |
 | F-005 | Hair | 5 styles (short/bob/long/twin/pony), 3 bangs, length, volume, ahoge |
 | F-006 | Outfit | 4 (one-piece/sailor/shirts+pants/hoodie), skirt length, sleeves |
-| F-007 | Colours | Skin (8-palette), hair, iris, cloth main/sub/accent, shoes. Arbitrary colours allowed |
+| F-007 | Colours | Skin (8-palette), hair, iris, cloth main/sub/accent, shoes. Arbitrary colours allowed. **Cloth sub is shown only for outfits whose geometry actually samples that atlas block (currently `shirts`)** — offering it elsewhere changes nothing the user can see (Round 539; core `usesClothSub()` is the single source of truth) |
 | F-008 | Physics | Hair stiffness/gravity/drag. **Springs-off** toggle (for Quest Excellent) |
 | F-009 | Preview | WebGL toon (2-band + rim), outline, orbit camera, breathing/blink/gaze/Verlet hair. Auto-stops with `prefers-reduced-motion` |
 | F-010 | Rank estimate | Judges every §6 category for PC and Quest, shows the worst as a coloured rank, names the limiting category |
