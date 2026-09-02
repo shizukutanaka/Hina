@@ -2828,7 +2828,15 @@ function renderBody(scrollReset=true){
       placeholder:t('gacha.seed.ph'), 'aria-label':t('gacha.seed'), min:'0', max:'4294967295', step:'1', autocomplete:'off', inputmode:'numeric', enterkeyhint:'go',
       ...(lastGachaSeed!==null?{value:String(lastGachaSeed)}:{}),
       onwheel:e=>e.preventDefault(),
-      onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); },
+      // Round 546: Enter must NOT fall through to its default action. blur() below fires change,
+      // which runs runGacha(typed seed) — and runGacha ends by focusing the gacha button so the
+      // roll can be repeated. The same Enter keystroke then activated that freshly focused button,
+      // instantly rolling a RANDOM seed over the one the user just typed. Measured 3/3: typing
+      // 987654 and pressing Enter left the field showing 3872386978 / 1944695725 / 3229565579 and
+      // an avatar that was not seed 987654's, silently. Tab (blur without a default action) was
+      // always correct, which is what made this invisible. The field carries enterkeyhint='go', so
+      // Enter is the gesture it invites — on a phone keyboard it is literally labelled "go".
+      onkeydown:e=>{ if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); } },
       onchange:e=>{ const n=Math.round(Number(e.target.value));
         const clamped=clampSeed(e.target.value);
         if (clamped===null){

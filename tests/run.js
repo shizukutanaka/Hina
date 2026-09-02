@@ -5516,8 +5516,19 @@ function accData(j, bin, ai){
 
 /* ---- Round 303: seed input Enter key blurs field to reliably fire onchange ---- */
 {
-  ok(html.includes("onkeydown:e=>{ if(e.key==='Enter') e.target.blur(); }"),
-    'seed input has Enter key handler that blurs to reliably trigger onchange across browsers');
+  // Round 546: this used to pin the exact old source line. That line was WRONG — blurring without
+  // preventing Enter's default let the same keystroke activate the gacha button that runGacha()
+  // focuses, rolling a random seed over the one the user typed (measured 3/3). So the assertion is
+  // now about the requirement rather than the wording: Enter must blur (to fire change) AND must
+  // not fall through. The end-to-end behaviour is covered by tools/render-check.js.
+  const _enterBranch = html.slice(html.indexOf("onkeydown:e=>{ if(e.key==='Enter')"),
+                                  html.indexOf("onkeydown:e=>{ if(e.key==='Enter')") + 120);
+  ok(_enterBranch.length > 30, 'R546: the seed input Enter handler was located');
+  ok(/e\.target\.blur\(\)/.test(_enterBranch),
+    'seed input Enter handler blurs to reliably trigger onchange across browsers');
+  ok(/preventDefault\(\)[\s\S]{0,40}blur\(\)/.test(_enterBranch),
+    'R546: Enter is preventDefault()ed BEFORE the blur, so the keystroke cannot go on to activate '
+    + 'the gacha button that runGacha() focuses (that discarded the typed seed)');
 }
 
 /* ---- Round 302: doUndo uses renderBody(false) to preserve scroll position ---- */
@@ -5913,7 +5924,9 @@ function accData(j, bin, ai){
   // Round 493: the inline "!Number.isFinite(n)||n<0" check moved into the shared clampSeed()
   // helper (also used by loadState() and the ?seed= URL parser) — onchange now branches on
   // clampSeed()'s null return instead of re-deriving the same condition locally.
-  ok((()=>{ const si=html.indexOf("placeholder:t('gacha.seed.ph')"); const chunk=html.slice(si, si+700); return /clamped===null[\s\S]{0,80}aria-invalid[\s\S]{0,200}seedInvalid/.test(chunk); })(),
+  // window widened 700 -> 1500 in Round 546 (the Enter-default comment sits between the
+  // placeholder anchor and the aria-invalid branch)
+  ok((()=>{ const si=html.indexOf("placeholder:t('gacha.seed.ph')"); const chunk=html.slice(si, si+1500); return /clamped===null[\s\S]{0,80}aria-invalid[\s\S]{0,200}seedInvalid/.test(chunk); })(),
     'seed input sets aria-invalid and announces a11y.seedInvalid on invalid value (NaN or negative)');
   ok(/seedInvalid[\s\S]{0,100}removeAttribute\('aria-invalid'\)/.test(html),
     'seed input clears aria-invalid after timeout');
@@ -6004,7 +6017,9 @@ function accData(j, bin, ai){
   // Round 455 upgraded the target from srStatus (polite) to srAlert (assertive) to match numIn upgrade.
   const si = html.indexOf("placeholder:t('gacha.seed.ph')");
   ok(si !== -1, 'gacha seed input exists');
-  const chunk = html.slice(si, si + 800);
+  // window widened 800 -> 1600 in Round 546 (the Enter-default comment sits between the
+  // placeholder anchor and the aria-errormessage branch)
+  const chunk = html.slice(si, si + 1600);
   ok(/aria-errormessage[\s\S]{0,30}srAlert[\s\S]{0,150}seedInvalid/.test(chunk),
     'seed input sets aria-errormessage=srAlert alongside aria-invalid for assertive AT error pointer');
   ok(/seedInvalid[\s\S]{0,100}removeAttribute\('aria-errormessage'\)/.test(chunk),

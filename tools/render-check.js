@@ -467,6 +467,65 @@ async function main(){
     await c6.close();
   }
 
+  /* --- Round 546: typing a seed must apply THAT seed, whether you leave the field with Tab or
+     with Enter. The field carries enterkeyhint='go', so Enter is the gesture it invites — on a
+     phone the key is literally labelled "go". Enter was broken and nothing noticed: blur() fired
+     change, runGacha() rolled the typed seed correctly and then focused the gacha button so the
+     roll could be repeated, and the very same Enter keystroke went on to activate that freshly
+     focused button, replacing the user's avatar with a random one. Tab was always fine, which is
+     exactly why source-level tests could never have found this: the source looked reasonable and
+     the bug lived in the interaction between a keystroke's default action and a focus move.
+     The oracle is core — randomParams(seed) says what the avatar must be — so this compares the
+     applied sliders against it for both exit gestures. --- */
+  console.log('\nseed entry (typed seed must be the seed that is applied):');
+  {
+    const SEED = 987654;
+    const ctxS = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const ps = await ctxS.newPage();
+    const bad = [];
+    let want = null, got = {};
+    try {
+      await ps.goto('file://' + INDEX);
+      await ps.waitForTimeout(2500);
+      want = await ps.evaluate(s2 => String(HINA.randomParams(s2).height), SEED);
+
+      const seedSel = '#tabBody input[type=number][max="4294967295"]';
+      const applyWith = async key => {
+        await ps.goto('file://' + INDEX);
+        await ps.waitForTimeout(2400);
+        await ps.getByRole('tab', { name: /Preset|プリセット/ }).click();
+        await ps.waitForTimeout(450);
+        // The field is pre-filled from the previous run's auto-saved lastGachaSeed (this section
+        // reuses one context), so typing without clearing APPENDS: "987654" onto "987654" becomes
+        // 987654987654, which clampSeed() pins to 4294967295. That produced a very convincing
+        // false failure — the fix is to select the existing text first, exactly as a user would.
+        await ps.click(seedSel);
+        await ps.keyboard.press('Control+a');
+        await ps.keyboard.type(String(SEED));
+        await ps.keyboard.press(key);
+        await ps.waitForTimeout(1200);
+        const shown = await ps.evaluate(sel => {
+          const e = document.querySelector(sel); return e ? e.value : '(gone)';
+        }, seedSel);
+        await ps.getByRole('tab', { name: /Body|体型/ }).click();
+        await ps.waitForTimeout(450);
+        const h = await ps.evaluate(() => document.getElementById('pr-height').value);
+        return { shown, h };
+      };
+      for (const key of ['Tab', 'Enter']){
+        const r = await applyWith(key);
+        got[key] = r;
+        if (r.h !== want) bad.push(`${key}: applied height ${r.h}, but seed ${SEED} must give ${want}`);
+        if (r.shown !== String(SEED)) bad.push(`${key}: seed field shows ${r.shown} instead of ${SEED}`);
+      }
+    } catch (e) { bad.push('threw: ' + String(e.message).slice(0, 110)); }
+    console.log('  typed seed applied        '
+      + (bad.length ? 'FAIL — ' + bad.join('; ')
+         : `ok (Tab and Enter both apply seed ${SEED}; height ${want} matches randomParams())`));
+    if (bad.length) failures++;
+    await ctxS.close();
+  }
+
   /* --- Round 543: the zero-network promise, enforced by actually watching the network.
      CLAUDE.md makes "single HTML, zero dependencies" non-negotiable, and its stated reasons are
      distribution, auditability and an OFFLINE guarantee. Until now that promise rested on four
