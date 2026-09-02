@@ -9032,6 +9032,76 @@ function accData(j, bin, ai){
     'dialog transition is suppressed under prefers-reduced-motion:reduce so it appears instantly');
 }
 
+/* ---- Round 545: no orphaned i18n key, including the dynamically-built ones ---- */
+{
+  // SWOT claims "dead code ゼロ", measured once by hand in Round 526. Eighteen rounds of change
+  // later that was worth re-measuring, and re-measuring it exposed why a naive check is useless
+  // here: 73 of the 228 keys never appear as a literal anywhere, because they are assembled at
+  // runtime — t('tab.'+id), t('rank.'+r.rank), t(tp+'.'+value) for the VRM meta dropdowns,
+  // t('enum.'+param+'.'+value), t('cat.'+category), t('expr.'+morph). Every one of those 73 is
+  // genuinely reachable; a checker that flagged them would cry wolf and get switched off.
+  //
+  // So instead of asking "does this literal appear", this resolves each dynamic family against
+  // the data that actually drives it. An orphan then means something real: a key for an option
+  // that no longer exists — precisely what a v0.2 edit removing an outfit or a hair style would
+  // leave behind, and precisely what nothing would otherwise notice.
+  const uiHalf = html.slice(html.indexOf('/*HINA-CORE-END*/'));
+  const enumParams = Object.keys(H.PARAMS).filter(k => H.PARAMS[k].k === 'enum');
+  const morphNames = H.buildAvatar(H.defaults()).morphs.names;
+  const rankCats = Object.keys(H.RANKS.quest || H.RANKS);
+
+  // family prefix -> the exact set of suffixes the code can produce
+  const families = {
+    'rank.tip.': H.RANK_NAMES,
+    'rank.':     H.RANK_NAMES,
+    'allowed.':  H.META_ENUMS.allowed,
+    'usage.':    [...new Set([...H.META_ENUMS.violent, ...H.META_ENUMS.sexual, ...H.META_ENUMS.commercial])],
+    'license.':  H.META_ENUMS.license,
+    'cat.':      rankCats,
+    // the expression bar deliberately skips the per-eye blinks (buildExprBar: `if (name ===
+    // 'blink_l' || name === 'blink_r') continue`), so they are morphs without a button and
+    // correctly have no label. Mirror that skip rather than demanding labels that must not exist.
+    'expr.':     morphNames.filter(n => n !== 'blink_l' && n !== 'blink_r'),
+  };
+  for (const p2 of enumParams) families['enum.' + p2 + '.'] = H.PARAMS[p2].opts;
+
+  const legit = new Set();
+  for (const [pre, vals] of Object.entries(families)) for (const v of vals) legit.add(pre + v);
+
+  const keys = Object.keys(H.I18N.ja);
+  ok(keys.length > 150, `R545: the i18n table was read (${keys.length} keys)`);
+  const literal = k => uiHalf.includes("'" + k + "'") || uiHalf.includes('"' + k + '"');
+  // 'tab.' keys are produced by t('tab.'+tb) over the TABS array; the element ids are built the
+  // same dynamic way (id:'tab-'+tb), so read the array itself rather than hunting for literals.
+  const tabsSrc = uiHalf.match(/const TABS\s*=\s*\[([^\]]*)\]/);
+  const tabIds = tabsSrc ? [...tabsSrc[1].matchAll(/'([a-z]+)'/g)].map(m => m[1]) : [];
+  ok(tabIds.length >= 6, `R545: the TABS list was located in the UI source (${tabIds.length} tabs)`);
+  for (const t2 of tabIds) legit.add('tab.' + t2);
+
+  const orphans = keys.filter(k => !literal(k) && !legit.has(k));
+  ok(orphans.length === 0,
+    'R545: every i18n key is reachable — either referenced literally or produced by a dynamic '
+    + 'family whose values come from PARAMS/META_ENUMS/RANKS/morphs'
+    + (orphans.length ? ` [ORPHANED: ${orphans.join(', ')}]` : ''));
+
+  // guard the guard: the dynamic resolution must actually be doing work, otherwise this would
+  // degrade into the naive literal check and start passing for the wrong reason
+  const dynamicOnly = keys.filter(k => !literal(k) && legit.has(k));
+  ok(dynamicOnly.length >= 50,
+    `R545: the dynamic families really are resolving keys (${dynamicOnly.length} keys are reachable only that way)`);
+
+  // and the reverse direction: every option that exists must HAVE a label, in both languages
+  const missing = [];
+  for (const [pre, vals] of Object.entries(families))
+    for (const v of vals){
+      if (!(pre + v in H.I18N.ja)) missing.push('ja:' + pre + v);
+      if (!(pre + v in H.I18N.en)) missing.push('en:' + pre + v);
+    }
+  ok(missing.length === 0,
+    'R545: every enum/rank/category/morph value has a label in both languages'
+    + (missing.length ? ` [MISSING: ${missing.slice(0,6).join(', ')}]` : ''));
+}
+
 /* ---- Round 544: docs/SPEC.md is normative, so it must not silently drift from the code ---- */
 {
   // CLAUDE.md says outright: "docs/SPEC.md … 実装と乖離したらSPECが正" — if the spec and the
