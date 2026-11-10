@@ -55,8 +55,7 @@ VRChatへのアップロードはVRChat公式SDK（Unity）経由のみ許可さ
 
 雛は無料で使えます。開発を支援したい方は:
 
-- 月額 $1 寄付（Stripe）: 準備中
-- Bitcoin: `bc1qjaet6jgpk08la46jelmlpgsz84luc4lc0tnwr5`
+- GitHub Sponsors: https://github.com/sponsors/shizukutanaka
 
 ## License
 
