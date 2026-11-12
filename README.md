@@ -51,12 +51,6 @@ VRChatへのアップロードはVRChat公式SDK（Unity）経由のみ許可さ
 | [docs/UPLOAD_GUIDE.md](docs/UPLOAD_GUIDE.md) | VRChatへの持ち込み手順（初心者向け） |
 | [docs/adr/](docs/adr/) | 設計判断の記録 |
 
-## 寄付
-
-雛は無料で使えます。開発を支援したい方は:
-
-- GitHub Sponsors: https://github.com/sponsors/shizukutanaka
-
 ## License
 
 [MIT](LICENSE) — 雛で**生成したアバターの権利は生成したユーザーに帰属**します。商用利用・改変・再配布の可否はVRM書き出し時にメタ情報としてあなた自身が設定できます。
@@ -117,13 +111,6 @@ There are no config files or environment variables. Save parameters as JSON with
 | [docs/adr/](docs/adr/) | Architecture decision records |
 
 > The specification, FAQ and upload guide are all bilingual; only the ADRs remain Japanese. The in-app UI is fully bilingual.
-
-## Donation
-
-Hina is free to use. If you'd like to support development:
-
-- $1/month (Stripe): coming soon
-- Bitcoin: `bc1qjaet6jgpk08la46jelmlpgsz84luc4lc0tnwr5`
 
 ## License
 
