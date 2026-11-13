@@ -20,7 +20,7 @@ A. VRChat持込の事実上標準ルートである VRM Converter for VRChat が
 A. ツール本体はMIT。**生成アバターの権利は生成者に帰属**。配布可否・商用可否・暴力/性的表現の許可は書き出し時にVRMメタとして自分で設定する（既定は最も保守的: 本人のみ/全Disallow/再配布禁止）。
 
 ### Q. 通信・アカウント・課金は？
-A. すべてなし。完全ローカル動作で1リクエストも送信しない。本体無料。寄付は任意（README参照）。
+A. すべてなし。完全ローカル動作で1リクエストも送信しない。本体無料。
 
 ### Q. BOOTHの衣装や既存モデルを着せられる？
 A. v0.1では非対応（スコープ外）。雛は「ゼロから1体作る」ツール。既存モデル改変はBlender/Unityの領分。
@@ -74,7 +74,7 @@ A. Because VRM Converter for VRChat — the de-facto standard route into VRChat 
 A. The tool itself is MIT. **Rights to generated avatars belong to their creator.** You set redistribution / commercial / violent / sexual permissions yourself as VRM metadata at export time (the default is the most conservative: author-only / all Disallow / no redistribution).
 
 ### Q. Any network, account, or payment?
-A. None. It runs fully locally and sends zero requests. The tool is free; donations are optional (see README).
+A. None. It runs fully locally and sends zero requests. The tool is free.
 
 ### Q. Can I put BOOTH clothing or existing models on it?
 A. Not in v0.1 (out of scope). Hina is a "build one from scratch" tool; editing existing models is Blender/Unity territory.
