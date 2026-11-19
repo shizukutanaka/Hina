@@ -20,12 +20,36 @@ VRChatで「自分のアバター」を持つには、従来 Blender や VRoid S
 
 ## Installation
 
+### デスクトップ版（正規の配布形態）
+
+雛の正規の公開形態は **デスクトップアプリ（ソフトウェア）** です。中身は同じ index.html を、外部通信・外部ページ遷移を遮断した最小の Electron 殻で開くだけで、アプリ本体は一切変更していません。
+
+| OS | 形式 | 起動 |
+|----|------|------|
+| Windows | portable `.exe` | ダウンロードしてそのまま実行（インストール不要） |
+| macOS | `.zip`（`.app`） | 展開して `Hina.app` を開く |
+| Linux | `.AppImage` | `chmod +x` して実行 |
+
+> **未署名についての注意:** デスクトップ版はコード署名・公証をしていません。そのため初回起動時に **Windows SmartScreen**（「WindowsによってPCが保護されました」→「詳細情報」→「実行」）や **macOS Gatekeeper**（「開発元を確認できない」→ Finder で右クリック →「開く」、または「システム設定 → プライバシーとセキュリティ」→「このまま開く」）の警告が出ることがあります。
+
+ソースから起動・ビルドする場合（Node.js 必須）:
+
+```
+npm ci
+npm start              # デスクトップ版を起動
+npm run dist:win       # Windows portable（dist-desktop/）
+npm run dist:mac       # macOS zip（未署名）
+npm run dist:linux     # Linux AppImage
+```
+
+### ブラウザで開く（従来どおり）
+
 ```
 1. index.html をダウンロード
 2. ブラウザ（Chrome / Edge / Firefox / Safari 最新版）で開く
 ```
 
-以上です。ビルドもnpmも必要ありません。
+アプリ本体は今も単一HTML・依存ゼロのままなので、ブラウザでもビルドやnpmなしで動きます（npm はデスクトップ殻のビルドにだけ使います）。
 
 ## Usage
 
@@ -79,12 +103,36 @@ Owning "your own avatar" in VRChat has traditionally meant learning heavyweight 
 
 ## Installation
 
+### Desktop app (the official distribution)
+
+Hina is officially distributed as a **desktop application (software)**. It is the same index.html, opened in a minimal Electron shell that blocks network navigation and external pages; the app itself is unchanged.
+
+| OS | Format | Run |
+|----|--------|-----|
+| Windows | portable `.exe` | Download and run (no installer) |
+| macOS | `.zip` (`.app`) | Unzip and open `Hina.app` |
+| Linux | `.AppImage` | `chmod +x` and run |
+
+> **Unsigned builds:** the desktop builds are not code-signed or notarized, so on first launch you may see a **Windows SmartScreen** warning ("Windows protected your PC" → "More info" → "Run anyway") or a **macOS Gatekeeper** warning ("cannot verify the developer" → right-click the app in Finder → "Open", or System Settings → Privacy & Security → "Open Anyway").
+
+To run or build from source (requires Node.js):
+
+```
+npm ci
+npm start              # launch the desktop app
+npm run dist:win       # Windows portable (dist-desktop/)
+npm run dist:mac       # macOS zip (unsigned)
+npm run dist:linux     # Linux AppImage
+```
+
+### Open in a browser (still supported)
+
 ```
 1. Download index.html
 2. Open it in a browser (latest Chrome / Edge / Firefox / Safari)
 ```
 
-That's it. No build step, no npm.
+The app itself is still a single, zero-dependency HTML file, so the browser route needs no build step and no npm (npm is only used to build the desktop shell).
 
 ## Usage
 

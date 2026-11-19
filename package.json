@@ -1,0 +1,44 @@
+{
+  "name": "hina",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hina: make VRChat-ready VRM 0.x avatars. Single-file app wrapped in a minimal Electron shell.",
+  "license": "MIT",
+  "main": "desktop/main.js",
+  "scripts": {
+    "test": "node tests/run.js",
+    "start": "electron .",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist:linux": "electron-builder --linux --publish never"
+  },
+  "build": {
+    "appId": "io.github.shizukutanaka.hina",
+    "productName": "Hina",
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "files": [
+      "index.html",
+      "desktop/main.js",
+      "LICENSE"
+    ],
+    "artifactName": "Hina-${version}-${os}-${arch}.${ext}",
+    "win": {
+      "target": "portable"
+    },
+    "mac": {
+      "target": "zip",
+      "category": "public.app-category.graphics-design",
+      "identity": null
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Graphics"
+    }
+  },
+  "devDependencies": {
+    "electron": "45.3.4",
+    "electron-builder": "26.0.12"
+  }
+}
