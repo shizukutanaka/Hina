@@ -5,3 +5,4 @@ dist/
 .temp/
 *.vrm
 !samples/*.vrm
+dist-desktop/

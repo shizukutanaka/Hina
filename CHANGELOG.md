@@ -8,6 +8,7 @@
 
 ## [Unreleased]
 ### Added
+- **デスクトップ版（正規の配布形態）** — 無変更の index.html を最小の Electron 殻（`desktop/main.js`：contextIsolation／sandbox 有効・nodeIntegration 無効・preload なし・新規ウィンドウ拒否・外部遷移遮断・多重起動防止）で開く。Windows portable／macOS zip（未署名）／Linux AppImage。
 - **表情エディタ** — 喜/怒/哀/楽の4感情を、既存モーフ10種（あ〜お・まばたき・4感情）の重み0–100のミックスとして編集可能に。未編集時は従来と完全に同一のVRMを書き出す。
 - **複数段Undo/Redo** — Ctrl+Z / Ctrl+Shift+Z で最大20段。スライダー・プリセット・ガチャ・JSON読込・メタ入力すべてが対象。Redoの存在はUndo後のヒント表示で発見可能。
 - **ガチャのカテゴリロック** — 体格/顔/髪/衣装/配色の5分類を個別にロックし、気に入った部分を保ったまま再ガチャできる。
