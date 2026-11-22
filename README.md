@@ -4,7 +4,7 @@
 
 **日本語** · [English](#english)
 
-**ブラウザだけでVRChat向けアバター(VRM)を作れる単一HTMLツール。3Dモデリング知識・インストール・外部送信、すべて不要。**
+**スライダーだけで、VRChatの性能ランク（Quest Excellent圏）が保証されたアバターを作れる単一HTMLツール。作ったアバターはシード番号ひとつで再現・共有でき、ファイルは標準VRM形式であなたの手元に残ります。3Dモデリング知識・インストール・外部送信、すべて不要。**
 
 VRChatで「自分のアバター」を持つには、従来 Blender や VRoid Studio などの学習コストの高いツールが必要でした。雛はスライダーを動かすだけで、揺れる髪・表情・リップシンク対応のVRM 0.xアバターを生成します。既定プリセットはすべて **Quest Excellent 圏**（揺れ物オフ時）に収まるよう設計されており、書き出したVRMはUnity + VRM Converter for VRChat 経由でそのままVRChatにアップロードできます。
 
@@ -87,7 +87,7 @@ VRChatへのアップロードはVRChat公式SDK（Unity）経由のみ許可さ
 
 [日本語](#japanese) · **English**
 
-**A single-file HTML tool for making VRChat avatars (VRM) in your browser alone. No 3D-modeling knowledge, no installation, no data ever leaves your machine.**
+**A single-file HTML tool for making VRChat avatars (VRM) with sliders alone — whose VRChat performance rank is guaranteed by construction (Quest Excellent range), reproducible and shareable from a single seed number, and kept as a standard VRM file in your hands. No 3D-modeling knowledge, no installation, no data ever leaves your machine.**
 
 Owning "your own avatar" in VRChat has traditionally meant learning heavyweight tools like Blender or VRoid Studio. Hina generates a VRM 0.x avatar — with swaying hair, facial expressions, and lip-sync support — just by moving sliders. Every built-in preset is designed to stay within **Quest Excellent** rank (with spring bones off), and the exported VRM uploads to VRChat directly via Unity + VRM Converter for VRChat.
 
